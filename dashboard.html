@@ -6,18 +6,12 @@
   <title>Dashboard — เช็คอิน กรมวิทยาศาสตร์การแพทย์</title>
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
   <style>
     :root{--blue:#0d2b6b;--blue-mid:#1a4eb8;--blue-light:#e8f0fe;--green:#16a34a;--yellow:#d97706;--red:#dc2626;--white:#fff;--border:#e2e8f0;--shadow:0 2px 12px rgba(13,43,107,0.10);}
     *{box-sizing:border-box;margin:0;padding:0;}
     body{background:#f0f4ff;font-family:'Sarabun',sans-serif;min-height:100vh;}
-    .login-screen{position:fixed;inset:0;background:linear-gradient(135deg,#0d2b6b,#1a4eb8);display:flex;align-items:center;justify-content:center;z-index:9999;}
-    .login-box{background:white;border-radius:20px;padding:36px 32px;width:320px;text-align:center;}
-    .login-box h2{color:var(--blue);margin-bottom:8px;font-size:1.3rem;}
-    .login-box p{color:#64748b;font-size:0.85rem;margin-bottom:24px;}
-    .login-box input{width:100%;padding:12px 16px;border-radius:10px;border:2px solid var(--border);font-family:'Sarabun',sans-serif;font-size:1rem;margin-bottom:14px;outline:none;}
-    .login-box button{width:100%;padding:13px;border-radius:10px;border:none;background:var(--blue);color:white;font-family:'Sarabun',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;}
-    .login-err{color:var(--red);font-size:0.85rem;margin-top:8px;display:none;}
-    .topbar{background:var(--blue);color:white;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+    .topbar{background:var(--blue);color:white;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;position:sticky;top:0;z-index:50;}
     .topbar h1{font-size:1rem;font-weight:700;}
     .topbar-right{display:flex;align-items:center;gap:12px;}
     .refresh-btn{padding:7px 16px;border-radius:8px;border:1.5px solid rgba(255,255,255,0.4);color:white;background:transparent;font-family:'Sarabun',sans-serif;font-size:0.85rem;cursor:pointer;}
@@ -25,8 +19,11 @@
     .last-update{font-size:0.75rem;opacity:0.6;}
     .main{padding:20px;max-width:1200px;margin:0 auto;}
 
+    /* Section title */
+    .section-title{font-size:1rem;font-weight:700;color:var(--blue);margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+
     /* Stats */
-    .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:16px;}
+    .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:20px;}
     .stat-card{background:var(--white);border-radius:14px;padding:16px;box-shadow:var(--shadow);}
     .stat-label{font-size:0.75rem;color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;}
     .stat-num{font-size:1.8rem;font-weight:700;color:var(--blue);}
@@ -39,14 +36,14 @@
 
     /* Filter bar */
     .filter-bar{background:var(--white);border-radius:14px;padding:16px 20px;box-shadow:var(--shadow);margin-bottom:14px;display:flex;flex-wrap:wrap;gap:14px;align-items:flex-start;}
-    .filter-group{display:flex;flex-direction:column;gap:4px;min-width:150px;}
+    .filter-group{display:flex;flex-direction:column;gap:4px;}
     .filter-label{font-size:0.72rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.04em;}
     .filter-select{padding:8px 12px;border-radius:8px;border:1.5px solid var(--border);font-family:'Sarabun',sans-serif;font-size:0.88rem;color:#1e293b;cursor:pointer;outline:none;}
     .filter-select:focus{border-color:var(--blue-mid);}
     .btn-reset{padding:8px 14px;border-radius:8px;border:1.5px solid var(--border);background:white;font-family:'Sarabun',sans-serif;font-size:0.83rem;cursor:pointer;color:#64748b;align-self:flex-end;}
     .btn-reset:hover{background:#f1f5f9;}
 
-    /* Multi-select dropdown */
+    /* Multi-select */
     .multi-select-wrap{position:relative;}
     .multi-select-btn{padding:8px 32px 8px 12px;border-radius:8px;border:1.5px solid var(--border);font-family:'Sarabun',sans-serif;font-size:0.88rem;color:#1e293b;cursor:pointer;background:white;width:100%;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;position:relative;}
     .multi-select-btn::after{content:'▾';position:absolute;right:10px;top:50%;transform:translateY(-50%);color:#64748b;}
@@ -63,8 +60,8 @@
     .tab{padding:8px 18px;border-radius:10px;border:2px solid var(--border);background:var(--white);font-family:'Sarabun',sans-serif;font-size:0.88rem;font-weight:600;cursor:pointer;color:#64748b;}
     .tab.active{background:var(--blue);color:white;border-color:var(--blue);}
 
-    /* Table */
-    .table-card{background:var(--white);border-radius:14px;box-shadow:var(--shadow);overflow:hidden;}
+    /* Table card */
+    .table-card{background:var(--white);border-radius:14px;box-shadow:var(--shadow);overflow:hidden;margin-bottom:24px;}
     .table-header{padding:14px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:10px;}
     .table-title{font-weight:700;color:var(--blue);font-size:1rem;}
     .table-count{font-size:0.82rem;color:#64748b;margin-left:6px;}
@@ -90,19 +87,22 @@
     .page-btns{display:flex;gap:6px;}
     .page-btn{padding:5px 12px;border-radius:6px;border:1.5px solid var(--border);background:var(--white);cursor:pointer;font-size:0.8rem;}
     .page-btn:disabled{opacity:0.4;cursor:not-allowed;}
+
+    /* Dept section */
+    .dept-card{background:var(--white);border-radius:14px;box-shadow:var(--shadow);overflow:hidden;margin-bottom:24px;}
+    .dept-header{padding:14px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:10px;}
+    .view-btns{display:flex;gap:6px;}
+    .view-btn{padding:6px 14px;border-radius:8px;border:1.5px solid var(--border);background:white;font-family:'Sarabun',sans-serif;font-size:0.82rem;cursor:pointer;color:#64748b;}
+    .view-btn.active{background:var(--blue);color:white;border-color:var(--blue);}
+    .dept-table{width:100%;border-collapse:collapse;font-size:0.84rem;table-layout:fixed;}
+    .dept-table th{background:#f8fafc;padding:9px 14px;text-align:left;font-size:0.72rem;font-weight:700;color:#64748b;text-transform:uppercase;border-bottom:2px solid var(--border);}
+    .dept-table td{padding:9px 14px;border-bottom:1px solid var(--border);color:#1e293b;}
+    .dept-table tr:last-child td{border-bottom:none;}
+    .dept-table tr:nth-child(even) td{background:#fafafa;}
+    .dept-search{padding:7px 12px;border-radius:8px;border:1.5px solid var(--border);font-family:'Sarabun',sans-serif;font-size:0.85rem;width:200px;outline:none;}
   </style>
 </head>
 <body>
-
-<div class="login-screen" id="loginScreen">
-  <div class="login-box">
-    <h2>🔐 Admin Dashboard</h2>
-    <p>กรมวิทยาศาสตร์การแพทย์<br>ระบบเช็คอินงานประชุม</p>
-    <input type="password" id="pwInput" placeholder="รหัสผ่าน" onkeydown="if(event.key==='Enter')doLogin()">
-    <button onclick="doLogin()">เข้าสู่ระบบ</button>
-    <div class="login-err" id="loginErr">รหัสผ่านไม่ถูกต้อง</div>
-  </div>
-</div>
 
 <div class="topbar">
   <h1>📊 Dashboard เช็คอิน — กรมวิทยาศาสตร์การแพทย์</h1>
@@ -113,43 +113,43 @@
 </div>
 
 <div class="main">
-  <!-- Stats (เปลี่ยนตาม filter) -->
+
+  <!-- ===== STATS ===== -->
   <div class="stats-grid">
     <div class="stat-card">
       <div class="stat-label">แสดงผลอยู่</div>
       <div class="stat-num" id="statFiltered">-</div>
-      <div class="stat-sub" id="statFilteredSub">รายการ</div>
+      <div class="stat-sub">รายการ (ตาม filter)</div>
     </div>
     <div class="stat-card day1">
-      <div class="stat-label">📅 24 มิ.ย. (ใน filter)</div>
+      <div class="stat-label">📅 24 มิ.ย.</div>
       <div class="stat-num" id="statDay1">-</div>
       <div class="stat-sub" id="statDay1pct">-</div>
     </div>
     <div class="stat-card day2">
-      <div class="stat-label">📅 25 มิ.ย. (ใน filter)</div>
+      <div class="stat-label">📅 25 มิ.ย.</div>
       <div class="stat-num" id="statDay2">-</div>
       <div class="stat-sub" id="statDay2pct">-</div>
     </div>
     <div class="stat-card day3">
-      <div class="stat-label">📅 26 มิ.ย. (ใน filter)</div>
+      <div class="stat-label">📅 26 มิ.ย.</div>
       <div class="stat-num" id="statDay3">-</div>
       <div class="stat-sub" id="statDay3pct">-</div>
     </div>
     <div class="stat-card internal">
-      <div class="stat-label">🏢 ภายใน (ใน filter)</div>
+      <div class="stat-label">🏢 ภายใน</div>
       <div class="stat-num" id="statInternal">-</div>
-      <div class="stat-sub">คน</div>
+      <div class="stat-sub">คน (ใน filter)</div>
     </div>
     <div class="stat-card external">
-      <div class="stat-label">🌐 ภายนอก (ใน filter)</div>
+      <div class="stat-label">🌐 ภายนอก</div>
       <div class="stat-num" id="statExternal">-</div>
-      <div class="stat-sub">คน</div>
+      <div class="stat-sub">คน (ใน filter)</div>
     </div>
   </div>
 
-  <!-- Filter bar -->
+  <!-- ===== FILTER ===== -->
   <div class="filter-bar">
-    <!-- ประเภทบุคคล -->
     <div class="filter-group">
       <div class="filter-label">ประเภทบุคคล</div>
       <select class="filter-select" id="filterIntExt" onchange="applyFilters()">
@@ -158,29 +158,21 @@
         <option value="external">บุคคลภายนอก</option>
       </select>
     </div>
-
-    <!-- ประเภทการเข้าร่วม (multi-select) -->
     <div class="filter-group">
       <div class="filter-label">ประเภทการเข้าร่วม</div>
-      <div class="multi-select-wrap" id="partTypeWrap">
+      <div class="multi-select-wrap">
         <button class="multi-select-btn" id="partTypeBtn" onclick="toggleDropdown('partTypeDropdown','partTypeBtn')">ทั้งหมด</button>
         <div class="multi-dropdown" id="partTypeDropdown">
-          <label class="select-all">
-            <input type="checkbox" id="partTypeAll" checked onchange="toggleSelectAll('partType')"> เลือกทั้งหมด
-          </label>
+          <label class="select-all"><input type="checkbox" id="partTypeAll" checked onchange="toggleSelectAll()"> เลือกทั้งหมด</label>
         </div>
       </div>
     </div>
-
-    <!-- หน่วยงาน -->
     <div class="filter-group">
       <div class="filter-label">หน่วยงาน</div>
       <select class="filter-select" id="filterDept" onchange="applyFilters()" style="min-width:200px;">
         <option value="">ทั้งหมด</option>
       </select>
     </div>
-
-    <!-- TAG -->
     <div class="filter-group">
       <div class="filter-label">TAG</div>
       <select class="filter-select" id="filterTag" onchange="applyFilters()">
@@ -189,11 +181,10 @@
         <option value="Staff">Staff</option>
       </select>
     </div>
-
     <button class="btn-reset" onclick="resetFilters()">✕ ล้าง filter</button>
   </div>
 
-  <!-- Tabs -->
+  <!-- ===== TABS ===== -->
   <div class="tabs">
     <button class="tab active" onclick="switchTab(0)">ทั้งหมด</button>
     <button class="tab" onclick="switchTab(1)">วันที่ 1 — 24 มิ.ย.</button>
@@ -201,7 +192,7 @@
     <button class="tab" onclick="switchTab(3)">วันที่ 3 — 26 มิ.ย.</button>
   </div>
 
-  <!-- Table -->
+  <!-- ===== CHECK-IN TABLE ===== -->
   <div class="table-card">
     <div class="table-header">
       <div>
@@ -220,14 +211,9 @@
       <table>
         <thead>
           <tr>
-            <th>#</th>
-            <th>ชื่อ-นามสกุล</th>
-            <th>หน่วยงาน</th>
-            <th>ประเภทบุคคล</th>
-            <th>ประเภทการเข้าร่วม</th>
-            <th>TAG</th>
-            <th>วันที่เช็คอิน</th>
-            <th>เวลา</th>
+            <th>#</th><th>ชื่อ-นามสกุล</th><th>หน่วยงาน</th>
+            <th>ประเภทบุคคล</th><th>ประเภทการเข้าร่วม</th>
+            <th>TAG</th><th>วันที่เช็คอิน</th><th>เวลา</th>
           </tr>
         </thead>
         <tbody id="tableBody">
@@ -243,273 +229,355 @@
       </div>
     </div>
   </div>
+
+  <!-- ===== DEPT SECTION ===== -->
+  <div class="dept-card">
+    <div class="dept-header">
+      <div class="section-title" style="margin:0;">📋 สถิติแยกตามหน่วยงาน</div>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+        <input class="dept-search" id="deptSearch" placeholder="🔍 ค้นหาหน่วยงาน..." oninput="renderDept()">
+        <div class="view-btns">
+          <button class="view-btn active" id="btnDeptTable" onclick="setDeptView('table')">ตาราง</button>
+          <button class="view-btn" id="btnDeptChart" onclick="setDeptView('chart')">แผนภูมิ</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dept Table View -->
+    <div id="deptTableView" style="overflow-x:auto;">
+      <table class="dept-table">
+        <colgroup>
+          <col style="width:44%"><col style="width:12%"><col style="width:12%"><col style="width:12%"><col style="width:20%">
+        </colgroup>
+        <thead>
+          <tr>
+            <th>หน่วยงาน</th>
+            <th style="text-align:center;color:#2563eb;">24 มิ.ย.</th>
+            <th style="text-align:center;color:#7c3aed;">25 มิ.ย.</th>
+            <th style="text-align:center;color:#0891b2;">26 มิ.ย.</th>
+            <th>รวม</th>
+          </tr>
+        </thead>
+        <tbody id="deptTbody"></tbody>
+      </table>
+    </div>
+
+    <!-- Dept Chart View -->
+    <div id="deptChartView" style="display:none; padding:16px;">
+      <div style="position:relative; width:100%;" id="deptChartWrap">
+        <canvas id="deptChart" role="img" aria-label="แผนภูมิแท่งแสดงจำนวนผู้เข้าร่วมแต่ละหน่วยงาน"></canvas>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <script>
-  const SUPABASE_URL = "https://gvxytnjfyepqhbkmcjms.supabase.co";
-  const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2eHl0bmpmeWVwcWhia21jam1zIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3OTQzMTY0MCwiZXhwIjoyMDk1MDA3NjQwfQ.Hrfc0erkIatyVbmsOW2SU7piH3L65qbS2kdi2eYzbQk";
-  const ADMIN_PASS   = "dmsc2568";
-  const DAY_LABELS   = {1:'24 มิ.ย.',2:'25 มิ.ย.',3:'26 มิ.ย.'};
-  const PAGE_SIZE    = 50;
+const SUPABASE_URL = "https://gvxytnjfyepqhbkmcjms.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2eHl0bmpmeWVwcWhia21jam1zIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3OTQzMTY0MCwiZXhwIjoyMDk1MDA3NjQwfQ.Hrfc0erkIatyVbmsOW2SU7piH3L65qbS2kdi2eYzbQk";
+const DAY_LABELS = {1:'24 มิ.ย.',2:'25 มิ.ย.',3:'26 มิ.ย.'};
+const PAGE_SIZE  = 50;
+const DEPT_LIST  = [
+  'อธิบดีกรมวิทยาศาสตร์การแพทย์','รองอธิบดีกรมวิทยาศาสตร์การแพทย์',
+  'สำนักผู้ทรงคุณวุฒิกรมวิทยาศาสตร์การแพทย์','กองแผนงานและวิชาการ',
+  'กองทดสอบความชำนาญ','กลุ่มพัฒนาระบบบริหาร','กลุ่มตรวจสอบภายใน',
+  'กลุ่มงานจริยธรรม','สำนักงานเลขานุการกรม','สถาบันชีววัตถุ',
+  'สถาบันวิจัยวิทยาศาสตร์สาธารณสุข','สถาบันวิจัยสมุนไพร',
+  'สถาบันชีววิทยาศาสตร์ทางการแพทย์','สำนักคุณภาพและความปลอดภัยอาหาร',
+  'สำนักเครื่องสำอางและวัตถุอันตราย','สำนักรังสีและเครื่องมือแพทย์',
+  'สำนักมาตรฐานห้องปฏิบัติการ','สำนักยาและวัตถุเสพติด','ศูนย์รวมบริการ',
+  'ศูนย์เทคโนโลยีสารสนเทศและการสื่อสาร','กองความร่วมมือระหว่างประเทศ',
+  'กองบริหารทรัพยากรบุคคล','กองบริหารการคลัง','กองประชาสัมพันธ์และสื่อสารสาธารณะ',
+  'ศูนย์ตอบโต้เหตุฉุกเฉินด้านห้องปฏิบัติการและรังสี',
+  'ศูนย์วิทยาศาสตร์การแพทย์ที่ 1 เชียงใหม่','ศูนย์วิทยาศาสตร์การแพทย์ที่ 1/1 เชียงราย',
+  'ศูนย์วิทยาศาสตร์การแพทย์ที่ 2 พิษณุโลก','ศูนย์วิทยาศาสตร์การแพทย์ที่ 3 นครสวรรค์',
+  'ศูนย์วิทยาศาสตร์การแพทย์ที่ 4 สระบุรี','ศูนย์วิทยาศาสตร์การแพทย์ที่ 5 สมุทรสงคราม',
+  'ศูนย์วิทยาศาสตร์การแพทย์ที่ 6 ชลบุรี','ศูนย์วิทยาศาสตร์การแพทย์ที่ 7 ขอนแก่น',
+  'ศูนย์วิทยาศาสตร์การแพทย์ที่ 8 อุดรธานี','ศูนย์วิทยาศาสตร์การแพทย์ที่ 9 นครราชสีมา',
+  'ศูนย์วิทยาศาสตร์การแพทย์ที่ 10 อุบลราชธานี','ศูนย์วิทยาศาสตร์การแพทย์ที่ 11 สุราษฎร์ธานี',
+  'ศูนย์วิทยาศาสตร์การแพทย์ที่ 11/1 ภูเก็ต','ศูนย์วิทยาศาสตร์การแพทย์ที่ 12 สงขลา',
+  'ศูนย์วิทยาศาสตร์การแพทย์ที่ 12/1 ตรัง'
+];
 
-  let allData=[], filtered=[], currentTab=0, currentPage=1;
-  let selectedPartTypes = new Set(); // ประเภทที่เลือก (ว่าง = ทั้งหมด)
+let allData=[], filtered=[], currentTab=0, currentPage=1;
+let selectedPartTypes=new Set();
+let deptStats={};
+let deptChartInst=null, deptView='table';
 
-  function doLogin() {
-    document.getElementById('loginScreen').style.display = 'none';
-    loadAll();
-  }
-
-  async function fetchAll(path, pageSize=1000) {
-    let results=[], from=0;
-    while(true) {
-      const res = await fetch(`${SUPABASE_URL}${path}`, {
-        headers: {
-          'apikey': SUPABASE_KEY,
-          'Authorization': 'Bearer '+SUPABASE_KEY,
-          'Range-Unit': 'items',
-          'Range': `${from}-${from+pageSize-1}`,
-          'Prefer': 'count=exact'
-        }
-      });
-      const data = await res.json();
-      if (!Array.isArray(data)||data.length===0) break;
-      results = results.concat(data);
-      if (data.length < pageSize) break;
-      from += pageSize;
-    }
-    return results;
-  }
-
-  async function loadAll() {
-    document.getElementById('tableBody').innerHTML =
-      '<tr class="loading-row"><td colspan="8">กำลังโหลด...</td></tr>';
-
-    const checkins = await fetchAll(
-      '/rest/v1/checkins?select=id,day,checkin_time,participants(prefix,first_name,last_name,tag,dept,ext_dept,internal_external,participation_type,items)&order=checkin_time.desc'
-    );
-
-    allData = checkins.map(r => {
-      const p = r.participants || {};
-      const isInternal = (p.internal_external||'').includes('ภายใน');
-      const dept = isInternal ? (p.dept||'-') : (p.ext_dept||p.dept||'-');
-      return {
-        id: r.id, day: r.day, time: r.checkin_time,
-        name: `${p.prefix||''} ${p.first_name||''} ${p.last_name||''}`.trim(),
-        dept, is_internal: isInternal,
-        internal_external: p.internal_external||'-',
-        participation_type: p.participation_type||'-',
-        tag: p.tag||'-', items: p.items||'-'
-      };
+// ===== FETCH =====
+async function fetchAll(path, ps=1000) {
+  let res=[], from=0;
+  while(true) {
+    const r = await fetch(SUPABASE_URL+path, {
+      headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,
+        'Range-Unit':'items','Range':`${from}-${from+ps-1}`,'Prefer':'count=exact'}
     });
-
-    // สร้าง dropdown ประเภทการเข้าร่วม (multi)
-    const types = [...new Set(allData.map(r=>r.participation_type).filter(t=>t&&t!=='-'))].sort();
-    const dd = document.getElementById('partTypeDropdown');
-    // เก็บ select-all ไว้
-    const allLabel = dd.querySelector('.select-all');
-    dd.innerHTML = '';
-    dd.appendChild(allLabel);
-    types.forEach(t => {
-      const lbl = document.createElement('label');
-      lbl.innerHTML = `<input type="checkbox" value="${t}" checked onchange="onPartTypeChange()"> ${t}`;
-      dd.appendChild(lbl);
-    });
-    selectedPartTypes = new Set(); // ว่าง = ทั้งหมด
-
-    // สร้าง dropdown หน่วยงาน
-    const depts = [...new Set(allData.map(r=>r.dept).filter(d=>d&&d!=='-'))].sort();
-    const deptSel = document.getElementById('filterDept');
-    deptSel.innerHTML = '<option value="">ทั้งหมด</option>';
-    depts.forEach(d => {
-      const opt = document.createElement('option');
-      opt.value=d; opt.textContent=d;
-      deptSel.appendChild(opt);
-    });
-
-    document.getElementById('lastUpdate').textContent =
-      'อัปเดต: '+new Date().toLocaleTimeString('th-TH',{timeZone:'Asia/Bangkok'});
-
-    applyFilters();
+    const d = await r.json();
+    if(!Array.isArray(d)||d.length===0) break;
+    res=res.concat(d);
+    if(d.length<ps) break;
+    from+=ps;
   }
+  return res;
+}
 
-  // Multi-select logic
-  function toggleDropdown(ddId, btnId) {
-    const dd = document.getElementById(ddId);
-    dd.classList.toggle('open');
-    // ปิด dropdown อื่น
-    document.querySelectorAll('.multi-dropdown').forEach(d => {
-      if(d.id!==ddId) d.classList.remove('open');
-    });
-  }
+async function loadAll() {
+  document.getElementById('tableBody').innerHTML='<tr class="loading-row"><td colspan="8">กำลังโหลด...</td></tr>';
+  document.getElementById('deptTbody').innerHTML='<tr><td colspan="5" style="text-align:center;padding:30px;color:#94a3b8;">กำลังโหลด...</td></tr>';
 
-  // ปิด dropdown เมื่อคลิกข้างนอก
-  document.addEventListener('click', e => {
-    if (!e.target.closest('.multi-select-wrap')) {
-      document.querySelectorAll('.multi-dropdown').forEach(d=>d.classList.remove('open'));
-    }
+  const checkins = await fetchAll('/rest/v1/checkins?select=id,day,checkin_time,participants(prefix,first_name,last_name,tag,dept,ext_dept,internal_external,participation_type,items)&order=checkin_time.desc');
+
+  allData = checkins.map(r => {
+    const p = r.participants||{};
+    const isInt = (p.internal_external||'').includes('ภายใน');
+    const dept  = isInt ? (p.dept||'-') : (p.ext_dept||p.dept||'-');
+    return {
+      id:r.id, day:r.day, time:r.checkin_time,
+      name:`${p.prefix||''} ${p.first_name||''} ${p.last_name||''}`.trim(),
+      dept, is_internal:isInt,
+      internal_external:p.internal_external||'-',
+      participation_type:p.participation_type||'-',
+      tag:p.tag||'-', items:p.items||'-'
+    };
   });
 
-  function toggleSelectAll(group) {
-    if (group==='partType') {
-      const checked = document.getElementById('partTypeAll').checked;
-      document.querySelectorAll('#partTypeDropdown input[type=checkbox]:not(#partTypeAll)')
-        .forEach(cb => cb.checked = checked);
-      selectedPartTypes = new Set();
-      applyFilters();
+  // Build dept stats (ทุก checkin ไม่ filter)
+  deptStats={};
+  DEPT_LIST.forEach(d => deptStats[d]={1:0,2:0,3:0});
+  allData.forEach(r => {
+    if(deptStats[r.dept]) deptStats[r.dept][r.day]++;
+  });
+
+  // Dropdowns
+  const types=[...new Set(allData.map(r=>r.participation_type).filter(t=>t&&t!=='-'))].sort();
+  const dd=document.getElementById('partTypeDropdown');
+  const allLabel=dd.querySelector('.select-all');
+  dd.innerHTML=''; dd.appendChild(allLabel);
+  types.forEach(t=>{
+    const lbl=document.createElement('label');
+    lbl.innerHTML=`<input type="checkbox" value="${t}" checked onchange="onPartTypeChange()"> ${t}`;
+    dd.appendChild(lbl);
+  });
+  selectedPartTypes=new Set();
+
+  const depts=[...new Set(allData.map(r=>r.dept).filter(d=>d&&d!=='-'))].sort();
+  const deptSel=document.getElementById('filterDept');
+  deptSel.innerHTML='<option value="">ทั้งหมด</option>';
+  depts.forEach(d=>{const o=document.createElement('option');o.value=d;o.textContent=d;deptSel.appendChild(o);});
+
+  document.getElementById('lastUpdate').textContent='อัปเดต: '+new Date().toLocaleTimeString('th-TH',{timeZone:'Asia/Bangkok'});
+
+  applyFilters();
+  renderDept();
+}
+
+// ===== MULTI SELECT =====
+function toggleDropdown(ddId) {
+  document.getElementById(ddId).classList.toggle('open');
+  document.querySelectorAll('.multi-dropdown').forEach(d=>{if(d.id!==ddId)d.classList.remove('open');});
+}
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.multi-select-wrap'))
+    document.querySelectorAll('.multi-dropdown').forEach(d=>d.classList.remove('open'));
+});
+function toggleSelectAll() {
+  const checked=document.getElementById('partTypeAll').checked;
+  document.querySelectorAll('#partTypeDropdown input[type=checkbox]:not(#partTypeAll)').forEach(cb=>cb.checked=checked);
+  selectedPartTypes=new Set();
+  updatePartTypeBtn();
+  applyFilters();
+}
+function onPartTypeChange() {
+  const cbs=document.querySelectorAll('#partTypeDropdown input[type=checkbox]:not(#partTypeAll)');
+  const allChecked=[...cbs].every(cb=>cb.checked);
+  document.getElementById('partTypeAll').checked=allChecked;
+  selectedPartTypes=new Set();
+  if(!allChecked) cbs.forEach(cb=>{if(cb.checked)selectedPartTypes.add(cb.value);});
+  updatePartTypeBtn();
+  applyFilters();
+}
+function updatePartTypeBtn() {
+  const btn=document.getElementById('partTypeBtn');
+  if(selectedPartTypes.size===0){btn.textContent='ทั้งหมด';btn.classList.remove('active-filter');}
+  else{btn.textContent=`เลือก ${selectedPartTypes.size} ประเภท`;btn.classList.add('active-filter');}
+}
+
+// ===== TABS =====
+function switchTab(day) {
+  currentTab=day; currentPage=1;
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',i===day));
+  const labels=['ทั้งหมด','วันที่ 1 — 24 มิ.ย.','วันที่ 2 — 25 มิ.ย.','วันที่ 3 — 26 มิ.ย.'];
+  document.getElementById('tableTitle').textContent='รายชื่อผู้เช็คอิน '+labels[day];
+  applyFilters();
+}
+
+function resetFilters() {
+  document.getElementById('filterIntExt').value='';
+  document.getElementById('filterDept').value='';
+  document.getElementById('filterTag').value='';
+  document.getElementById('searchBox').value='';
+  document.querySelectorAll('#partTypeDropdown input[type=checkbox]').forEach(cb=>cb.checked=true);
+  document.getElementById('partTypeAll').checked=true;
+  selectedPartTypes=new Set();
+  document.getElementById('partTypeBtn').textContent='ทั้งหมด';
+  document.getElementById('partTypeBtn').classList.remove('active-filter');
+  applyFilters();
+}
+
+// ===== FILTER & RENDER =====
+function applyFilters() {
+  const q=document.getElementById('searchBox').value.toLowerCase();
+  const intExt=document.getElementById('filterIntExt').value;
+  const dept=document.getElementById('filterDept').value;
+  const tag=document.getElementById('filterTag').value;
+
+  filtered=allData.filter(r=>{
+    const matchDay=currentTab===0||r.day===currentTab;
+    const matchSearch=!q||r.name.toLowerCase().includes(q)||r.dept.toLowerCase().includes(q);
+    const matchIntExt=!intExt||(intExt==='internal'&&r.is_internal)||(intExt==='external'&&!r.is_internal);
+    const matchPT=selectedPartTypes.size===0||selectedPartTypes.has(r.participation_type);
+    const matchDept=!dept||r.dept===dept;
+    const matchTag=!tag||r.tag===tag;
+    return matchDay&&matchSearch&&matchIntExt&&matchPT&&matchDept&&matchTag;
+  });
+
+  currentPage=1;
+  const total=filtered.length;
+  document.getElementById('statFiltered').textContent=total.toLocaleString();
+  [1,2,3].forEach(d=>{
+    const cnt=filtered.filter(r=>r.day===d).length;
+    document.getElementById(`statDay${d}`).textContent=cnt.toLocaleString();
+    document.getElementById(`statDay${d}pct`).textContent=total?`${Math.round(cnt/total*100)}% ของ filter`:'-';
+  });
+  document.getElementById('statInternal').textContent=filtered.filter(r=>r.is_internal).length.toLocaleString();
+  document.getElementById('statExternal').textContent=filtered.filter(r=>!r.is_internal).length.toLocaleString();
+  document.getElementById('tableCount').textContent=`(${total.toLocaleString()} รายการ)`;
+  renderTable();
+}
+
+function renderTable() {
+  const start=(currentPage-1)*PAGE_SIZE;
+  const page=filtered.slice(start,start+PAGE_SIZE);
+  const total=filtered.length;
+  const totalPages=Math.ceil(total/PAGE_SIZE);
+  document.getElementById('pageInfo').textContent=`แสดง ${total===0?0:start+1}–${Math.min(start+PAGE_SIZE,total)} จาก ${total.toLocaleString()} รายการ`;
+  document.getElementById('btnPrev').disabled=currentPage<=1;
+  document.getElementById('btnNext').disabled=currentPage>=totalPages;
+  if(page.length===0){document.getElementById('tableBody').innerHTML='<tr class="loading-row"><td colspan="8">ไม่พบข้อมูล</td></tr>';return;}
+  document.getElementById('tableBody').innerHTML=page.map((r,i)=>{
+    const t=new Date(r.time).toLocaleTimeString('th-TH',{timeZone:'Asia/Bangkok',hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    const tagClass=r.tag==='Staff'?'badge-staff':'badge-participant';
+    const intClass=r.is_internal?'badge-internal':'badge-external';
+    return `<tr>
+      <td>${start+i+1}</td>
+      <td>${r.name}</td>
+      <td style="max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${r.dept}">${r.dept}</td>
+      <td><span class="badge ${intClass}">${r.is_internal?'ภายใน':'ภายนอก'}</span></td>
+      <td>${r.participation_type}</td>
+      <td><span class="badge ${tagClass}">${r.tag}</span></td>
+      <td><span class="badge badge-day">${DAY_LABELS[r.day]||r.day}</span></td>
+      <td>${t}</td>
+    </tr>`;
+  }).join('');
+}
+
+function changePage(dir){currentPage+=dir;renderTable();window.scrollTo({top:0,behavior:'smooth'});}
+
+// ===== DEPT =====
+function renderDept() {
+  const q=(document.getElementById('deptSearch').value||'').toLowerCase();
+  const depts=DEPT_LIST.filter(d=>!q||d.toLowerCase().includes(q));
+  const maxTotal=Math.max(...DEPT_LIST.map(d=>(deptStats[d]||{1:0,2:0,3:0})[1]+(deptStats[d]||{1:0,2:0,3:0})[2]+(deptStats[d]||{1:0,2:0,3:0})[3]),1);
+
+  document.getElementById('deptTbody').innerHTML=depts.map((dept,i)=>{
+    const d=deptStats[dept]||{1:0,2:0,3:0};
+    const total=d[1]+d[2]+d[3];
+    const barW=Math.round(total/maxTotal*80);
+    return `<tr>
+      <td style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:0;" title="${dept}">${dept}</td>
+      <td style="text-align:center;color:#2563eb;font-weight:600;">${d[1]||'—'}</td>
+      <td style="text-align:center;color:#7c3aed;font-weight:600;">${d[2]||'—'}</td>
+      <td style="text-align:center;color:#0891b2;font-weight:600;">${d[3]||'—'}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <div style="flex:1;height:6px;background:#e2e8f0;border-radius:3px;overflow:hidden;">
+            <div style="width:${barW}%;height:100%;background:var(--blue);border-radius:3px;"></div>
+          </div>
+          <span style="font-size:12px;font-weight:700;color:var(--blue);min-width:20px;text-align:right;">${total}</span>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+
+  if(deptView==='chart') renderDeptChart(depts);
+}
+
+function setDeptView(v) {
+  deptView=v;
+  document.getElementById('deptTableView').style.display=v==='table'?'':'none';
+  document.getElementById('deptChartView').style.display=v==='chart'?'':'none';
+  document.getElementById('btnDeptTable').className='view-btn'+(v==='table'?' active':'');
+  document.getElementById('btnDeptChart').className='view-btn'+(v==='chart'?' active':'');
+  if(v==='chart') renderDeptChart();
+}
+
+function renderDeptChart(deptsIn) {
+  const q=(document.getElementById('deptSearch').value||'').toLowerCase();
+  const depts=deptsIn||DEPT_LIST.filter(d=>!q||d.toLowerCase().includes(d));
+  const wrap=document.getElementById('deptChartWrap');
+  wrap.style.height=Math.max(300,depts.length*36+80)+'px';
+  const labels=depts.map(d=>d.length>22?d.slice(0,22)+'…':d);
+  const d1=depts.map(d=>(deptStats[d]||{1:0})[1]);
+  const d2=depts.map(d=>(deptStats[d]||{2:0})[2]);
+  const d3=depts.map(d=>(deptStats[d]||{3:0})[3]);
+  if(deptChartInst){deptChartInst.destroy();deptChartInst=null;}
+  deptChartInst=new Chart(document.getElementById('deptChart'),{
+    type:'bar',
+    data:{labels,datasets:[
+      {label:'24 มิ.ย.',data:d1,backgroundColor:'#2563eb',borderRadius:3},
+      {label:'25 มิ.ย.',data:d2,backgroundColor:'#7c3aed',borderRadius:3},
+      {label:'26 มิ.ย.',data:d3,backgroundColor:'#0891b2',borderRadius:3},
+    ]},
+    options:{
+      indexAxis:'y',responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:true,position:'top',labels:{font:{size:12},boxWidth:12}}},
+      scales:{
+        x:{stacked:false,ticks:{font:{size:11}},grid:{color:'rgba(0,0,0,0.05)'}},
+        y:{ticks:{font:{size:11}},grid:{display:false}}
+      }
     }
-  }
+  });
+}
 
-  function onPartTypeChange() {
-    const cbs = document.querySelectorAll('#partTypeDropdown input[type=checkbox]:not(#partTypeAll)');
-    const allChecked = [...cbs].every(cb=>cb.checked);
-    document.getElementById('partTypeAll').checked = allChecked;
+// ===== EXPORT =====
+function exportExcel(){
+  const rows=getExportRows();
+  const ws=XLSX.utils.json_to_sheet(rows);
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'CheckIn');
+  XLSX.writeFile(wb,`checkin_dmsc_${new Date().toISOString().slice(0,10)}.xlsx`);
+}
+function exportCSV(){
+  const rows=getExportRows();
+  const h=Object.keys(rows[0]);
+  const csv=[h.join(','),...rows.map(r=>h.map(k=>`"${String(r[k]).replace(/"/g,'""')}"`).join(','))].join('\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'}));
+  a.download=`checkin_dmsc_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+}
+function getExportRows(){
+  return filtered.map((r,i)=>({
+    'ลำดับ':i+1,'ชื่อ-นามสกุล':r.name,'หน่วยงาน':r.dept,
+    'ประเภทบุคคล':r.is_internal?'บุคลากรภายใน':'บุคคลภายนอก',
+    'ประเภทการเข้าร่วม':r.participation_type,'TAG':r.tag,
+    'วันที่เช็คอิน':DAY_LABELS[r.day]||r.day,
+    'เวลาเช็คอิน':new Date(r.time).toLocaleTimeString('th-TH',{timeZone:'Asia/Bangkok'}),
+    'ของที่ระลึก':r.items
+  }));
+}
 
-    selectedPartTypes = new Set();
-    if (!allChecked) {
-      cbs.forEach(cb => { if(cb.checked) selectedPartTypes.add(cb.value); });
-    }
-
-    // อัปเดตปุ่ม
-    const btn = document.getElementById('partTypeBtn');
-    if (selectedPartTypes.size===0) {
-      btn.textContent = 'ทั้งหมด';
-      btn.classList.remove('active-filter');
-    } else {
-      btn.textContent = `เลือก ${selectedPartTypes.size} ประเภท`;
-      btn.classList.add('active-filter');
-    }
-    applyFilters();
-  }
-
-  function switchTab(day) {
-    currentTab=day; currentPage=1;
-    document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',i===day));
-    const labels=['ทั้งหมด','วันที่ 1 — 24 มิ.ย.','วันที่ 2 — 25 มิ.ย.','วันที่ 3 — 26 มิ.ย.'];
-    document.getElementById('tableTitle').textContent='รายชื่อผู้เช็คอิน '+labels[day];
-    applyFilters();
-  }
-
-  function resetFilters() {
-    document.getElementById('filterIntExt').value='';
-    document.getElementById('filterDept').value='';
-    document.getElementById('filterTag').value='';
-    document.getElementById('searchBox').value='';
-    // reset multi-select
-    document.querySelectorAll('#partTypeDropdown input[type=checkbox]').forEach(cb=>cb.checked=true);
-    document.getElementById('partTypeAll').checked=true;
-    selectedPartTypes=new Set();
-    document.getElementById('partTypeBtn').textContent='ทั้งหมด';
-    document.getElementById('partTypeBtn').classList.remove('active-filter');
-    applyFilters();
-  }
-
-  function applyFilters() {
-    const q       = document.getElementById('searchBox').value.toLowerCase();
-    const intExt  = document.getElementById('filterIntExt').value;
-    const dept    = document.getElementById('filterDept').value;
-    const tag     = document.getElementById('filterTag').value;
-
-    filtered = allData.filter(r => {
-      const matchDay      = currentTab===0 || r.day===currentTab;
-      const matchSearch   = !q || r.name.toLowerCase().includes(q) || r.dept.toLowerCase().includes(q);
-      const matchIntExt   = !intExt ||
-        (intExt==='internal'&&r.is_internal)||(intExt==='external'&&!r.is_internal);
-      const matchPartType = selectedPartTypes.size===0 || selectedPartTypes.has(r.participation_type);
-      const matchDept     = !dept || r.dept===dept;
-      const matchTag      = !tag || r.tag===tag;
-      return matchDay&&matchSearch&&matchIntExt&&matchPartType&&matchDept&&matchTag;
-    });
-
-    currentPage=1;
-
-    // อัปเดต stat cards ตาม filtered
-    const total = filtered.length;
-    document.getElementById('statFiltered').textContent = total.toLocaleString();
-    document.getElementById('statFilteredSub').textContent = 'รายการ (ใน filter ปัจจุบัน)';
-    [1,2,3].forEach(d=>{
-      const cnt = filtered.filter(r=>r.day===d).length;
-      document.getElementById(`statDay${d}`).textContent = cnt.toLocaleString();
-      document.getElementById(`statDay${d}pct`).textContent = total ? `${Math.round(cnt/total*100)}% ของ filter` : '-';
-    });
-    document.getElementById('statInternal').textContent = filtered.filter(r=>r.is_internal).length.toLocaleString();
-    document.getElementById('statExternal').textContent = filtered.filter(r=>!r.is_internal).length.toLocaleString();
-    document.getElementById('tableCount').textContent = `(${total.toLocaleString()} รายการ)`;
-
-    renderTable();
-  }
-
-  function renderTable() {
-    const start=((currentPage-1)*PAGE_SIZE);
-    const page=filtered.slice(start,start+PAGE_SIZE);
-    const total=filtered.length;
-    const totalPages=Math.ceil(total/PAGE_SIZE);
-
-    document.getElementById('pageInfo').textContent=
-      `แสดง ${total===0?0:start+1}–${Math.min(start+PAGE_SIZE,total)} จาก ${total.toLocaleString()} รายการ`;
-    document.getElementById('btnPrev').disabled=currentPage<=1;
-    document.getElementById('btnNext').disabled=currentPage>=totalPages;
-
-    if(page.length===0){
-      document.getElementById('tableBody').innerHTML='<tr class="loading-row"><td colspan="8">ไม่พบข้อมูล</td></tr>';
-      return;
-    }
-    document.getElementById('tableBody').innerHTML=page.map((r,i)=>{
-      const t=new Date(r.time).toLocaleTimeString('th-TH',{timeZone:'Asia/Bangkok',hour:'2-digit',minute:'2-digit',second:'2-digit'});
-      const tagClass=r.tag==='Staff'?'badge-staff':'badge-participant';
-      const intClass=r.is_internal?'badge-internal':'badge-external';
-      const intLabel=r.is_internal?'ภายใน':'ภายนอก';
-      return `<tr>
-        <td>${start+i+1}</td>
-        <td>${r.name}</td>
-        <td style="max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${r.dept}">${r.dept}</td>
-        <td><span class="badge ${intClass}">${intLabel}</span></td>
-        <td>${r.participation_type}</td>
-        <td><span class="badge ${tagClass}">${r.tag}</span></td>
-        <td><span class="badge badge-day">${DAY_LABELS[r.day]||r.day}</span></td>
-        <td>${t}</td>
-      </tr>`;
-    }).join('');
-  }
-
-  function changePage(dir){
-    currentPage+=dir;
-    renderTable();
-    window.scrollTo({top:0,behavior:'smooth'});
-  }
-
-  function exportExcel(){
-    const rows=getExportRows();
-    const ws=XLSX.utils.json_to_sheet(rows);
-    const wb=XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb,ws,'CheckIn');
-    XLSX.writeFile(wb,`checkin_dmsc_${new Date().toISOString().slice(0,10)}.xlsx`);
-  }
-
-  function exportCSV(){
-    const rows=getExportRows();
-    const headers=Object.keys(rows[0]);
-    const csv=[headers.join(','),...rows.map(r=>headers.map(h=>`"${String(r[h]).replace(/"/g,'""')}"`).join(','))].join('\n');
-    const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
-    const a=document.createElement('a');
-    a.href=URL.createObjectURL(blob);
-    a.download=`checkin_dmsc_${new Date().toISOString().slice(0,10)}.csv`;
-    a.click();
-  }
-
-  function getExportRows(){
-    return filtered.map((r,i)=>({
-      'ลำดับ':i+1,
-      'ชื่อ-นามสกุล':r.name,
-      'หน่วยงาน':r.dept,
-      'ประเภทบุคคล':r.is_internal?'บุคลากรภายใน':'บุคคลภายนอก',
-      'ประเภทการเข้าร่วม':r.participation_type,
-      'TAG':r.tag,
-      'วันที่เช็คอิน':DAY_LABELS[r.day]||r.day,
-      'เวลาเช็คอิน':new Date(r.time).toLocaleTimeString('th-TH',{timeZone:'Asia/Bangkok'}),
-      'ของที่ระลึก':r.items
-    }));
-  }
+loadAll();
 </script>
 </body>
 </html>
