@@ -30,7 +30,7 @@
         <div class="row g-2 mb-4" id="summaryCounters">
             <div class="col-12 loading-overlay">
               <div class="spinner-border text-primary" role="status"></div>
-              <div class="mt-2 text-muted">กำลังเชื่อมต่อฐานข้อมูล...</div>
+              <div class="mt-2 text-muted">กำลังโหลดข้อมูลจากฐานข้อมูล...</div>
             </div>
         </div>
 
@@ -87,7 +87,6 @@
       let rawData = [];
 
       window.onload = async function() {
-        // ⚡ เอา URL ของ Web App จาก Google Apps Script (ลงท้ายด้วย /exec) มาวางในเครื่องหมายคำพูดด้านล่าง
         const API_URL = "https://script.google.com/macros/s/AKfycbwJ1ETvPV4M1Dhxr7ZfWka1j0hPn5L-i4zoY9MvIyjxpmaT0pmnCTD70wzpK4mKBM3v/exec"; 
 
         try {
