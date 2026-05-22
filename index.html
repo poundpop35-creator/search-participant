@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="th">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -49,7 +49,7 @@
           </div>
           <div class="col-md-2">
             <label class="form-label text-muted fw-bold small">พิมพ์ชื่อหน่วยงาน</label>
-            <input type="text" id="deptSearch" class="form-control" placeholder="พิมพ์ค้นหาหน่วยงาน..." onkeyup="filterData()">
+            <input type="text" id="deptSearch" class="form-control" placeholder="ค้นหาหน่วยงาน..." onkeyup="filterData()">
           </div>
           <div class="col-md-2">
             <label class="form-label text-muted fw-bold small">จังหวัด</label>
@@ -73,7 +73,7 @@
                 <th>สังกัด/หน่วยงาน</th>
                 <th>สถานะ</th>
                 <th>สิ่งที่ได้รับ</th>
-                <th class="text-center">QR Code สำหรับเข้าร่วมงาน</th>
+                <th class="text-center">QR Code</th>
                 <th>จังหวัด</th>
               </tr>
             </thead>
@@ -87,7 +87,7 @@
       let rawData = [];
 
       window.onload = async function() {
-        // ⚡ วางลิงก์ URL Web App (/exec) อันใหม่ที่คุณเพิ่งกด Deploy ตะกี้ตรงนี้ครับ
+        // ⚡ เอา URL ของ Web App จาก Google Apps Script (ลงท้ายด้วย /exec) มาวางในเครื่องหมายคำพูดด้านล่าง
         const API_URL = "https://script.google.com/macros/s/AKfycbwJ1ETvPV4M1Dhxr7ZfWka1j0hPn5L-i4zoY9MvIyjxpmaT0pmnCTD70wzpK4mKBM3v/exec"; 
 
         try {
@@ -103,7 +103,7 @@
           setupDropdowns(rawData);
           updateCounters(rawData);
         } catch (err) {
-          document.getElementById('summaryCounters').innerHTML = `<div class="alert alert-danger w-100">เชื่อมต่อ API ล้มเหลว (${err.message})<br><small>กรุณาตรวจสอบว่าเลือกสิทธิ์สิทธิ์ผู้ใช้งาน Web App เป็น 'Anyone' (ทุกคน) แล้วหรือยัง</small></div>`;
+          document.getElementById('summaryCounters').innerHTML = `<div class="alert alert-danger w-100">การเชื่อมต่อล้มเหลว (${err.message})</div>`;
         }
       };
 
