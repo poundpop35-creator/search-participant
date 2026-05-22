@@ -22,9 +22,7 @@
       --white:      #ffffff;
       --shadow:     0 4px 24px rgba(13,43,107,0.13);
     }
-
     * { box-sizing: border-box; margin: 0; padding: 0; }
-
     body {
       background: linear-gradient(160deg, #e8f0fe 0%, #f0f4ff 60%, #e0e8ff 100%);
       font-family: 'Sarabun', sans-serif;
@@ -34,8 +32,6 @@
       align-items: center;
       padding: 0 0 32px;
     }
-
-    /* Header */
     .header {
       width: 100%;
       background: var(--blue-dark);
@@ -44,110 +40,67 @@
       padding: 18px 16px 14px;
       margin-bottom: 20px;
     }
-    .header h1 { font-size: 1.1rem; font-weight: 700; letter-spacing: 0.01em; }
+    .header h1 { font-size: 1.1rem; font-weight: 700; }
     .header p  { font-size: 0.8rem; opacity: 0.7; margin-top: 2px; }
-
-    /* Card */
     .card {
       background: var(--white);
       border-radius: 20px;
       box-shadow: var(--shadow);
       padding: 20px;
-      width: 100%;
+      width: calc(100% - 32px);
       max-width: 400px;
-      margin: 0 16px;
     }
-
-    /* Day selector */
     .day-label {
-      font-size: 0.82rem;
-      font-weight: 600;
-      color: var(--blue-dark);
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      margin-bottom: 6px;
+      font-size: 0.82rem; font-weight: 700;
+      color: var(--blue-dark); margin-bottom: 6px;
     }
     .day-select {
-      width: 100%;
-      padding: 11px 14px;
-      border-radius: 12px;
-      border: 2px solid #c7d7f5;
+      width: 100%; padding: 11px 14px;
+      border-radius: 12px; border: 2px solid #c7d7f5;
       font-family: 'Sarabun', sans-serif;
-      font-size: 1rem;
-      font-weight: 600;
-      color: var(--blue-dark);
-      background: var(--blue-light);
-      margin-bottom: 18px;
-      appearance: none;
+      font-size: 1rem; font-weight: 600;
+      color: var(--blue-dark); background: var(--blue-light);
+      margin-bottom: 18px; appearance: none;
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%230d2b6b' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
       background-repeat: no-repeat;
       background-position: right 14px center;
       cursor: pointer;
     }
-
-    /* Scanner box */
-    .scanner-wrap {
-      border-radius: 16px;
-      overflow: hidden;
+    #reader-container {
+      border-radius: 16px; overflow: hidden;
       border: 3px solid #c7d7f5;
-      background: #000;
-      position: relative;
+      background: #000; width: 100%;
+      min-height: 260px;
+      display: flex; align-items: center; justify-content: center;
     }
     #reader { width: 100%; }
+    video { width: 100% !important; border-radius: 0 !important; }
 
-    /* ซ่อน UI ขยะของ html5-qrcode */
-    #reader__dashboard_section_csr span,
-    #reader__dashboard_section_fsr span,
-    #reader__filescan_input { display: none !important; }
-    #reader__dashboard { padding: 8px !important; background: var(--white) !important; }
-    #reader__camera_selection {
-      width: 100% !important;
-      font-family: 'Sarabun', sans-serif !important;
-      font-size: 0.85rem !important;
-      border-radius: 8px !important;
-      padding: 6px !important;
-      border: 1.5px solid #c7d7f5 !important;
-    }
-    #reader__scan_region img { display: none !important; }
-
-    /* Result box */
+    /* Result */
     .result-box {
-      margin-top: 16px;
-      border-radius: 14px;
-      padding: 16px;
-      display: none;
+      margin-top: 16px; border-radius: 14px;
+      padding: 16px; display: none;
       animation: popIn .25s cubic-bezier(.34,1.56,.64,1);
     }
     @keyframes popIn {
       from { opacity:0; transform:scale(.94) translateY(8px); }
       to   { opacity:1; transform:none; }
     }
-    .result-box.success { background: var(--green-bg);  border: 2px solid var(--green);  }
-    .result-box.warning { background: var(--yellow-bg); border: 2px solid var(--yellow); }
-    .result-box.error   { background: var(--red-bg);    border: 2px solid var(--red);    }
-    .result-box.loading { background: var(--gray-bg);   border: 2px solid #94a3b8;       }
-
-    .res-icon   { font-size: 2rem; text-align: center; margin-bottom: 6px; }
+    .result-box.success { background:var(--green-bg);  border:2px solid var(--green); }
+    .result-box.warning { background:var(--yellow-bg); border:2px solid var(--yellow); }
+    .result-box.error   { background:var(--red-bg);    border:2px solid var(--red); }
+    .result-box.loading { background:var(--gray-bg);   border:2px solid #94a3b8; }
+    .res-icon   { font-size: 2rem; text-align: center; margin-bottom: 4px; }
     .res-status { font-size: 1.05rem; font-weight: 700; text-align: center; }
-    .res-name   { font-size: 1rem; font-weight: 600; color: var(--blue-dark);
-                  text-align: center; margin-top: 8px; }
+    .res-name   { font-size: 1rem; font-weight: 600; color: var(--blue-dark); text-align: center; margin-top: 8px; }
     .res-detail {
       font-size: 0.85rem; color: #374151;
-      margin-top: 8px; line-height: 1.7;
+      margin-top: 8px; line-height: 1.8;
       background: rgba(255,255,255,0.6);
       border-radius: 10px; padding: 10px 12px;
     }
     .res-detail span { display: block; }
 
-    .tag-badge {
-      display: inline-block; padding: 2px 10px;
-      border-radius: 20px; font-size: 0.75rem; font-weight: 700;
-      margin-left: 6px; vertical-align: middle;
-    }
-    .tag-staff       { background: #fef3c7; color: #92400e; }
-    .tag-participant { background: #dbeafe; color: #1e40af; }
-
-    /* Counter */
     .counter {
       display: flex; align-items: center; justify-content: center;
       gap: 8px; margin-top: 16px;
@@ -155,8 +108,6 @@
       padding: 10px; font-size: 0.9rem; color: var(--blue-dark);
     }
     .counter strong { font-size: 1.3rem; font-weight: 700; }
-
-    /* Status dot */
     .status-bar {
       display: flex; align-items: center; gap: 6px;
       font-size: 0.78rem; color: var(--gray);
@@ -167,8 +118,29 @@
       background: var(--green);
       animation: pulse 2s infinite;
     }
-    @keyframes pulse {
-      0%,100% { opacity:1; } 50% { opacity:.4; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+    /* Loading spinner */
+    .spinner {
+      width: 40px; height: 40px;
+      border: 4px solid rgba(255,255,255,0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 60px auto;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .err-msg {
+      color: #fff; text-align: center;
+      font-size: 0.85rem; padding: 16px;
+    }
+    .retry-btn {
+      display: block; margin: 8px auto 16px;
+      padding: 8px 20px; border-radius: 20px;
+      background: var(--blue-mid); color: white;
+      border: none; font-family: 'Sarabun', sans-serif;
+      font-size: 0.9rem; cursor: pointer;
     }
   </style>
 </head>
@@ -181,9 +153,6 @@
 
 <div class="card">
 
-  <!-- *** แก้ URL นี้เป็น Apps Script Web App URL ของคุณ *** -->
-  <input type="hidden" id="apiUrl" value="https://script.google.com/macros/s/AKfycbw1QK4MYNxOKbqpAurgwZHkmn5mwIoTVCd53v7DgXx3tOzqWPTlH2wL8G200UTeNZA/exec">
-
   <div class="day-label">📅 เลือกวันที่สแกน</div>
   <select class="day-select" id="day">
     <option value="1">วันที่ 1</option>
@@ -191,8 +160,8 @@
     <option value="3">วันที่ 3</option>
   </select>
 
-  <div class="scanner-wrap">
-    <div id="reader"></div>
+  <div id="reader-container">
+    <div class="spinner"></div>
   </div>
 
   <div class="result-box" id="resultBox">
@@ -210,25 +179,47 @@
 
   <div class="status-bar">
     <div class="dot"></div>
-    <span id="statusText">พร้อมสแกน</span>
+    <span id="statusText">กำลังเปิดกล้อง...</span>
   </div>
 
 </div>
 
 <script>
-  const API_URL = document.getElementById('apiUrl').value;
+  const API_URL = "https://script.google.com/macros/s/AKfycbw1QK4MYNxOKbqpAurgwZHkmn5mwIoTVCd53v7DgXx3tOzqWPTlH2wL8G200UTeNZA/exec";
+
   let isProcessing = false;
   let todayCount   = 0;
+  let qrCode       = null;
 
-  // เริ่มกล้อง
-  const scanner = new Html5QrcodeScanner("reader", {
-    fps: 12,
-    qrbox: { width: 240, height: 240 },
-    rememberLastUsedCamera: true,
-    showTorchButtonIfSupported: true
-  });
+  // เริ่มกล้องทันที
+  window.addEventListener('load', startCamera);
 
-  scanner.render(onScanSuccess, () => {});
+  function startCamera() {
+    const container = document.getElementById('reader-container');
+    container.innerHTML = '<div id="reader"></div>';
+
+    qrCode = new Html5Qrcode("reader");
+
+    qrCode.start(
+      { facingMode: "environment" },
+      {
+        fps: 12,
+        qrbox: { width: 230, height: 230 },
+        aspectRatio: 1.0
+      },
+      onScanSuccess,
+      () => {} // ไม่แสดง error ระหว่างสแกน
+    ).then(() => {
+      setStatus('พร้อมสแกน ✓');
+    }).catch(err => {
+      container.innerHTML = `
+        <div>
+          <div class="err-msg">⚠️ ไม่สามารถเปิดกล้องได้<br><small>${err}</small></div>
+          <button class="retry-btn" onclick="startCamera()">ลองใหม่</button>
+        </div>`;
+      setStatus('เปิดกล้องไม่ได้');
+    });
+  }
 
   async function onScanSuccess(decodedText) {
     if (isProcessing) return;
@@ -239,11 +230,10 @@
     showResult('loading', '⏳', 'กำลังบันทึกข้อมูล...', '', '');
 
     try {
-      // Apps Script redirect จาก POST → GET บางครั้ง ต้องใช้ no-redirect
       const res = await fetch(API_URL, {
-        method:  'POST',
+        method: 'POST',
         redirect: 'follow',
-        body:    JSON.stringify({ scannedId: decodedText, daySelected: day })
+        body: JSON.stringify({ scannedId: decodedText, daySelected: day })
       });
 
       const data = await res.json();
@@ -251,46 +241,36 @@
       if (data.status === 'success') {
         todayCount++;
         document.getElementById('count').textContent = todayCount;
-        setStatus('เช็คอินสำเร็จ!');
-        showResult(
-          'success', '✅',
-          data.msg,
-          data.name,
-          buildDetail(data)
+        setStatus('เช็คอินสำเร็จ! ✅');
+        showResult('success', '✅', data.msg, data.name,
+          [
+            data.time ? `🕐 เวลา: ${data.time}` : '',
+            data.gift ? `🎁 ของที่ระลึก: ${data.gift}` : '',
+            data.tag  ? `🏷️ ประเภท: ${data.tag}` : ''
+          ].filter(Boolean).join('\n')
         );
 
       } else if (data.status === 'warning') {
-        setStatus('เคยเช็คอินแล้ว');
-        showResult(
-          'warning', '⚠️',
-          data.msg,
-          data.name,
+        setStatus('เคยเช็คอินแล้ว ⚠️');
+        showResult('warning', '⚠️', data.msg, data.name,
           `เคยเช็คอินเวลา: ${data.time || '-'}`
         );
 
       } else {
-        setStatus('ไม่พบข้อมูล');
+        setStatus('ไม่พบข้อมูล ❌');
         showResult('error', '❌', data.msg, '', '');
       }
 
     } catch (err) {
-      setStatus('เชื่อมต่อไม่ได้');
-      showResult('error', '📡', '❌ ไม่สามารถเชื่อมต่อได้', '', 'กรุณาตรวจสอบ internet');
+      setStatus('เชื่อมต่อไม่ได้ 📡');
+      showResult('error', '📡', 'เชื่อมต่อ Server ไม่ได้', '', 'กรุณาตรวจสอบ internet แล้วลองใหม่');
     }
 
     setTimeout(() => {
       hideResult();
       isProcessing = false;
-      setStatus('พร้อมสแกน');
+      setStatus('พร้อมสแกน ✓');
     }, 4500);
-  }
-
-  function buildDetail(data) {
-    let lines = [];
-    if (data.time) lines.push(`🕐 เวลา: ${data.time}`);
-    if (data.gift) lines.push(`🎁 ของที่ระลึก: ${data.gift}`);
-    if (data.tag)  lines.push(`🏷️ ประเภท: ${data.tag}`);
-    return lines.join('\n');
   }
 
   function showResult(type, icon, msg, name, detail) {
@@ -299,21 +279,11 @@
     box.style.display = 'block';
     document.getElementById('resIcon').textContent = icon;
     document.getElementById('resMsg').textContent  = msg;
-
-    // ชื่อ + badge
-    const nameEl = document.getElementById('resName');
-    if (name) {
-      nameEl.innerHTML = name;
-    } else {
-      nameEl.innerHTML = '';
-    }
-
-    // detail (รองรับ newline)
+    document.getElementById('resName').textContent = name || '';
     const detailEl = document.getElementById('resDetail');
     if (detail) {
       detailEl.style.display = 'block';
-      detailEl.innerHTML = detail.split('\n')
-        .map(l => `<span>${l}</span>`).join('');
+      detailEl.innerHTML = detail.split('\n').map(l => `<span>${l}</span>`).join('');
     } else {
       detailEl.style.display = 'none';
     }
