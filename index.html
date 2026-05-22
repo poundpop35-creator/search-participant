@@ -7,7 +7,7 @@
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
   <style>
-    :root {
+    :root{
       --blue-dark:#0d2b6b;--blue-light:#e8f0fe;
       --green:#16a34a;--green-bg:#dcfce7;
       --yellow:#d97706;--yellow-bg:#fef3c7;
@@ -36,8 +36,7 @@
     .err-msg{color:#fff;text-align:center;font-size:0.85rem;padding:16px;}
     .retry-btn{display:block;margin:8px auto 16px;padding:8px 20px;border-radius:20px;background:#1a4eb8;color:white;border:none;font-family:'Sarabun',sans-serif;font-size:0.9rem;cursor:pointer;}
     /* MODAL */
-    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.55);display:flex;align-items:center;justify-content:center;z-index:999;padding:24px;animation:fadeOverlay .2s ease;}
-    @keyframes fadeOverlay{from{opacity:0}to{opacity:1}}
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.55);display:flex;align-items:center;justify-content:center;z-index:999;padding:24px;}
     .modal-overlay.hidden{display:none;}
     .modal{background:white;border-radius:24px;padding:28px 24px 20px;width:100%;max-width:360px;box-shadow:0 8px 40px rgba(0,0,0,0.25);animation:slideUp .25s cubic-bezier(.34,1.56,.64,1);text-align:center;}
     @keyframes slideUp{from{opacity:0;transform:translateY(30px) scale(.95)}to{opacity:1;transform:none}}
@@ -50,8 +49,7 @@
     .modal-name{font-size:1.05rem;font-weight:600;color:var(--blue-dark);margin-bottom:12px;}
     .modal-detail{background:#f8fafc;border-radius:12px;padding:12px 14px;margin-bottom:20px;font-size:0.88rem;color:#374151;line-height:1.9;text-align:left;}
     .modal-detail span{display:block;}
-    .btn-ok{width:100%;padding:14px;border-radius:14px;border:none;font-family:'Sarabun',sans-serif;font-size:1.05rem;font-weight:700;cursor:pointer;transition:transform .1s,opacity .1s;}
-    .btn-ok:active{transform:scale(.97);opacity:.85;}
+    .btn-ok{width:100%;padding:14px;border-radius:14px;border:none;font-family:'Sarabun',sans-serif;font-size:1.05rem;font-weight:700;cursor:pointer;}
     .btn-ok.success{background:var(--green);color:white;}
     .btn-ok.warning{background:var(--yellow);color:white;}
     .btn-ok.error{background:var(--red);color:white;}
@@ -59,6 +57,7 @@
   </style>
 </head>
 <body>
+
 <div class="modal-overlay hidden" id="modalOverlay">
   <div class="modal">
     <div class="modal-icon"  id="modalIcon"></div>
@@ -130,7 +129,7 @@
     try {
       const keyword = decodedText.trim();
 
-      // 1. ค้นหาผู้เข้าร่วมจาก id_card หรือ passport
+      // 1. ค้นหาผู้เข้าร่วม
       const searchRes = await sbFetch(
         `/rest/v1/participants?or=(id_card.eq.${encodeURIComponent(keyword)},passport.eq.${encodeURIComponent(keyword)})&select=id,prefix,first_name,last_name,tag,items`,
         'GET'
@@ -143,53 +142,69 @@
       }
 
       const p = participants[0];
-      const fullName = `${p.prefix || ''} ${p.first_name || ''} ${p.last_name || ''}`.trim();
+      const fullName = `${p.prefix||''} ${p.first_name||''} ${p.last_name||''}`.trim();
 
       // 2. เช็คว่าเคยเช็คอินวันนี้ยัง
-      const checkRes = await sbFetch(
+      const checkTodayRes = await sbFetch(
         `/rest/v1/checkins?participant_id=eq.${p.id}&day=eq.${day}&select=id,checkin_time`,
         'GET'
       );
-      const existing = await checkRes.json();
+      const existingToday = await checkTodayRes.json();
 
-      if (existing && existing.length > 0) {
-        const t = new Date(existing[0].checkin_time).toLocaleTimeString('th-TH', {timeZone:'Asia/Bangkok'});
-        showModal('warning', '⚠️', `เคยเช็คอินวันที่ ${day} ไปแล้ว!`, fullName, `เคยเช็คอินเวลา: ${t}`);
+      if (existingToday && existingToday.length > 0) {
+        const t = new Date(existingToday[0].checkin_time)
+          .toLocaleTimeString('th-TH', { timeZone: 'Asia/Bangkok' });
+        showModal('warning', '⚠️', `เคยเช็คอินวันที่ ${day} ไปแล้ว!`, fullName,
+          `เคยเช็คอินเวลา: ${t}`);
         return;
       }
 
-      // เช็คว่าเคยเช็คอินวันไหนมาก่อนไหม (ทุกวัน)
-const allCheckinRes = await sbFetch(
-  `/rest/v1/checkins?participant_id=eq.${p.id}&select=id`,
-  'GET'
-);
-const allCheckins  = await allCheckinRes.json();
-const isFirstCheckin = !allCheckins || allCheckins.length === 0;
+      // 3. เช็คว่าเคยเช็คอินวันก่อนหน้าไหม (เพื่อตัดสินใจเรื่องของที่ระลึก)
+      const checkAllRes = await sbFetch(
+        `/rest/v1/checkins?participant_id=eq.${p.id}&select=id`,
+        'GET'
+      );
+      const allCheckins    = await checkAllRes.json();
+      const isFirstCheckin = !allCheckins || allCheckins.length === 0;
+
+      // 4. บันทึกเช็คอิน
+      const insertRes = await sbFetch('/rest/v1/checkins', 'POST', {
+        participant_id: p.id,
+        day: parseInt(day),
+        checkin_time: new Date().toISOString()
+      });
 
       if (insertRes.ok || insertRes.status === 201) {
         todayCount++;
         document.getElementById('count').textContent = todayCount;
-        const timeNow = new Date().toLocaleTimeString('th-TH', {timeZone:'Asia/Bangkok'});
+        const timeNow = new Date().toLocaleTimeString('th-TH', { timeZone: 'Asia/Bangkok' });
+
+        // แสดงของที่ระลึกเฉพาะครั้งแรกที่เช็คอิน
+        const giftLine = isFirstCheckin
+          ? `🎁 ของที่ระลึก: ${p.items || '-'}`
+          : `🎁 ของที่ระลึก: รับไปแล้ว`;
+
         showModal('success', '✅', `เช็คอินสำเร็จ! วันที่ ${day}`, fullName,
           [
             `🕐 เวลา: ${timeNow}`,
-`🍱 คูปองอาหาร: รับได้เลย`,
-isFirstCheckin ? `🎁 ของที่ระลึก: ${p.items}` : `🎁 ของที่ระลึก: รับไปแล้ว (วันก่อนหน้า)`,
-p.tag ? `🏷️ ประเภท: ${p.tag}` : ''
+            `🍱 คูปองอาหาร: รับได้เลย`,
+            giftLine,
+            p.tag ? `🏷️ ประเภท: ${p.tag}` : ''
           ].filter(Boolean).join('\n')
         );
         setStatus('เช็คอินสำเร็จ! ✅');
+
       } else {
         const errData = await insertRes.json().catch(() => ({}));
         if (errData.code === '23505') {
           showModal('warning', '⚠️', `เคยเช็คอินวันที่ ${day} ไปแล้ว!`, fullName, '');
         } else {
-          showModal('error', '❌', 'บันทึกไม่สำเร็จ', '', JSON.stringify(errData));
+          showModal('error', '❌', 'บันทึกไม่สำเร็จ', '', '');
         }
       }
 
     } catch (err) {
-      showModal('error', '📡', 'เชื่อมต่อไม่ได้', '', 'กรุณาตรวจสอบ internet');
+      showModal('error', '📡', 'เชื่อมต่อไม่ได้', '', 'กรุณาตรวจสอบ internet แล้วลองใหม่');
       setStatus('เชื่อมต่อไม่ได้ 📡');
     }
   }
