@@ -158,12 +158,13 @@
         return;
       }
 
-      // 3. บันทึกเช็คอิน
-      const insertRes = await sbFetch('/rest/v1/checkins', 'POST', {
-        participant_id: p.id,
-        day: parseInt(day),
-        checkin_time: new Date().toISOString()
-      });
+      // เช็คว่าเคยเช็คอินวันไหนมาก่อนไหม (ทุกวัน)
+const allCheckinRes = await sbFetch(
+  `/rest/v1/checkins?participant_id=eq.${p.id}&select=id`,
+  'GET'
+);
+const allCheckins  = await allCheckinRes.json();
+const isFirstCheckin = !allCheckins || allCheckins.length === 0;
 
       if (insertRes.ok || insertRes.status === 201) {
         todayCount++;
@@ -172,8 +173,9 @@
         showModal('success', '✅', `เช็คอินสำเร็จ! วันที่ ${day}`, fullName,
           [
             `🕐 เวลา: ${timeNow}`,
-            p.items ? `🎁 ของที่ระลึก: ${p.items}` : '',
-            p.tag   ? `🏷️ ประเภท: ${p.tag}` : ''
+`🍱 คูปองอาหาร: รับได้เลย`,
+isFirstCheckin ? `🎁 ของที่ระลึก: ${p.items}` : `🎁 ของที่ระลึก: รับไปแล้ว (วันก่อนหน้า)`,
+p.tag ? `🏷️ ประเภท: ${p.tag}` : ''
           ].filter(Boolean).join('\n')
         );
         setStatus('เช็คอินสำเร็จ! ✅');
