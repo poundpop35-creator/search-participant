@@ -7,26 +7,19 @@
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
   <style>
-    :root{
-      --blue-dark:#0d2b6b;--blue-light:#e8f0fe;
-      --green:#16a34a;--green-bg:#dcfce7;
-      --yellow:#d97706;--yellow-bg:#fef3c7;
-      --red:#dc2626;--red-bg:#fee2e2;
-      --gray-bg:#f1f5f9;--white:#ffffff;
-      --shadow:0 4px 24px rgba(13,43,107,0.13);
-    }
+    :root{--blue:#0d2b6b;--blue-light:#e8f0fe;--green:#16a34a;--green-bg:#dcfce7;--yellow:#d97706;--yellow-bg:#fef3c7;--red:#dc2626;--red-bg:#fee2e2;--white:#fff;--shadow:0 4px 24px rgba(13,43,107,0.13);}
     *{box-sizing:border-box;margin:0;padding:0;}
     body{background:linear-gradient(160deg,#e8f0fe 0%,#f0f4ff 60%,#e0e8ff 100%);font-family:'Sarabun',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:0 0 32px;}
-    .header{width:100%;background:var(--blue-dark);color:white;text-align:center;padding:18px 16px 14px;margin-bottom:20px;}
+    .header{width:100%;background:var(--blue);color:white;text-align:center;padding:18px 16px 14px;margin-bottom:20px;}
     .header h1{font-size:1.1rem;font-weight:700;}
     .header p{font-size:0.8rem;opacity:0.7;margin-top:2px;}
     .card{background:var(--white);border-radius:20px;box-shadow:var(--shadow);padding:20px;width:calc(100% - 32px);max-width:400px;}
-    .day-label{font-size:0.82rem;font-weight:700;color:var(--blue-dark);margin-bottom:6px;}
-    .day-select{width:100%;padding:11px 14px;border-radius:12px;border:2px solid #c7d7f5;font-family:'Sarabun',sans-serif;font-size:1rem;font-weight:600;color:var(--blue-dark);background:var(--blue-light);margin-bottom:18px;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%230d2b6b' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;cursor:pointer;}
+    .day-label{font-size:0.82rem;font-weight:700;color:var(--blue);margin-bottom:6px;}
+    .day-select{width:100%;padding:11px 14px;border-radius:12px;border:2px solid #c7d7f5;font-family:'Sarabun',sans-serif;font-size:1rem;font-weight:600;color:var(--blue);background:var(--blue-light);margin-bottom:18px;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%230d2b6b' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;cursor:pointer;}
     #reader-container{border-radius:16px;overflow:hidden;border:3px solid #c7d7f5;background:#000;width:100%;min-height:260px;display:flex;align-items:center;justify-content:center;}
     #reader{width:100%;}
     video{width:100%!important;border-radius:0!important;}
-    .counter{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:16px;background:var(--blue-light);border-radius:12px;padding:10px;font-size:0.9rem;color:var(--blue-dark);}
+    .counter{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:16px;background:var(--blue-light);border-radius:12px;padding:10px;font-size:0.9rem;color:var(--blue);}
     .counter strong{font-size:1.3rem;font-weight:700;}
     .status-bar{display:flex;align-items:center;gap:6px;font-size:0.78rem;color:#64748b;margin-top:12px;justify-content:center;}
     .dot{width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;}
@@ -36,19 +29,21 @@
     .err-msg{color:#fff;text-align:center;font-size:0.85rem;padding:16px;}
     .retry-btn{display:block;margin:8px auto 16px;padding:8px 20px;border-radius:20px;background:#1a4eb8;color:white;border:none;font-family:'Sarabun',sans-serif;font-size:0.9rem;cursor:pointer;}
     /* MODAL */
-    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.55);display:flex;align-items:center;justify-content:center;z-index:999;padding:24px;}
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.55);display:flex;align-items:center;justify-content:center;z-index:999;padding:20px;}
     .modal-overlay.hidden{display:none;}
-    .modal{background:white;border-radius:24px;padding:28px 24px 20px;width:100%;max-width:360px;box-shadow:0 8px 40px rgba(0,0,0,0.25);animation:slideUp .25s cubic-bezier(.34,1.56,.64,1);text-align:center;}
+    .modal{background:white;border-radius:24px;padding:24px 22px 20px;width:100%;max-width:360px;box-shadow:0 8px 40px rgba(0,0,0,0.25);animation:slideUp .25s cubic-bezier(.34,1.56,.64,1);text-align:center;}
     @keyframes slideUp{from{opacity:0;transform:translateY(30px) scale(.95)}to{opacity:1;transform:none}}
-    .modal-icon{font-size:3rem;margin-bottom:10px;}
-    .modal-title{font-size:1.2rem;font-weight:700;margin-bottom:6px;}
+    .modal-icon{font-size:2.8rem;margin-bottom:8px;}
+    .modal-title{font-size:1.15rem;font-weight:700;margin-bottom:6px;}
     .modal-title.success{color:var(--green);}
     .modal-title.warning{color:var(--yellow);}
     .modal-title.error{color:var(--red);}
     .modal-title.loading{color:#64748b;}
-    .modal-name{font-size:1.05rem;font-weight:600;color:var(--blue-dark);margin-bottom:12px;}
-    .modal-detail{background:#f8fafc;border-radius:12px;padding:12px 14px;margin-bottom:20px;font-size:0.88rem;color:#374151;line-height:1.9;text-align:left;}
-    .modal-detail span{display:block;}
+    .modal-name{font-size:1.05rem;font-weight:700;color:var(--blue);margin-bottom:12px;}
+    .modal-detail{background:#f8fafc;border-radius:12px;padding:12px 14px;margin-bottom:18px;font-size:0.88rem;color:#374151;line-height:2;text-align:left;}
+    .modal-detail .row{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;}
+    .modal-detail .val{color:#1e293b;}
+    .modal-detail .done{color:var(--red);font-weight:700;}
     .btn-ok{width:100%;padding:14px;border-radius:14px;border:none;font-family:'Sarabun',sans-serif;font-size:1.05rem;font-weight:700;cursor:pointer;}
     .btn-ok.success{background:var(--green);color:white;}
     .btn-ok.warning{background:var(--yellow);color:white;}
@@ -124,7 +119,7 @@
 
     const day = document.getElementById('day').value;
     setStatus('กำลังค้นหา...');
-    showModal('loading', '⏳', 'กำลังบันทึกข้อมูล...', '', '');
+    showModal('loading', '⏳', 'กำลังบันทึกข้อมูล...', '', null);
 
     try {
       const keyword = decodedText.trim();
@@ -137,7 +132,7 @@
       const participants = await searchRes.json();
 
       if (!participants || participants.length === 0) {
-        showModal('error', '❌', 'ไม่พบรหัสนี้ในระบบ', '', '');
+        showModal('error', '❌', 'ไม่พบรหัสนี้ในระบบ', '', null);
         return;
       }
 
@@ -154,12 +149,14 @@
       if (existingToday && existingToday.length > 0) {
         const t = new Date(existingToday[0].checkin_time)
           .toLocaleTimeString('th-TH', { timeZone: 'Asia/Bangkok' });
+        // warning: เคยสแกนวันนี้แล้ว — แสดง "รับแล้ว" ทุกรายการ
         showModal('warning', '⚠️', `เคยเช็คอินวันที่ ${day} ไปแล้ว!`, fullName,
-          `เคยเช็คอินเวลา: ${t}`);
+          buildWarningDetail(t, p)
+        );
         return;
       }
 
-      // 3. เช็คว่าเคยเช็คอินวันก่อนหน้าไหม (เพื่อตัดสินใจเรื่องของที่ระลึก)
+      // 3. เช็คว่าเคยเช็คอินวันก่อนหน้าไหม (ตัดสินใจเรื่องของที่ระลึก)
       const checkAllRes = await sbFetch(
         `/rest/v1/checkins?participant_id=eq.${p.id}&select=id`,
         'GET'
@@ -178,35 +175,46 @@
         todayCount++;
         document.getElementById('count').textContent = todayCount;
         const timeNow = new Date().toLocaleTimeString('th-TH', { timeZone: 'Asia/Bangkok' });
-
-        // แสดงของที่ระลึกเฉพาะครั้งแรกที่เช็คอิน
-        const giftLine = isFirstCheckin
-          ? `🎁 ของที่ระลึก: ${p.items || '-'}`
-          : `🎁 ของที่ระลึก: รับไปแล้ว`;
-
         showModal('success', '✅', `เช็คอินสำเร็จ! วันที่ ${day}`, fullName,
-          [
-            `🕐 เวลา: ${timeNow}`,
-            `🍱 คูปองอาหาร: รับได้เลย`,
-            giftLine,
-            p.tag ? `🏷️ ประเภท: ${p.tag}` : ''
-          ].filter(Boolean).join('\n')
+          buildSuccessDetail(timeNow, p, isFirstCheckin)
         );
         setStatus('เช็คอินสำเร็จ! ✅');
-
       } else {
         const errData = await insertRes.json().catch(() => ({}));
         if (errData.code === '23505') {
-          showModal('warning', '⚠️', `เคยเช็คอินวันที่ ${day} ไปแล้ว!`, fullName, '');
+          const t = new Date().toLocaleTimeString('th-TH', { timeZone: 'Asia/Bangkok' });
+          showModal('warning', '⚠️', `เคยเช็คอินวันที่ ${day} ไปแล้ว!`, fullName,
+            buildWarningDetail(t, p)
+          );
         } else {
-          showModal('error', '❌', 'บันทึกไม่สำเร็จ', '', '');
+          showModal('error', '❌', 'บันทึกไม่สำเร็จ', '', null);
         }
       }
 
     } catch (err) {
-      showModal('error', '📡', 'เชื่อมต่อไม่ได้', '', 'กรุณาตรวจสอบ internet แล้วลองใหม่');
+      showModal('error', '📡', 'เชื่อมต่อไม่ได้', '', null);
       setStatus('เชื่อมต่อไม่ได้ 📡');
     }
+  }
+
+  // สร้าง detail สำหรับ success
+  function buildSuccessDetail(time, p, isFirst) {
+    return [
+      { label: '🕐 เวลา:', val: time, done: false },
+      { label: '🍱 คูปองอาหาร:', val: 'รับได้เลย', done: false },
+      { label: '🎁 ของที่ระลึก:', val: p.items || '-', done: !isFirst },
+      { label: '🏷️ ประเภท:', val: p.tag || '-', done: false },
+    ];
+  }
+
+  // สร้าง detail สำหรับ warning (รับไปหมดแล้ว)
+  function buildWarningDetail(time, p) {
+    return [
+      { label: '🕐 เวลาที่เช็คอิน:', val: time, done: false },
+      { label: '🍱 คูปองอาหาร:', val: '', done: true, doneText: 'รับแล้ว' },
+      { label: '🎁 ของที่ระลึก:', val: p.items || '-', done: true, doneText: 'รับแล้ว' },
+      { label: '🏷️ ประเภท:', val: p.tag || '-', done: true, doneText: 'รับแล้ว' },
+    ];
   }
 
   function sbFetch(path, method, body) {
@@ -223,20 +231,36 @@
     return fetch(SUPABASE_URL + path, opts);
   }
 
-  function showModal(type, icon, title, name, detail) {
+  function showModal(type, icon, title, name, rows) {
     document.getElementById('modalIcon').textContent  = icon;
     document.getElementById('modalTitle').textContent = title;
     document.getElementById('modalTitle').className   = 'modal-title ' + type;
     document.getElementById('modalName').textContent  = name || '';
     document.getElementById('btnOk').className        = 'btn-ok ' + type;
     document.getElementById('btnOk').style.display    = type === 'loading' ? 'none' : 'block';
+
     const detailEl = document.getElementById('modalDetail');
-    if (detail) {
+    if (rows && rows.length > 0) {
       detailEl.style.display = 'block';
-      detailEl.innerHTML = detail.split('\n').map(l => `<span>${l}</span>`).join('');
+      detailEl.innerHTML = rows.map(r => {
+        if (r.done) {
+          // แสดง "รับแล้ว" สีแดงต่อท้าย
+          return `<div class="row">
+            <span>${r.label}</span>
+            ${r.val ? `<span class="val">${r.val}</span>` : ''}
+            <span class="done">— ${r.doneText || 'รับแล้ว'}</span>
+          </div>`;
+        } else {
+          return `<div class="row">
+            <span>${r.label}</span>
+            <span class="val">${r.val}</span>
+          </div>`;
+        }
+      }).join('');
     } else {
       detailEl.style.display = 'none';
     }
+
     document.getElementById('modalOverlay').classList.remove('hidden');
   }
 
