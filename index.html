@@ -30,7 +30,7 @@
         <div class="row g-2 mb-4" id="summaryCounters">
             <div class="col-12 loading-overlay">
               <div class="spinner-border text-primary" role="status"></div>
-              <div class="mt-2 text-muted">กำลังโหลดข้อมูลจากฐานข้อมูล...</div>
+              <div class="mt-2 text-muted">กำลังเชื่อมต่อฐานข้อมูล...</div>
             </div>
         </div>
 
@@ -86,10 +86,9 @@
     <script>
       let rawData = [];
 
-      // ⚡ เปลี่ยนไปใช้ fetch() ดึงข้อมูลจาก API ของ Apps Script
       window.onload = async function() {
-        // 🛑 นำ URL จาก Apps Script ที่ลงท้ายด้วย /exec มาวางในเครื่องหมายคำพูดด้านล่างนี้เลยครับ 🛑
-        const API_URL = "https://script.google.com/macros/s/AKfycbzu6PpkrqBCmscSwYsE4wuvf6_3xWrOHW-Fc7A4BHcug13vh9jBLlJSkKVZtwcwW5W8/exec"; 
+        // ⚡ วางลิงก์ URL Web App (/exec) อันใหม่ที่คุณเพิ่งกด Deploy ตะกี้ตรงนี้ครับ
+        const API_URL = "https://script.google.com/macros/s/AKfycbwJ1ETvPV4M1Dhxr7ZfWka1j0hPn5L-i4zoY9MvIyjxpmaT0pmnCTD70wzpK4mKBM3v/exec"; 
 
         try {
           const response = await fetch(API_URL);
@@ -104,7 +103,7 @@
           setupDropdowns(rawData);
           updateCounters(rawData);
         } catch (err) {
-          document.getElementById('summaryCounters').innerHTML = `<div class="alert alert-danger w-100">เชื่อมต่อ API ล้มเหลว กรุณาตรวจสอบ URL หรือการตั้งค่า Apps Script (${err.message})</div>`;
+          document.getElementById('summaryCounters').innerHTML = `<div class="alert alert-danger w-100">เชื่อมต่อ API ล้มเหลว (${err.message})<br><small>กรุณาตรวจสอบว่าเลือกสิทธิ์สิทธิ์ผู้ใช้งาน Web App เป็น 'Anyone' (ทุกคน) แล้วหรือยัง</small></div>`;
         }
       };
 
