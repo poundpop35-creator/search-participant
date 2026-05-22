@@ -14,7 +14,24 @@
     .topbar{background:var(--blue);color:white;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;position:sticky;top:0;z-index:50;}
     .topbar h1{font-size:1rem;font-weight:700;}
     .refresh-btn{padding:7px 16px;border-radius:8px;border:1.5px solid rgba(255,255,255,0.4);color:white;background:transparent;font-family:'Sarabun',sans-serif;font-size:0.85rem;cursor:pointer;}
+    .refresh-btn:hover{background:rgba(255,255,255,0.1);}
+    .clear-btn{padding:7px 16px;border-radius:8px;border:1.5px solid rgba(252,165,165,0.6);color:#fca5a5;background:transparent;font-family:'Sarabun',sans-serif;font-size:0.85rem;cursor:pointer;}
+    .clear-btn:hover{background:rgba(220,38,38,0.2);}
     .last-update{font-size:0.75rem;opacity:0.6;}
+    /* Clear modal */
+    .clear-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.65);display:flex;align-items:center;justify-content:center;z-index:9999;padding:24px;}
+    .clear-overlay.hidden{display:none;}
+    .clear-modal{background:white;border-radius:20px;padding:28px 24px 22px;width:100%;max-width:360px;box-shadow:0 8px 40px rgba(0,0,0,0.3);text-align:center;}
+    .clear-icon{font-size:2.5rem;margin-bottom:10px;}
+    .clear-modal h3{color:#dc2626;font-size:1.15rem;font-weight:700;margin-bottom:8px;}
+    .clear-modal p{font-size:0.86rem;color:#64748b;margin-bottom:18px;line-height:1.7;}
+    .clear-pw-input{width:100%;padding:11px 14px;border-radius:10px;border:2px solid #e2e8f0;font-family:'Sarabun',sans-serif;font-size:1rem;margin-bottom:6px;outline:none;text-align:center;letter-spacing:2px;}
+    .clear-pw-input:focus{border-color:#dc2626;}
+    .clear-err{color:#dc2626;font-size:0.82rem;margin-bottom:14px;min-height:20px;}
+    .clear-actions{display:flex;gap:8px;}
+    .clear-cancel{flex:1;padding:12px;border-radius:10px;border:2px solid #e2e8f0;background:white;font-family:'Sarabun',sans-serif;font-size:0.95rem;cursor:pointer;color:#64748b;}
+    .clear-confirm{flex:1;padding:12px;border-radius:10px;border:none;background:#dc2626;color:white;font-family:'Sarabun',sans-serif;font-size:0.95rem;font-weight:700;cursor:pointer;}
+    .clear-confirm:disabled{opacity:0.5;cursor:not-allowed;}
     .main{padding:20px;max-width:1200px;margin:0 auto;}
     /* Stats */
     .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:20px;}
@@ -92,11 +109,28 @@
   </style>
 </head>
 <body>
+
+<!-- Clear modal -->
+<div class="clear-overlay hidden" id="clearOverlay">
+  <div class="clear-modal">
+    <div class="clear-icon">🗑️</div>
+    <h3>ล้างข้อมูลเช็คอินทั้งหมด</h3>
+    <p>การล้างข้อมูลจะ<strong>ลบประวัติเช็คอินทั้งหมด</strong>ออกจากระบบถาวร<br>ข้อมูลผู้ลงทะเบียนจะยังคงอยู่ครับ</p>
+    <input class="clear-pw-input" type="password" id="clearPwInput" placeholder="ใส่รหัสผ่าน" onkeydown="if(event.key==='Enter')confirmClear()">
+    <div class="clear-err" id="clearErr"></div>
+    <div class="clear-actions">
+      <button class="clear-cancel" onclick="closeClearModal()">ยกเลิก</button>
+      <button class="clear-confirm" id="clearConfirmBtn" onclick="confirmClear()">ล้างข้อมูล</button>
+    </div>
+  </div>
+</div>
+
 <div class="topbar">
   <h1>📊 Dashboard เช็คอิน — กรมวิทยาศาสตร์การแพทย์</h1>
-  <div style="display:flex;align-items:center;gap:12px;">
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
     <span class="last-update" id="lastUpdate">-</span>
     <button class="refresh-btn" onclick="loadAll()">🔄 รีเฟรช</button>
+    <button class="clear-btn" onclick="openClearModal()">🗑️ ล้างข้อมูล</button>
   </div>
 </div>
 
@@ -225,6 +259,16 @@
           </div>
         </div>
       </div>
+      <div class="filter-group">
+        <div class="filter-label">หน่วยงาน (กรมวิทย์)</div>
+        <div class="multi-wrap">
+          <button class="multi-btn" id="dDeptBtn" onclick="toggleDD('dDeptDD')">ทั้งหมด</button>
+          <div class="multi-dd" id="dDeptDD" style="min-width:280px;max-height:300px;">
+            <label class="all-label"><input type="checkbox" id="dDeptAll" checked onchange="toggleDeptDeptAll()"> เลือกทั้งหมด</label>
+          </div>
+        </div>
+      </div>
+      <button class="btn-reset" onclick="resetDeptFilters()">✕ ล้าง</button>
     </div>
 
     <!-- Dept table -->
@@ -262,7 +306,7 @@ const PAGE  = 10;
 const DEPTS = ['อธิบดีกรมวิทยาศาสตร์การแพทย์','รองอธิบดีกรมวิทยาศาสตร์การแพทย์','สำนักผู้ทรงคุณวุฒิกรมวิทยาศาสตร์การแพทย์','กองแผนงานและวิชาการ','กองทดสอบความชำนาญ','กลุ่มพัฒนาระบบบริหาร','กลุ่มตรวจสอบภายใน','กลุ่มงานจริยธรรม','สำนักงานเลขานุการกรม','สถาบันชีววัตถุ','สถาบันวิจัยวิทยาศาสตร์สาธารณสุข','สถาบันวิจัยสมุนไพร','สถาบันชีววิทยาศาสตร์ทางการแพทย์','สำนักคุณภาพและความปลอดภัยอาหาร','สำนักเครื่องสำอางและวัตถุอันตราย','สำนักรังสีและเครื่องมือแพทย์','สำนักมาตรฐานห้องปฏิบัติการ','สำนักยาและวัตถุเสพติด','ศูนย์รวมบริการ','ศูนย์เทคโนโลยีสารสนเทศและการสื่อสาร','กองความร่วมมือระหว่างประเทศ','กองบริหารทรัพยากรบุคคล','กองบริหารการคลัง','กองประชาสัมพันธ์และสื่อสารสาธารณะ','ศูนย์ตอบโต้เหตุฉุกเฉินด้านห้องปฏิบัติการและรังสี','ศูนย์วิทยาศาสตร์การแพทย์ที่ 1 เชียงใหม่','ศูนย์วิทยาศาสตร์การแพทย์ที่ 1/1 เชียงราย','ศูนย์วิทยาศาสตร์การแพทย์ที่ 2 พิษณุโลก','ศูนย์วิทยาศาสตร์การแพทย์ที่ 3 นครสวรรค์','ศูนย์วิทยาศาสตร์การแพทย์ที่ 4 สระบุรี','ศูนย์วิทยาศาสตร์การแพทย์ที่ 5 สมุทรสงคราม','ศูนย์วิทยาศาสตร์การแพทย์ที่ 6 ชลบุรี','ศูนย์วิทยาศาสตร์การแพทย์ที่ 7 ขอนแก่น','ศูนย์วิทยาศาสตร์การแพทย์ที่ 8 อุดรธานี','ศูนย์วิทยาศาสตร์การแพทย์ที่ 9 นครราชสีมา','ศูนย์วิทยาศาสตร์การแพทย์ที่ 10 อุบลราชธานี','ศูนย์วิทยาศาสตร์การแพทย์ที่ 11 สุราษฎร์ธานี','ศูนย์วิทยาศาสตร์การแพทย์ที่ 11/1 ภูเก็ต','ศูนย์วิทยาศาสตร์การแพทย์ที่ 12 สงขลา','ศูนย์วิทยาศาสตร์การแพทย์ที่ 12/1 ตรัง'];
 
 let allData=[], filtered=[], curTab=0, curPage=1;
-let selPT=new Set(), selDPT=new Set();
+let selPT=new Set(), selDPT=new Set(), selDDept=new Set();
 let deptRaw=[], dView='table', dChart=null;
 
 async function fetchAll(path,ps=1000){
@@ -299,6 +343,28 @@ async function loadAll(){
   const types=[...new Set(allData.map(r=>r.pt).filter(t=>t&&t!=='-'))].sort();
   buildDD('ptDD','ptAll',types,()=>{selPT=getChecked('ptDD');updateBtn('ptBtn',selPT);applyFilters();});
   buildDD('dptDD','dptAll',types,()=>{selDPT=getChecked('dptDD');updateBtn('dptBtn',selDPT);renderDept();});
+
+  // build dropdown หน่วยงาน (fixed list) สำหรับส่วน dept
+  const dDeptDd=document.getElementById('dDeptDD');
+  const dDeptAllLabel=dDeptDd.querySelector('.all-label');
+  dDeptDd.innerHTML='';dDeptDd.appendChild(dDeptAllLabel);
+  document.getElementById('dDeptAll').onchange=function(){
+    dDeptDd.querySelectorAll('input:not(#dDeptAll)').forEach(cb=>cb.checked=this.checked);
+    selDDept=new Set();updateBtn('dDeptBtn',selDDept);renderDept();
+  };
+  DEPTS.forEach(d=>{
+    const lbl=document.createElement('label');
+    lbl.innerHTML=`<input type="checkbox" value="${d}" checked> ${d}`;
+    lbl.querySelector('input').onchange=function(){
+      const cbs=dDeptDd.querySelectorAll('input:not(#dDeptAll)');
+      document.getElementById('dDeptAll').checked=[...cbs].every(c=>c.checked);
+      selDDept=new Set();
+      if(![...cbs].every(c=>c.checked)) cbs.forEach(cb=>{if(cb.checked)selDDept.add(cb.value);});
+      updateBtn('dDeptBtn',selDDept);renderDept();
+    };
+    dDeptDd.appendChild(lbl);
+  });
+  selDDept=new Set();
 
   const depts=[...new Set(allData.map(r=>r.dept).filter(d=>d&&d!=='-'))].sort();
   const ds=document.getElementById('fDept');
@@ -356,6 +422,20 @@ function toggleDeptAll(){
   const checked=document.getElementById('dptAll').checked;
   document.querySelectorAll('#dptDD input:not(#dptAll)').forEach(cb=>cb.checked=checked);
   selDPT=new Set();updateBtn('dptBtn',selDPT);renderDept();
+}
+function toggleDeptDeptAll(){
+  const checked=document.getElementById('dDeptAll').checked;
+  document.querySelectorAll('#dDeptDD input:not(#dDeptAll)').forEach(cb=>cb.checked=checked);
+  selDDept=new Set();updateBtn('dDeptBtn',selDDept);renderDept();
+}
+function resetDeptFilters(){
+  document.getElementById('dDay').value='0';
+  document.getElementById('dSearch').value='';
+  document.querySelectorAll('#dptDD input').forEach(cb=>cb.checked=true);
+  selDPT=new Set();updateBtn('dptBtn',selDPT);
+  document.querySelectorAll('#dDeptDD input').forEach(cb=>cb.checked=true);
+  selDDept=new Set();updateBtn('dDeptBtn',selDDept);
+  renderDept();
 }
 document.addEventListener('click',e=>{if(!e.target.closest('.multi-wrap'))document.querySelectorAll('.multi-dd').forEach(d=>d.classList.remove('open'));});
 
@@ -448,7 +528,12 @@ function renderDept(){
   DEPTS.forEach(d=>stats[d]={1:0,2:0,3:0});
   data.forEach(r=>{if(stats[r.dept])stats[r.dept][r.day]++;});
 
-  const depts=DEPTS.filter(d=>!q||d.toLowerCase().includes(q));
+  // กรองหน่วยงานตาม selDDept และ search
+  const depts=DEPTS.filter(d=>{
+    const matchSel=selDDept.size===0||selDDept.has(d);
+    const matchQ=!q||d.toLowerCase().includes(q);
+    return matchSel&&matchQ;
+  });
   const maxTot=Math.max(...depts.map(d=>stats[d][1]+stats[d][2]+stats[d][3]),1);
 
   // ปรับ header ตาม dayF
@@ -553,6 +638,73 @@ function getRows(){
 }
 
 loadAll();
+
+// ===== CLEAR DATA =====
+const CLEAR_PASS = "P@und3142";
+
+function openClearModal() {
+  document.getElementById('clearPwInput').value = '';
+  document.getElementById('clearErr').textContent = '';
+  document.getElementById('clearConfirmBtn').disabled = false;
+  document.getElementById('clearConfirmBtn').textContent = 'ล้างข้อมูล';
+  document.getElementById('clearOverlay').classList.remove('hidden');
+  setTimeout(() => document.getElementById('clearPwInput').focus(), 100);
+}
+
+function closeClearModal() {
+  document.getElementById('clearOverlay').classList.add('hidden');
+}
+
+async function confirmClear() {
+  const pw = document.getElementById('clearPwInput').value;
+  const errEl = document.getElementById('clearErr');
+  const btn = document.getElementById('clearConfirmBtn');
+
+  if (pw !== CLEAR_PASS) {
+    errEl.textContent = '❌ รหัสผ่านไม่ถูกต้อง';
+    document.getElementById('clearPwInput').value = '';
+    document.getElementById('clearPwInput').focus();
+    return;
+  }
+
+  // ยืนยันอีกรอบ
+  if (!confirm('⚠️ ยืนยันการล้างข้อมูลเช็คอินทั้งหมด?\n\nการกระทำนี้ไม่สามารถย้อนกลับได้')) return;
+
+  btn.disabled = true;
+  btn.textContent = '⏳ กำลังล้างข้อมูล...';
+  errEl.textContent = '';
+
+  try {
+    const res = await fetch(`${SB_URL}/rest/v1/checkins?id=gte.0`, {
+      method: 'DELETE',
+      headers: {
+        'apikey': SB_KEY,
+        'Authorization': 'Bearer ' + SB_KEY,
+        'Prefer': 'return=minimal'
+      }
+    });
+
+    if (res.ok || res.status === 204) {
+      closeClearModal();
+      alert('✅ ล้างข้อมูลเช็คอินเรียบร้อยแล้ว');
+      loadAll();
+    } else {
+      const err = await res.json().catch(() => ({}));
+      errEl.textContent = '❌ เกิดข้อผิดพลาด: ' + (err.message || res.status);
+      btn.disabled = false;
+      btn.textContent = 'ล้างข้อมูล';
+    }
+  } catch(e) {
+    errEl.textContent = '❌ เชื่อมต่อไม่ได้';
+    btn.disabled = false;
+    btn.textContent = 'ล้างข้อมูล';
+  }
+}
+
+// ปิด modal เมื่อกดนอก
+document.getElementById('clearOverlay').addEventListener('click', function(e) {
+  if (e.target === this) closeClearModal();
+});
 </script>
 </body>
 </html>
