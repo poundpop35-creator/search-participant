@@ -7,18 +7,38 @@
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
   <style>
-    :root{--blue:#0d2b6b;--blue-light:#e8f0fe;--green:#16a34a;--green-bg:#dcfce7;--yellow:#d97706;--yellow-bg:#fef3c7;--red:#dc2626;--red-bg:#fee2e2;--white:#fff;--shadow:0 4px 24px rgba(13,43,107,0.13);}
+    :root{--blue:#0d2b6b;--blue-light:#e8f0fe;--green:#16a34a;--yellow:#d97706;--red:#dc2626;--white:#fff;--shadow:0 4px 24px rgba(13,43,107,0.13);}
     *{box-sizing:border-box;margin:0;padding:0;}
     body{background:linear-gradient(160deg,#e8f0fe 0%,#f0f4ff 60%,#e0e8ff 100%);font-family:'Sarabun',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:0 0 32px;}
     .header{width:100%;background:var(--blue);color:white;text-align:center;padding:18px 16px 14px;margin-bottom:20px;}
     .header h1{font-size:1.1rem;font-weight:700;}
     .header p{font-size:0.8rem;opacity:0.7;margin-top:2px;}
-    .card{background:var(--white);border-radius:20px;box-shadow:var(--shadow);padding:20px;width:calc(100% - 32px);max-width:400px;}
-    .day-label{font-size:0.82rem;font-weight:700;color:var(--blue);margin-bottom:6px;}
-    .day-select{width:100%;padding:11px 14px;border-radius:12px;border:2px solid #c7d7f5;font-family:'Sarabun',sans-serif;font-size:1rem;font-weight:600;color:var(--blue);background:var(--blue-light);margin-bottom:18px;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%230d2b6b' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;cursor:pointer;}
+    .card{background:var(--white);border-radius:20px;box-shadow:var(--shadow);padding:20px;width:calc(100% - 32px);max-width:440px;}
+    .row-label{font-size:0.82rem;font-weight:700;color:var(--blue);margin-bottom:6px;}
+    .day-select{width:100%;padding:11px 14px;border-radius:12px;border:2px solid #c7d7f5;font-family:'Sarabun',sans-serif;font-size:1rem;font-weight:600;color:var(--blue);background:var(--blue-light);margin-bottom:16px;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%230d2b6b' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;cursor:pointer;}
+    /* Mode toggle */
+    .mode-toggle{display:flex;gap:8px;margin-bottom:16px;}
+    .mode-btn{flex:1;padding:10px;border-radius:12px;border:2px solid #c7d7f5;font-family:'Sarabun',sans-serif;font-size:0.85rem;font-weight:600;cursor:pointer;background:white;color:#64748b;transition:all .15s;}
+    .mode-btn.active{background:var(--blue);color:white;border-color:var(--blue);}
+    /* Camera */
     #reader-container{border-radius:16px;overflow:hidden;border:3px solid #c7d7f5;background:#000;width:100%;min-height:260px;display:flex;align-items:center;justify-content:center;}
     #reader{width:100%;}
     video{width:100%!important;border-radius:0!important;}
+    /* Scanner gun */
+    .scanner-mode{display:none;}
+    .scan-hint{font-size:0.8rem;color:#94a3b8;text-align:center;margin-bottom:8px;}
+    .scan-input{width:100%;padding:14px 16px;border-radius:12px;border:2px solid #c7d7f5;font-family:'Sarabun',sans-serif;font-size:1rem;color:#1e293b;outline:none;background:#f8fafc;margin-bottom:8px;}
+    .scan-status-box{background:#f8fafc;border:2px solid #c7d7f5;border-radius:12px;padding:12px;text-align:center;font-size:0.88rem;color:#64748b;}
+    /* Manual input */
+    .divider{display:flex;align-items:center;gap:10px;margin:16px 0;}
+    .divider-line{flex:1;height:1px;background:#e2e8f0;}
+    .divider-text{font-size:0.78rem;color:#94a3b8;white-space:nowrap;}
+    .manual-wrap{display:flex;gap:8px;margin-top:4px;}
+    .manual-input{flex:1;padding:11px 14px;border-radius:12px;border:2px solid #c7d7f5;font-family:'Sarabun',sans-serif;font-size:0.95rem;color:#1e293b;outline:none;}
+    .manual-input:focus{border-color:var(--blue);}
+    .manual-btn{padding:11px 18px;border-radius:12px;border:none;background:var(--blue);color:white;font-family:'Sarabun',sans-serif;font-size:0.9rem;font-weight:700;cursor:pointer;white-space:nowrap;}
+    .manual-btn:active{opacity:0.85;}
+    /* Counter */
     .counter{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:16px;background:var(--blue-light);border-radius:12px;padding:10px;font-size:0.9rem;color:var(--blue);}
     .counter strong{font-size:1.3rem;font-weight:700;}
     .status-bar{display:flex;align-items:center;gap:6px;font-size:0.78rem;color:#64748b;margin-top:12px;justify-content:center;}
@@ -69,13 +89,46 @@
 </div>
 
 <div class="card">
-  <div class="day-label">📅 เลือกวันที่สแกน</div>
+  <!-- วันที่ -->
+  <div class="row-label">📅 เลือกวันที่สแกน</div>
   <select class="day-select" id="day">
     <option value="1">วันที่ 1 — 24 มิ.ย.</option>
     <option value="2">วันที่ 2 — 25 มิ.ย.</option>
     <option value="3">วันที่ 3 — 26 มิ.ย.</option>
   </select>
-  <div id="reader-container"><div class="spinner"></div></div>
+
+  <!-- Mode toggle -->
+  <div class="row-label">🔧 เลือกวิธีสแกน</div>
+  <div class="mode-toggle">
+    <button class="mode-btn active" id="btnCamera"  onclick="setMode('camera')">📱 กล้องมือถือ</button>
+    <button class="mode-btn"        id="btnScanner" onclick="setMode('scanner')">🔫 เครื่องยิงบาร์โค้ด</button>
+  </div>
+
+  <!-- Camera mode -->
+  <div id="cameraMode">
+    <div id="reader-container"><div class="spinner"></div></div>
+  </div>
+
+  <!-- Scanner gun mode -->
+  <div class="scanner-mode" id="scannerMode">
+    <div class="scan-hint">เล็งเครื่องยิงบาร์โค้ดที่ QR Code แล้วกดปุ่มยิง</div>
+    <input class="scan-input" id="scanInput" placeholder="รอรับรหัสจากเครื่องยิง..." readonly>
+    <div class="scan-status-box" id="scanStatusBox">⌨️ พร้อมรับข้อมูลจากเครื่องยิงบาร์โค้ด</div>
+  </div>
+
+  <!-- Manual input (แสดงทุก mode) -->
+  <div class="divider">
+    <div class="divider-line"></div>
+    <div class="divider-text">หรือป้อนรหัสเอง</div>
+    <div class="divider-line"></div>
+  </div>
+  <div class="manual-wrap">
+    <input class="manual-input" id="manualInput"
+      placeholder="พิมพ์เลขบัตร / Passport..."
+      onkeydown="if(event.key==='Enter') submitManual()">
+    <button class="manual-btn" onclick="submitManual()">ค้นหา</button>
+  </div>
+
   <div class="counter">
     <span>สแกนสำเร็จวันนี้</span>
     <strong id="count">0</strong>
@@ -94,9 +147,29 @@
   let isProcessing = false;
   let todayCount   = 0;
   let qrCode       = null;
+  let currentMode  = 'camera';
+  let scanBuffer   = '';
+  let scanTimer    = null;
 
-  window.addEventListener('load', startCamera);
+  window.addEventListener('load', () => startCamera());
 
+  // ===== MODE =====
+  function setMode(mode) {
+    currentMode = mode;
+    document.getElementById('btnCamera').classList.toggle('active', mode === 'camera');
+    document.getElementById('btnScanner').classList.toggle('active', mode === 'scanner');
+    document.getElementById('cameraMode').style.display  = mode === 'camera'  ? '' : 'none';
+    document.getElementById('scannerMode').style.display = mode === 'scanner' ? '' : 'none';
+
+    if (mode === 'camera') {
+      startCamera();
+    } else {
+      if (qrCode) { qrCode.stop().catch(()=>{}); qrCode = null; }
+      setStatus('รอเครื่องยิงบาร์โค้ด...');
+    }
+  }
+
+  // ===== CAMERA =====
   function startCamera() {
     const container = document.getElementById('reader-container');
     container.innerHTML = '<div id="reader"></div>';
@@ -107,15 +180,59 @@
       onScanSuccess, () => {}
     ).then(() => setStatus('พร้อมสแกน ✓'))
      .catch(err => {
-       container.innerHTML = `<div><div class="err-msg">⚠️ ไม่สามารถเปิดกล้องได้<br><small>${err}</small></div><button class="retry-btn" onclick="startCamera()">ลองใหม่</button></div>`;
+       container.innerHTML = `<div><div class="err-msg">⚠️ เปิดกล้องไม่ได้</div><button class="retry-btn" onclick="startCamera()">ลองใหม่</button></div>`;
        setStatus('เปิดกล้องไม่ได้');
      });
   }
 
+  // ===== BARCODE GUN (keyboard wedge) =====
+  document.addEventListener('keydown', function(e) {
+    if (currentMode !== 'scanner' || isProcessing) return;
+    if (document.activeElement === document.getElementById('manualInput')) return;
+
+    if (e.key === 'Enter') {
+      if (scanBuffer.length > 0) {
+        const code = scanBuffer.trim();
+        scanBuffer = '';
+        clearTimeout(scanTimer);
+        document.getElementById('scanInput').value = code;
+        onScanSuccess(code);
+      }
+      return;
+    }
+    if (e.key.length === 1) {
+      scanBuffer += e.key;
+      document.getElementById('scanInput').value = scanBuffer;
+      clearTimeout(scanTimer);
+      scanTimer = setTimeout(() => {
+        if (scanBuffer.length > 5) {
+          const code = scanBuffer.trim();
+          scanBuffer = '';
+          onScanSuccess(code);
+        } else {
+          scanBuffer = '';
+          document.getElementById('scanInput').value = '';
+        }
+      }, 500);
+    }
+  });
+
+  // ===== MANUAL INPUT =====
+  function submitManual() {
+    const val = document.getElementById('manualInput').value.trim();
+    if (!val) return;
+    if (isProcessing) return;
+    onScanSuccess(val);
+  }
+
+  // ===== PROCESS =====
   async function onScanSuccess(decodedText) {
     if (isProcessing) return;
     isProcessing = true;
-    try { qrCode.pause(); } catch(e) {}
+
+    if (currentMode === 'camera') {
+      try { qrCode.pause(); } catch(e) {}
+    }
 
     const day = document.getElementById('day').value;
     setStatus('กำลังค้นหา...');
@@ -124,7 +241,6 @@
     try {
       const keyword = decodedText.trim();
 
-      // 1. ค้นหาผู้เข้าร่วม
       const searchRes = await sbFetch(
         `/rest/v1/participants?or=(id_card.eq.${encodeURIComponent(keyword)},passport.eq.${encodeURIComponent(keyword)})&select=id,prefix,first_name,last_name,tag,items`,
         'GET'
@@ -139,32 +255,25 @@
       const p = participants[0];
       const fullName = `${p.prefix||''} ${p.first_name||''} ${p.last_name||''}`.trim();
 
-      // 2. เช็คว่าเคยเช็คอินวันนี้ยัง
       const checkTodayRes = await sbFetch(
-        `/rest/v1/checkins?participant_id=eq.${p.id}&day=eq.${day}&select=id,checkin_time`,
-        'GET'
+        `/rest/v1/checkins?participant_id=eq.${p.id}&day=eq.${day}&select=id,checkin_time`, 'GET'
       );
       const existingToday = await checkTodayRes.json();
 
       if (existingToday && existingToday.length > 0) {
         const t = new Date(existingToday[0].checkin_time)
           .toLocaleTimeString('th-TH', { timeZone: 'Asia/Bangkok' });
-        // warning: เคยสแกนวันนี้แล้ว — แสดง "รับแล้ว" ทุกรายการ
         showModal('warning', '⚠️', `เคยเช็คอินวันที่ ${day} ไปแล้ว!`, fullName,
-          buildWarningDetail(t, p)
-        );
+          buildWarningDetail(t, p));
         return;
       }
 
-      // 3. เช็คว่าเคยเช็คอินวันก่อนหน้าไหม (ตัดสินใจเรื่องของที่ระลึก)
       const checkAllRes = await sbFetch(
-        `/rest/v1/checkins?participant_id=eq.${p.id}&select=id`,
-        'GET'
+        `/rest/v1/checkins?participant_id=eq.${p.id}&select=id`, 'GET'
       );
       const allCheckins    = await checkAllRes.json();
       const isFirstCheckin = !allCheckins || allCheckins.length === 0;
 
-      // 4. บันทึกเช็คอิน
       const insertRes = await sbFetch('/rest/v1/checkins', 'POST', {
         participant_id: p.id,
         day: parseInt(day),
@@ -176,16 +285,14 @@
         document.getElementById('count').textContent = todayCount;
         const timeNow = new Date().toLocaleTimeString('th-TH', { timeZone: 'Asia/Bangkok' });
         showModal('success', '✅', `เช็คอินสำเร็จ! วันที่ ${day}`, fullName,
-          buildSuccessDetail(timeNow, p, isFirstCheckin)
-        );
+          buildSuccessDetail(timeNow, p, isFirstCheckin));
         setStatus('เช็คอินสำเร็จ! ✅');
       } else {
         const errData = await insertRes.json().catch(() => ({}));
         if (errData.code === '23505') {
           const t = new Date().toLocaleTimeString('th-TH', { timeZone: 'Asia/Bangkok' });
           showModal('warning', '⚠️', `เคยเช็คอินวันที่ ${day} ไปแล้ว!`, fullName,
-            buildWarningDetail(t, p)
-          );
+            buildWarningDetail(t, p));
         } else {
           showModal('error', '❌', 'บันทึกไม่สำเร็จ', '', null);
         }
@@ -197,40 +304,25 @@
     }
   }
 
-  // สร้าง detail สำหรับ success
+  // ===== DETAIL BUILDERS =====
   function buildSuccessDetail(time, p, isFirst) {
     return [
-      { label: '🕐 เวลา:', val: time, done: false },
-      { label: '🍱 คูปองอาหาร:', val: 'รับได้เลย', done: false },
-      { label: '🎁 ของที่ระลึก:', val: p.items || '-', done: !isFirst },
-      { label: '🏷️ ประเภท:', val: p.tag || '-', done: false },
+      { label:'🕐 เวลา:', val:time, done:false },
+      { label:'🍱 คูปองอาหาร:', val:'รับได้เลย', done:false },
+      { label:'🎁 ของที่ระลึก:', val:p.items||'-', done:!isFirst },
+      { label:'🏷️ ประเภท:', val:p.tag||'-', done:false },
     ];
   }
-
-  // สร้าง detail สำหรับ warning (รับไปหมดแล้ว)
   function buildWarningDetail(time, p) {
     return [
-      { label: '🕐 เวลาที่เช็คอิน:', val: time, done: false },
-      { label: '🍱 คูปองอาหาร:', val: '', done: true, doneText: 'รับแล้ว' },
-      { label: '🎁 ของที่ระลึก:', val: p.items || '-', done: true, doneText: 'รับแล้ว' },
-      { label: '🏷️ ประเภท:', val: p.tag || '-', done: true, doneText: 'รับแล้ว' },
+      { label:'🕐 เวลาที่เช็คอิน:', val:time, done:false },
+      { label:'🍱 คูปองอาหาร:', val:'', done:true, doneText:'รับแล้ว' },
+      { label:'🎁 ของที่ระลึก:', val:p.items||'-', done:true, doneText:'รับแล้ว' },
+      { label:'🏷️ ประเภท:', val:p.tag||'-', done:true, doneText:'รับแล้ว' },
     ];
   }
 
-  function sbFetch(path, method, body) {
-    const opts = {
-      method,
-      headers: {
-        'apikey': SUPABASE_ANON,
-        'Authorization': 'Bearer ' + SUPABASE_ANON,
-        'Content-Type': 'application/json',
-        'Prefer': 'return=minimal'
-      }
-    };
-    if (body) opts.body = JSON.stringify(body);
-    return fetch(SUPABASE_URL + path, opts);
-  }
-
+  // ===== MODAL =====
   function showModal(type, icon, title, name, rows) {
     document.getElementById('modalIcon').textContent  = icon;
     document.getElementById('modalTitle').textContent = title;
@@ -238,42 +330,44 @@
     document.getElementById('modalName').textContent  = name || '';
     document.getElementById('btnOk').className        = 'btn-ok ' + type;
     document.getElementById('btnOk').style.display    = type === 'loading' ? 'none' : 'block';
-
     const detailEl = document.getElementById('modalDetail');
     if (rows && rows.length > 0) {
       detailEl.style.display = 'block';
-      detailEl.innerHTML = rows.map(r => {
-        if (r.done) {
-          // แสดง "รับแล้ว" สีแดงต่อท้าย
-          return `<div class="row">
-            <span>${r.label}</span>
-            ${r.val ? `<span class="val">${r.val}</span>` : ''}
-            <span class="done">— ${r.doneText || 'รับแล้ว'}</span>
-          </div>`;
-        } else {
-          return `<div class="row">
-            <span>${r.label}</span>
-            <span class="val">${r.val}</span>
-          </div>`;
-        }
-      }).join('');
+      detailEl.innerHTML = rows.map(r =>
+        r.done
+          ? `<div class="row"><span>${r.label}</span>${r.val?`<span class="val">${r.val}</span>`:''}<span class="done">— ${r.doneText||'รับแล้ว'}</span></div>`
+          : `<div class="row"><span>${r.label}</span><span class="val">${r.val}</span></div>`
+      ).join('');
     } else {
       detailEl.style.display = 'none';
     }
-
     document.getElementById('modalOverlay').classList.remove('hidden');
   }
 
   function closeModal() {
     document.getElementById('modalOverlay').classList.add('hidden');
-    try { qrCode.resume(); } catch(e) {}
+    if (currentMode === 'camera') {
+      try { qrCode.resume(); } catch(e) {}
+    } else {
+      document.getElementById('scanInput').value = '';
+      scanBuffer = '';
+    }
+    // clear manual input
+    document.getElementById('manualInput').value = '';
     isProcessing = false;
     setStatus('พร้อมสแกน ✓');
   }
 
-  function setStatus(text) {
-    document.getElementById('statusText').textContent = text;
+  function sbFetch(path, method, body) {
+    const opts = { method, headers: {
+      'apikey': SUPABASE_ANON, 'Authorization': 'Bearer '+SUPABASE_ANON,
+      'Content-Type': 'application/json', 'Prefer': 'return=minimal'
+    }};
+    if (body) opts.body = JSON.stringify(body);
+    return fetch(SUPABASE_URL + path, opts);
   }
+
+  function setStatus(t) { document.getElementById('statusText').textContent = t; }
 </script>
 </body>
 </html>
