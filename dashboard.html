@@ -137,14 +137,34 @@
 <div class="main">
 
   <!-- STATS -->
-  <div class="stats-grid">
-    <div class="stat-card"><div class="stat-label">แสดงผลอยู่</div><div class="stat-num" id="sFiltered">-</div><div class="stat-sub">รายการ (ตาม filter)</div></div>
+  <!-- แถวที่ 1: รวมทั้งหมด -->
+  <div class="stats-grid" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr));margin-bottom:10px;">
+    <div class="stat-card" style="border-left:4px solid #0d2b6b;">
+      <div class="stat-label">จำนวนที่สแกน (ปัจจุบัน)</div>
+      <div class="stat-num" id="sFiltered">-</div>
+      <div class="stat-sub">ราย (ตาม filter)</div>
+    </div>
+    <div class="stat-card" style="border-left:4px solid #0891b2;">
+      <div class="stat-label">รวมทั้งหมด</div>
+      <div class="stat-num" id="sTotal" style="color:#0891b2;">-</div>
+      <div class="stat-sub">ราย (ลงทะเบียน + Walk-in)</div>
+    </div>
+    <div class="stat-card" style="border-left:4px solid #16a34a;">
+      <div class="stat-label">ลงทะเบียนล่วงหน้า</div>
+      <div class="stat-num" id="sPreReg" style="color:#16a34a;">-</div>
+      <div class="stat-sub">ราย (เช็คอินแล้ว)</div>
+    </div>
+    <div class="stat-card" style="border-left:4px solid #7c3aed;">
+      <div class="stat-label">Walk-in</div>
+      <div class="stat-num" id="sWalkin" style="color:#7c3aed;">-</div>
+      <div class="stat-sub" id="sWalkinSub">ราย (เช็คอินแล้ว)</div>
+    </div>
+  </div>
+  <!-- แถวที่ 2: แยกวัน -->
+  <div class="stats-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:20px;">
     <div class="stat-card day1"><div class="stat-label">วันที่ 1 — 24 มิ.ย.</div><div class="stat-num" id="sD1">-</div><div class="stat-sub" id="sD1p">-</div></div>
     <div class="stat-card day2"><div class="stat-label">วันที่ 2 — 25 มิ.ย.</div><div class="stat-num" id="sD2">-</div><div class="stat-sub" id="sD2p">-</div></div>
     <div class="stat-card day3"><div class="stat-label">วันที่ 3 — 26 มิ.ย.</div><div class="stat-num" id="sD3">-</div><div class="stat-sub" id="sD3p">-</div></div>
-    <div class="stat-card internal"><div class="stat-label">บุคลากรภายใน</div><div class="stat-num" id="sInt">-</div><div class="stat-sub">คน (ใน filter)</div></div>
-    <div class="stat-card external"><div class="stat-label">บุคคลภายนอก</div><div class="stat-num" id="sExt">-</div><div class="stat-sub">คน (ใน filter)</div></div>
-    <div class="stat-card" style="border-left:4px solid #7c3aed;"><div class="stat-label">Walk-in</div><div class="stat-num" id="sWalkin" style="color:#7c3aed;">-</div><div class="stat-sub" id="sWalkinSub">คน (เช็คอินแล้ว)</div></div>
   </div>
 
   <!-- FILTER BAR -->
@@ -168,9 +188,16 @@
     </div>
     <div class="filter-group">
       <div class="filter-label">หน่วยงาน</div>
-      <select class="filter-select" id="fDept" onchange="applyFilters()" style="min-width:200px;">
-        <option value="">ทั้งหมด</option>
-      </select>
+      <div class="multi-wrap">
+        <button class="multi-btn" id="fDeptBtn" onclick="toggleDD('fDeptDD')">ทั้งหมด</button>
+        <div class="multi-dd" id="fDeptDD" style="min-width:300px;max-height:300px;">
+          <label class="all-label"><input type="checkbox" id="fDeptAll" checked onchange="toggleFDeptAll()"> เลือกทั้งหมด</label>
+          <div style="padding:6px 14px;font-size:0.75rem;font-weight:700;color:#0d2b6b;background:#f0f4ff;border-bottom:1px solid #e2e8f0;">— หน่วยงานภายใน —</div>
+          <div id="fDeptInternal"></div>
+          <div style="padding:6px 14px;font-size:0.75rem;font-weight:700;color:#d97706;background:#fffbeb;border-bottom:1px solid #e2e8f0;">— หน่วยงานภายนอก —</div>
+          <div id="fDeptExternal"></div>
+        </div>
+      </div>
     </div>
     <div class="filter-group">
       <div class="filter-label">TAG</div>
@@ -178,6 +205,14 @@
         <option value="">ทั้งหมด</option>
         <option value="participant">participant</option>
         <option value="Staff">Staff</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <div class="filter-label">ประเภท</div>
+      <select class="filter-select" id="fWalkin" onchange="applyFilters()">
+        <option value="">ทั้งหมด</option>
+        <option value="preReg">ลงทะเบียนล่วงหน้า</option>
+        <option value="walkin">Walk-in</option>
       </select>
     </div>
     <button class="btn-reset" onclick="resetFilters()">✕ ล้าง filter</button>
@@ -307,7 +342,7 @@ const PAGE  = 10;
 const DEPTS = ['อธิบดีกรมวิทยาศาสตร์การแพทย์','รองอธิบดีกรมวิทยาศาสตร์การแพทย์','สำนักผู้ทรงคุณวุฒิกรมวิทยาศาสตร์การแพทย์','กองแผนงานและวิชาการ','กองทดสอบความชำนาญ','กลุ่มพัฒนาระบบบริหาร','กลุ่มตรวจสอบภายใน','กลุ่มงานจริยธรรม','สำนักงานเลขานุการกรม','สถาบันชีววัตถุ','สถาบันวิจัยวิทยาศาสตร์สาธารณสุข','สถาบันวิจัยสมุนไพร','สถาบันชีววิทยาศาสตร์ทางการแพทย์','สำนักคุณภาพและความปลอดภัยอาหาร','สำนักเครื่องสำอางและวัตถุอันตราย','สำนักรังสีและเครื่องมือแพทย์','สำนักมาตรฐานห้องปฏิบัติการ','สำนักยาและวัตถุเสพติด','ศูนย์รวมบริการ','ศูนย์เทคโนโลยีสารสนเทศและการสื่อสาร','กองความร่วมมือระหว่างประเทศ','กองบริหารทรัพยากรบุคคล','กองบริหารการคลัง','กองประชาสัมพันธ์และสื่อสารสาธารณะ','ศูนย์ตอบโต้เหตุฉุกเฉินด้านห้องปฏิบัติการและรังสี','ศูนย์วิทยาศาสตร์การแพทย์ที่ 1 เชียงใหม่','ศูนย์วิทยาศาสตร์การแพทย์ที่ 1/1 เชียงราย','ศูนย์วิทยาศาสตร์การแพทย์ที่ 2 พิษณุโลก','ศูนย์วิทยาศาสตร์การแพทย์ที่ 3 นครสวรรค์','ศูนย์วิทยาศาสตร์การแพทย์ที่ 4 สระบุรี','ศูนย์วิทยาศาสตร์การแพทย์ที่ 5 สมุทรสงคราม','ศูนย์วิทยาศาสตร์การแพทย์ที่ 6 ชลบุรี','ศูนย์วิทยาศาสตร์การแพทย์ที่ 7 ขอนแก่น','ศูนย์วิทยาศาสตร์การแพทย์ที่ 8 อุดรธานี','ศูนย์วิทยาศาสตร์การแพทย์ที่ 9 นครราชสีมา','ศูนย์วิทยาศาสตร์การแพทย์ที่ 10 อุบลราชธานี','ศูนย์วิทยาศาสตร์การแพทย์ที่ 11 สุราษฎร์ธานี','ศูนย์วิทยาศาสตร์การแพทย์ที่ 11/1 ภูเก็ต','ศูนย์วิทยาศาสตร์การแพทย์ที่ 12 สงขลา','ศูนย์วิทยาศาสตร์การแพทย์ที่ 12/1 ตรัง'];
 
 let allData=[], filtered=[], curTab=0, curPage=1;
-let selPT=new Set(), selDPT=new Set(), selDDept=new Set();
+let selPT=new Set(), selDPT=new Set(), selDDept=new Set(), selFDept=new Set();
 let deptRaw=[], dView='table', dChart=null;
 
 async function fetchAll(path,ps=1000){
@@ -367,14 +402,50 @@ async function loadAll(){
   });
   selDDept=new Set();
 
-  const depts=[...new Set(allData.map(r=>r.dept).filter(d=>d&&d!=='-'))].sort();
-  const ds=document.getElementById('fDept');
-  ds.innerHTML='<option value="">ทั้งหมด</option>';
-  depts.forEach(d=>{const o=document.createElement('option');o.value=d;o.textContent=d;ds.appendChild(o);});
+  // Build filter หน่วยงาน แบบ checkbox แยก ภายใน/ภายนอก
+  const intDeptEl  = document.getElementById('fDeptInternal');
+  const extDeptEl  = document.getElementById('fDeptExternal');
+  intDeptEl.innerHTML=''; extDeptEl.innerHTML='';
+  // หน่วยงานภายใน = DEPTS list
+  DEPTS.forEach(d=>{
+    const lbl=document.createElement('label');
+    lbl.innerHTML=`<input type="checkbox" class="fDeptCb" value="${d}" checked> ${d}`;
+    lbl.querySelector('input').onchange=onFDeptChange;
+    intDeptEl.appendChild(lbl);
+  });
+  // หน่วยงานภายนอก = จากข้อมูลจริง ที่ไม่ใช่ DEPTS
+  const extDepts=[...new Set(allData.filter(r=>!r.isIn).map(r=>r.dept).filter(d=>d&&d!=='-'))].sort();
+  extDepts.forEach(d=>{
+    const lbl=document.createElement('label');
+    lbl.innerHTML=`<input type="checkbox" class="fDeptCb" value="${d}" checked> ${d}`;
+    lbl.querySelector('input').onchange=onFDeptChange;
+    extDeptEl.appendChild(lbl);
+  });
+  selFDept=new Set();
 
   document.getElementById('lastUpdate').textContent='อัปเดต: '+new Date().toLocaleTimeString('th-TH',{timeZone:'Asia/Bangkok'});
   applyFilters();
   renderDept();
+
+  // Auto-refresh ทุก 30 วินาที
+  if(!window._autoRefreshTimer){
+    window._autoRefreshTimer=setInterval(()=>{
+      loadAll();
+    },30000);
+  }
+}
+
+function toggleFDeptAll(){
+  const checked=document.getElementById('fDeptAll').checked;
+  document.querySelectorAll('.fDeptCb').forEach(cb=>cb.checked=checked);
+  selFDept=new Set();updateBtn('fDeptBtn',selFDept);applyFilters();
+}
+function onFDeptChange(){
+  const cbs=document.querySelectorAll('.fDeptCb');
+  document.getElementById('fDeptAll').checked=[...cbs].every(c=>c.checked);
+  selFDept=new Set();
+  if(![...cbs].every(c=>c.checked)) cbs.forEach(cb=>{if(cb.checked)selFDept.add(cb.value);});
+  updateBtn('fDeptBtn',selFDept);applyFilters();
 }
 
 function buildDD(ddId,allId,types,onChange){
@@ -450,41 +521,46 @@ function switchTab(day){
 
 function resetFilters(){
   document.getElementById('fIntExt').value='';
-  document.getElementById('fDept').value='';
   document.getElementById('fTag').value='';
+  document.getElementById('fWalkin').value='';
   document.getElementById('sBox').value='';
   document.querySelectorAll('#ptDD input').forEach(cb=>cb.checked=true);
   selPT=new Set();updateBtn('ptBtn',selPT);
+  document.querySelectorAll('.fDeptCb').forEach(cb=>cb.checked=true);
+  document.getElementById('fDeptAll').checked=true;
+  selFDept=new Set();updateBtn('fDeptBtn',selFDept);
   applyFilters();
 }
 
 function applyFilters(){
   const q=document.getElementById('sBox').value.toLowerCase();
   const ie=document.getElementById('fIntExt').value;
-  const dp=document.getElementById('fDept').value;
   const tg=document.getElementById('fTag').value;
+  const wi=document.getElementById('fWalkin').value;
   filtered=allData.filter(r=>{
     const mDay=curTab===0||r.day===curTab;
     const mSearch=!q||r.name.toLowerCase().includes(q)||r.dept.toLowerCase().includes(q);
     const mIE=!ie||(ie==='internal'&&r.isIn)||(ie==='external'&&!r.isIn);
     const mPT=selPT.size===0||selPT.has(r.pt);
-    const mDept=!dp||r.dept===dp;
+    const mDept=selFDept.size===0||selFDept.has(r.dept);
     const mTag=!tg||r.tag===tg;
-    return mDay&&mSearch&&mIE&&mPT&&mDept&&mTag;
+    const mWI=!wi||(wi==='walkin'&&r.isWalkin)||(wi==='preReg'&&!r.isWalkin);
+    return mDay&&mSearch&&mIE&&mPT&&mDept&&mTag&&mWI;
   });
   curPage=1;
   const tot=filtered.length;
+  const totalAll=allData.length;
+  const walkinCount=allData.filter(r=>r.isWalkin).length;
+  const preRegCount=totalAll-walkinCount;
   document.getElementById('sFiltered').textContent=tot.toLocaleString();
+  document.getElementById('sTotal').textContent=totalAll.toLocaleString();
+  document.getElementById('sPreReg').textContent=preRegCount.toLocaleString();
+  document.getElementById('sWalkin').textContent=walkinCount.toLocaleString();
   [1,2,3].forEach(d=>{
     const c=filtered.filter(r=>r.day===d).length;
     document.getElementById(`sD${d}`).textContent=c.toLocaleString();
     document.getElementById(`sD${d}p`).textContent=tot?`${Math.round(c/tot*100)}% ของ filter`:'-';
   });
-  document.getElementById('sInt').textContent=filtered.filter(r=>r.isIn).length.toLocaleString();
-  document.getElementById('sExt').textContent=filtered.filter(r=>!r.isIn).length.toLocaleString();
-  const walkinCount=allData.filter(r=>r.isWalkin).length;
-  document.getElementById('sWalkin').textContent=walkinCount.toLocaleString();
-  document.getElementById('sWalkinSub').textContent=`ราย (เช็คอินแล้ว ทั้งหมด)`;
   document.getElementById('tCount').textContent=`(${tot.toLocaleString()} รายการ)`;
   renderTable();
 }
