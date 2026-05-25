@@ -131,15 +131,9 @@
   </div>
   <div class="counter-sub" id="counterSub">กำลังโหลด...</div>
 
-  <a class="dash-link" href="dashboard.html">
+  <a class="dash-link" href="https://search-participant.netlify.app/dashboard.html" target="_blank">
     ไปหน้า Dashboard
   </a>
-  <a class="dash-link" href="public.html" style="background:#1a4eb8;margin-top:8px;">
-    ดู Live Dashboard (สาธารณะ)
-  </a>
-  <button onclick="doLogout()" style="width:100%;margin-top:8px;padding:10px;border-radius:12px;border:2px solid #e2e8f0;background:white;font-family:'Sarabun',sans-serif;font-size:0.85rem;color:#64748b;cursor:pointer;">
-    ออกจากระบบ
-  </button>
 
   <div class="status-bar">
     <div class="dot"></div>
@@ -348,12 +342,6 @@
   }
 
   function setStatus(t){document.getElementById('statusText').textContent=t;}
-
-  function doLogout(){
-    sessionStorage.removeItem('dmsc_auth');
-    sessionStorage.removeItem('dmsc_user');
-    window.location.href='login.html';
-  }
 </script>
 </body>
 </html>
