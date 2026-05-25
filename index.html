@@ -144,8 +144,8 @@
   const DAY_TH  = {1:'24 มิถุนายน 2569',2:'25 มิถุนายน 2569',3:'26 มิถุนายน 2569'};
 
   // Auth check
-  if(sessionStorage.getItem('dmsc_auth')!=='ok') window.location.href='login.html';
-  document.getElementById('userDisplay').textContent = sessionStorage.getItem('dmsc_user')||'';
+  if(localStorage.getItem('dmsc_auth')!=='ok') window.location.href='login.html';
+  document.getElementById('userDisplay').textContent = localStorage.getItem('dmsc_user')||'';
 
   let isProcessing=false, todayCount=0, qrCode=null;
   let currentMode='camera', scanBuffer='', scanTimer=null;
@@ -256,7 +256,7 @@
       const insertRes=await sbFetch('/rest/v1/checkins','POST',{
         participant_id:p.id, day:parseInt(day),
         checkin_time:new Date().toISOString(),
-        scanned_by:sessionStorage.getItem('dmsc_user')||'unknown'
+        scanned_by:localStorage.getItem('dmsc_user')||'unknown'
       });
 
       if(insertRes.ok||insertRes.status===201){
@@ -329,7 +329,7 @@
   }
 
   function setStatus(t){document.getElementById('statusText').textContent=t;}
-  function doLogout(){sessionStorage.removeItem('dmsc_auth');sessionStorage.removeItem('dmsc_user');window.location.href='login.html';}
+  function doLogout(){localStorage.removeItem('dmsc_auth');localStorage.removeItem('dmsc_user');window.location.href='login.html';}
 </script>
 </body>
 </html>
