@@ -261,10 +261,10 @@ if (sessionStorage.getItem('dmsc_auth') !== 'ok') {
           <tr>
             <th>#</th><th>ชื่อ-นามสกุล</th><th>หน่วยงาน</th>
             <th>ประเภทบุคคล</th><th>ประเภทการเข้าร่วม</th>
-            <th>TAG</th><th>วันที่เช็คอิน</th><th>เวลา</th>
+            <th>TAG</th><th>วันที่เช็คอิน</th><th>เวลา</th><th>สแกนโดย</th>
           </tr>
         </thead>
-        <tbody id="tBody"><tr><td colspan="8" class="loading-td">กำลังโหลด...</td></tr></tbody>
+        <tbody id="tBody"><tr><td colspan="9" class="loading-td">กำลังโหลด...</td></tr></tbody>
       </table>
     </div>
     <div class="pager">
@@ -373,16 +373,16 @@ async function fetchAll(path,ps=1000){
 }
 
 async function loadAll(){
-  document.getElementById('tBody').innerHTML='<tr><td colspan="8" class="loading-td">กำลังโหลด...</td></tr>';
+  document.getElementById('tBody').innerHTML='<tr><td colspan="9" class="loading-td">กำลังโหลด...</td></tr>';
   document.getElementById('dBody').innerHTML='<tr><td colspan="5" style="text-align:center;padding:30px;color:#94a3b8;">กำลังโหลด...</td></tr>';
 
-  const rows=await fetchAll('/rest/v1/checkins?select=id,day,checkin_time,participants(prefix,first_name,last_name,tag,dept,ext_dept,internal_external,participation_type,items,is_walkin)&order=checkin_time.desc');
+  const rows=await fetchAll('/rest/v1/checkins?select=id,day,checkin_time,scanned_by,participants(prefix,first_name,last_name,tag,dept,ext_dept,internal_external,participation_type,items,is_walkin)&order=checkin_time.desc');
 
   allData=rows.map(r=>{
     const p=r.participants||{};
     const isIn=(p.internal_external||'').includes('ภายใน');
     const dept=isIn?(p.dept||'-'):(p.ext_dept||p.dept||'-');
-    return{id:r.id,day:r.day,time:r.checkin_time,
+    return{id:r.id,day:r.day,time:r.checkin_time,scannedBy:r.scanned_by||'-',
       name:`${p.prefix||''} ${p.first_name||''} ${p.last_name||''}`.trim(),
       dept,isIn,tag:p.tag||'-',items:p.items||'-',
       pt:p.participation_type||'-',isWalkin:p.is_walkin===true};
@@ -587,7 +587,7 @@ function renderTable(){
   document.getElementById('pInfo').textContent=`แสดง ${tot===0?0:start+1}–${Math.min(start+PAGE,tot)} จาก ${tot.toLocaleString()} รายการ`;
   document.getElementById('bPrev').disabled=curPage<=1;
   document.getElementById('bNext').disabled=curPage>=totPages;
-  if(!page.length){document.getElementById('tBody').innerHTML='<tr><td colspan="8" class="loading-td">ไม่พบข้อมูล</td></tr>';return;}
+  if(!page.length){document.getElementById('tBody').innerHTML='<tr><td colspan="9" class="loading-td">ไม่พบข้อมูล</td></tr>';return;}
   document.getElementById('tBody').innerHTML=page.map((r,i)=>{
     const t=new Date(r.time).toLocaleTimeString('th-TH',{timeZone:'Asia/Bangkok',hour:'2-digit',minute:'2-digit',second:'2-digit'});
     return`<tr>
@@ -599,6 +599,7 @@ function renderTable(){
       <td><span class="badge ${r.tag==='Staff'?'b-staff':'b-participant'}">${r.tag}</span></td>
       <td><span class="badge b-day">${DAY_L[r.day]||r.day}</span></td>
       <td>${t}</td>
+      <td style="font-size:0.8rem;color:#64748b;">${r.scannedBy}</td>
     </tr>`;
   }).join('');
 }
@@ -744,7 +745,8 @@ function getRows(){
   return filtered.map((r,i)=>({'ลำดับ':i+1,'ชื่อ-นามสกุล':r.name,'หน่วยงาน':r.dept,
     'ประเภทบุคคล':r.isIn?'บุคลากรภายใน':'บุคคลภายนอก','ประเภทการเข้าร่วม':r.pt,
     'TAG':r.tag,'วันที่เช็คอิน':DAY_L[r.day]||r.day,
-    'เวลาเช็คอิน':new Date(r.time).toLocaleTimeString('th-TH',{timeZone:'Asia/Bangkok'}),'ของที่ระลึก':r.items}));
+    'เวลาเช็คอิน':new Date(r.time).toLocaleTimeString('th-TH',{timeZone:'Asia/Bangkok'}),
+    'ของที่ระลึก':r.items,'สแกนโดย':r.scannedBy}));
 }
 
 loadAll();

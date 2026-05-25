@@ -259,7 +259,12 @@
       const allCheckins=await checkAllRes.json();
       const isFirst=!allCheckins||allCheckins.length===0;
 
-      const insertRes=await sbFetch('/rest/v1/checkins','POST',{participant_id:p.id,day:parseInt(day),checkin_time:new Date().toISOString()});
+      const insertRes=await sbFetch('/rest/v1/checkins','POST',{
+        participant_id: p.id,
+        day: parseInt(day),
+        checkin_time: new Date().toISOString(),
+        scanned_by: sessionStorage.getItem('dmsc_user') || 'unknown'
+      });
 
       if(insertRes.ok||insertRes.status===201){
         todayCount++;

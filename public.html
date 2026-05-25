@@ -10,13 +10,16 @@
     *{box-sizing:border-box;margin:0;padding:0;}
     body{background:#f0f4ff;font-family:'Sarabun',sans-serif;min-height:100vh;}
 
-    /* Hero Header */
+    /* Hero */
     .hero{background:linear-gradient(135deg,#0d2b6b 0%,#1a4eb8 60%,#0891b2 100%);color:white;padding:36px 24px 32px;text-align:center;}
     .hero-badge{display:inline-block;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);border-radius:20px;padding:4px 16px;font-size:0.8rem;margin-bottom:14px;}
     .hero h1{font-size:1.4rem;font-weight:800;line-height:1.5;margin-bottom:6px;}
     .hero p{font-size:0.85rem;opacity:0.75;}
-    .hero-date{display:flex;justify-content:center;gap:16px;margin-top:20px;flex-wrap:wrap;}
+    .hero-date{display:flex;justify-content:center;gap:12px;margin-top:20px;flex-wrap:wrap;}
     .hero-date-item{background:rgba(255,255,255,0.12);border-radius:12px;padding:10px 20px;font-size:0.85rem;font-weight:600;}
+    /* staff button in hero */
+    .hero-staff-btn{display:inline-block;margin-top:20px;padding:10px 24px;border-radius:20px;background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.4);color:white;font-family:'Sarabun',sans-serif;font-size:0.88rem;font-weight:600;text-decoration:none;cursor:pointer;transition:background .15s;}
+    .hero-staff-btn:hover{background:rgba(255,255,255,0.25);}
 
     .main{padding:24px 16px;max-width:900px;margin:0 auto;}
 
@@ -24,14 +27,14 @@
     .big-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:24px;}
     .big-card{background:var(--white);border-radius:18px;padding:24px 20px;box-shadow:var(--shadow);text-align:center;}
     .big-label{font-size:0.78rem;color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;}
-    .big-num{font-size:2.8rem;font-weight:800;color:var(--blue);line-height:1;}
+    .big-num{font-size:2.8rem;font-weight:800;line-height:1;}
     .big-sub{font-size:0.8rem;color:#94a3b8;margin-top:6px;}
     .big-card.total .big-num{color:#0d2b6b;}
     .big-card.d1    .big-num{color:#2563eb;}
     .big-card.d2    .big-num{color:#7c3aed;}
     .big-card.d3    .big-num{color:#0891b2;}
 
-    /* Progress bar */
+    /* Progress */
     .progress-card{background:var(--white);border-radius:18px;padding:20px 24px;box-shadow:var(--shadow);margin-bottom:20px;}
     .progress-title{font-size:0.9rem;font-weight:700;color:var(--blue);margin-bottom:16px;}
     .progress-row{margin-bottom:14px;}
@@ -41,9 +44,9 @@
     .progress-bar{height:10px;background:#e2e8f0;border-radius:5px;overflow:hidden;}
     .progress-fill{height:100%;border-radius:5px;transition:width .8s ease;}
 
-    /* Dept table */
+    /* Dept */
     .dept-card{background:var(--white);border-radius:18px;box-shadow:var(--shadow);overflow:hidden;margin-bottom:24px;}
-    .dept-card-header{padding:18px 24px;border-bottom:1px solid #e2e8f0;}
+    .dept-card-header{padding:18px 24px;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
     .dept-card-title{font-size:1rem;font-weight:700;color:var(--blue);}
     .dept-card-sub{font-size:0.8rem;color:#94a3b8;margin-top:2px;}
     table{width:100%;border-collapse:collapse;}
@@ -51,18 +54,23 @@
     td{padding:10px 16px;font-size:0.88rem;border-bottom:1px solid #f1f5f9;color:#1e293b;}
     tr:last-child td{border-bottom:none;}
     tr:nth-child(even) td{background:#fafafa;}
-    .rank{font-weight:700;color:#94a3b8;width:30px;}
+    .rank{font-weight:700;color:#94a3b8;width:36px;}
     .dept-name{font-weight:600;}
-    .count-num{font-weight:700;color:var(--blue);text-align:right;}
-    .mini-bar{height:6px;background:#e2e8f0;border-radius:3px;overflow:hidden;min-width:60px;}
-    .mini-fill{height:100%;background:var(--blue-mid);border-radius:3px;}
+    .count-num{font-weight:700;color:var(--blue);text-align:right;width:70px;}
+    .mini-bar{height:6px;background:#e2e8f0;border-radius:3px;overflow:hidden;min-width:80px;}
+    .mini-fill{height:100%;background:var(--blue-mid);border-radius:3px;transition:width .6s ease;}
+
+    /* Collapse button */
+    .collapse-row td{padding:12px 16px;text-align:center;background:#f8fafc;border-top:1px solid #e2e8f0;}
+    .collapse-btn{padding:8px 20px;border-radius:20px;border:2px solid #c7d7f5;background:white;font-family:'Sarabun',sans-serif;font-size:0.85rem;font-weight:600;color:var(--blue);cursor:pointer;transition:all .15s;}
+    .collapse-btn:hover{background:var(--blue-light);}
+    .hidden-row{display:none;}
 
     /* Footer */
     .footer{text-align:center;padding:20px;font-size:0.78rem;color:#94a3b8;}
     .update-info{display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:8px;}
     .dot-live{width:8px;height:8px;border-radius:50%;background:#16a34a;animation:pulse 2s infinite;}
     @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
-
     .loading{text-align:center;padding:60px;color:#94a3b8;font-size:1rem;}
   </style>
 </head>
@@ -77,13 +85,14 @@
     <div class="hero-date-item">25 มิถุนายน 2569</div>
     <div class="hero-date-item">26 มิถุนายน 2569</div>
   </div>
+  <br>
+  <a class="hero-staff-btn" href="login.html">เข้าสู่ระบบเจ้าหน้าที่</a>
 </div>
 
 <div class="main">
   <div id="loadingArea" class="loading">กำลังโหลดข้อมูล...</div>
   <div id="contentArea" style="display:none;">
 
-    <!-- Big stats -->
     <div class="big-stats">
       <div class="big-card total">
         <div class="big-label">ผู้เข้าร่วมทั้งหมด</div>
@@ -107,7 +116,6 @@
       </div>
     </div>
 
-    <!-- Progress per day -->
     <div class="progress-card">
       <div class="progress-title">สัดส่วนผู้เข้าร่วมแต่ละวัน</div>
       <div class="progress-row">
@@ -124,11 +132,12 @@
       </div>
     </div>
 
-    <!-- Dept table -->
     <div class="dept-card">
       <div class="dept-card-header">
-        <div class="dept-card-title">จำนวนผู้เข้าร่วมแยกตามหน่วยงานภายใน</div>
-        <div class="dept-card-sub">เรียงตามจำนวนผู้เข้าร่วมสูงสุด</div>
+        <div>
+          <div class="dept-card-title">จำนวนผู้เข้าร่วมแยกตามหน่วยงานภายใน</div>
+          <div class="dept-card-sub">เรียงตามจำนวนผู้เข้าร่วมสูงสุด</div>
+        </div>
       </div>
       <div style="overflow-x:auto;">
         <table>
@@ -137,10 +146,10 @@
               <th style="width:40px;">#</th>
               <th>หน่วยงาน</th>
               <th style="text-align:right;width:80px;">จำนวน</th>
-              <th style="width:120px;">สัดส่วน</th>
+              <th style="width:130px;">สัดส่วน</th>
             </tr>
           </thead>
-          <tbody id="deptBody"><tr><td colspan="4" style="text-align:center;padding:30px;color:#94a3b8;">กำลังโหลด...</td></tr></tbody>
+          <tbody id="deptBody"></tbody>
         </table>
       </div>
     </div>
@@ -158,8 +167,30 @@
 
 <script>
 const SUPABASE_URL  = "https://gvxytnjfyepqhbkmcjms.supabase.co";
-const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2eHl0bmpmeWVwcWhia21jam1zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0MzE2NDAsImV4cCI6MjA5NTAwNzY0MH0.RAr_ehb4cxfNliDR0h5XcihUaP-0ltZTTGIAv2Fw1kk";
-const DEPTS = ['อธิบดีกรมวิทยาศาสตร์การแพทย์','รองอธิบดีกรมวิทยาศาสตร์การแพทย์','สำนักผู้ทรงคุณวุฒิกรมวิทยาศาสตร์การแพทย์','กองแผนงานและวิชาการ','กองทดสอบความชำนาญ','กลุ่มพัฒนาระบบบริหาร','กลุ่มตรวจสอบภายใน','กลุ่มงานจริยธรรม','สำนักงานเลขานุการกรม','สถาบันชีววัตถุ','สถาบันวิจัยวิทยาศาสตร์สาธารณสุข','สถาบันวิจัยสมุนไพร','สถาบันชีววิทยาศาสตร์ทางการแพทย์','สำนักคุณภาพและความปลอดภัยอาหาร','สำนักเครื่องสำอางและวัตถุอันตราย','สำนักรังสีและเครื่องมือแพทย์','สำนักมาตรฐานห้องปฏิบัติการ','สำนักยาและวัตถุเสพติด','ศูนย์รวมบริการ','ศูนย์เทคโนโลยีสารสนเทศและการสื่อสาร','กองความร่วมมือระหว่างประเทศ','กองบริหารทรัพยากรบุคคล','กองบริหารการคลัง','กองประชาสัมพันธ์และสื่อสารสาธารณะ','ศูนย์ตอบโต้เหตุฉุกเฉินด้านห้องปฏิบัติการและรังสี','ศูนย์วิทยาศาสตร์การแพทย์ที่ 1 เชียงใหม่','ศูนย์วิทยาศาสตร์การแพทย์ที่ 1/1 เชียงราย','ศูนย์วิทยาศาสตร์การแพทย์ที่ 2 พิษณุโลก','ศูนย์วิทยาศาสตร์การแพทย์ที่ 3 นครสวรรค์','ศูนย์วิทยาศาสตร์การแพทย์ที่ 4 สระบุรี','ศูนย์วิทยาศาสตร์การแพทย์ที่ 5 สมุทรสงคราม','ศูนย์วิทยาศาสตร์การแพทย์ที่ 6 ชลบุรี','ศูนย์วิทยาศาสตร์การแพทย์ที่ 7 ขอนแก่น','ศูนย์วิทยาศาสตร์การแพทย์ที่ 8 อุดรธานี','ศูนย์วิทยาศาสตร์การแพทย์ที่ 9 นครราชสีมา','ศูนย์วิทยาศาสตร์การแพทย์ที่ 10 อุบลราชธานี','ศูนย์วิทยาศาสตร์การแพทย์ที่ 11 สุราษฎร์ธานี','ศูนย์วิทยาศาสตร์การแพทย์ที่ 11/1 ภูเก็ต','ศูนย์วิทยาศาสตร์การแพทย์ที่ 12 สงขลา','ศูนย์วิทยาศาสตร์การแพทย์ที่ 12/1 ตรัง'];
+const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2eHl0bmpmeWVwcWhia21cam1zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0MzE2NDAsImV4cCI6MjA5NTAwNzY0MH0.RAr_ehb4cxfNliDR0h5XcihUaP-0ltZTTGIAv2Fw1kk";
+
+// ไม่รวม อธิบดี และ รองอธิบดี
+const DEPTS = [
+  'สำนักผู้ทรงคุณวุฒิกรมวิทยาศาสตร์การแพทย์','กองแผนงานและวิชาการ','กองทดสอบความชำนาญ',
+  'กลุ่มพัฒนาระบบบริหาร','กลุ่มตรวจสอบภายใน','กลุ่มงานจริยธรรม','สำนักงานเลขานุการกรม',
+  'สถาบันชีววัตถุ','สถาบันวิจัยวิทยาศาสตร์สาธารณสุข','สถาบันวิจัยสมุนไพร',
+  'สถาบันชีววิทยาศาสตร์ทางการแพทย์','สำนักคุณภาพและความปลอดภัยอาหาร',
+  'สำนักเครื่องสำอางและวัตถุอันตราย','สำนักรังสีและเครื่องมือแพทย์',
+  'สำนักมาตรฐานห้องปฏิบัติการ','สำนักยาและวัตถุเสพติด','ศูนย์รวมบริการ',
+  'ศูนย์เทคโนโลยีสารสนเทศและการสื่อสาร','กองความร่วมมือระหว่างประเทศ',
+  'กองบริหารทรัพยากรบุคคล','กองบริหารการคลัง','กองประชาสัมพันธ์และสื่อสารสาธารณะ',
+  'ศูนย์ตอบโต้เหตุฉุกเฉินด้านห้องปฏิบัติการและรังสี',
+  'ศูนย์วิทยาศาสตร์การแพทย์ที่ 1 เชียงใหม่','ศูนย์วิทยาศาสตร์การแพทย์ที่ 1/1 เชียงราย',
+  'ศูนย์วิทยาศาสตร์การแพทย์ที่ 2 พิษณุโลก','ศูนย์วิทยาศาสตร์การแพทย์ที่ 3 นครสวรรค์',
+  'ศูนย์วิทยาศาสตร์การแพทย์ที่ 4 สระบุรี','ศูนย์วิทยาศาสตร์การแพทย์ที่ 5 สมุทรสงคราม',
+  'ศูนย์วิทยาศาสตร์การแพทย์ที่ 6 ชลบุรี','ศูนย์วิทยาศาสตร์การแพทย์ที่ 7 ขอนแก่น',
+  'ศูนย์วิทยาศาสตร์การแพทย์ที่ 8 อุดรธานี','ศูนย์วิทยาศาสตร์การแพทย์ที่ 9 นครราชสีมา',
+  'ศูนย์วิทยาศาสตร์การแพทย์ที่ 10 อุบลราชธานี','ศูนย์วิทยาศาสตร์การแพทย์ที่ 11 สุราษฎร์ธานี',
+  'ศูนย์วิทยาศาสตร์การแพทย์ที่ 11/1 ภูเก็ต','ศูนย์วิทยาศาสตร์การแพทย์ที่ 12 สงขลา',
+  'ศูนย์วิทยาศาสตร์การแพทย์ที่ 12/1 ตรัง'
+];
+const SHOW_FIRST = 10; // โชว์ 10 อันดับแรกก่อน
+let isExpanded = false;
 
 async function fetchAll(path) {
   let res=[], from=0;
@@ -167,9 +198,7 @@ async function fetchAll(path) {
     const r=await fetch(SUPABASE_URL+path,{headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Range-Unit':'items','Range':`${from}-${from+999}`,'Prefer':'count=exact'}});
     const d=await r.json();
     if(!Array.isArray(d)||d.length===0) break;
-    res=res.concat(d);
-    if(d.length<1000) break;
-    from+=1000;
+    res=res.concat(d); if(d.length<1000) break; from+=1000;
   }
   return res;
 }
@@ -177,64 +206,93 @@ async function fetchAll(path) {
 async function loadData() {
   try {
     const checkins = await fetchAll('/rest/v1/checkins?select=day,participants(dept,internal_external)&order=checkin_time.desc');
+    const total=checkins.length;
+    const d1=checkins.filter(r=>r.day===1).length;
+    const d2=checkins.filter(r=>r.day===2).length;
+    const d3=checkins.filter(r=>r.day===3).length;
 
-    const total = checkins.length;
-    const d1 = checkins.filter(r=>r.day===1).length;
-    const d2 = checkins.filter(r=>r.day===2).length;
-    const d3 = checkins.filter(r=>r.day===3).length;
-    const max = Math.max(d1,d2,d3,1);
+    document.getElementById('pTotal').textContent=total.toLocaleString();
+    document.getElementById('pD1').textContent=d1.toLocaleString();
+    document.getElementById('pD2').textContent=d2.toLocaleString();
+    document.getElementById('pD3').textContent=d3.toLocaleString();
+    document.getElementById('pD1s').textContent=`${total?Math.round(d1/total*100):0}% ของผู้เข้าร่วมทั้งหมด`;
+    document.getElementById('pD2s').textContent=`${total?Math.round(d2/total*100):0}% ของผู้เข้าร่วมทั้งหมด`;
+    document.getElementById('pD3s').textContent=`${total?Math.round(d3/total*100):0}% ของผู้เข้าร่วมทั้งหมด`;
 
-    document.getElementById('pTotal').textContent = total.toLocaleString();
-    document.getElementById('pD1').textContent = d1.toLocaleString();
-    document.getElementById('pD2').textContent = d2.toLocaleString();
-    document.getElementById('pD3').textContent = d3.toLocaleString();
-    document.getElementById('pD1s').textContent = `${total?Math.round(d1/total*100):0}% ของผู้เข้าร่วมทั้งหมด`;
-    document.getElementById('pD2s').textContent = `${total?Math.round(d2/total*100):0}% ของผู้เข้าร่วมทั้งหมด`;
-    document.getElementById('pD3s').textContent = `${total?Math.round(d3/total*100):0}% ของผู้เข้าร่วมทั้งหมด`;
-
-    // Progress bars
     [1,2,3].forEach(d=>{
-      const cnt = checkins.filter(r=>r.day===d).length;
-      const pct = total ? Math.round(cnt/total*100) : 0;
-      document.getElementById(`pg${d}`).textContent = `${pct}%`;
-      setTimeout(()=>{ document.getElementById(`pf${d}`).style.width = pct+'%'; }, 200);
+      const cnt=checkins.filter(r=>r.day===d).length;
+      const pct=total?Math.round(cnt/total*100):0;
+      document.getElementById(`pg${d}`).textContent=`${pct}%`;
+      setTimeout(()=>{document.getElementById(`pf${d}`).style.width=pct+'%';},200);
     });
 
-    // Dept stats (เฉพาะหน่วยงานภายใน)
-    const deptCount = {};
+    // Dept stats เฉพาะ 38 หน่วยงาน (ไม่รวม อธิบดี/รองอธิบดี)
+    const deptSet = new Set(DEPTS);
+    const deptCount={};
     DEPTS.forEach(d=>deptCount[d]=0);
     checkins.forEach(r=>{
-      const p = r.participants;
-      if(p && (p.internal_external||'').includes('ภายใน') && deptCount[p.dept]!==undefined){
+      const p=r.participants;
+      if(p&&(p.internal_external||'').includes('ภายใน')&&deptSet.has(p.dept)){
         deptCount[p.dept]++;
       }
     });
 
-    const sorted = DEPTS
-      .map(d=>({name:d, count:deptCount[d]}))
+    const sorted=DEPTS.map(d=>({name:d,count:deptCount[d]}))
       .filter(d=>d.count>0)
       .sort((a,b)=>b.count-a.count);
 
-    const maxDept = sorted.length > 0 ? sorted[0].count : 1;
-    document.getElementById('deptBody').innerHTML = sorted.length === 0
-      ? '<tr><td colspan="4" style="text-align:center;padding:30px;color:#94a3b8;">ยังไม่มีข้อมูล</td></tr>'
-      : sorted.map((d,i)=>`<tr>
-          <td class="rank">${i+1}</td>
-          <td class="dept-name">${d.name}</td>
-          <td class="count-num">${d.count}</td>
-          <td><div class="mini-bar"><div class="mini-fill" style="width:${Math.round(d.count/maxDept*100)}%"></div></div></td>
-        </tr>`).join('');
+    const maxDept=sorted.length>0?sorted[0].count:1;
+    renderDeptTable(sorted, maxDept);
 
-    document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString('th-TH',{timeZone:'Asia/Bangkok'});
+    document.getElementById('lastUpdate').textContent=new Date().toLocaleTimeString('th-TH',{timeZone:'Asia/Bangkok'});
     document.getElementById('loadingArea').style.display='none';
     document.getElementById('contentArea').style.display='';
   } catch(e) {
-    document.getElementById('loadingArea').textContent = 'ไม่สามารถโหลดข้อมูลได้ กรุณารีเฟรชหน้า';
+    document.getElementById('loadingArea').textContent='ไม่สามารถโหลดข้อมูลได้ กรุณารีเฟรชหน้า';
   }
 }
 
+function renderDeptTable(sorted, maxDept) {
+  if(sorted.length===0){
+    document.getElementById('deptBody').innerHTML='<tr><td colspan="4" style="text-align:center;padding:30px;color:#94a3b8;">ยังไม่มีข้อมูล</td></tr>';
+    return;
+  }
+
+  const rows = sorted.map((d,i)=>{
+    const isHidden = i >= SHOW_FIRST && !isExpanded;
+    return `<tr class="${isHidden?'hidden-row':''}" data-idx="${i}">
+      <td class="rank">${i+1}</td>
+      <td class="dept-name">${d.name}</td>
+      <td class="count-num">${d.count}</td>
+      <td><div class="mini-bar"><div class="mini-fill" style="width:${Math.round(d.count/maxDept*100)}%"></div></div></td>
+    </tr>`;
+  }).join('');
+
+  const collapseBtn = sorted.length > SHOW_FIRST
+    ? `<tr class="collapse-row">
+        <td colspan="4">
+          <button class="collapse-btn" onclick="toggleExpand()">
+            ${isExpanded ? 'แสดงน้อยลง' : `แสดงทั้งหมด ${sorted.length} หน่วยงาน`}
+          </button>
+        </td>
+       </tr>`
+    : '';
+
+  document.getElementById('deptBody').innerHTML = rows + collapseBtn;
+}
+
+function toggleExpand() {
+  isExpanded = !isExpanded;
+  document.querySelectorAll('#deptBody tr[data-idx]').forEach(tr=>{
+    const idx = parseInt(tr.getAttribute('data-idx'));
+    tr.classList.toggle('hidden-row', idx >= SHOW_FIRST && !isExpanded);
+  });
+  const btn = document.querySelector('.collapse-btn');
+  if(btn) btn.textContent = isExpanded ? 'แสดงน้อยลง' : `แสดงทั้งหมด`;
+}
+
 loadData();
-setInterval(loadData, 60000); // refresh ทุก 1 นาที
+setInterval(loadData, 60000);
 </script>
 </body>
 </html>
