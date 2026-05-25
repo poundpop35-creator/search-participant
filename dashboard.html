@@ -139,11 +139,12 @@
   <!-- STATS -->
   <div class="stats-grid">
     <div class="stat-card"><div class="stat-label">แสดงผลอยู่</div><div class="stat-num" id="sFiltered">-</div><div class="stat-sub">รายการ (ตาม filter)</div></div>
-    <div class="stat-card day1"><div class="stat-label">📅 24 มิ.ย.</div><div class="stat-num" id="sD1">-</div><div class="stat-sub" id="sD1p">-</div></div>
-    <div class="stat-card day2"><div class="stat-label">📅 25 มิ.ย.</div><div class="stat-num" id="sD2">-</div><div class="stat-sub" id="sD2p">-</div></div>
-    <div class="stat-card day3"><div class="stat-label">📅 26 มิ.ย.</div><div class="stat-num" id="sD3">-</div><div class="stat-sub" id="sD3p">-</div></div>
-    <div class="stat-card internal"><div class="stat-label">🏢 ภายใน</div><div class="stat-num" id="sInt">-</div><div class="stat-sub">คน (ใน filter)</div></div>
-    <div class="stat-card external"><div class="stat-label">🌐 ภายนอก</div><div class="stat-num" id="sExt">-</div><div class="stat-sub">คน (ใน filter)</div></div>
+    <div class="stat-card day1"><div class="stat-label">วันที่ 1 — 24 มิ.ย.</div><div class="stat-num" id="sD1">-</div><div class="stat-sub" id="sD1p">-</div></div>
+    <div class="stat-card day2"><div class="stat-label">วันที่ 2 — 25 มิ.ย.</div><div class="stat-num" id="sD2">-</div><div class="stat-sub" id="sD2p">-</div></div>
+    <div class="stat-card day3"><div class="stat-label">วันที่ 3 — 26 มิ.ย.</div><div class="stat-num" id="sD3">-</div><div class="stat-sub" id="sD3p">-</div></div>
+    <div class="stat-card internal"><div class="stat-label">บุคลากรภายใน</div><div class="stat-num" id="sInt">-</div><div class="stat-sub">คน (ใน filter)</div></div>
+    <div class="stat-card external"><div class="stat-label">บุคคลภายนอก</div><div class="stat-num" id="sExt">-</div><div class="stat-sub">คน (ใน filter)</div></div>
+    <div class="stat-card" style="border-left:4px solid #7c3aed;"><div class="stat-label">Walk-in</div><div class="stat-num" id="sWalkin" style="color:#7c3aed;">-</div><div class="stat-sub" id="sWalkinSub">คน (เช็คอินแล้ว)</div></div>
   </div>
 
   <!-- FILTER BAR -->
@@ -326,7 +327,7 @@ async function loadAll(){
   document.getElementById('tBody').innerHTML='<tr><td colspan="8" class="loading-td">กำลังโหลด...</td></tr>';
   document.getElementById('dBody').innerHTML='<tr><td colspan="5" style="text-align:center;padding:30px;color:#94a3b8;">กำลังโหลด...</td></tr>';
 
-  const rows=await fetchAll('/rest/v1/checkins?select=id,day,checkin_time,participants(prefix,first_name,last_name,tag,dept,ext_dept,internal_external,participation_type,items)&order=checkin_time.desc');
+  const rows=await fetchAll('/rest/v1/checkins?select=id,day,checkin_time,participants(prefix,first_name,last_name,tag,dept,ext_dept,internal_external,participation_type,items,is_walkin)&order=checkin_time.desc');
 
   allData=rows.map(r=>{
     const p=r.participants||{};
@@ -335,7 +336,7 @@ async function loadAll(){
     return{id:r.id,day:r.day,time:r.checkin_time,
       name:`${p.prefix||''} ${p.first_name||''} ${p.last_name||''}`.trim(),
       dept,isIn,tag:p.tag||'-',items:p.items||'-',
-      pt:p.participation_type||'-'};
+      pt:p.participation_type||'-',isWalkin:p.is_walkin===true};
   });
   deptRaw=[...allData];
 
@@ -481,6 +482,9 @@ function applyFilters(){
   });
   document.getElementById('sInt').textContent=filtered.filter(r=>r.isIn).length.toLocaleString();
   document.getElementById('sExt').textContent=filtered.filter(r=>!r.isIn).length.toLocaleString();
+  const walkinCount=allData.filter(r=>r.isWalkin).length;
+  document.getElementById('sWalkin').textContent=walkinCount.toLocaleString();
+  document.getElementById('sWalkinSub').textContent=`ราย (เช็คอินแล้ว ทั้งหมด)`;
   document.getElementById('tCount').textContent=`(${tot.toLocaleString()} รายการ)`;
   renderTable();
 }
