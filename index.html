@@ -85,15 +85,15 @@
 
 <div class="header">
   <h1>ระบบสแกนเช็คอินหน้างาน</h1>
-  <p>กรมวิทยาศาสตร์การแพทย์</p>
+  <p>กรมวิทยาศาสตร์การแพทย์ | <span id="userDisplay"></span></p>
 </div>
 
 <div class="card">
   <div class="row-label">เลือกวันที่สแกน</div>
   <select class="day-select" id="day" onchange="loadTodayCount()">
-    <option value="1">วันที่ 1 — 24 มิถุนายน 2569</option>
-    <option value="2">วันที่ 2 — 25 มิถุนายน 2569</option>
-    <option value="3">วันที่ 3 — 26 มิถุนายน 2569</option>
+    <option value="1">วันที่ 1 — 24 มิถุนายน 2568</option>
+    <option value="2">วันที่ 2 — 25 มิถุนายน 2568</option>
+    <option value="3">วันที่ 3 — 26 มิถุนายน 2568</option>
   </select>
 
   <div class="row-label">เลือกวิธีสแกน</div>
@@ -143,8 +143,15 @@
 
 <script>
   const SUPABASE_URL  = "https://gvxytnjfyepqhbkmcjms.supabase.co";
-  const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2eHl0bmpmeWVwcWhia21jam1zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0MzE2NDAsImV4cCI6MjA5NTAwNzY0MH0.RAr_ehb4cxfNliDR0h5XcihUaP-0ltZTTGIAv2Fw1kk";
+  const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2eHl0bmpmeWVwcWhia21cam1zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0MzE2NDAsImV4cCI6MjA5NTAwNzY0MH0.RAr_ehb4cxfNliDR0h5XcihUaP-0ltZTTGIAv2Fw1kk";
   const DAY_TH = {1:'24 มิถุนายน 2569', 2:'25 มิถุนายน 2569', 3:'26 มิถุนายน 2569'};
+
+  // Auth check
+  if (sessionStorage.getItem('dmsc_auth') !== 'ok') {
+    window.location.href = 'login.html';
+  }
+  const user = sessionStorage.getItem('dmsc_user') || '';
+  document.getElementById('userDisplay').textContent = user;
 
   let isProcessing=false, todayCount=0, qrCode=null;
   let currentMode='camera', scanBuffer='', scanTimer=null;
@@ -218,30 +225,22 @@
   }
 
   async function onScanSuccess(decodedText) {
-  if(isProcessing) return;
-  isProcessing=true;
-  if(currentMode==='camera'){try{qrCode.pause();}catch(e){}}
-  const day=document.getElementById('day').value;
-  setStatus('กำลังค้นหา...');
-  showModal('loading','กำลังดำเนินการ','กำลังบันทึกข้อมูล','',null);
+    if(isProcessing) return;
+    isProcessing=true;
+    if(currentMode==='camera'){try{qrCode.pause();}catch(e){}}
+    const day=document.getElementById('day').value;
+    setStatus('กำลังค้นหา...');
+    showModal('loading','กำลังดำเนินการ','กำลังบันทึกข้อมูล','',null);
 
-  try {
-    const keyword=decodedText.trim();
-    const searchRes=await sbFetch(`/rest/v1/participants?or=(id_card.eq.${encodeURIComponent(keyword)},passport.eq.${encodeURIComponent(keyword)})&select=id,prefix,first_name,last_name,tag,items,is_walkin`,'GET');
-    
-    // 1. เพิ่มการเช็ค API Error ตรงนี้
-    if (!searchRes.ok) {
-      const err = await searchRes.json().catch(()=>({}));
-      showModal('error', 'ข้อผิดพลาดจากฐานข้อมูล', err.message || 'ไม่สามารถค้นหาข้อมูลได้', '', null);
-      return;
-    }
+    try {
+      const keyword=decodedText.trim();
+      const searchRes=await sbFetch(`/rest/v1/participants?or=(id_card.eq.${encodeURIComponent(keyword)},passport.eq.${encodeURIComponent(keyword)})&select=id,prefix,first_name,last_name,tag,items,is_walkin`,'GET');
+      const participants=await searchRes.json();
 
-    const participants=await searchRes.json();
-
-    if(!participants||participants.length===0){
-      showModal('error','ไม่พบข้อมูล','ไม่พบรหัสนี้ในระบบ','',null);
-      return;
-    }
+      if(!participants||participants.length===0){
+        showModal('error','ไม่พบข้อมูล','ไม่พบรหัสนี้ในระบบ','',null);
+        return;
+      }
 
       const p=participants[0];
       const fullName=`${p.prefix||''} ${p.first_name||''} ${p.last_name||''}`.trim();

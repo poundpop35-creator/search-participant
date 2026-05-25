@@ -110,12 +110,19 @@
 </head>
 <body>
 
+<script>
+// Auth check — ต้อง login ก่อน
+if (sessionStorage.getItem('dmsc_auth') !== 'ok') {
+  window.location.href = 'login.html';
+}
+</script>
+
 <!-- Clear modal -->
 <div class="clear-overlay hidden" id="clearOverlay">
   <div class="clear-modal">
     <div class="clear-icon">🗑️</div>
     <h3>ล้างข้อมูลเช็คอินทั้งหมด</h3>
-    <p>การล้างข้อมูลจะ<strong>ลบประวัติเช็คอินทั้งหมด</strong>ออกจากระบบถาวร<br>ข้อมูลผู้ลงทะเบียนจะยังคงอยู่ครับ</p>
+    <p>การล้างข้อมูลจะ<strong>ลบประวัติเช็คอินทั้งหมด</strong>ออกจากระบบถาวร<br>ข้อมูลผู้ลงทะเบียนจะยังคงอยู่</p>
     <input class="clear-pw-input" type="password" id="clearPwInput" placeholder="ใส่รหัสผ่าน" onkeydown="if(event.key==='Enter')confirmClear()">
     <div class="clear-err" id="clearErr"></div>
     <div class="clear-actions">
@@ -126,11 +133,18 @@
 </div>
 
 <div class="topbar">
-  <h1>📊 Dashboard เช็คอิน — กรมวิทยาศาสตร์การแพทย์</h1>
-  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+  <h1>Dashboard เช็คอิน — กรมวิทยาศาสตร์การแพทย์</h1>
+  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
     <span class="last-update" id="lastUpdate">-</span>
-    <button class="refresh-btn" onclick="loadAll()">🔄 รีเฟรช</button>
-    <button class="clear-btn" onclick="openClearModal()">🗑️ ล้างข้อมูล</button>
+    <select id="autoRefreshSel" onchange="setAutoRefresh()" style="padding:6px 10px;border-radius:8px;border:1.5px solid rgba(255,255,255,0.3);background:transparent;color:white;font-family:'Sarabun',sans-serif;font-size:0.82rem;cursor:pointer;">
+      <option value="0">ไม่ auto-refresh</option>
+      <option value="30">ทุก 30 วินาที</option>
+      <option value="60" selected>ทุก 1 นาที</option>
+      <option value="300">ทุก 5 นาที</option>
+    </select>
+    <button class="refresh-btn" onclick="loadAll()">รีเฟรช</button>
+    <button class="clear-btn" onclick="openClearModal()">ล้างข้อมูล</button>
+    <button class="refresh-btn" onclick="doLogout()" style="border-color:rgba(252,165,165,0.5);color:#fca5a5;">ออกจากระบบ</button>
   </div>
 </div>
 
@@ -735,7 +749,20 @@ function getRows(){
 
 loadAll();
 
-// ===== CLEAR DATA =====
+// Auto-refresh
+let _refreshTimer = null;
+function setAutoRefresh() {
+  clearInterval(_refreshTimer);
+  const sec = parseInt(document.getElementById('autoRefreshSel').value);
+  if (sec > 0) _refreshTimer = setInterval(loadAll, sec * 1000);
+}
+setAutoRefresh(); // เริ่มทันที (default 1 นาที)
+
+function doLogout() {
+  sessionStorage.removeItem('dmsc_auth');
+  sessionStorage.removeItem('dmsc_user');
+  window.location.href = 'login.html';
+}
 const CLEAR_PASS = "P@und3142";
 
 function openClearModal() {
