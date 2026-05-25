@@ -218,22 +218,30 @@
   }
 
   async function onScanSuccess(decodedText) {
-    if(isProcessing) return;
-    isProcessing=true;
-    if(currentMode==='camera'){try{qrCode.pause();}catch(e){}}
-    const day=document.getElementById('day').value;
-    setStatus('กำลังค้นหา...');
-    showModal('loading','กำลังดำเนินการ','กำลังบันทึกข้อมูล','',null);
+  if(isProcessing) return;
+  isProcessing=true;
+  if(currentMode==='camera'){try{qrCode.pause();}catch(e){}}
+  const day=document.getElementById('day').value;
+  setStatus('กำลังค้นหา...');
+  showModal('loading','กำลังดำเนินการ','กำลังบันทึกข้อมูล','',null);
 
-    try {
-      const keyword=decodedText.trim();
-      const searchRes=await sbFetch(`/rest/v1/participants?or=(id_card.eq.${encodeURIComponent(keyword)},passport.eq.${encodeURIComponent(keyword)})&select=id,prefix,first_name,last_name,tag,items,is_walkin`,'GET');
-      const participants=await searchRes.json();
+  try {
+    const keyword=decodedText.trim();
+    const searchRes=await sbFetch(`/rest/v1/participants?or=(id_card.eq.${encodeURIComponent(keyword)},passport.eq.${encodeURIComponent(keyword)})&select=id,prefix,first_name,last_name,tag,items,is_walkin`,'GET');
+    
+    // 1. เพิ่มการเช็ค API Error ตรงนี้
+    if (!searchRes.ok) {
+      const err = await searchRes.json().catch(()=>({}));
+      showModal('error', 'ข้อผิดพลาดจากฐานข้อมูล', err.message || 'ไม่สามารถค้นหาข้อมูลได้', '', null);
+      return;
+    }
 
-      if(!participants||participants.length===0){
-        showModal('error','ไม่พบข้อมูล','ไม่พบรหัสนี้ในระบบ','',null);
-        return;
-      }
+    const participants=await searchRes.json();
+
+    if(!participants||participants.length===0){
+      showModal('error','ไม่พบข้อมูล','ไม่พบรหัสนี้ในระบบ','',null);
+      return;
+    }
 
       const p=participants[0];
       const fullName=`${p.prefix||''} ${p.first_name||''} ${p.last_name||''}`.trim();
