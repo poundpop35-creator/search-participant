@@ -55,15 +55,15 @@
 </div>
 <script>
 const USERS={'staff01':'Dmsc@2569','staff02':'Dmsc@2569','staff03':'Dmsc@2569','staff04':'Dmsc@2569','staff05':'Dmsc@2569','staff06':'Dmsc@2569','staff07':'Dmsc@2569','staff08':'Dmsc@2569','staff09':'Dmsc@2569','staff10':'Dmsc@2569'};
-if(sessionStorage.getItem('dmsc_auth')==='ok') window.location.href='index.html';
+if(localStorage.getItem('dmsc_auth')==='ok') window.location.href='index.html';
 function doLogin(){
   const u=document.getElementById('username').value.trim().toLowerCase();
   const p=document.getElementById('password').value;
   const err=document.getElementById('errMsg');
   if(!u||!p){err.textContent='กรุณากรอกชื่อผู้ใช้และรหัสผ่าน';return;}
   if(USERS[u]&&USERS[u]===p){
-    sessionStorage.setItem('dmsc_auth','ok');
-    sessionStorage.setItem('dmsc_user',u);
+    localStorage.setItem('dmsc_auth','ok');
+    localStorage.setItem('dmsc_user',u);
     window.location.href='index.html';
   } else {
     err.textContent='ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง';
