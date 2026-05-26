@@ -134,6 +134,7 @@
   <div class="counter-sub" id="counterSub">กำลังโหลด...</div>
 
   <a class="btn-nav primary" href="dashboard.html">ไปหน้า Dashboard</a>
+  <a class="btn-nav secondary" href="bag-dashboard.html">Dashboard กระเป๋า</a>
   <a class="btn-nav secondary" href="public.html">ดู Live Dashboard (สาธารณะ)</a>
   <button class="btn-nav secondary" onclick="doLogout()">ออกจากระบบ</button>
 
@@ -158,11 +159,8 @@
 
   function onDayChange(){
     const val=document.getElementById('day').value;
-    if(val==='bag'){
-      window.location.href='bag.html';
-    } else {
-      loadTodayCount();
-    }
+    if(val==='bag') window.location.href='bag.html';
+    else loadTodayCount();
   }
 
   async function loadTodayCount(){
@@ -242,16 +240,9 @@
     try{
       const keyword=decodedText.trim();
       const searchRes=await sbFetch(`/rest/v1/participants?or=(id_card.eq.${encodeURIComponent(keyword)},passport.eq.${encodeURIComponent(keyword)})&select=id,prefix,first_name,last_name,tag,items,is_walkin,bag_received`,'GET');
-      if(!searchRes.ok){
-        const err=await searchRes.json().catch(()=>({}));
-        showModal('error','ข้อผิดพลาด',err.message||'ไม่สามารถค้นหาข้อมูลได้','',null);
-        return;
-      }
+      if(!searchRes.ok){showModal('error','ข้อผิดพลาด','ไม่สามารถค้นหาข้อมูลได้','',null);return;}
       const participants=await searchRes.json();
-      if(!participants||participants.length===0){
-        showModal('error','ไม่พบข้อมูล','ไม่พบรหัสนี้ในระบบ','',null);
-        return;
-      }
+      if(!participants||participants.length===0){showModal('error','ไม่พบข้อมูล','ไม่พบรหัสนี้ในระบบ','',null);return;}
       const p=participants[0];
       const fullName=`${p.prefix||''} ${p.first_name||''} ${p.last_name||''}`.trim();
       const isWalkin=p.is_walkin===true;
