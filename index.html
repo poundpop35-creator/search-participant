@@ -10,7 +10,7 @@
     :root{--blue:#0d2b6b;--blue-light:#e8f0fe;--green:#16a34a;--yellow:#d97706;--red:#dc2626;--white:#fff;--shadow:0 4px 24px rgba(13,43,107,0.13);}
     *{box-sizing:border-box;margin:0;padding:0;}
     body{background:linear-gradient(160deg,#e8f0fe 0%,#f0f4ff 60%,#e0e8ff 100%);font-family:'Sarabun',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:0 0 32px;}
-    .header{width:100%;background:#416f76; color:white;text-align:center;padding:16px 16px 12px;margin-bottom:20px;}
+    .header{width:100%;background:#3b82f6;color:white;text-align:center;padding:16px 16px 12px;margin-bottom:20px;}
     .header h1{font-size:1.05rem;font-weight:700;}
     .header p{font-size:0.78rem;opacity:0.7;margin-top:2px;}
     .card{background:var(--white);border-radius:20px;box-shadow:var(--shadow);padding:20px;width:calc(100% - 32px);max-width:440px;}
@@ -93,10 +93,11 @@
 
 <div class="card">
   <div class="row-label">เลือกวันที่สแกน</div>
-  <select class="day-select" id="day" onchange="loadTodayCount()">
+  <select class="day-select" id="day" onchange="onDayChange()">
     <option value="1">วันที่ 1 — 24 มิถุนายน 2569</option>
     <option value="2">วันที่ 2 — 25 มิถุนายน 2569</option>
     <option value="3">วันที่ 3 — 26 มิถุนายน 2569</option>
+    <option value="bag">รับกระเป๋า — 10 มิถุนายน 2569</option>
   </select>
 
   <div class="row-label">เลือกวิธีสแกน</div>
@@ -126,14 +127,13 @@
   </div>
 
   <div class="counter">
-    <span>เช็คอินสำเร็จวันนี้</span>
+    <span id="counterLabel">เช็คอินสำเร็จวันนี้</span>
     <strong id="count">—</strong>
     <span>ราย</span>
   </div>
   <div class="counter-sub" id="counterSub">กำลังโหลด...</div>
 
   <a class="btn-nav primary" href="dashboard.html">ไปหน้า Dashboard</a>
-  <a class="btn-nav primary" href="bag.html" style="background:#16a34a;">หน้าสแกนรับกระเป๋า</a>
   <a class="btn-nav secondary" href="public.html">ดู Live Dashboard (สาธารณะ)</a>
   <button class="btn-nav secondary" onclick="doLogout()">ออกจากระบบ</button>
 
@@ -145,29 +145,38 @@
 
 <script>
   const SB_URL  = "https://gvxytnjfyepqhbkmcjms.supabase.co";
-  const SB_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2eHl0bmpmeWVwcWhia21jam1zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0MzE2NDAsImV4cCI6MjA5NTAwNzY0MH0.RAr_ehb4cxfNliDR0h5XcihUaP-0ltZTTGIAv2Fw1kk";
+  const SB_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2eHl0bmpmeWVwcWhia21cam1zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0MzE2NDAsImV4cCI6MjA5NTAwNzY0MH0.RAr_ehb4cxfNliDR0h5XcihUaP-0ltZTTGIAv2Fw1kk";
   const DAY_TH  = {1:'24 มิถุนายน 2569',2:'25 มิถุนายน 2569',3:'26 มิถุนายน 2569'};
 
-  // Auth check
-  if(sessionStorage.getItem('dmsc_auth')!=='ok') window.location.href='login.html';
-  document.getElementById('userDisplay').textContent = sessionStorage.getItem('dmsc_user')||'';
+  if(localStorage.getItem('dmsc_auth')!=='ok') window.location.href='login.html';
+  document.getElementById('userDisplay').textContent=localStorage.getItem('dmsc_user')||'';
 
   let isProcessing=false, todayCount=0, qrCode=null;
   let currentMode='camera', scanBuffer='', scanTimer=null;
 
   window.addEventListener('load',()=>{ startCamera(); loadTodayCount(); });
 
+  function onDayChange(){
+    const val=document.getElementById('day').value;
+    if(val==='bag'){
+      window.location.href='bag.html';
+    } else {
+      loadTodayCount();
+    }
+  }
+
   async function loadTodayCount(){
     const day=document.getElementById('day').value;
+    if(day==='bag') return;
     document.getElementById('count').textContent='—';
     document.getElementById('counterSub').textContent='กำลังโหลด...';
+    document.getElementById('counterLabel').textContent='เช็คอินสำเร็จวันนี้';
     try{
       const res=await fetch(`${SB_URL}/rest/v1/checkins?day=eq.${day}&select=id`,
         {headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON,'Prefer':'count=exact','Range':'0-0'}});
       const range=res.headers.get('Content-Range');
       let count=0;
       if(range){const m=range.match(/\/(\d+)/);if(m)count=parseInt(m[1]);}
-      else{const d=await res.json();count=Array.isArray(d)?d.length:0;}
       todayCount=count;
       document.getElementById('count').textContent=count.toLocaleString();
       document.getElementById('counterSub').textContent='วันที่ '+DAY_TH[parseInt(day)];
@@ -193,7 +202,7 @@
     qrCode=new Html5Qrcode("reader");
     qrCode.start({facingMode:"environment"},{fps:12,qrbox:{width:230,height:230},aspectRatio:1.0},onScanSuccess,()=>{})
       .then(()=>setStatus('พร้อมสแกน'))
-      .catch(err=>{
+      .catch(()=>{
         c.innerHTML=`<div><div class="err-msg">ไม่สามารถเปิดกล้องได้</div><button class="retry-btn" onclick="startCamera()">ลองใหม่</button></div>`;
         setStatus('เปิดกล้องไม่ได้');
       });
@@ -227,6 +236,7 @@
     isProcessing=true;
     if(currentMode==='camera'){try{qrCode.pause();}catch(e){}}
     const day=document.getElementById('day').value;
+    if(day==='bag'){isProcessing=false;return;}
     setStatus('กำลังค้นหา...');
     showModal('loading','กำลังดำเนินการ','กำลังบันทึกข้อมูล','',null);
     try{
@@ -261,7 +271,7 @@
       const insertRes=await sbFetch('/rest/v1/checkins','POST',{
         participant_id:p.id, day:parseInt(day),
         checkin_time:new Date().toISOString(),
-        scanned_by:sessionStorage.getItem('dmsc_user')||'unknown'
+        scanned_by:localStorage.getItem('dmsc_user')||'unknown'
       });
 
       if(insertRes.ok||insertRes.status===201){
@@ -284,41 +294,25 @@
   }
 
   function buildSuccessRows(time,p,isFirst,isWalkin){
-    const bagDone = p.bag_received===true;
-    // แยก items ออกเป็น กระเป๋า และ อื่นๆ
-    const items = p.items||'';
-    const hasBag = items.includes('กระเป๋า');
-    const otherItems = items.replace('กระเป๋า','').replace(/^\+|\+$|^\+|\+$/g,'').replace('++','+').trim().replace(/^[+\-,]|[+\-,]$/g,'').trim();
-
-    const rows = [
+    const bagDone=p.bag_received===true;
+    const items=p.items||'';
+    const hasBag=items.includes('กระเป๋า');
+    const otherItems=items.replace('กระเป๋า','').replace(/\+\+/g,'+').replace(/^\+|\+$/g,'').trim();
+    const rows=[
       {label:'เวลา',val:time,style:'normal'},
       {label:'คูปองอาหาร',val:'รับได้เลย',style:'ok'},
     ];
-
     if(isWalkin){
       rows.push({label:'ของที่ระลึก',val:'(ไม่มี)',style:'normal'});
     } else if(isFirst){
-      if(hasBag){
-        rows.push({label:'กระเป๋า',val:bagDone?'รับไปแล้ว':'รับได้เลย',style:bagDone?'done':'ok'});
-      }
-      if(otherItems){
-        rows.push({label:'ของที่ระลึกอื่น',val:otherItems,style:'ok'});
-      }
-      if(!hasBag&&!otherItems){
-        rows.push({label:'ของที่ระลึก',val:p.items||'(ไม่มี)',style:'ok'});
-      }
+      if(hasBag) rows.push({label:'กระเป๋า',val:bagDone?'รับไปแล้ว':'รับได้เลย',style:bagDone?'done':'ok'});
+      if(otherItems) rows.push({label:'ของที่ระลึกอื่น',val:otherItems,style:'ok'});
+      if(!hasBag&&!otherItems) rows.push({label:'ของที่ระลึก',val:items||'(ไม่มี)',style:'ok'});
     } else {
-      if(hasBag){
-        rows.push({label:'กระเป๋า',val:bagDone?'รับไปแล้ว':'รับไปแล้ว',style:'done'});
-      }
-      if(otherItems){
-        rows.push({label:'ของที่ระลึกอื่น',val:'รับไปแล้ว',style:'done'});
-      }
-      if(!hasBag&&!otherItems){
-        rows.push({label:'ของที่ระลึก',val:'รับไปแล้ว',style:'done'});
-      }
+      if(hasBag) rows.push({label:'กระเป๋า',val:bagDone?'รับไปแล้ว':'รับไปแล้ว',style:'done'});
+      if(otherItems) rows.push({label:'ของที่ระลึกอื่น',val:'รับไปแล้ว',style:'done'});
+      if(!hasBag&&!otherItems) rows.push({label:'ของที่ระลึก',val:'รับไปแล้ว',style:'done'});
     }
-
     rows.push({label:'ประเภท',val:p.tag||'-',style:'normal'});
     if(isWalkin) rows.push({label:'หมายเหตุ',val:'Walk-in',style:'normal'});
     return rows;
@@ -365,7 +359,7 @@
   }
 
   function setStatus(t){document.getElementById('statusText').textContent=t;}
-  function doLogout(){sessionStorage.removeItem('dmsc_auth');sessionStorage.removeItem('dmsc_user');window.location.href='login.html';}
+  function doLogout(){localStorage.removeItem('dmsc_auth');localStorage.removeItem('dmsc_user');window.location.href='login.html';}
 </script>
 </body>
 </html>

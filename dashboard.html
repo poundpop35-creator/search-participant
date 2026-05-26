@@ -10,8 +10,8 @@
   <style>
     :root{--blue:#0d2b6b;--blue-mid:#1a4eb8;--blue-light:#e8f0fe;--green:#16a34a;--yellow:#d97706;--white:#fff;--border:#e2e8f0;--shadow:0 2px 12px rgba(13,43,107,0.10);}
     *{box-sizing:border-box;margin:0;padding:0;}
-     body{background:#e8edf5;font-family:'Sarabun',sans-serif;}
-    .topbar{background:#9eabbd ;color:white;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;position:sticky;top:0;z-index:50;}
+    body{background:#f0f4ff;font-family:'Sarabun',sans-serif;}
+    .topbar{background:var(--blue);color:white;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;position:sticky;top:0;z-index:50;}
     .topbar h1{font-size:1rem;font-weight:700;}
     .refresh-btn{padding:7px 16px;border-radius:8px;border:1.5px solid rgba(255,255,255,0.4);color:white;background:transparent;font-family:'Sarabun',sans-serif;font-size:0.85rem;cursor:pointer;}
     .refresh-btn:hover{background:rgba(255,255,255,0.1);}
@@ -136,22 +136,22 @@ if (sessionStorage.getItem('dmsc_auth') !== 'ok') {
   <div style="display:flex;align-items:center;gap:10px;">
     <img src="https://raw.githubusercontent.com/poundpop35-creator/search-participant/main/logo-%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B8%8A%E0%B8%B8%E0%B8%A1%E0%B8%A7%E0%B8%B4%E0%B8%8A%E0%B8%B2%E0%B8%81%E0%B8%B2%E0%B8%A3-34-Final_0.png" style="height:40px;object-fit:contain;" alt="conference">
     <img src="https://raw.githubusercontent.com/poundpop35-creator/search-participant/main/logo-DMSc-MOPH%20(1)%20(2)_0.png" style="height:40px;object-fit:contain;" alt="dmsc">
-    <!-- <img src="https://raw.githubusercontent.com/poundpop35-creator/search-participant/main/%E0%B8%AA%E0%B8%B3%E0%B9%80%E0%B8%99%E0%B8%B2%E0%B8%82%E0%B8%AD%E0%B8%87%20%E0%B9%82%E0%B8%A5%E0%B9%82%E0%B8%81%E0%B9%89.png" style="height:50px;object-fit:contain;border-radius:8px;" alt="DPTC"> -->
+    <img src="https://raw.githubusercontent.com/poundpop35-creator/search-participant/main/%E0%B8%AA%E0%B8%B3%E0%B9%80%E0%B8%99%E0%B8%B2%E0%B8%82%E0%B8%AD%E0%B8%87%20%E0%B9%82%E0%B8%A5%E0%B9%82%E0%B8%81%E0%B9%89.png" style="height:34px;object-fit:contain;border-radius:6px;" alt="dptc">
     <h1>Dashboard เช็คอิน — กรมวิทยาศาสตร์การแพทย์</h1>
   </div>
   <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
     <span class="last-update" id="lastUpdate">-</span>
-    <select id="autoRefreshSel" onchange="setAutoRefresh()" style="padding:6px 10px;border-radius:8px;border:1.5px solid rgba(255,255,255,0.3);background:white;color:#0d2b6b;font-family:'Sarabun',sans-serif;font-size:0.82rem;cursor:pointer;">
-      <option value="0" selected>ไม่ auto-refresh</option>
+    <select id="autoRefreshSel" onchange="setAutoRefresh()" style="padding:6px 10px;border-radius:8px;border:1.5px solid rgba(255,255,255,0.3);background:transparent;color:white;font-family:'Sarabun',sans-serif;font-size:0.82rem;cursor:pointer;">
+      <option value="0">ไม่ auto-refresh</option>
       <option value="30">ทุก 30 วินาที</option>
-      <option value="60">ทุก 1 นาที</option>
+      <option value="60" selected>ทุก 1 นาที</option>
       <option value="300">ทุก 5 นาที</option>
     </select>
     <button class="refresh-btn" onclick="loadAll()">รีเฟรช</button>
     <button class="clear-btn" onclick="openClearModal()">ล้างข้อมูล</button>
-    <a class="btn-nav secondary" href="bag-dashboard.html">ดู Dashboard กระเป๋า</a>
-    <a href="public.html" style="padding:7px 16px;border-radius:8px;border:1.5px solid rgba(255,255,255,0.4);color:white;background:transparent;font-family:'Sarabun',sans-serif;font-size:0.85rem;text-decoration:none;">Live Dashboard</a>
-<button class="refresh-btn" onclick="doLogout()" style="border-color:rgba(252,165,165,0.5);color:#fca5a5;">ออกจากระบบ</button>
+    <a href="bag-dashboard.html" class="refresh-btn" style="text-decoration:none;">Dashboard กระเป๋า</a>
+    <a href="public.html" class="refresh-btn" style="text-decoration:none;">Live Dashboard</a>
+    <button class="refresh-btn" onclick="doLogout()" style="border-color:rgba(252,165,165,0.5);color:#fca5a5;">ออกจากระบบ</button>
   </div>
 </div>
 
@@ -765,7 +765,7 @@ function setAutoRefresh() {
   const sec = parseInt(document.getElementById('autoRefreshSel').value);
   if (sec > 0) _refreshTimer = setInterval(loadAll, sec * 1000);
 }
-// setAutoRefresh(); // ปิด auto-refresh ตอนเริ่ม
+setAutoRefresh(); // เริ่มทันที (default 1 นาที)
 
 function doLogout() {
   sessionStorage.removeItem('dmsc_auth');
