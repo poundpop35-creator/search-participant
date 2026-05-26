@@ -10,7 +10,7 @@
     :root{--blue:#0d2b6b;--blue-light:#e8f0fe;--green:#16a34a;--yellow:#d97706;--red:#dc2626;--white:#fff;--shadow:0 4px 24px rgba(13,43,107,0.13);}
     *{box-sizing:border-box;margin:0;padding:0;}
     body{background:linear-gradient(160deg,#e8f0fe 0%,#f0f4ff 60%,#e0e8ff 100%);font-family:'Sarabun',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:0 0 32px;}
-    .header{width:100%;background:var(--blue);color:white;text-align:center;padding:16px 16px 12px;margin-bottom:20px;}
+    .header{width:100%;background:#3b82f6; color:white;text-align:center;padding:16px 16px 12px;margin-bottom:20px;}
     .header h1{font-size:1.05rem;font-weight:700;}
     .header p{font-size:0.78rem;opacity:0.7;margin-top:2px;}
     .card{background:var(--white);border-radius:20px;box-shadow:var(--shadow);padding:20px;width:calc(100% - 32px);max-width:440px;}
@@ -83,10 +83,9 @@
 </div>
 
 <div class="header">
-  <div style="display:flex;align-items:center;gap:8px;padding:4px 0 6px;flex-wrap:wrap;">
+  <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:8px;">
     <img src="https://raw.githubusercontent.com/poundpop35-creator/search-participant/main/logo-%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B8%8A%E0%B8%B8%E0%B8%A1%E0%B8%A7%E0%B8%B4%E0%B8%8A%E0%B8%B2%E0%B8%81%E0%B8%B2%E0%B8%A3-34-Final_0.png" style="height:44px;object-fit:contain;" alt="conference">
     <img src="https://raw.githubusercontent.com/poundpop35-creator/search-participant/main/logo-DMSc-MOPH%20(1)%20(2)_0.png" style="height:44px;object-fit:contain;" alt="dmsc">
-    <img src="https://raw.githubusercontent.com/poundpop35-creator/search-participant/main/%E0%B8%AA%E0%B8%B3%E0%B9%80%E0%B8%99%E0%B8%B2%E0%B8%82%E0%B8%AD%E0%B8%87%20%E0%B9%82%E0%B8%A5%E0%B9%82%E0%B8%81%E0%B9%89.png" style="height:38px;object-fit:contain;border-radius:6px;" alt="dptc">
   </div>
   <h1>ระบบสแกนเช็คอินหน้างาน</h1>
   <p>กรมวิทยาศาสตร์การแพทย์ | <span id="userDisplay"></span></p>
@@ -134,6 +133,7 @@
   <div class="counter-sub" id="counterSub">กำลังโหลด...</div>
 
   <a class="btn-nav primary" href="dashboard.html">ไปหน้า Dashboard</a>
+  <a class="btn-nav primary" href="bag.html" style="background:#16a34a;">หน้าสแกนรับกระเป๋า</a>
   <a class="btn-nav secondary" href="public.html">ดู Live Dashboard (สาธารณะ)</a>
   <button class="btn-nav secondary" onclick="doLogout()">ออกจากระบบ</button>
 
