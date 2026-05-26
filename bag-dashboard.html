@@ -169,7 +169,7 @@ async function loadAll(){
       res=res.concat(d); if(d.length<1000) break; from+=1000;
     }
 
-    allData = res.filter(p => p.is_walkin === false).map(p=>{
+    allData = res.filter(p => p.is_walkin !== true).map(p=>{
       const isIn=(p.internal_external||'').includes('ภายใน');
       const dept=isIn?(p.dept||'-'):(p.ext_dept||p.dept||'-');
       return{
