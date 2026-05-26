@@ -180,6 +180,11 @@ if (localStorage.getItem('dmsc_auth') !== 'ok') {
       <div class="stat-num" id="sWalkin" style="color:#7c3aed;">-</div>
       <div class="stat-sub" id="sWalkinSub">ราย (เช็คอินแล้ว)</div>
     </div>
+    <div class="stat-card" style="border-left:4px solid #f59e0b;">
+      <div class="stat-label">รับกระเป๋าแล้ว</div>
+      <div class="stat-num" id="sBagReceived" style="color:#f59e0b;">-</div>
+      <div class="stat-sub" id="sBagSub">- / - ราย</div>
+    </div>
   </div>
   <!-- แถวที่ 2: แยกวัน -->
   <div class="stats-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:20px;">
@@ -349,6 +354,44 @@ if (localStorage.getItem('dmsc_auth') !== 'ok') {
     <div id="dChartWrap" style="display:none;padding:16px;">
       <div style="position:relative;width:100%;" id="dCWrap">
         <canvas id="dChart" role="img" aria-label="แผนภูมิแท่งจำนวนผู้เข้าร่วมแต่ละหน่วยงาน"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- BAG TABLE -->
+  <div class="tcard">
+    <div class="thead-row">
+      <div>
+        <span class="ttitle">รายชื่อผู้มีสิทธิ์รับกระเป๋า</span>
+        <span class="tcount" id="bagCount"></span>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+        <select id="bagFilter" onchange="renderBagTable()" style="padding:8px 12px;border-radius:8px;border:1.5px solid #e2e8f0;font-family:'Sarabun',sans-serif;font-size:0.88rem;">
+          <option value="">ทั้งหมด</option>
+          <option value="received">รับแล้ว</option>
+          <option value="pending">ยังไม่รับ</option>
+        </select>
+        <input class="sbox" id="bagSearch" placeholder="🔍 ค้นหาชื่อ..." oninput="renderBagTable()">
+        <button class="btn-xl green" onclick="exportBagExcel()">⬇ Excel กระเป๋า</button>
+      </div>
+    </div>
+    <div style="overflow-x:auto;">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th><th>ชื่อ-นามสกุล</th><th>หน่วยงาน</th>
+            <th>ประเภทการเข้าร่วม</th><th>TAG</th>
+            <th>สถานะกระเป๋า</th><th>วันที่รับ</th>
+          </tr>
+        </thead>
+        <tbody id="bagBody"><tr><td colspan="7" class="loading-td">กำลังโหลด...</td></tr></tbody>
+      </table>
+    </div>
+    <div class="pager">
+      <span id="bagPInfo">-</span>
+      <div style="display:flex;gap:6px;">
+        <button class="pbtn" id="bagPrev" onclick="changeBagPage(-1)">← ก่อนหน้า</button>
+        <button class="pbtn" id="bagNext" onclick="changeBagPage(1)">ถัดไป →</button>
       </div>
     </div>
   </div>
@@ -757,15 +800,16 @@ function getRows(){
 }
 
 loadAll();
+loadBagData();
 
 // Auto-refresh
 let _refreshTimer = null;
 function setAutoRefresh() {
   clearInterval(_refreshTimer);
   const sec = parseInt(document.getElementById('autoRefreshSel').value);
-  if (sec > 0) _refreshTimer = setInterval(loadAll, sec * 1000);
+  if (sec > 0) _refreshTimer = setInterval(()=>{loadAll();loadBagData();}, sec * 1000);
 }
-setAutoRefresh(); // เริ่มทันที (default 1 นาที)
+setAutoRefresh();
 
 function doLogout() {
   localStorage.removeItem('dmsc_auth');

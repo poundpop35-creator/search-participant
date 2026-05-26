@@ -97,7 +97,7 @@
     <option value="1">วันที่ 1 — 24 มิถุนายน 2569</option>
     <option value="2">วันที่ 2 — 25 มิถุนายน 2569</option>
     <option value="3">วันที่ 3 — 26 มิถุนายน 2569</option>
-    <option value="bag">รับกระเป๋า — 10 มิถุนายน 2569</option>
+    <option value="bag">รับกระเป๋า</option>
   </select>
 
   <div class="row-label">เลือกวิธีสแกน</div>
@@ -129,12 +129,11 @@
   <div class="counter">
     <span id="counterLabel">เช็คอินสำเร็จวันนี้</span>
     <strong id="count">—</strong>
-    <span>ราย</span>
+    <span id="counterUnit">ราย</span>
   </div>
   <div class="counter-sub" id="counterSub">กำลังโหลด...</div>
 
   <a class="btn-nav primary" href="dashboard.html">ไปหน้า Dashboard</a>
-  <a class="btn-nav secondary" href="bag-dashboard.html">Dashboard กระเป๋า</a>
   <a class="btn-nav secondary" href="public.html">ดู Live Dashboard (สาธารณะ)</a>
   <button class="btn-nav secondary" onclick="doLogout()">ออกจากระบบ</button>
 
@@ -154,13 +153,21 @@
 
   let isProcessing=false, todayCount=0, qrCode=null;
   let currentMode='camera', scanBuffer='', scanTimer=null;
+  let isBagMode=false;
 
   window.addEventListener('load',()=>{ startCamera(); loadTodayCount(); });
 
   function onDayChange(){
     const val=document.getElementById('day').value;
-    if(val==='bag') window.location.href='bag.html';
-    else loadTodayCount();
+    isBagMode=(val==='bag');
+    if(isBagMode){
+      document.getElementById('counterLabel').textContent='รับกระเป๋าแล้ว';
+      document.getElementById('counterSub').textContent='';
+      loadBagCount();
+    } else {
+      document.getElementById('counterLabel').textContent='เช็คอินสำเร็จวันนี้';
+      loadTodayCount();
+    }
   }
 
   async function loadTodayCount(){
@@ -168,7 +175,6 @@
     if(day==='bag') return;
     document.getElementById('count').textContent='—';
     document.getElementById('counterSub').textContent='กำลังโหลด...';
-    document.getElementById('counterLabel').textContent='เช็คอินสำเร็จวันนี้';
     try{
       const res=await fetch(`${SB_URL}/rest/v1/checkins?day=eq.${day}&select=id`,
         {headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON,'Prefer':'count=exact','Range':'0-0'}});
@@ -181,6 +187,21 @@
     }catch(e){
       document.getElementById('count').textContent='?';
       document.getElementById('counterSub').textContent='โหลดไม่สำเร็จ';
+    }
+  }
+
+  async function loadBagCount(){
+    document.getElementById('count').textContent='—';
+    try{
+      const res=await fetch(`${SB_URL}/rest/v1/participants?bag_received=eq.true&select=id`,
+        {headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON,'Prefer':'count=exact','Range':'0-0'}});
+      const range=res.headers.get('Content-Range');
+      let count=0;
+      if(range){const m=range.match(/\/(\d+)/);if(m)count=parseInt(m[1]);}
+      document.getElementById('count').textContent=count.toLocaleString();
+      document.getElementById('counterSub').textContent='รายที่รับกระเป๋าแล้ว';
+    }catch(e){
+      document.getElementById('count').textContent='?';
     }
   }
 
@@ -233,20 +254,48 @@
     if(isProcessing) return;
     isProcessing=true;
     if(currentMode==='camera'){try{qrCode.pause();}catch(e){}}
-    const day=document.getElementById('day').value;
-    if(day==='bag'){isProcessing=false;return;}
     setStatus('กำลังค้นหา...');
-    showModal('loading','กำลังดำเนินการ','กำลังบันทึกข้อมูล','',null);
+    showModal('loading','กำลังดำเนินการ','กำลังค้นหาข้อมูล','',null);
+
     try{
       const keyword=decodedText.trim();
-      const searchRes=await sbFetch(`/rest/v1/participants?or=(id_card.eq.${encodeURIComponent(keyword)},passport.eq.${encodeURIComponent(keyword)})&select=id,prefix,first_name,last_name,tag,items,is_walkin,bag_received`,'GET');
+      const searchRes=await sbFetch(`/rest/v1/participants?or=(id_card.eq.${encodeURIComponent(keyword)},passport.eq.${encodeURIComponent(keyword)})&select=id,prefix,first_name,last_name,tag,items,is_walkin,bag_received,bag_received_date`,'GET');
       if(!searchRes.ok){showModal('error','ข้อผิดพลาด','ไม่สามารถค้นหาข้อมูลได้','',null);return;}
       const participants=await searchRes.json();
       if(!participants||participants.length===0){showModal('error','ไม่พบข้อมูล','ไม่พบรหัสนี้ในระบบ','',null);return;}
+
       const p=participants[0];
       const fullName=`${p.prefix||''} ${p.first_name||''} ${p.last_name||''}`.trim();
-      const isWalkin=p.is_walkin===true;
 
+      // ===== โหมดรับกระเป๋า =====
+      if(isBagMode){
+        if(p.bag_received===true){
+          showModal('warning','รับกระเป๋าแล้ว','บุคคลนี้รับกระเป๋าไปแล้ว',fullName,[
+            {label:'วันที่รับ',val:p.bag_received_date||'-',style:'normal'},
+            {label:'สถานะ',val:'รับกระเป๋าไปแล้ว',style:'done'},
+          ]);
+          return;
+        }
+        const today=new Date().toLocaleDateString('th-TH',{timeZone:'Asia/Bangkok',year:'numeric',month:'long',day:'numeric'});
+        const updateRes=await sbFetch(`/rest/v1/participants?id=eq.${p.id}`,'PATCH',{bag_received:true,bag_received_date:today});
+        if(updateRes.ok||updateRes.status===204){
+          const cur=parseInt(document.getElementById('count').textContent)||0;
+          document.getElementById('count').textContent=(cur+1).toLocaleString();
+          showModal('success','รับกระเป๋าสำเร็จ','บันทึกการรับกระเป๋าเรียบร้อย',fullName,[
+            {label:'วันที่รับ',val:today,style:'normal'},
+            {label:'ประเภท',val:p.tag||'-',style:'normal'},
+            {label:'สถานะกระเป๋า',val:'รับแล้ว',style:'ok'},
+          ]);
+          setStatus('บันทึกสำเร็จ');
+        } else {
+          showModal('error','เกิดข้อผิดพลาด','ไม่สามารถบันทึกได้','',null);
+        }
+        return;
+      }
+
+      // ===== โหมดเช็คอินปกติ =====
+      const day=document.getElementById('day').value;
+      const isWalkin=p.is_walkin===true;
       const checkTodayRes=await sbFetch(`/rest/v1/checkins?participant_id=eq.${p.id}&day=eq.${day}&select=id,checkin_time`,'GET');
       const existingToday=await checkTodayRes.json();
       if(existingToday&&existingToday.length>0){
@@ -254,17 +303,14 @@
         showModal('warning','เคยเช็คอินแล้ว',`เช็คอินวันที่ ${day} ไปแล้ว`,fullName,buildWarningRows(t,p,isWalkin));
         return;
       }
-
       const checkAllRes=await sbFetch(`/rest/v1/checkins?participant_id=eq.${p.id}&select=id`,'GET');
       const allCheckins=await checkAllRes.json();
       const isFirst=!allCheckins||allCheckins.length===0;
-
       const insertRes=await sbFetch('/rest/v1/checkins','POST',{
-        participant_id:p.id, day:parseInt(day),
+        participant_id:p.id,day:parseInt(day),
         checkin_time:new Date().toISOString(),
         scanned_by:localStorage.getItem('dmsc_user')||'unknown'
       });
-
       if(insertRes.ok||insertRes.status===201){
         todayCount++;
         document.getElementById('count').textContent=todayCount.toLocaleString();
