@@ -83,6 +83,11 @@
 </div>
 
 <div class="header">
+  <div style="display:flex;align-items:center;gap:8px;padding:4px 0 6px;flex-wrap:wrap;">
+    <img src="https://raw.githubusercontent.com/poundpop35-creator/search-participant/main/logo-%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B8%8A%E0%B8%B8%E0%B8%A1%E0%B8%A7%E0%B8%B4%E0%B8%8A%E0%B8%B2%E0%B8%81%E0%B8%B2%E0%B8%A3-34-Final_0.png" style="height:44px;object-fit:contain;" alt="conference">
+    <img src="https://raw.githubusercontent.com/poundpop35-creator/search-participant/main/logo-DMSc-MOPH%20(1)%20(2)_0.png" style="height:44px;object-fit:contain;" alt="dmsc">
+    <img src="https://raw.githubusercontent.com/poundpop35-creator/search-participant/main/%E0%B8%AA%E0%B8%B3%E0%B9%80%E0%B8%99%E0%B8%B2%E0%B8%82%E0%B8%AD%E0%B8%87%20%E0%B9%82%E0%B8%A5%E0%B9%82%E0%B8%81%E0%B9%89.png" style="height:38px;object-fit:contain;border-radius:6px;" alt="dptc">
+  </div>
   <h1>ระบบสแกนเช็คอินหน้างาน</h1>
   <p>กรมวิทยาศาสตร์การแพทย์ | <span id="userDisplay"></span></p>
 </div>
@@ -128,8 +133,8 @@
   </div>
   <div class="counter-sub" id="counterSub">กำลังโหลด...</div>
 
-<a class="btn-nav primary" href="dashboard.html" target="_blank">ไปหน้า Dashboard</a>
-<a class="btn-nav secondary" href="public.html" target="_blank">ดู Live Dashboard (สาธารณะ)</a>
+  <a class="btn-nav primary" href="dashboard.html">ไปหน้า Dashboard</a>
+  <a class="btn-nav secondary" href="public.html">ดู Live Dashboard (สาธารณะ)</a>
   <button class="btn-nav secondary" onclick="doLogout()">ออกจากระบบ</button>
 
   <div class="status-bar">
@@ -140,12 +145,12 @@
 
 <script>
   const SB_URL  = "https://gvxytnjfyepqhbkmcjms.supabase.co";
-  const SB_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2eHl0bmpmeWVwcWhia21jam1zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0MzE2NDAsImV4cCI6MjA5NTAwNzY0MH0.RAr_ehb4cxfNliDR0h5XcihUaP-0ltZTTGIAv2Fw1kk";
+  const SB_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2eHl0bmpmeWVwcWhia21cam1zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0MzE2NDAsImV4cCI6MjA5NTAwNzY0MH0.RAr_ehb4cxfNliDR0h5XcihUaP-0ltZTTGIAv2Fw1kk";
   const DAY_TH  = {1:'24 มิถุนายน 2569',2:'25 มิถุนายน 2569',3:'26 มิถุนายน 2569'};
 
   // Auth check
-  if(localStorage.getItem('dmsc_auth')!=='ok') window.location.href='login.html';
-  document.getElementById('userDisplay').textContent = localStorage.getItem('dmsc_user')||'';
+  if(sessionStorage.getItem('dmsc_auth')!=='ok') window.location.href='login.html';
+  document.getElementById('userDisplay').textContent = sessionStorage.getItem('dmsc_user')||'';
 
   let isProcessing=false, todayCount=0, qrCode=null;
   let currentMode='camera', scanBuffer='', scanTimer=null;
@@ -256,7 +261,7 @@
       const insertRes=await sbFetch('/rest/v1/checkins','POST',{
         participant_id:p.id, day:parseInt(day),
         checkin_time:new Date().toISOString(),
-        scanned_by:localStorage.getItem('dmsc_user')||'unknown'
+        scanned_by:sessionStorage.getItem('dmsc_user')||'unknown'
       });
 
       if(insertRes.ok||insertRes.status===201){
@@ -329,7 +334,7 @@
   }
 
   function setStatus(t){document.getElementById('statusText').textContent=t;}
-  function doLogout(){localStorage.removeItem('dmsc_auth');localStorage.removeItem('dmsc_user');window.location.href='login.html';}
+  function doLogout(){sessionStorage.removeItem('dmsc_auth');sessionStorage.removeItem('dmsc_user');window.location.href='login.html';}
 </script>
 </body>
 </html>

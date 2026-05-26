@@ -30,7 +30,11 @@
 <body>
 <div class="box">
   <div class="logo">
-    <div class="logo-icon">🔬</div>
+    <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+      <img src="https://raw.githubusercontent.com/poundpop35-creator/search-participant/main/logo-%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B8%8A%E0%B8%B8%E0%B8%A1%E0%B8%A7%E0%B8%B4%E0%B8%8A%E0%B8%B2%E0%B8%81%E0%B8%B2%E0%B8%A3-34-Final_0.png" style="height:48px;object-fit:contain;" alt="conference">
+      <img src="https://raw.githubusercontent.com/poundpop35-creator/search-participant/main/logo-DMSc-MOPH%20(1)%20(2)_0.png" style="height:48px;object-fit:contain;" alt="dmsc">
+      <img src="https://raw.githubusercontent.com/poundpop35-creator/search-participant/main/%E0%B8%AA%E0%B8%B3%E0%B9%80%E0%B8%99%E0%B8%B2%E0%B8%82%E0%B8%AD%E0%B8%87%20%E0%B9%82%E0%B8%A5%E0%B9%82%E0%B8%81%E0%B9%89.png" style="height:42px;object-fit:contain;border-radius:6px;" alt="dptc">
+    </div>
     <h1>ระบบเช็คอินหน้างาน<br>กรมวิทยาศาสตร์การแพทย์</h1>
     <p>สำหรับเจ้าหน้าที่เท่านั้น</p>
   </div>
@@ -55,15 +59,15 @@
 </div>
 <script>
 const USERS={'staff01':'Dmsc@2569','staff02':'Dmsc@2569','staff03':'Dmsc@2569','staff04':'Dmsc@2569','staff05':'Dmsc@2569','staff06':'Dmsc@2569','staff07':'Dmsc@2569','staff08':'Dmsc@2569','staff09':'Dmsc@2569','staff10':'Dmsc@2569'};
-if(localStorage.getItem('dmsc_auth')==='ok') window.location.href='index.html';
+if(sessionStorage.getItem('dmsc_auth')==='ok') window.location.href='index.html';
 function doLogin(){
   const u=document.getElementById('username').value.trim().toLowerCase();
   const p=document.getElementById('password').value;
   const err=document.getElementById('errMsg');
   if(!u||!p){err.textContent='กรุณากรอกชื่อผู้ใช้และรหัสผ่าน';return;}
   if(USERS[u]&&USERS[u]===p){
-    localStorage.setItem('dmsc_auth','ok');
-    localStorage.setItem('dmsc_user',u);
+    sessionStorage.setItem('dmsc_auth','ok');
+    sessionStorage.setItem('dmsc_user',u);
     window.location.href='index.html';
   } else {
     err.textContent='ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง';
