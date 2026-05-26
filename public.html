@@ -10,31 +10,48 @@
     *{box-sizing:border-box;margin:0;padding:0;}
     body{background:#f0f4ff;font-family:'Sarabun',sans-serif;min-height:100vh;}
 
-    /* Hero */
-    .hero{background:linear-gradient(135deg,#1a4eb8 0%,#2563eb 50%,#38bdf8 100%);color:white;padding:36px 24px 32px;text-align:center;}
-    .hero-badge{display:inline-block;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);border-radius:20px;padding:4px 16px;font-size:0.8rem;margin-bottom:14px;}
-    .hero h1{font-size:1.4rem;font-weight:800;line-height:1.5;margin-bottom:6px;}
-    .hero p{font-size:0.85rem;opacity:0.75;}
+    /* Hero — DNA background */
+    .hero{
+      position:relative;
+      background-color:#e8f0fe;
+      background-image:url('https://raw.githubusercontent.com/poundpop35-creator/search-participant/main/DNA.png');
+      background-size:cover;
+      background-position:center right;
+      color:#0d2b6b;
+      padding:36px 24px 32px;
+      text-align:center;
+      overflow:hidden;
+    }
+    /* overlay ทำให้สีอ่อนลง */
+    .hero::before{
+      content:'';
+      position:absolute;
+      inset:0;
+      background:rgba(232,240,254,0.82);
+      z-index:0;
+    }
+    .hero > *{position:relative;z-index:1;}
+
+    .hero-badge{display:inline-block;background:rgba(13,43,107,0.08);border:1px solid rgba(13,43,107,0.2);border-radius:20px;padding:4px 16px;font-size:0.8rem;margin-bottom:14px;color:#1a4eb8;}
+    .hero h1{font-size:1.4rem;font-weight:800;line-height:1.5;margin-bottom:6px;color:#0d2b6b;}
+    .hero p{font-size:0.85rem;color:#1a4eb8;opacity:0.85;}
     .hero-date{display:flex;justify-content:center;gap:12px;margin-top:20px;flex-wrap:wrap;}
-    .hero-date-item{background:rgba(255,255,255,0.12);border-radius:12px;padding:10px 20px;font-size:0.85rem;font-weight:600;}
-    /* staff button in hero */
-    .hero-staff-btn{display:inline-block;margin-top:20px;padding:10px 24px;border-radius:20px;background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.4);color:white;font-family:'Sarabun',sans-serif;font-size:0.88rem;font-weight:600;text-decoration:none;cursor:pointer;transition:background .15s;}
-    .hero-staff-btn:hover{background:rgba(255,255,255,0.25);}
+    .hero-date-item{background:rgba(13,43,107,0.08);border:1px solid rgba(13,43,107,0.15);border-radius:12px;padding:10px 20px;font-size:0.85rem;font-weight:600;color:#0d2b6b;}
+    .hero-staff-btn{display:inline-block;margin-top:20px;padding:10px 24px;border-radius:20px;background:#0d2b6b;border:1.5px solid #0d2b6b;color:white;font-family:'Sarabun',sans-serif;font-size:0.88rem;font-weight:600;text-decoration:none;cursor:pointer;transition:opacity .15s;}
+    .hero-staff-btn:hover{opacity:0.85;}
 
     .main{padding:24px 16px;max-width:900px;margin:0 auto;}
 
-    /* Big stats */
     .big-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:24px;}
     .big-card{background:var(--white);border-radius:18px;padding:24px 20px;box-shadow:var(--shadow);text-align:center;}
     .big-label{font-size:0.78rem;color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;}
     .big-num{font-size:2.8rem;font-weight:800;line-height:1;}
     .big-sub{font-size:0.8rem;color:#94a3b8;margin-top:6px;}
     .big-card.total .big-num{color:#0d2b6b;}
-    .big-card.d1    .big-num{color:#2563eb;}
-    .big-card.d2    .big-num{color:#7c3aed;}
-    .big-card.d3    .big-num{color:#0891b2;}
+    .big-card.d1 .big-num{color:#2563eb;}
+    .big-card.d2 .big-num{color:#7c3aed;}
+    .big-card.d3 .big-num{color:#0891b2;}
 
-    /* Progress */
     .progress-card{background:var(--white);border-radius:18px;padding:20px 24px;box-shadow:var(--shadow);margin-bottom:20px;}
     .progress-title{font-size:0.9rem;font-weight:700;color:var(--blue);margin-bottom:16px;}
     .progress-row{margin-bottom:14px;}
@@ -44,9 +61,8 @@
     .progress-bar{height:10px;background:#e2e8f0;border-radius:5px;overflow:hidden;}
     .progress-fill{height:100%;border-radius:5px;transition:width .8s ease;}
 
-    /* Dept */
     .dept-card{background:var(--white);border-radius:18px;box-shadow:var(--shadow);overflow:hidden;margin-bottom:24px;}
-    .dept-card-header{padding:18px 24px;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+    .dept-card-header{padding:18px 24px;border-bottom:1px solid #e2e8f0;}
     .dept-card-title{font-size:1rem;font-weight:700;color:var(--blue);}
     .dept-card-sub{font-size:0.8rem;color:#94a3b8;margin-top:2px;}
     table{width:100%;border-collapse:collapse;}
@@ -60,13 +76,11 @@
     .mini-bar{height:6px;background:#e2e8f0;border-radius:3px;overflow:hidden;min-width:80px;}
     .mini-fill{height:100%;background:var(--blue-mid);border-radius:3px;transition:width .6s ease;}
 
-    /* Collapse button */
     .collapse-row td{padding:12px 16px;text-align:center;background:#f8fafc;border-top:1px solid #e2e8f0;}
-    .collapse-btn{padding:8px 20px;border-radius:20px;border:2px solid #c7d7f5;background:white;font-family:'Sarabun',sans-serif;font-size:0.85rem;font-weight:600;color:var(--blue);cursor:pointer;transition:all .15s;}
+    .collapse-btn{padding:8px 20px;border-radius:20px;border:2px solid #c7d7f5;background:white;font-family:'Sarabun',sans-serif;font-size:0.85rem;font-weight:600;color:var(--blue);cursor:pointer;}
     .collapse-btn:hover{background:var(--blue-light);}
     .hidden-row{display:none;}
 
-    /* Footer */
     .footer{text-align:center;padding:20px;font-size:0.78rem;color:#94a3b8;}
     .update-info{display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:8px;}
     .dot-live{width:8px;height:8px;border-radius:50%;background:#16a34a;animation:pulse 2s infinite;}
@@ -77,11 +91,9 @@
 <body>
 
 <div class="hero">
-  <!-- Logo bar มุมซ้ายบน -->
   <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;justify-content:center;">
-    <img src="https://raw.githubusercontent.com/poundpop35-creator/search-participant/main/logo-%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B8%8A%E0%B8%B8%E0%B8%A1%E0%B8%A7%E0%B8%B4%E0%B8%8A%E0%B8%B2%E0%B8%81%E0%B8%B2%E0%B8%A3-34-Final_0.png" style="height:56px;object-fit:contain;" alt="34th Annual Medical Sciences Conference">
-    <img src="https://raw.githubusercontent.com/poundpop35-creator/search-participant/main/logo-DMSc-MOPH%20(1)%20(2)_0.png" style="height:56px;object-fit:contain;" alt="กรมวิทยาศาสตร์การแพทย์">
-    <!-- <img src="https://raw.githubusercontent.com/poundpop35-creator/search-participant/main/%E0%B8%AA%E0%B8%B3%E0%B9%80%E0%B8%99%E0%B8%B2%E0%B8%82%E0%B8%AD%E0%B8%87%20%E0%B9%82%E0%B8%A5%E0%B9%82%E0%B8%81%E0%B9%89.png" style="height:50px;object-fit:contain;border-radius:8px;" alt="DPTC"> -->
+    <img src="https://raw.githubusercontent.com/poundpop35-creator/search-participant/main/logo-%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B8%8A%E0%B8%B8%E0%B8%A1%E0%B8%A7%E0%B8%B4%E0%B8%8A%E0%B8%B2%E0%B8%81%E0%B8%B2%E0%B8%A3-34-Final_0.png" style="height:60px;object-fit:contain;" alt="34th Conference">
+    <img src="https://raw.githubusercontent.com/poundpop35-creator/search-participant/main/logo-DMSc-MOPH%20(1)%20(2)_0.png" style="height:60px;object-fit:contain;" alt="DMSc">
   </div>
   <div class="hero-badge">Live Dashboard</div>
   <h1>ประชุมวิชาการวิทยาศาสตร์การแพทย์<br>ครั้งที่ 34</h1>
@@ -140,10 +152,8 @@
 
     <div class="dept-card">
       <div class="dept-card-header">
-        <div>
-          <div class="dept-card-title">จำนวนผู้เข้าร่วมแยกตามหน่วยงานภายใน</div>
-          <div class="dept-card-sub">เรียงตามจำนวนผู้เข้าร่วมสูงสุด</div>
-        </div>
+        <div class="dept-card-title">จำนวนผู้เข้าร่วมแยกตามหน่วยงานภายใน</div>
+        <div class="dept-card-sub">เรียงตามจำนวนผู้เข้าร่วมสูงสุด</div>
       </div>
       <div style="overflow-x:auto;">
         <table>
@@ -173,9 +183,8 @@
 
 <script>
 const SUPABASE_URL  = "https://gvxytnjfyepqhbkmcjms.supabase.co";
-const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2eHl0bmpmeWVwcWhia21jam1zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0MzE2NDAsImV4cCI6MjA5NTAwNzY0MH0.RAr_ehb4cxfNliDR0h5XcihUaP-0ltZTTGIAv2Fw1kk";
+const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2eHl0bmpmeWVwcWhia21cam1zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0MzE2NDAsImV4cCI6MjA5NTAwNzY0MH0.RAr_ehb4cxfNliDR0h5XcihUaP-0ltZTTGIAv2Fw1kk";
 
-// ไม่รวม อธิบดี และ รองอธิบดี
 const DEPTS = [
   'สำนักผู้ทรงคุณวุฒิกรมวิทยาศาสตร์การแพทย์','กองแผนงานและวิชาการ','กองทดสอบความชำนาญ',
   'กลุ่มพัฒนาระบบบริหาร','กลุ่มตรวจสอบภายใน','กลุ่มงานจริยธรรม','สำนักงานเลขานุการกรม',
@@ -195,7 +204,7 @@ const DEPTS = [
   'ศูนย์วิทยาศาสตร์การแพทย์ที่ 11/1 ภูเก็ต','ศูนย์วิทยาศาสตร์การแพทย์ที่ 12 สงขลา',
   'ศูนย์วิทยาศาสตร์การแพทย์ที่ 12/1 ตรัง'
 ];
-const SHOW_FIRST = 10; // โชว์ 10 อันดับแรกก่อน
+const SHOW_FIRST = 10;
 let isExpanded = false;
 
 async function fetchAll(path) {
@@ -232,8 +241,7 @@ async function loadData() {
       setTimeout(()=>{document.getElementById(`pf${d}`).style.width=pct+'%';},200);
     });
 
-    // Dept stats เฉพาะ 38 หน่วยงาน (ไม่รวม อธิบดี/รองอธิบดี)
-    const deptSet = new Set(DEPTS);
+    const deptSet=new Set(DEPTS);
     const deptCount={};
     DEPTS.forEach(d=>deptCount[d]=0);
     checkins.forEach(r=>{
@@ -248,7 +256,7 @@ async function loadData() {
       .sort((a,b)=>b.count-a.count);
 
     const maxDept=sorted.length>0?sorted[0].count:1;
-    renderDeptTable(sorted, maxDept);
+    renderDeptTable(sorted,maxDept);
 
     document.getElementById('lastUpdate').textContent=new Date().toLocaleTimeString('th-TH',{timeZone:'Asia/Bangkok'});
     document.getElementById('loadingArea').style.display='none';
@@ -258,47 +266,37 @@ async function loadData() {
   }
 }
 
-function renderDeptTable(sorted, maxDept) {
+function renderDeptTable(sorted,maxDept) {
   if(sorted.length===0){
     document.getElementById('deptBody').innerHTML='<tr><td colspan="4" style="text-align:center;padding:30px;color:#94a3b8;">ยังไม่มีข้อมูล</td></tr>';
     return;
   }
-
-  const rows = sorted.map((d,i)=>{
-    const isHidden = i >= SHOW_FIRST && !isExpanded;
-    return `<tr class="${isHidden?'hidden-row':''}" data-idx="${i}">
+  const rows=sorted.map((d,i)=>{
+    const isHidden=i>=SHOW_FIRST&&!isExpanded;
+    return`<tr class="${isHidden?'hidden-row':''}" data-idx="${i}">
       <td class="rank">${i+1}</td>
       <td class="dept-name">${d.name}</td>
       <td class="count-num">${d.count}</td>
       <td><div class="mini-bar"><div class="mini-fill" style="width:${Math.round(d.count/maxDept*100)}%"></div></div></td>
     </tr>`;
   }).join('');
-
-  const collapseBtn = sorted.length > SHOW_FIRST
-    ? `<tr class="collapse-row">
-        <td colspan="4">
-          <button class="collapse-btn" onclick="toggleExpand()">
-            ${isExpanded ? 'แสดงน้อยลง' : `แสดงทั้งหมด ${sorted.length} หน่วยงาน`}
-          </button>
-        </td>
-       </tr>`
-    : '';
-
-  document.getElementById('deptBody').innerHTML = rows + collapseBtn;
+  const collapseBtn=sorted.length>SHOW_FIRST
+    ?`<tr class="collapse-row"><td colspan="4"><button class="collapse-btn" onclick="toggleExpand()">${isExpanded?'แสดงน้อยลง':`แสดงทั้งหมด ${sorted.length} หน่วยงาน`}</button></td></tr>`:'';
+  document.getElementById('deptBody').innerHTML=rows+collapseBtn;
 }
 
-function toggleExpand() {
-  isExpanded = !isExpanded;
+function toggleExpand(){
+  isExpanded=!isExpanded;
   document.querySelectorAll('#deptBody tr[data-idx]').forEach(tr=>{
-    const idx = parseInt(tr.getAttribute('data-idx'));
-    tr.classList.toggle('hidden-row', idx >= SHOW_FIRST && !isExpanded);
+    const idx=parseInt(tr.getAttribute('data-idx'));
+    tr.classList.toggle('hidden-row',idx>=SHOW_FIRST&&!isExpanded);
   });
-  const btn = document.querySelector('.collapse-btn');
-  if(btn) btn.textContent = isExpanded ? 'แสดงน้อยลง' : `แสดงทั้งหมด`;
+  const btn=document.querySelector('.collapse-btn');
+  if(btn) btn.textContent=isExpanded?'แสดงน้อยลง':'แสดงทั้งหมด';
 }
 
 loadData();
-setInterval(loadData, 60000);
+setInterval(loadData,60000);
 </script>
 </body>
 </html>
