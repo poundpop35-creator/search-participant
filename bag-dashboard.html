@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard รับกระเป๋า — กรมวิทยาศาสตร์การแพทย์</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <style>
+    :root{--blue:#0d2b6b;--blue-light:#e8f0fe;--green:#16a34a;--red:#dc2626;--white:#fff;--shadow:0 2px 12px rgba(13,43,107,0.10);--border:#e2e8f0;}
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:linear-gradient(rgba(232,240,254,0.82),rgba(232,240,254,0.82)),url('https://raw.githubusercontent.com/poundpop35-creator/search-participant/main/DNA.png') center/cover fixed;font-family:'Sarabun',sans-serif;}
+    .topbar{background:var(--blue);color:white;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;position:sticky;top:0;z-index:50;}
+    .topbar h1{font-size:1rem;font-weight:700;}
+    .topbar-btns{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+    .tbtn{padding:7px 14px;border-radius:8px;border:1.5px solid rgba(255,255,255,0.4);color:white;background:transparent;font-family:'Sarabun',sans-serif;font-size:0.82rem;cursor:pointer;text-decoration:none;display:inline-block;}
+    .tbtn:hover{background:rgba(255,255,255,0.1);}
+    .last-update{font-size:0.75rem;opacity:0.6;}
+    .main{padding:20px;max-width:1100px;margin:0 auto;}
+    /* Stats */
+    .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:20px;}
+    .stat-card{background:var(--white);border-radius:14px;padding:18px;box-shadow:var(--shadow);}
+    .stat-label{font-size:0.74rem;color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;}
+    .stat-num{font-size:2rem;font-weight:700;}
+    .stat-sub{font-size:0.76rem;color:#94a3b8;margin-top:3px;}
+    .stat-card.total .stat-num{color:var(--blue);}
+    .stat-card.received .stat-num{color:var(--green);}
+    .stat-card.pending .stat-num{color:var(--red);}
+    /* Filter */
+    .filter-bar{background:var(--white);border-radius:14px;padding:14px 18px;box-shadow:var(--shadow);margin-bottom:14px;display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;}
+    .filter-group{display:flex;flex-direction:column;gap:4px;}
+    .filter-label{font-size:0.71rem;font-weight:700;color:#64748b;text-transform:uppercase;}
+    .filter-select{padding:8px 12px;border-radius:8px;border:1.5px solid var(--border);font-family:'Sarabun',sans-serif;font-size:0.88rem;color:#1e293b;cursor:pointer;outline:none;}
+    .sbox{padding:8px 12px;border-radius:8px;border:1.5px solid var(--border);font-family:'Sarabun',sans-serif;font-size:0.88rem;width:200px;outline:none;}
+    .btn-reset{padding:8px 12px;border-radius:8px;border:1.5px solid var(--border);background:white;font-family:'Sarabun',sans-serif;font-size:0.83rem;cursor:pointer;color:#64748b;}
+    /* Table */
+    .tcard{background:var(--white);border-radius:14px;box-shadow:var(--shadow);overflow:hidden;}
+    .thead-row{padding:14px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:10px;}
+    .ttitle{font-weight:700;color:var(--blue);font-size:1rem;}
+    .tcount{font-size:0.82rem;color:#64748b;margin-left:6px;}
+    .export-btns{display:flex;gap:8px;}
+    .btn-xl{padding:8px 14px;border-radius:8px;border:none;font-family:'Sarabun',sans-serif;font-size:0.82rem;font-weight:600;cursor:pointer;}
+    .btn-xl.green{background:#16a34a;color:white;}
+    .btn-xl.teal{background:#0891b2;color:white;}
+    table{width:100%;border-collapse:collapse;}
+    th{background:#f8fafc;padding:10px 14px;text-align:left;font-size:0.73rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.04em;border-bottom:2px solid var(--border);}
+    td{padding:10px 14px;font-size:0.86rem;border-bottom:1px solid var(--border);color:#1e293b;}
+    tr:last-child td{border-bottom:none;}
+    tr:hover td{background:#f8fafc;}
+    .badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:0.72rem;font-weight:700;}
+    .b-received{background:#dcfce7;color:#166534;}
+    .b-pending{background:#fee2e2;color:#991b1b;}
+    .b-participant{background:#dbeafe;color:#1e40af;}
+    .b-staff{background:#fef9c3;color:#92400e;}
+    .loading-td{text-align:center;padding:40px;color:#94a3b8;}
+    /* Pager */
+    .pager{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-top:1px solid var(--border);font-size:0.83rem;color:#64748b;flex-wrap:wrap;gap:8px;}
+    .pbtn{padding:5px 12px;border-radius:6px;border:1.5px solid var(--border);background:var(--white);cursor:pointer;font-size:0.8rem;}
+    .pbtn:disabled{opacity:0.4;cursor:not-allowed;}
+  </style>
+</head>
+<body>
+<div class="topbar">
+  <div style="display:flex;align-items:center;gap:10px;">
+    <img src="https://raw.githubusercontent.com/poundpop35-creator/search-participant/main/logo-%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B8%8A%E0%B8%B8%E0%B8%A1%E0%B8%A7%E0%B8%B4%E0%B8%8A%E0%B8%B2%E0%B8%81%E0%B8%B2%E0%B8%A3-34-Final_0.png" style="height:36px;object-fit:contain;" alt="conf">
+    <img src="https://raw.githubusercontent.com/poundpop35-creator/search-participant/main/logo-DMSc-MOPH%20(1)%20(2)_0.png" style="height:36px;object-fit:contain;" alt="dmsc">
+    <h1>Dashboard รับกระเป๋า</h1>
+  </div>
+  <div class="topbar-btns">
+    <span class="last-update" id="lastUpdate">-</span>
+    <button class="tbtn" onclick="loadAll()">รีเฟรช</button>
+    <a class="tbtn" href="bag.html">← ระบบสแกนรับกระเป๋า</a>
+    <a class="tbtn" href="dashboard.html">Dashboard หลัก</a>
+    <button class="tbtn" onclick="doLogout()" style="border-color:rgba(252,165,165,0.5);color:#fca5a5;">ออกจากระบบ</button>
+  </div>
+</div>
+
+<div class="main">
+  <!-- Stats -->
+  <div class="stats-grid">
+    <div class="stat-card total"><div class="stat-label">มีสิทธิ์รับกระเป๋าทั้งหมด</div><div class="stat-num" id="sTotal">-</div><div class="stat-sub">ราย</div></div>
+    <div class="stat-card received"><div class="stat-label">รับแล้ว</div><div class="stat-num" id="sReceived">-</div><div class="stat-sub" id="sReceivedPct">-</div></div>
+    <div class="stat-card pending"><div class="stat-label">ยังไม่รับ</div><div class="stat-num" id="sPending">-</div><div class="stat-sub" id="sPendingPct">-</div></div>
+  </div>
+
+  <!-- Filter -->
+  <div class="filter-bar">
+    <div class="filter-group">
+      <div class="filter-label">สถานะกระเป๋า</div>
+      <select class="filter-select" id="fStatus" onchange="applyFilters()">
+        <option value="">ทั้งหมด</option>
+        <option value="received">รับแล้ว</option>
+        <option value="pending">ยังไม่รับ</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <div class="filter-label">TAG</div>
+      <select class="filter-select" id="fTag" onchange="applyFilters()">
+        <option value="">ทั้งหมด</option>
+        <option value="participant">participant</option>
+        <option value="Staff">Staff</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <div class="filter-label">ค้นหา</div>
+      <input class="sbox" id="sBox" placeholder="ชื่อ / หน่วยงาน..." oninput="applyFilters()">
+    </div>
+    <button class="btn-reset" onclick="resetFilters()">✕ ล้าง</button>
+  </div>
+
+  <!-- Table -->
+  <div class="tcard">
+    <div class="thead-row">
+      <div>
+        <span class="ttitle" id="tTitle">รายชื่อผู้มีสิทธิ์รับกระเป๋า</span>
+        <span class="tcount" id="tCount"></span>
+      </div>
+      <div class="export-btns">
+        <button class="btn-xl green" onclick="exportExcel()">⬇ Excel</button>
+        <button class="btn-xl teal"  onclick="exportCSV()">⬇ CSV</button>
+      </div>
+    </div>
+    <div style="overflow-x:auto;">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>ชื่อ-นามสกุล</th>
+            <th>หน่วยงาน</th>
+            <th>ประเภทการเข้าร่วม</th>
+            <th>TAG</th>
+            <th>สถานะกระเป๋า</th>
+            <th>วันที่รับ</th>
+          </tr>
+        </thead>
+        <tbody id="tBody"><tr><td colspan="7" class="loading-td">กำลังโหลด...</td></tr></tbody>
+      </table>
+    </div>
+    <div class="pager">
+      <span id="pInfo">-</span>
+      <div style="display:flex;gap:6px;">
+        <button class="pbtn" id="bPrev" onclick="changePage(-1)">← ก่อนหน้า</button>
+        <button class="pbtn" id="bNext" onclick="changePage(1)">ถัดไป →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const SB_URL = "https://gvxytnjfyepqhbkmcjms.supabase.co";
+const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2eHl0bmpmeWVwcWhia21cam1zIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3OTQzMTY0MCwiZXhwIjoyMDk1MDA3NjQwfQ.Hrfc0erkIatyVbmsOW2SU7piH3L65qbS2kdi2eYzbQk";
+const PAGE = 10;
+
+// Auth check
+if(sessionStorage.getItem('dmsc_auth')!=='ok') window.location.href='login.html';
+
+let allData=[], filtered=[], curPage=1;
+
+async function loadAll(){
+  document.getElementById('tBody').innerHTML='<tr><td colspan="7" class="loading-td">กำลังโหลด...</td></tr>';
+  try{
+    let res=[], from=0;
+    while(true){
+      const r=await fetch(`${SB_URL}/rest/v1/participants?select=id,prefix,first_name,last_name,dept,ext_dept,internal_external,participation_type,tag,bag_received,bag_received_date&order=last_name.asc`,{
+        headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Range-Unit':'items','Range':`${from}-${from+999}`,'Prefer':'count=exact'}
+      });
+      const d=await r.json();
+      if(!Array.isArray(d)){
+        document.getElementById('tBody').innerHTML=`<tr><td colspan="7" class="loading-td" style="color:#dc2626;">API Error: ${JSON.stringify(d)}</td></tr>`;
+        return;
+      }
+      if(d.length===0) break;
+      res=res.concat(d); if(d.length<1000) break; from+=1000;
+    }
+
+    allData = res.map(p=>{
+      const isIn=(p.internal_external||'').includes('ภายใน');
+      const dept=isIn?(p.dept||'-'):(p.ext_dept||p.dept||'-');
+      return{
+        name:`${p.prefix||''} ${p.first_name||''} ${p.last_name||''}`.trim(),
+        dept, pt:p.participation_type||'-', tag:p.tag||'-',
+        received:p.bag_received===true,
+        receivedDate:p.bag_received_date||'-'
+      };
+    });
+
+    const total=allData.length;
+    const receivedCount=allData.filter(r=>r.received).length;
+    const pendingCount=total-receivedCount;
+
+    document.getElementById('sTotal').textContent=total.toLocaleString();
+    document.getElementById('sReceived').textContent=receivedCount.toLocaleString();
+    document.getElementById('sPending').textContent=pendingCount.toLocaleString();
+    document.getElementById('sReceivedPct').textContent=total?`${Math.round(receivedCount/total*100)}% ของทั้งหมด`:'-';
+    document.getElementById('sPendingPct').textContent=total?`${Math.round(pendingCount/total*100)}% ของทั้งหมด`:'-';
+    document.getElementById('lastUpdate').textContent='อัปเดต: '+new Date().toLocaleTimeString('th-TH',{timeZone:'Asia/Bangkok'});
+
+    applyFilters();
+  }catch(e){
+    document.getElementById('tBody').innerHTML='<tr><td colspan="7" class="loading-td">โหลดไม่สำเร็จ</td></tr>';
+  }
+}
+
+function applyFilters(){
+  const q=(document.getElementById('sBox').value||'').toLowerCase();
+  const st=document.getElementById('fStatus').value;
+  const tg=document.getElementById('fTag').value;
+  filtered=allData.filter(r=>{
+    const mQ=!q||r.name.toLowerCase().includes(q)||r.dept.toLowerCase().includes(q);
+    const mSt=!st||(st==='received'&&r.received)||(st==='pending'&&!r.received);
+    const mTg=!tg||r.tag===tg;
+    return mQ&&mSt&&mTg;
+  });
+  curPage=1;
+  document.getElementById('tCount').textContent=`(${filtered.length.toLocaleString()} รายการ)`;
+  renderTable();
+}
+
+function renderTable(){
+  const start=(curPage-1)*PAGE;
+  const page=filtered.slice(start,start+PAGE);
+  const tot=filtered.length;
+  const totPages=Math.ceil(tot/PAGE)||1;
+  document.getElementById('pInfo').textContent=`แสดง ${tot===0?0:start+1}–${Math.min(start+PAGE,tot)} จาก ${tot.toLocaleString()} รายการ`;
+  document.getElementById('bPrev').disabled=curPage<=1;
+  document.getElementById('bNext').disabled=curPage>=totPages;
+  if(!page.length){document.getElementById('tBody').innerHTML='<tr><td colspan="7" class="loading-td">ไม่พบข้อมูล</td></tr>';return;}
+  document.getElementById('tBody').innerHTML=page.map((r,i)=>`<tr>
+    <td>${start+i+1}</td>
+    <td>${r.name}</td>
+    <td style="max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${r.dept}">${r.dept}</td>
+    <td>${r.pt}</td>
+    <td><span class="badge ${r.tag==='Staff'?'b-staff':'b-participant'}">${r.tag}</span></td>
+    <td><span class="badge ${r.received?'b-received':'b-pending'}">${r.received?'รับแล้ว':'ยังไม่รับ'}</span></td>
+    <td>${r.received?r.receivedDate:'-'}</td>
+  </tr>`).join('');
+}
+
+function changePage(d){curPage+=d;renderTable();window.scrollTo({top:0,behavior:'smooth'});}
+
+function resetFilters(){
+  document.getElementById('fStatus').value='';
+  document.getElementById('fTag').value='';
+  document.getElementById('sBox').value='';
+  applyFilters();
+}
+
+function exportExcel(){
+  const ws=XLSX.utils.json_to_sheet(getRows());
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'กระเป๋า');
+  XLSX.writeFile(wb,`bag_dashboard_${new Date().toISOString().slice(0,10)}.xlsx`);
+}
+function exportCSV(){
+  const rows=getRows(),h=Object.keys(rows[0]);
+  const csv=[h.join(','),...rows.map(r=>h.map(k=>`"${String(r[k]).replace(/"/g,'""')}"`).join(','))].join('\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'}));
+  a.download=`bag_dashboard_${new Date().toISOString().slice(0,10)}.csv`;a.click();
+}
+function getRows(){
+  return filtered.map((r,i)=>({'ลำดับ':i+1,'ชื่อ-นามสกุล':r.name,'หน่วยงาน':r.dept,
+    'ประเภทการเข้าร่วม':r.pt,'TAG':r.tag,
+    'สถานะกระเป๋า':r.received?'รับแล้ว':'ยังไม่รับ',
+    'วันที่รับ':r.received?r.receivedDate:'-'}));
+}
+
+function doLogout(){sessionStorage.removeItem('dmsc_auth');sessionStorage.removeItem('dmsc_user');window.location.href='login.html';}
+
+loadAll();
+</script>
+</body>
+</html>
