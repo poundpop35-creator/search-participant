@@ -764,7 +764,7 @@ function setAutoRefresh() {
   const sec = parseInt(document.getElementById('autoRefreshSel').value);
   if (sec > 0) _refreshTimer = setInterval(loadAll, sec * 1000);
 }
-setAutoRefresh(); // เริ่มทันที (default 1 นาที)
+// setAutoRefresh(); // ปิด auto-refresh ตอนเริ่ม
 
 function doLogout() {
   sessionStorage.removeItem('dmsc_auth');
