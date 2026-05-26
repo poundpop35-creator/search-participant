@@ -154,16 +154,11 @@ const PAGE = 10;
 // Auth check
 if(sessionStorage.getItem('dmsc_auth')!=='ok') window.location.href='login.html';
 
-// กลุ่มที่มีสิทธิ์รับกระเป๋า
-const BAG_PT_PARTICIPANT = ['บุคลากรภายในกรม (Personnel of the Department)'];
-const BAG_PT_STAFF = ['ผู้บริหาร','ผู้บริหาร+กรรมการ','ผู้บริหาร+คณะทำงาน','ผู้บริหาร+ผู้ส่งผลงาน'];
-
 let allData=[], filtered=[], curPage=1;
 
 async function loadAll(){
   document.getElementById('tBody').innerHTML='<tr><td colspan="7" class="loading-td">กำลังโหลด...</td></tr>';
   try{
-    // ดึง participants ที่มีสิทธิ์รับกระเป๋า
     let res=[], from=0;
     while(true){
       const r=await fetch(`${SB_URL}/rest/v1/participants?select=id,prefix,first_name,last_name,dept,ext_dept,internal_external,participation_type,tag,bag_received,bag_received_date&order=last_name.asc`,{
@@ -174,12 +169,7 @@ async function loadAll(){
       res=res.concat(d); if(d.length<1000) break; from+=1000;
     }
 
-    // กรองเฉพาะคนมีสิทธิ์
-    allData = res.filter(p=>{
-      if(p.tag==='participant' && BAG_PT_PARTICIPANT.includes((p.internal_external||'').trim())) return true;
-      if(p.tag==='Staff' && BAG_PT_STAFF.includes((p.participation_type||'').trim())) return true;
-      return false;
-    }).map(p=>{
+    allData = res.filter(p => p.items && p.items.trim() !== '').map(p=>{
       const isIn=(p.internal_external||'').includes('ภายใน');
       const dept=isIn?(p.dept||'-'):(p.ext_dept||p.dept||'-');
       return{
