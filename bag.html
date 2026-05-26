@@ -140,8 +140,8 @@
   const SB_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2eHl0bmpmeWVwcWhia21cam1zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0MzE2NDAsImV4cCI6MjA5NTAwNzY0MH0.RAr_ehb4cxfNliDR0h5XcihUaP-0ltZTTGIAv2Fw1kk";
 
   // Auth check
-  if(localStorage.getItem('dmsc_auth')!=='ok') window.location.href='login.html';
-  document.getElementById('userDisplay').textContent = localStorage.getItem('dmsc_user')||'';
+  if(sessionStorage.getItem('dmsc_auth')!=='ok') window.location.href='login.html';
+  document.getElementById('userDisplay').textContent = sessionStorage.getItem('dmsc_user')||'';
 
   let isProcessing=false, qrCode=null;
   let currentMode='camera', scanBuffer='', scanTimer=null;
@@ -299,7 +299,7 @@
   }
 
   function setStatus(t){document.getElementById('statusText').textContent=t;}
-  function doLogout(){localStorage.removeItem('dmsc_auth');localStorage.removeItem('dmsc_user');window.location.href='login.html';}
+  function doLogout(){sessionStorage.removeItem('dmsc_auth');sessionStorage.removeItem('dmsc_user');window.location.href='login.html';}
 </script>
 </body>
 </html>

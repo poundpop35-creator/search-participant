@@ -72,6 +72,39 @@
   </style>
 </head>
 <body>
+<!-- Walk-in Overlay -->
+<div class="modal-overlay hidden" id="walkinOverlay">
+  <div class="modal" style="max-width:400px;text-align:left;">
+    <div class="modal-status warning" style="text-align:center;">WALK-IN</div>
+    <div class="modal-title" style="text-align:center;margin-bottom:16px;">ลงทะเบียน Walk-in</div>
+    <div style="margin-bottom:10px;">
+      <label style="font-size:0.82rem;font-weight:700;color:#64748b;display:block;margin-bottom:4px;">คำนำหน้า</label>
+      <select id="wiPrefix" style="width:100%;padding:10px 12px;border-radius:10px;border:2px solid #e2e8f0;font-family:'Sarabun',sans-serif;font-size:0.95rem;outline:none;">
+        <option>นาย</option><option>นาง</option><option>นางสาว</option>
+        <option>ดร.</option><option>นพ.</option><option>พญ.</option>
+        <option>ผศ.ดร.</option><option>รศ.ดร.</option><option>ศ.ดร.</option>
+      </select>
+    </div>
+    <div style="margin-bottom:10px;">
+      <label style="font-size:0.82rem;font-weight:700;color:#64748b;display:block;margin-bottom:4px;">ชื่อ <span style="color:#dc2626;">*</span></label>
+      <input id="wiFirstName" type="text" placeholder="ชื่อ" style="width:100%;padding:10px 12px;border-radius:10px;border:2px solid #e2e8f0;font-family:'Sarabun',sans-serif;font-size:0.95rem;outline:none;">
+    </div>
+    <div style="margin-bottom:10px;">
+      <label style="font-size:0.82rem;font-weight:700;color:#64748b;display:block;margin-bottom:4px;">นามสกุล <span style="color:#dc2626;">*</span></label>
+      <input id="wiLastName" type="text" placeholder="นามสกุล" style="width:100%;padding:10px 12px;border-radius:10px;border:2px solid #e2e8f0;font-family:'Sarabun',sans-serif;font-size:0.95rem;outline:none;">
+    </div>
+    <div style="margin-bottom:10px;">
+      <label style="font-size:0.82rem;font-weight:700;color:#64748b;display:block;margin-bottom:4px;">เลขบัตรประชาชน / Passport</label>
+      <input id="wiIdCard" type="text" placeholder="เลขบัตรประชาชน หรือ Passport" style="width:100%;padding:10px 12px;border-radius:10px;border:2px solid #e2e8f0;font-family:'Sarabun',sans-serif;font-size:0.95rem;outline:none;">
+    </div>
+    <div id="wiErr" style="color:#dc2626;font-size:0.82rem;min-height:18px;margin-bottom:10px;"></div>
+    <div style="display:flex;gap:8px;">
+      <button onclick="closeWalkin()" style="flex:1;padding:12px;border-radius:10px;border:2px solid #e2e8f0;background:white;font-family:'Sarabun',sans-serif;font-size:0.95rem;cursor:pointer;color:#64748b;">ยกเลิก</button>
+      <button onclick="submitWalkin()" id="wiSubmitBtn" style="flex:2;padding:12px;border-radius:10px;border:none;background:#d97706;color:white;font-family:'Sarabun',sans-serif;font-size:0.95rem;font-weight:700;cursor:pointer;">ลงทะเบียน Walk-in</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay hidden" id="modalOverlay">
   <div class="modal">
     <div class="modal-status" id="modalStatus"></div>
@@ -97,7 +130,7 @@
     <option value="1">วันที่ 1 — 24 มิถุนายน 2569</option>
     <option value="2">วันที่ 2 — 25 มิถุนายน 2569</option>
     <option value="3">วันที่ 3 — 26 มิถุนายน 2569</option>
-    <option value="bag">รับกระเป๋า</option>
+    <option value="bag">รับกระเป๋า — 10 มิถุนายน 2569</option>
   </select>
 
   <div class="row-label">เลือกวิธีสแกน</div>
@@ -129,11 +162,12 @@
   <div class="counter">
     <span id="counterLabel">เช็คอินสำเร็จวันนี้</span>
     <strong id="count">—</strong>
-    <span id="counterUnit">ราย</span>
+    <span>ราย</span>
   </div>
   <div class="counter-sub" id="counterSub">กำลังโหลด...</div>
 
   <a class="btn-nav primary" href="dashboard.html">ไปหน้า Dashboard</a>
+  <a class="btn-nav secondary" href="bag-dashboard.html">Dashboard กระเป๋า</a>
   <a class="btn-nav secondary" href="public.html">ดู Live Dashboard (สาธารณะ)</a>
   <button class="btn-nav secondary" onclick="doLogout()">ออกจากระบบ</button>
 
@@ -148,26 +182,18 @@
   const SB_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2eHl0bmpmeWVwcWhia21cam1zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0MzE2NDAsImV4cCI6MjA5NTAwNzY0MH0.RAr_ehb4cxfNliDR0h5XcihUaP-0ltZTTGIAv2Fw1kk";
   const DAY_TH  = {1:'24 มิถุนายน 2569',2:'25 มิถุนายน 2569',3:'26 มิถุนายน 2569'};
 
-  if(localStorage.getItem('dmsc_auth')!=='ok') window.location.href='login.html';
-  document.getElementById('userDisplay').textContent=localStorage.getItem('dmsc_user')||'';
+  if(sessionStorage.getItem('dmsc_auth')!=='ok') window.location.href='login.html';
+  document.getElementById('userDisplay').textContent=sessionStorage.getItem('dmsc_user')||'';
 
   let isProcessing=false, todayCount=0, qrCode=null;
   let currentMode='camera', scanBuffer='', scanTimer=null;
-  let isBagMode=false;
 
   window.addEventListener('load',()=>{ startCamera(); loadTodayCount(); });
 
   function onDayChange(){
     const val=document.getElementById('day').value;
-    isBagMode=(val==='bag');
-    if(isBagMode){
-      document.getElementById('counterLabel').textContent='รับกระเป๋าแล้ว';
-      document.getElementById('counterSub').textContent='';
-      loadBagCount();
-    } else {
-      document.getElementById('counterLabel').textContent='เช็คอินสำเร็จวันนี้';
-      loadTodayCount();
-    }
+    if(val==='bag') window.location.href='bag.html';
+    else loadTodayCount();
   }
 
   async function loadTodayCount(){
@@ -175,6 +201,7 @@
     if(day==='bag') return;
     document.getElementById('count').textContent='—';
     document.getElementById('counterSub').textContent='กำลังโหลด...';
+    document.getElementById('counterLabel').textContent='เช็คอินสำเร็จวันนี้';
     try{
       const res=await fetch(`${SB_URL}/rest/v1/checkins?day=eq.${day}&select=id`,
         {headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON,'Prefer':'count=exact','Range':'0-0'}});
@@ -187,21 +214,6 @@
     }catch(e){
       document.getElementById('count').textContent='?';
       document.getElementById('counterSub').textContent='โหลดไม่สำเร็จ';
-    }
-  }
-
-  async function loadBagCount(){
-    document.getElementById('count').textContent='—';
-    try{
-      const res=await fetch(`${SB_URL}/rest/v1/participants?bag_received=eq.true&select=id`,
-        {headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON,'Prefer':'count=exact','Range':'0-0'}});
-      const range=res.headers.get('Content-Range');
-      let count=0;
-      if(range){const m=range.match(/\/(\d+)/);if(m)count=parseInt(m[1]);}
-      document.getElementById('count').textContent=count.toLocaleString();
-      document.getElementById('counterSub').textContent='รายที่รับกระเป๋าแล้ว';
-    }catch(e){
-      document.getElementById('count').textContent='?';
     }
   }
 
@@ -254,48 +266,24 @@
     if(isProcessing) return;
     isProcessing=true;
     if(currentMode==='camera'){try{qrCode.pause();}catch(e){}}
+    const day=document.getElementById('day').value;
+    if(day==='bag'){isProcessing=false;return;}
     setStatus('กำลังค้นหา...');
-    showModal('loading','กำลังดำเนินการ','กำลังค้นหาข้อมูล','',null);
-
+    showModal('loading','กำลังดำเนินการ','กำลังบันทึกข้อมูล','',null);
     try{
       const keyword=decodedText.trim();
-      const searchRes=await sbFetch(`/rest/v1/participants?or=(id_card.eq.${encodeURIComponent(keyword)},passport.eq.${encodeURIComponent(keyword)})&select=id,prefix,first_name,last_name,tag,items,is_walkin,bag_received,bag_received_date`,'GET');
+      const searchRes=await sbFetch(`/rest/v1/participants?or=(id_card.eq.${encodeURIComponent(keyword)},passport.eq.${encodeURIComponent(keyword)})&select=id,prefix,first_name,last_name,tag,items,is_walkin,bag_received`,'GET');
       if(!searchRes.ok){showModal('error','ข้อผิดพลาด','ไม่สามารถค้นหาข้อมูลได้','',null);return;}
       const participants=await searchRes.json();
-      if(!participants||participants.length===0){showModal('error','ไม่พบข้อมูล','ไม่พบรหัสนี้ในระบบ','',null);return;}
-
-      const p=participants[0];
-      const fullName=`${p.prefix||''} ${p.first_name||''} ${p.last_name||''}`.trim();
-
-      // ===== โหมดรับกระเป๋า =====
-      if(isBagMode){
-        if(p.bag_received===true){
-          showModal('warning','รับกระเป๋าแล้ว','บุคคลนี้รับกระเป๋าไปแล้ว',fullName,[
-            {label:'วันที่รับ',val:p.bag_received_date||'-',style:'normal'},
-            {label:'สถานะ',val:'รับกระเป๋าไปแล้ว',style:'done'},
-          ]);
-          return;
-        }
-        const today=new Date().toLocaleDateString('th-TH',{timeZone:'Asia/Bangkok',year:'numeric',month:'long',day:'numeric'});
-        const updateRes=await sbFetch(`/rest/v1/participants?id=eq.${p.id}`,'PATCH',{bag_received:true,bag_received_date:today});
-        if(updateRes.ok||updateRes.status===204){
-          const cur=parseInt(document.getElementById('count').textContent)||0;
-          document.getElementById('count').textContent=(cur+1).toLocaleString();
-          showModal('success','รับกระเป๋าสำเร็จ','บันทึกการรับกระเป๋าเรียบร้อย',fullName,[
-            {label:'วันที่รับ',val:today,style:'normal'},
-            {label:'ประเภท',val:p.tag||'-',style:'normal'},
-            {label:'สถานะกระเป๋า',val:'รับแล้ว',style:'ok'},
-          ]);
-          setStatus('บันทึกสำเร็จ');
-        } else {
-          showModal('error','เกิดข้อผิดพลาด','ไม่สามารถบันทึกได้','',null);
-        }
+      if(!participants||participants.length===0){
+        document.getElementById('modalOverlay').classList.add('hidden');
+        showWalkin(keyword);
         return;
       }
-
-      // ===== โหมดเช็คอินปกติ =====
-      const day=document.getElementById('day').value;
+      const p=participants[0];
+      const fullName=`${p.prefix||''} ${p.first_name||''} ${p.last_name||''}`.trim();
       const isWalkin=p.is_walkin===true;
+
       const checkTodayRes=await sbFetch(`/rest/v1/checkins?participant_id=eq.${p.id}&day=eq.${day}&select=id,checkin_time`,'GET');
       const existingToday=await checkTodayRes.json();
       if(existingToday&&existingToday.length>0){
@@ -303,14 +291,17 @@
         showModal('warning','เคยเช็คอินแล้ว',`เช็คอินวันที่ ${day} ไปแล้ว`,fullName,buildWarningRows(t,p,isWalkin));
         return;
       }
+
       const checkAllRes=await sbFetch(`/rest/v1/checkins?participant_id=eq.${p.id}&select=id`,'GET');
       const allCheckins=await checkAllRes.json();
       const isFirst=!allCheckins||allCheckins.length===0;
+
       const insertRes=await sbFetch('/rest/v1/checkins','POST',{
-        participant_id:p.id,day:parseInt(day),
+        participant_id:p.id, day:parseInt(day),
         checkin_time:new Date().toISOString(),
-        scanned_by:localStorage.getItem('dmsc_user')||'unknown'
+        scanned_by:sessionStorage.getItem('dmsc_user')||'unknown'
       });
+
       if(insertRes.ok||insertRes.status===201){
         todayCount++;
         document.getElementById('count').textContent=todayCount.toLocaleString();
@@ -389,6 +380,75 @@
     setStatus('พร้อมสแกน');
   }
 
+  let walkinCode='';
+
+  function showWalkin(code){
+    walkinCode=code;
+    document.getElementById('wiIdCard').value=code;
+    document.getElementById('wiFirstName').value='';
+    document.getElementById('wiLastName').value='';
+    document.getElementById('wiErr').textContent='';
+    document.getElementById('wiSubmitBtn').disabled=false;
+    document.getElementById('wiSubmitBtn').textContent='ลงทะเบียน Walk-in';
+    document.getElementById('walkinOverlay').classList.remove('hidden');
+    setTimeout(()=>document.getElementById('wiFirstName').focus(),100);
+  }
+
+  function closeWalkin(){
+    document.getElementById('walkinOverlay').classList.add('hidden');
+    if(currentMode==='camera'){try{qrCode.resume();}catch(e){}}
+    else{document.getElementById('scanInput').value='';scanBuffer='';}
+    document.getElementById('manualInput').value='';
+    isProcessing=false;
+    setStatus('พร้อมสแกน');
+  }
+
+  async function submitWalkin(){
+    const firstName=document.getElementById('wiFirstName').value.trim();
+    const lastName=document.getElementById('wiLastName').value.trim();
+    const idCard=document.getElementById('wiIdCard').value.trim();
+    const prefix=document.getElementById('wiPrefix').value;
+    const errEl=document.getElementById('wiErr');
+    const btn=document.getElementById('wiSubmitBtn');
+    if(!firstName||!lastName){errEl.textContent='กรุณากรอกชื่อและนามสกุล';return;}
+    btn.disabled=true;btn.textContent='กำลังบันทึก...';errEl.textContent='';
+    try{
+      const day=document.getElementById('day').value;
+      const isThaiId=/^\d{13}$/.test(idCard);
+      const newP={prefix,first_name:firstName,last_name:lastName,is_walkin:true,tag:'participant'};
+      if(isThaiId) newP.id_card=idCard;
+      else if(idCard) newP.passport=idCard;
+      const insertRes=await fetch(SB_URL+'/rest/v1/participants',{
+        method:'POST',
+        headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON,'Content-Type':'application/json','Prefer':'return=representation'}
+        ,body:JSON.stringify(newP)
+      });
+      if(!insertRes.ok&&insertRes.status!==201){errEl.textContent='บันทึกไม่สำเร็จ กรุณาลองใหม่';btn.disabled=false;btn.textContent='ลงทะเบียน Walk-in';return;}
+      const inserted=await insertRes.json();
+      const participantId=Array.isArray(inserted)&&inserted.length>0?inserted[0].id:null;
+      if(participantId){
+        await sbFetch('/rest/v1/checkins','POST',{
+          participant_id:participantId,day:parseInt(day),
+          checkin_time:new Date().toISOString(),
+          scanned_by:sessionStorage.getItem('dmsc_user')||'unknown'
+        });
+        todayCount++;
+        document.getElementById('count').textContent=todayCount.toLocaleString();
+      }
+      document.getElementById('walkinOverlay').classList.add('hidden');
+      const fullName=`${prefix} ${firstName} ${lastName}`.trim();
+      showModal('success','ลงทะเบียน Walk-in สำเร็จ','บันทึกข้อมูลเรียบร้อย',fullName,[
+        {label:'ประเภท',val:'Walk-in',style:'normal'},
+        {label:'คูปองอาหาร',val:'รับได้เลย',style:'ok'},
+        {label:'ของที่ระลึก',val:'(ไม่มี)',style:'normal'},
+      ]);
+      setStatus('บันทึก Walk-in สำเร็จ');
+    }catch(e){
+      errEl.textContent='เชื่อมต่อไม่ได้ กรุณาตรวจสอบอินเทอร์เน็ต';
+      btn.disabled=false;btn.textContent='ลงทะเบียน Walk-in';
+    }
+  }
+
   function sbFetch(path,method,body){
     const opts={method,headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON,'Content-Type':'application/json','Prefer':'return=minimal'}};
     if(body) opts.body=JSON.stringify(body);
@@ -396,7 +456,7 @@
   }
 
   function setStatus(t){document.getElementById('statusText').textContent=t;}
-  function doLogout(){localStorage.removeItem('dmsc_auth');localStorage.removeItem('dmsc_user');window.location.href='login.html';}
+  function doLogout(){sessionStorage.removeItem('dmsc_auth');sessionStorage.removeItem('dmsc_user');window.location.href='login.html';}
 </script>
 </body>
 </html>

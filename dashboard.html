@@ -112,7 +112,7 @@
 
 <script>
 // Auth check — ต้อง login ก่อน
-if (localStorage.getItem('dmsc_auth') !== 'ok') {
+if (sessionStorage.getItem('dmsc_auth') !== 'ok') {
   window.location.href = 'login.html';
 }
 </script>
@@ -179,11 +179,6 @@ if (localStorage.getItem('dmsc_auth') !== 'ok') {
       <div class="stat-label">Walk-in</div>
       <div class="stat-num" id="sWalkin" style="color:#7c3aed;">-</div>
       <div class="stat-sub" id="sWalkinSub">ราย (เช็คอินแล้ว)</div>
-    </div>
-    <div class="stat-card" style="border-left:4px solid #f59e0b;">
-      <div class="stat-label">รับกระเป๋าแล้ว</div>
-      <div class="stat-num" id="sBagReceived" style="color:#f59e0b;">-</div>
-      <div class="stat-sub" id="sBagSub">- / - ราย</div>
     </div>
   </div>
   <!-- แถวที่ 2: แยกวัน -->
@@ -358,44 +353,6 @@ if (localStorage.getItem('dmsc_auth') !== 'ok') {
     </div>
   </div>
 
-  <!-- BAG TABLE -->
-  <div class="tcard">
-    <div class="thead-row">
-      <div>
-        <span class="ttitle">รายชื่อผู้มีสิทธิ์รับกระเป๋า</span>
-        <span class="tcount" id="bagCount"></span>
-      </div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
-        <select id="bagFilter" onchange="renderBagTable()" style="padding:8px 12px;border-radius:8px;border:1.5px solid #e2e8f0;font-family:'Sarabun',sans-serif;font-size:0.88rem;">
-          <option value="">ทั้งหมด</option>
-          <option value="received">รับแล้ว</option>
-          <option value="pending">ยังไม่รับ</option>
-        </select>
-        <input class="sbox" id="bagSearch" placeholder="🔍 ค้นหาชื่อ..." oninput="renderBagTable()">
-        <button class="btn-xl green" onclick="exportBagExcel()">⬇ Excel กระเป๋า</button>
-      </div>
-    </div>
-    <div style="overflow-x:auto;">
-      <table>
-        <thead>
-          <tr>
-            <th>#</th><th>ชื่อ-นามสกุล</th><th>หน่วยงาน</th>
-            <th>ประเภทการเข้าร่วม</th><th>TAG</th>
-            <th>สถานะกระเป๋า</th><th>วันที่รับ</th>
-          </tr>
-        </thead>
-        <tbody id="bagBody"><tr><td colspan="7" class="loading-td">กำลังโหลด...</td></tr></tbody>
-      </table>
-    </div>
-    <div class="pager">
-      <span id="bagPInfo">-</span>
-      <div style="display:flex;gap:6px;">
-        <button class="pbtn" id="bagPrev" onclick="changeBagPage(-1)">← ก่อนหน้า</button>
-        <button class="pbtn" id="bagNext" onclick="changeBagPage(1)">ถัดไป →</button>
-      </div>
-    </div>
-  </div>
-
 </div>
 
 <script>
@@ -490,13 +447,6 @@ async function loadAll(){
   document.getElementById('lastUpdate').textContent='อัปเดต: '+new Date().toLocaleTimeString('th-TH',{timeZone:'Asia/Bangkok'});
   applyFilters();
   renderDept();
-
-  // Auto-refresh ทุก 30 วินาที
-  if(!window._autoRefreshTimer){
-    window._autoRefreshTimer=setInterval(()=>{
-      loadAll();
-    },30000);
-  }
 }
 
 function toggleFDeptAll(){
@@ -800,20 +750,19 @@ function getRows(){
 }
 
 loadAll();
-loadBagData();
 
 // Auto-refresh
 let _refreshTimer = null;
 function setAutoRefresh() {
   clearInterval(_refreshTimer);
   const sec = parseInt(document.getElementById('autoRefreshSel').value);
-  if (sec > 0) _refreshTimer = setInterval(()=>{loadAll();loadBagData();}, sec * 1000);
+  if (sec > 0) _refreshTimer = setInterval(loadAll, sec * 1000);
 }
-setAutoRefresh();
+setAutoRefresh(); // เริ่มทันที (default 1 นาที)
 
 function doLogout() {
-  localStorage.removeItem('dmsc_auth');
-  localStorage.removeItem('dmsc_user');
+  sessionStorage.removeItem('dmsc_auth');
+  sessionStorage.removeItem('dmsc_user');
   window.location.href = 'login.html';
 }const CLEAR_PASS = "P@und3142";
 
