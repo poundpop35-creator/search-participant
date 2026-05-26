@@ -161,7 +161,7 @@ async function loadAll(){
   try{
     let res=[], from=0;
     while(true){
-      const r=await fetch(`${SB_URL}/rest/v1/participants?select=id,prefix,first_name,last_name,dept,ext_dept,internal_external,participation_type,tag,bag_received,bag_received_date&order=last_name.asc`,{
+      const r=await fetch(`${SB_URL}/rest/v1/participants?select=id,prefix,first_name,last_name,dept,ext_dept,internal_external,participation_type,tag,is_walkin,bag_received,bag_received_date&order=last_name.asc`,{
         headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Range-Unit':'items','Range':`${from}-${from+999}`,'Prefer':'count=exact'}
       });
       const d=await r.json();
@@ -169,7 +169,7 @@ async function loadAll(){
       res=res.concat(d); if(d.length<1000) break; from+=1000;
     }
 
-    allData = res.filter(p => p.items && p.items.trim() !== '').map(p=>{
+    allData = res.filter(p => p.is_walkin === false).map(p=>{
       const isIn=(p.internal_external||'').includes('ภายใน');
       const dept=isIn?(p.dept||'-'):(p.ext_dept||p.dept||'-');
       return{
