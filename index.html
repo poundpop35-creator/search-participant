@@ -157,7 +157,20 @@
   let isProcessing=false, todayCount=0, qrCode=null;
   let currentMode='camera', scanBuffer='', scanTimer=null;
 
-  window.addEventListener('load',()=>{ startCamera(); loadTodayCount(); });
+  window.addEventListener('load',()=>{ initDaySelect(); startCamera(); loadTodayCount(); });
+
+  function initDaySelect(){
+    const now=new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Bangkok'}));
+    const m=now.getMonth()+1, d=now.getDate(), y=now.getFullYear();
+    const confDays={24:1,25:2,26:3};
+    const isBangkok2026June=y===2026&&m===6;
+    const bagOpt=document.getElementById('day').querySelector('option[value="bag"]');
+    if(isBangkok2026June&&confDays[d]){
+      bagOpt.disabled=true;
+      bagOpt.textContent='รับกระเป๋า (ก่อนวันงาน) — ปิดแล้ว';
+      document.getElementById('day').value=String(confDays[d]);
+    }
+  }
 
   function onDayChange(){
     loadTodayCount();
