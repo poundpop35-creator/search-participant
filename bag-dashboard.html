@@ -124,6 +124,18 @@
       </select>
     </div>
     <div class="filter-group">
+      <div class="filter-label">ประเภทการเข้าร่วม</div>
+      <select class="filter-select" id="fPT" onchange="applyFilters()">
+        <option value="">ทั้งหมด</option>
+        <option value="ผู้เข้าร่วมงาน">ผู้เข้าร่วมงาน</option>
+        <option value="ผู้บริหาร">ผู้บริหาร</option>
+        <option value="ผู้บริหาร+กรรมการ">ผู้บริหาร+กรรมการ</option>
+        <option value="ผู้บริหาร+คณะทำงาน">ผู้บริหาร+คณะทำงาน</option>
+        <option value="ผู้บริหาร+ผู้ส่งผลงาน">ผู้บริหาร+ผู้ส่งผลงาน</option>
+        <option value="ผู้ส่งผลงาน">ผู้ส่งผลงาน</option>
+      </select>
+    </div>
+    <div class="filter-group">
       <div class="filter-label">หน่วยงาน</div>
       <select class="filter-select" id="fDept" onchange="applyFilters()" style="max-width:260px;">
         <option value="">ทั้งหมด</option>
@@ -256,14 +268,16 @@ async function loadAll(){
 function applyFilters(){
   const q=(document.getElementById('sBox').value||'').toLowerCase();
   const st=document.getElementById('fStatus').value;
+  const pt=document.getElementById('fPT').value;
   const tg=document.getElementById('fTag').value;
   const dp=document.getElementById('fDept').value;
   filtered=allData.filter(r=>{
     const mQ=!q||r.name.toLowerCase().includes(q)||r.dept.toLowerCase().includes(q);
     const mSt=!st||(st==='received'&&r.received)||(st==='pending'&&!r.received);
+    const mPt=!pt||r.pt===pt;
     const mTg=!tg||r.tag===tg;
     const mDp=!dp||r.dept===dp;
-    return mQ&&mSt&&mTg&&mDp;
+    return mQ&&mSt&&mPt&&mTg&&mDp;
   });
   curPage=1;
   document.getElementById('tCount').textContent=`(${filtered.length.toLocaleString()} รายการ)`;
@@ -294,6 +308,7 @@ function changePage(d){curPage+=d;renderTable();window.scrollTo({top:0,behavior:
 
 function resetFilters(){
   document.getElementById('fStatus').value='';
+  document.getElementById('fPT').value='';
   document.getElementById('fTag').value='';
   document.getElementById('fDept').value='';
   document.getElementById('sBox').value='';
