@@ -159,29 +159,43 @@
   window.addEventListener('load',()=>{ startCamera(); loadTodayCount(); });
 
   function onDayChange(){
-    const val=document.getElementById('day').value;
-    if(val==='bag') window.location.href='bag.html';
-    else loadTodayCount();
+    loadTodayCount();
   }
 
   async function loadTodayCount(){
     const day=document.getElementById('day').value;
-    if(day==='bag') return;
     document.getElementById('count').textContent='—';
     document.getElementById('counterSub').textContent='กำลังโหลด...';
-    document.getElementById('counterLabel').textContent='เช็คอินสำเร็จวันนี้';
-    try{
-      const res=await fetch(`${SB_URL}/rest/v1/checkins?day=eq.${day}&select=id`,
-        {headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON,'Prefer':'count=exact','Range':'0-0'}});
-      const range=res.headers.get('Content-Range');
-      let count=0;
-      if(range){const m=range.match(/\/(\d+)/);if(m)count=parseInt(m[1]);}
-      todayCount=count;
-      document.getElementById('count').textContent=count.toLocaleString();
-      document.getElementById('counterSub').textContent='วันที่ '+DAY_TH[parseInt(day)];
-    }catch(e){
-      document.getElementById('count').textContent='?';
-      document.getElementById('counterSub').textContent='โหลดไม่สำเร็จ';
+    if(day==='bag'){
+      document.getElementById('counterLabel').textContent='รับกระเป๋าแล้ว';
+      try{
+        const res=await fetch(`${SB_URL}/rest/v1/participants?bag_received=eq.true&select=id`,
+          {headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON,'Prefer':'count=exact','Range':'0-0'}});
+        const range=res.headers.get('Content-Range');
+        let count=0;
+        if(range){const m=range.match(/\/(\d+)/);if(m)count=parseInt(m[1]);}
+        todayCount=count;
+        document.getElementById('count').textContent=count.toLocaleString();
+        document.getElementById('counterSub').textContent='ราย (รับกระเป๋าแล้ว)';
+      }catch(e){
+        document.getElementById('count').textContent='?';
+        document.getElementById('counterSub').textContent='โหลดไม่สำเร็จ';
+      }
+    } else {
+      document.getElementById('counterLabel').textContent='เช็คอินสำเร็จวันนี้';
+      try{
+        const res=await fetch(`${SB_URL}/rest/v1/checkins?day=eq.${day}&select=id`,
+          {headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON,'Prefer':'count=exact','Range':'0-0'}});
+        const range=res.headers.get('Content-Range');
+        let count=0;
+        if(range){const m=range.match(/\/(\d+)/);if(m)count=parseInt(m[1]);}
+        todayCount=count;
+        document.getElementById('count').textContent=count.toLocaleString();
+        document.getElementById('counterSub').textContent='วันที่ '+DAY_TH[parseInt(day)];
+      }catch(e){
+        document.getElementById('count').textContent='?';
+        document.getElementById('counterSub').textContent='โหลดไม่สำเร็จ';
+      }
     }
   }
 
@@ -235,12 +249,11 @@
     isProcessing=true;
     if(currentMode==='camera'){try{qrCode.pause();}catch(e){}}
     const day=document.getElementById('day').value;
-    if(day==='bag'){isProcessing=false;return;}
     setStatus('กำลังค้นหา...');
     showModal('loading','กำลังดำเนินการ','กำลังบันทึกข้อมูล','',null);
     try{
       const keyword=decodedText.trim();
-      const searchRes=await sbFetch(`/rest/v1/participants?or=(id_card.eq.${encodeURIComponent(keyword)},passport.eq.${encodeURIComponent(keyword)})&select=id,prefix,first_name,last_name,tag,items,is_walkin,bag_received`,'GET');
+      const searchRes=await sbFetch(`/rest/v1/participants?or=(id_card.eq.${encodeURIComponent(keyword)},passport.eq.${encodeURIComponent(keyword)})&select=id,prefix,first_name,last_name,tag,items,is_walkin,bag_received,bag_received_date`,'GET');
       if(!searchRes.ok){showModal('error','ข้อผิดพลาด','ไม่สามารถค้นหาข้อมูลได้','',null);return;}
       const participants=await searchRes.json();
       if(!participants||participants.length===0){
@@ -251,6 +264,32 @@
       const fullName=`${p.prefix||''} ${p.first_name||''} ${p.last_name||''}`.trim();
       const isWalkin=p.is_walkin===true;
 
+      // โหมดรับกระเป๋า
+      if(day==='bag'){
+        if(p.bag_received===true){
+          showModal('warning','รับกระเป๋าแล้ว','บุคคลนี้รับกระเป๋าไปแล้ว',fullName,[
+            {label:'วันที่รับ',val:p.bag_received_date||'-',style:'normal'},
+            {label:'สถานะ',val:'รับกระเป๋าไปแล้ว ✓',style:'done'}
+          ]);
+          return;
+        }
+        const today=new Date().toLocaleDateString('th-TH',{timeZone:'Asia/Bangkok',year:'numeric',month:'long',day:'numeric'});
+        const bagRes=await sbFetch(`/rest/v1/participants?id=eq.${p.id}`,'PATCH',{bag_received:true,bag_received_date:today});
+        if(bagRes.ok||bagRes.status===204){
+          todayCount++;
+          document.getElementById('count').textContent=todayCount.toLocaleString();
+          showModal('success','รับกระเป๋าสำเร็จ','บันทึกการรับกระเป๋าเรียบร้อย',fullName,[
+            {label:'วันที่รับ',val:today,style:'normal'},
+            {label:'สถานะกระเป๋า',val:'รับแล้ว ✓',style:'ok'}
+          ]);
+          setStatus('รับกระเป๋าสำเร็จ');
+        } else {
+          showModal('error','เกิดข้อผิดพลาด','ไม่สามารถบันทึกได้','',null);
+        }
+        return;
+      }
+
+      // โหมดเช็คอิน
       const checkTodayRes=await sbFetch(`/rest/v1/checkins?participant_id=eq.${p.id}&day=eq.${day}&select=id,checkin_time`,'GET');
       const existingToday=await checkTodayRes.json();
       if(existingToday&&existingToday.length>0){
