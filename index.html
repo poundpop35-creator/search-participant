@@ -356,11 +356,18 @@
       {label:'เวลาที่เช็คอิน',val:time,style:'normal'},
       {label:'ประเภท',val:'Walk-in',style:'normal'}
     ];
-    return[
+    const items=p.items||'';
+    const hasBag=items.includes('กระเป๋า');
+    const otherItems=items.replace('กระเป๋า','').replace(/\+\+/g,'+').replace(/^\+|\+$/g,'').trim();
+    const rows=[
       {label:'เวลาที่เช็คอิน',val:time,style:'normal'},
-      {label:'คูปองอาหาร',val:'รับแล้ว',style:'done'},
-      {label:'ประเภท',val:p.tag||'-',style:'normal'}
+      {label:'คูปองอาหาร',val:'รับไปแล้ว ✓',style:'done'}
     ];
+    if(hasBag) rows.push({label:'กระเป๋า',val:'รับไปแล้ว ✓',style:'done'});
+    if(otherItems) rows.push({label:'ของที่ระลึกอื่น',val:'รับไปแล้ว ✓',style:'done'});
+    if(!hasBag&&!otherItems) rows.push({label:'ของที่ระลึก',val:'รับไปแล้ว ✓',style:'done'});
+    rows.push({label:'ประเภท',val:p.tag||'-',style:'normal'});
+    return rows;
   }
 
   function showModal(type,status,title,name,rows){
