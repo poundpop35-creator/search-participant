@@ -11,13 +11,13 @@
     :root{--blue:#0d2b6b;--blue-mid:#1a4eb8;--blue-light:#e8f0fe;--green:#16a34a;--yellow:#d97706;--white:#fff;--border:#e2e8f0;--shadow:0 2px 12px rgba(13,43,107,0.10);}
     *{box-sizing:border-box;margin:0;padding:0;}
     body{background:linear-gradient(rgba(232,240,254,0.60),rgba(232,240,254,0.60)),url('https://raw.githubusercontent.com/poundpop35-creator/search-participant/main/DNA.png') center/cover fixed;font-family:'Sarabun',sans-serif;}
-    .topbar{background:rgba(13,43,107,0.78);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:white;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;position:sticky;top:0;z-index:50;}
-    .topbar h1{font-size:1rem;font-weight:700;text-shadow:0 1px 4px rgba(0,0,0,0.35);}
-    .refresh-btn{padding:7px 16px;border-radius:8px;border:1.5px solid rgba(255,255,255,0.4);color:white;background:transparent;font-family:'Sarabun',sans-serif;font-size:0.85rem;cursor:pointer;}
-    .refresh-btn:hover{background:rgba(255,255,255,0.1);}
-    .clear-btn{padding:7px 16px;border-radius:8px;border:1.5px solid rgba(252,165,165,0.6);color:#fca5a5;background:transparent;font-family:'Sarabun',sans-serif;font-size:0.85rem;cursor:pointer;}
-    .clear-btn:hover{background:rgba(220,38,38,0.2);}
-    .last-update{font-size:0.75rem;opacity:0.6;}
+    .topbar{background:rgba(255,255,255,0.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:#1e293b;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;position:sticky;top:0;z-index:50;}
+    .topbar h1{font-size:1rem;font-weight:700;color:#1e293b;}
+    .refresh-btn{padding:7px 16px;border-radius:8px;border:1.5px solid #cbd5e1;color:#1e293b;background:transparent;font-family:'Sarabun',sans-serif;font-size:0.85rem;cursor:pointer;}
+    .refresh-btn:hover{background:rgba(0,0,0,0.05);}
+    .clear-btn{padding:7px 16px;border-radius:8px;border:none;background:#dc2626;color:white;font-family:'Sarabun',sans-serif;font-size:0.85rem;cursor:pointer;font-weight:600;}
+    .clear-btn:hover{background:#b91c1c;}
+    .last-update{font-size:0.75rem;color:#64748b;}
     /* Clear modal */
     .clear-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.65);display:flex;align-items:center;justify-content:center;z-index:9999;padding:24px;}
     .clear-overlay.hidden{display:none;}
@@ -143,7 +143,7 @@ if (sessionStorage.getItem('dmsc_auth') !== 'ok') {
   </div>
   <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
     <span class="last-update" id="lastUpdate">-</span>
-    <select id="autoRefreshSel" onchange="setAutoRefresh()" style="padding:6px 10px;border-radius:8px;border:1.5px solid rgba(255,255,255,0.3);background:transparent;color:white;font-family:'Sarabun',sans-serif;font-size:0.82rem;cursor:pointer;">
+    <select id="autoRefreshSel" onchange="setAutoRefresh()" style="padding:6px 10px;border-radius:8px;border:1.5px solid #cbd5e1;background:white;color:#1e293b;font-family:'Sarabun',sans-serif;font-size:0.82rem;cursor:pointer;">
       <option value="0">ไม่ auto-refresh</option>
       <option value="30">ทุก 30 วินาที</option>
       <option value="60" selected>ทุก 1 นาที</option>
@@ -154,7 +154,7 @@ if (sessionStorage.getItem('dmsc_auth') !== 'ok') {
     <a href="index.html" class="refresh-btn" style="text-decoration:none;">← ระบบสแกนเช็คอิน</a>
     <a href="bag-dashboard.html" class="refresh-btn" style="text-decoration:none;">Dashboard กระเป๋า</a>
     <a href="public.html" class="refresh-btn" style="text-decoration:none;">Live Dashboard</a>
-    <button class="refresh-btn" onclick="doLogout()" style="border-color:rgba(252,165,165,0.5);color:#fca5a5;">ออกจากระบบ</button>
+    <button class="refresh-btn" onclick="doLogout()" style="background:#dc2626;color:white;border-color:#dc2626;font-weight:600;">ออกจากระบบ</button>
   </div>
 </div>
 

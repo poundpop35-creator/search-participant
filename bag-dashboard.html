@@ -10,14 +10,14 @@
     :root{--blue:#0d2b6b;--blue-light:#e8f0fe;--green:#16a34a;--red:#dc2626;--white:#fff;--shadow:0 2px 12px rgba(13,43,107,0.10);--border:#e2e8f0;}
     *{box-sizing:border-box;margin:0;padding:0;}
     body{background:linear-gradient(rgba(232,240,254,0.60),rgba(232,240,254,0.60)),url('https://raw.githubusercontent.com/poundpop35-creator/search-participant/main/DNA.png') center/cover fixed;font-family:'Sarabun',sans-serif;}
-    .topbar{background:rgba(13,43,107,0.78);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:white;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;position:sticky;top:0;z-index:50;}
-    .topbar h1{font-size:1rem;font-weight:700;text-shadow:0 1px 4px rgba(0,0,0,0.35);}
+    .topbar{background:rgba(255,255,255,0.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:#1e293b;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;position:sticky;top:0;z-index:50;}
+    .topbar h1{font-size:1rem;font-weight:700;color:#1e293b;}
     .topbar-btns{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
-    .tbtn{padding:7px 14px;border-radius:8px;border:1.5px solid rgba(255,255,255,0.4);color:white;background:transparent;font-family:'Sarabun',sans-serif;font-size:0.82rem;cursor:pointer;text-decoration:none;display:inline-block;}
-    .tbtn:hover{background:rgba(255,255,255,0.1);}
-    .last-update{font-size:0.75rem;opacity:0.6;}
-    .clear-btn{padding:7px 16px;border-radius:8px;border:1.5px solid rgba(252,165,165,0.6);color:#fca5a5;background:transparent;font-family:'Sarabun',sans-serif;font-size:0.85rem;cursor:pointer;}
-    .clear-btn:hover{background:rgba(220,38,38,0.2);}
+    .tbtn{padding:7px 14px;border-radius:8px;border:1.5px solid #cbd5e1;color:#1e293b;background:transparent;font-family:'Sarabun',sans-serif;font-size:0.82rem;cursor:pointer;text-decoration:none;display:inline-block;}
+    .tbtn:hover{background:rgba(0,0,0,0.05);}
+    .last-update{font-size:0.75rem;color:#64748b;}
+    .clear-btn{padding:7px 16px;border-radius:8px;border:none;background:#dc2626;color:white;font-family:'Sarabun',sans-serif;font-size:0.85rem;cursor:pointer;font-weight:600;}
+    .clear-btn:hover{background:#b91c1c;}
     .clear-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.65);display:flex;align-items:center;justify-content:center;z-index:9999;padding:24px;}
     .clear-overlay.hidden{display:none;}
     .clear-modal{background:white;border-radius:20px;padding:28px 24px 22px;width:100%;max-width:360px;box-shadow:0 8px 40px rgba(0,0,0,0.3);text-align:center;}
@@ -84,10 +84,10 @@
   <div class="topbar-btns">
     <span class="last-update" id="lastUpdate">-</span>
     <button class="tbtn" onclick="loadAll()">รีเฟรช</button>
-    <a class="tbtn" href="bag.html">← ระบบสแกนรับกระเป๋า</a>
+    <a class="tbtn" href="index.html">← ระบบสแกนเช็คอิน</a>
     <a class="tbtn" href="dashboard.html">Dashboard หลัก</a>
     <button class="clear-btn" onclick="openClearModal()">ล้างข้อมูล</button>
-    <button class="tbtn" onclick="doLogout()" style="border-color:rgba(252,165,165,0.5);color:#fca5a5;">ออกจากระบบ</button>
+    <button class="tbtn" onclick="doLogout()" style="background:#dc2626;color:white;border-color:#dc2626;font-weight:600;">ออกจากระบบ</button>
   </div>
 </div>
 
