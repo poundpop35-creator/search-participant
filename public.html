@@ -42,12 +42,14 @@
 
     .main{padding:24px 16px;max-width:900px;margin:0 auto;}
 
-    .big-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:24px;}
-    .big-card{background:var(--white);border-radius:18px;padding:24px 20px;box-shadow:var(--shadow);text-align:center;}
-    .big-label{font-size:0.78rem;color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;}
-    .big-num{font-size:2.8rem;font-weight:800;line-height:1;}
-    .big-sub{font-size:0.8rem;color:#94a3b8;margin-top:6px;}
+    .big-stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:14px;}
+    .big-card{background:var(--white);border-radius:18px;padding:20px 16px;box-shadow:var(--shadow);text-align:center;}
+    .big-label{font-size:0.75rem;color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;}
+    .big-num{font-size:2.4rem;font-weight:800;line-height:1;}
+    .big-sub{font-size:0.78rem;color:#94a3b8;margin-top:6px;}
     .big-card.total .big-num{color:#0d2b6b;}
+    .big-card.internal .big-num{color:#16a34a;}
+    .big-card.external .big-num{color:#ea580c;}
     .big-card.d1 .big-num{color:#2563eb;}
     .big-card.d2 .big-num{color:#7c3aed;}
     .big-card.d3 .big-num{color:#0891b2;}
@@ -111,12 +113,24 @@
   <div id="loadingArea" class="loading">กำลังโหลดข้อมูล...</div>
   <div id="contentArea" style="display:none;">
 
-    <div class="big-stats">
+    <div class="big-stats-row">
       <div class="big-card total">
         <div class="big-label">ผู้เข้าร่วมทั้งหมด</div>
         <div class="big-num" id="pTotal">-</div>
         <div class="big-sub">ราย (เช็คอินแล้ว)</div>
       </div>
+      <div class="big-card internal">
+        <div class="big-label">บุคลากรภายใน</div>
+        <div class="big-num" id="pInternal">-</div>
+        <div class="big-sub" id="pInternalS">ราย</div>
+      </div>
+      <div class="big-card external">
+        <div class="big-label">บุคคลภายนอก</div>
+        <div class="big-num" id="pExternal">-</div>
+        <div class="big-sub" id="pExternalS">ราย</div>
+      </div>
+    </div>
+    <div class="big-stats-row" style="margin-bottom:24px;">
       <div class="big-card d1">
         <div class="big-label">วันที่ 1 — 24 มิ.ย.</div>
         <div class="big-num" id="pD1">-</div>
@@ -225,8 +239,14 @@ async function loadData() {
     const d1=checkins.filter(r=>r.day===1).length;
     const d2=checkins.filter(r=>r.day===2).length;
     const d3=checkins.filter(r=>r.day===3).length;
+    const internal=checkins.filter(r=>r.participants&&(r.participants.internal_external||'').includes('ภายใน')).length;
+    const external=checkins.filter(r=>r.participants&&(r.participants.internal_external||'').includes('ภายนอก')).length;
 
     document.getElementById('pTotal').textContent=total.toLocaleString();
+    document.getElementById('pInternal').textContent=internal.toLocaleString();
+    document.getElementById('pExternal').textContent=external.toLocaleString();
+    document.getElementById('pInternalS').textContent=`${total?Math.round(internal/total*100):0}% ของทั้งหมด`;
+    document.getElementById('pExternalS').textContent=`${total?Math.round(external/total*100):0}% ของทั้งหมด`;
     document.getElementById('pD1').textContent=d1.toLocaleString();
     document.getElementById('pD2').textContent=d2.toLocaleString();
     document.getElementById('pD3').textContent=d3.toLocaleString();
