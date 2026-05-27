@@ -67,6 +67,9 @@
     .tabs{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
     .tab{padding:8px 18px;border-radius:10px;border:2px solid var(--border);background:var(--white);font-family:'Sarabun',sans-serif;font-size:0.88rem;font-weight:600;cursor:pointer;color:#64748b;}
     .tab.active{background:var(--blue);color:white;border-color:var(--blue);}
+    /* Participant list sub-tabs */
+    .ptab{padding:10px 20px;border:none;background:none;font-family:'Sarabun',sans-serif;font-size:0.9rem;font-weight:600;cursor:pointer;color:#64748b;border-bottom:3px solid transparent;}
+    .ptab.active{color:var(--blue);border-bottom-color:var(--blue);}
     /* Table card */
     .tcard{background:var(--white);border-radius:14px;box-shadow:var(--shadow);overflow:hidden;margin-bottom:24px;}
     .thead-row{padding:14px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:10px;}
@@ -284,6 +287,44 @@ if (sessionStorage.getItem('dmsc_auth') !== 'ok') {
     </div>
   </div>
 
+  <!-- ALL PARTICIPANTS SECTION -->
+  <div class="tcard" style="margin-bottom:24px;">
+    <div class="thead-row" style="cursor:pointer;" onclick="toggleParticipants()">
+      <div>
+        <span class="ttitle">รายชื่อผู้ลงทะเบียนทั้งหมด</span>
+        <span class="tcount" id="pRegCount"></span>
+      </div>
+      <button class="btn-xl" id="pToggleBtn" style="background:var(--blue);color:white;pointer-events:none;">▼ ดูรายชื่อ</button>
+    </div>
+    <div id="pRegSection" style="display:none;">
+      <div style="display:flex;border-bottom:2px solid var(--border);padding:0 8px;">
+        <button class="ptab active" id="ptab0" onclick="event.stopPropagation();switchPTab(0)">ลงทะเบียนล่วงหน้า <span id="pPreCount"></span></button>
+        <button class="ptab" id="ptab1" onclick="event.stopPropagation();switchPTab(1)">Walk-in <span id="pWiCount"></span></button>
+      </div>
+      <div style="padding:12px 20px;border-bottom:1px solid var(--border);">
+        <input class="sbox" id="pSearch" placeholder="🔍 ค้นหาชื่อ / หน่วยงาน" oninput="renderParticipants()">
+      </div>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th><th>ชื่อ-นามสกุล</th><th>หน่วยงาน</th>
+              <th>ประเภทการเข้าร่วม</th><th>TAG</th>
+            </tr>
+          </thead>
+          <tbody id="pBody"><tr><td colspan="5" class="loading-td">กำลังโหลด...</td></tr></tbody>
+        </table>
+      </div>
+      <div class="pager">
+        <span id="pRegInfo">-</span>
+        <div style="display:flex;gap:6px;">
+          <button class="pbtn" id="pPrev" onclick="changePPage(-1)">← ก่อนหน้า</button>
+          <button class="pbtn" id="pNext" onclick="changePPage(1)">ถัดไป →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- DEPT CARD -->
   <div class="dept-card">
     <div class="dept-top">
@@ -367,6 +408,8 @@ let allData=[], filtered=[], curTab=0, curPage=1;
 let selPT=new Set(), selDPT=new Set(), selDDept=new Set(), selFDept=new Set();
 let deptRaw=[], dView='table', dChart=null;
 let totalPreReg=0, totalAll=0;
+let allParticipants=[], curPTab=0, curPPage=1;
+const P_PAGE=20;
 
 async function fetchAll(path,ps=1000){
   let res=[],from=0;
@@ -457,7 +500,72 @@ async function loadAll(){
   document.getElementById('lastUpdate').textContent='อัปเดต: '+new Date().toLocaleTimeString('th-TH',{timeZone:'Asia/Bangkok'});
   applyFilters();
   renderDept();
+  loadParticipants();
 }
+
+async function loadParticipants(){
+  allParticipants=await fetchAll('/rest/v1/participants?select=id,prefix,first_name,last_name,dept,ext_dept,internal_external,participation_type,tag,is_walkin&order=last_name.asc');
+  const preC=allParticipants.filter(p=>!p.is_walkin).length;
+  const wiC=allParticipants.filter(p=>p.is_walkin===true).length;
+  document.getElementById('pRegCount').textContent=`(ล่วงหน้า ${preC.toLocaleString()} | Walk-in ${wiC.toLocaleString()})`;
+  document.getElementById('pPreCount').textContent=`(${preC.toLocaleString()})`;
+  document.getElementById('pWiCount').textContent=`(${wiC.toLocaleString()})`;
+}
+
+function toggleParticipants(){
+  const sec=document.getElementById('pRegSection');
+  const btn=document.getElementById('pToggleBtn');
+  if(sec.style.display==='none'){
+    sec.style.display='block';
+    btn.textContent='▲ ซ่อน';
+    renderParticipants();
+  } else {
+    sec.style.display='none';
+    btn.textContent='▼ ดูรายชื่อ';
+  }
+}
+
+function switchPTab(t){
+  curPTab=t; curPPage=1;
+  document.querySelectorAll('.ptab').forEach((b,i)=>b.classList.toggle('active',i===t));
+  renderParticipants();
+}
+
+function renderParticipants(){
+  const q=(document.getElementById('pSearch').value||'').toLowerCase();
+  const data=allParticipants.filter(p=>{
+    const isWI=p.is_walkin===true;
+    const matchTab=curPTab===0?!isWI:isWI;
+    const name=`${p.prefix||''} ${p.first_name||''} ${p.last_name||''}`.trim();
+    const isIn=(p.internal_external||'').includes('ภายใน');
+    const dept=isIn?(p.dept||'-'):(p.ext_dept||p.dept||'-');
+    const matchQ=!q||name.toLowerCase().includes(q)||dept.toLowerCase().includes(q);
+    return matchTab&&matchQ;
+  });
+  const tot=data.length;
+  const totPages=Math.ceil(tot/P_PAGE)||1;
+  if(curPPage>totPages) curPPage=1;
+  const start=(curPPage-1)*P_PAGE;
+  const page=data.slice(start,start+P_PAGE);
+  document.getElementById('pRegInfo').textContent=`แสดง ${tot===0?0:start+1}–${Math.min(start+P_PAGE,tot)} จาก ${tot.toLocaleString()} รายการ`;
+  document.getElementById('pPrev').disabled=curPPage<=1;
+  document.getElementById('pNext').disabled=curPPage>=totPages;
+  if(!page.length){document.getElementById('pBody').innerHTML='<tr><td colspan="5" class="loading-td">ไม่พบข้อมูล</td></tr>';return;}
+  document.getElementById('pBody').innerHTML=page.map((p,i)=>{
+    const name=`${p.prefix||''} ${p.first_name||''} ${p.last_name||''}`.trim();
+    const isIn=(p.internal_external||'').includes('ภายใน');
+    const dept=isIn?(p.dept||'-'):(p.ext_dept||p.dept||'-');
+    return`<tr>
+      <td>${start+i+1}</td>
+      <td>${name}</td>
+      <td style="max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${dept}">${dept}</td>
+      <td>${p.participation_type||'-'}</td>
+      <td>${p.tag||'-'}</td>
+    </tr>`;
+  }).join('');
+}
+
+function changePPage(d){curPPage+=d;renderParticipants();window.scrollTo({top:0,behavior:'smooth'});}
 
 function toggleFDeptAll(){
   const checked=document.getElementById('fDeptAll').checked;
