@@ -157,13 +157,17 @@
 
   async function load(){
     try{
-      const [participants, checkins, schedules] = await Promise.all([
-        fetch(SB_URL+'/rest/v1/participants?select=id,id_card,prefix,first_name,last_name,dept',{headers:{...H,'Range':'0-9999'}}).then(r=>r.json()),
-        fetch(SB_URL+'/rest/v1/presenter_checkins?select=participant_id,type,checkin_time&order=checkin_time.asc',{headers:{...H,'Range':'0-9999'}}).then(r=>r.json()),
-        fetch(SB_URL+'/rest/v1/presentation_schedule?select=id_card,presentation_code,poster_group,title,field,branch',{headers:{...H,'Range':'0-9999'}}).then(r=>r.json())
+      const [pRes, cRes, sRes] = await Promise.all([
+        fetch(SB_URL+'/rest/v1/participants?select=id,id_card,prefix,first_name,last_name,dept',{headers:{...H,'Range':'0-9999'}}),
+        fetch(SB_URL+'/rest/v1/presenter_checkins?select=participant_id,type,checkin_time&order=checkin_time.asc',{headers:{...H,'Range':'0-9999'}}),
+        fetch(SB_URL+'/rest/v1/presentation_schedule?select=id_card,presentation_code,poster_group,title,field,branch',{headers:{...H,'Range':'0-9999'}})
       ]);
+      const [participants, checkins, schedules] = await Promise.all([pRes.json(), cRes.json(), sRes.json()]);
 
-      if(!Array.isArray(participants)||!Array.isArray(checkins)) return;
+      if(!Array.isArray(participants)||!Array.isArray(checkins)){
+        document.getElementById('listPresent').innerHTML='<div class="empty" style="color:#dc2626">โหลดข้อมูลไม่สำเร็จ: '+JSON.stringify(participants)+'</div>';
+        return;
+      }
 
       // map participants by id
       const pMap = {};
@@ -203,7 +207,10 @@
         : '<div class="empty">ยังไม่มีคิวมารับใบประกาศครับ 🎖️</div>';
 
       document.getElementById('lastUpdate').textContent = 'อัปเดต '+new Date().toLocaleTimeString('th-TH',{timeZone:'Asia/Bangkok',hour:'2-digit',minute:'2-digit'});
-    }catch(e){console.error(e);}
+    }catch(e){
+      document.getElementById('listPresent').innerHTML='<div class="empty" style="color:#dc2626">Error: '+e.message+'</div>';
+      console.error(e);
+    }
   }
 
   load();
