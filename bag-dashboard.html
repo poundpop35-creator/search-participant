@@ -9,7 +9,7 @@
   <style>
     :root{--blue:#0d2b6b;--blue-light:#e8f0fe;--green:#16a34a;--red:#dc2626;--white:#fff;--shadow:0 2px 12px rgba(13,43,107,0.10);--border:#e2e8f0;}
     *{box-sizing:border-box;margin:0;padding:0;}
-    body{background:#f0f4ff;font-family:'Sarabun',sans-serif;}
+    body{background:linear-gradient(rgba(232,240,254,0.82),rgba(232,240,254,0.82)),url('https://raw.githubusercontent.com/poundpop35-creator/search-participant/main/DNA.png') center/cover fixed;font-family:'Sarabun',sans-serif;}
     .topbar{background:var(--blue);color:white;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;position:sticky;top:0;z-index:50;}
     .topbar h1{font-size:1rem;font-weight:700;}
     .topbar-btns{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
@@ -69,6 +69,7 @@
   <div class="topbar-btns">
     <span class="last-update" id="lastUpdate">-</span>
     <button class="tbtn" onclick="loadAll()">รีเฟรช</button>
+    <a class="tbtn" href="bag.html">← ระบบสแกนรับกระเป๋า</a>
     <a class="tbtn" href="dashboard.html">Dashboard หลัก</a>
     <button class="tbtn" onclick="doLogout()" style="border-color:rgba(252,165,165,0.5);color:#fca5a5;">ออกจากระบบ</button>
   </div>
@@ -151,40 +152,40 @@ const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 const PAGE = 10;
 
 // Auth check
-if(localStorage.getItem('dmsc_auth')!=='ok') window.location.href='login.html';
-
-// กลุ่มที่มีสิทธิ์รับกระเป๋า
-const BAG_PT_PARTICIPANT = ['บุคลากรภายในกรม (Personnel of the Department)'];
-const BAG_PT_STAFF = ['ผู้บริหาร','ผู้บริหาร+กรรมการ','ผู้บริหาร+คณะทำงาน','ผู้บริหาร+ผู้ส่งผลงาน'];
+if(sessionStorage.getItem('dmsc_auth')!=='ok') window.location.href='login.html';
 
 let allData=[], filtered=[], curPage=1;
 
 async function loadAll(){
   document.getElementById('tBody').innerHTML='<tr><td colspan="7" class="loading-td">กำลังโหลด...</td></tr>';
   try{
-    // ดึง participants ที่มีสิทธิ์รับกระเป๋า
     let res=[], from=0;
     while(true){
-      const r=await fetch(`${SB_URL}/rest/v1/participants?select=id,prefix,first_name,last_name,dept,ext_dept,internal_external,participation_type,tag,bag_received,bag_received_date&order=last_name.asc`,{
+      const r=await fetch(`${SB_URL}/rest/v1/participants?select=id,prefix,first_name,last_name,dept,ext_dept,internal_external,participation_type,tag,items,bag_received,bag_received_date&order=last_name.asc`,{
         headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Range-Unit':'items','Range':`${from}-${from+999}`,'Prefer':'count=exact'}
       });
+      if(!r.ok){
+        const errText=await r.text();
+        document.getElementById('tBody').innerHTML=`<tr><td colspan="7" class="loading-td" style="color:#dc2626;">API Error ${r.status}: ${errText}</td></tr>`;
+        return;
+      }
       const d=await r.json();
-      if(!Array.isArray(d)||d.length===0) break;
+      if(!Array.isArray(d)){
+        document.getElementById('tBody').innerHTML=`<tr><td colspan="7" class="loading-td" style="color:#dc2626;">API Error: ${JSON.stringify(d)}</td></tr>`;
+        return;
+      }
+      if(d.length===0) break;
       res=res.concat(d); if(d.length<1000) break; from+=1000;
     }
 
-    // กรองเฉพาะคนมีสิทธิ์
-    allData = res.filter(p=>{
-      if(p.tag==='participant' && BAG_PT_PARTICIPANT.includes((p.internal_external||'').trim())) return true;
-      if(p.tag==='Staff' && BAG_PT_STAFF.includes((p.participation_type||'').trim())) return true;
-      return false;
-    }).map(p=>{
+    allData = res.map(p=>{
       const isIn=(p.internal_external||'').includes('ภายใน');
       const dept=isIn?(p.dept||'-'):(p.ext_dept||p.dept||'-');
       return{
         name:`${p.prefix||''} ${p.first_name||''} ${p.last_name||''}`.trim(),
         dept, pt:p.participation_type||'-', tag:p.tag||'-',
-        received:p.bag_received===true,
+        items:p.items||'-',
+        received:p.bag_received===true||p.bag_received===1||p.bag_received==='true',
         receivedDate:p.bag_received_date||'-'
       };
     });
@@ -269,7 +270,7 @@ function getRows(){
     'วันที่รับ':r.received?r.receivedDate:'-'}));
 }
 
-function doLogout(){localStorage.removeItem('dmsc_auth');localStorage.removeItem('dmsc_user');window.location.href='login.html';}
+function doLogout(){sessionStorage.removeItem('dmsc_auth');sessionStorage.removeItem('dmsc_user');window.location.href='login.html';}
 
 loadAll();
 </script>

@@ -10,7 +10,7 @@
   <style>
     :root{--blue:#0d2b6b;--blue-mid:#1a4eb8;--blue-light:#e8f0fe;--green:#16a34a;--yellow:#d97706;--white:#fff;--border:#e2e8f0;--shadow:0 2px 12px rgba(13,43,107,0.10);}
     *{box-sizing:border-box;margin:0;padding:0;}
-    body{background:#f0f4ff;font-family:'Sarabun',sans-serif;}
+    body{background:linear-gradient(rgba(232,240,254,0.82),rgba(232,240,254,0.82)),url('https://raw.githubusercontent.com/poundpop35-creator/search-participant/main/DNA.png') center/cover fixed;font-family:'Sarabun',sans-serif;}
     .topbar{background:var(--blue);color:white;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;position:sticky;top:0;z-index:50;}
     .topbar h1{font-size:1rem;font-weight:700;}
     .refresh-btn{padding:7px 16px;border-radius:8px;border:1.5px solid rgba(255,255,255,0.4);color:white;background:transparent;font-family:'Sarabun',sans-serif;font-size:0.85rem;cursor:pointer;}
@@ -112,7 +112,7 @@
 
 <script>
 // Auth check — ต้อง login ก่อน
-if (localStorage.getItem('dmsc_auth') !== 'ok') {
+if (sessionStorage.getItem('dmsc_auth') !== 'ok') {
   window.location.href = 'login.html';
 }
 </script>
@@ -149,6 +149,7 @@ if (localStorage.getItem('dmsc_auth') !== 'ok') {
     </select>
     <button class="refresh-btn" onclick="loadAll()">รีเฟรช</button>
     <button class="clear-btn" onclick="openClearModal()">ล้างข้อมูล</button>
+    <a href="index.html" class="refresh-btn" style="text-decoration:none;">← ระบบสแกนเช็คอิน</a>
     <a href="bag-dashboard.html" class="refresh-btn" style="text-decoration:none;">Dashboard กระเป๋า</a>
     <a href="public.html" class="refresh-btn" style="text-decoration:none;">Live Dashboard</a>
     <button class="refresh-btn" onclick="doLogout()" style="border-color:rgba(252,165,165,0.5);color:#fca5a5;">ออกจากระบบ</button>
@@ -447,13 +448,6 @@ async function loadAll(){
   document.getElementById('lastUpdate').textContent='อัปเดต: '+new Date().toLocaleTimeString('th-TH',{timeZone:'Asia/Bangkok'});
   applyFilters();
   renderDept();
-
-  // Auto-refresh ทุก 30 วินาที
-  if(!window._autoRefreshTimer){
-    window._autoRefreshTimer=setInterval(()=>{
-      loadAll();
-    },30000);
-  }
 }
 
 function toggleFDeptAll(){
@@ -768,8 +762,8 @@ function setAutoRefresh() {
 setAutoRefresh(); // เริ่มทันที (default 1 นาที)
 
 function doLogout() {
-  localStorage.removeItem('dmsc_auth');
-  localStorage.removeItem('dmsc_user');
+  sessionStorage.removeItem('dmsc_auth');
+  sessionStorage.removeItem('dmsc_user');
   window.location.href = 'login.html';
 }const CLEAR_PASS = "P@und3142";
 
