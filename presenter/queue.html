@@ -234,7 +234,7 @@
       function buildList(type){
         return checkins
           .filter(c=>c.type===type)
-          .map(c=>{ const p=pMap[c.participant_id]||{}; return {...p,...c,schedules:schedMap[p.id_card]||}; })
+          .map(c=>{ const p=pMap[c.participant_id]||{}; return {...p,...c,schedules:schedMap[p.id_card]||[]}; })
           .filter(x=>x.first_name);
       }
 
