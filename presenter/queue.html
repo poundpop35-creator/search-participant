@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart E-Queue — กรมวิทยาศาสตร์การแพทย์</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{
+      background:linear-gradient(rgba(232,240,254,0.75),rgba(232,240,254,0.75)),
+        url('https://raw.githubusercontent.com/poundpop35-creator/search-participant/main/DNA.png') center/cover fixed;
+      font-family:'Sarabun',sans-serif;min-height:100vh;padding-bottom:48px;
+    }
+
+    /* Header */
+    .header{background:rgba(255,255,255,0.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+      padding:14px 24px;display:flex;align-items:center;gap:12px;
+      box-shadow:0 2px 16px rgba(13,43,107,0.10);position:sticky;top:0;z-index:50;}
+    .header-logos{display:flex;align-items:center;gap:8px;}
+    .header-text{flex:1;}
+    .header-title{font-size:1.05rem;font-weight:700;color:#0d2b6b;}
+    .header-sub{font-size:0.72rem;color:#94a3b8;margin-top:1px;}
+    .header-update{font-size:0.72rem;color:#94a3b8;text-align:right;white-space:nowrap;}
+
+    /* Content */
+    .content{max-width:720px;margin:0 auto;padding:24px 16px;display:flex;flex-direction:column;gap:24px;}
+
+    /* Section */
+    .section{background:rgba(255,255,255,0.92);backdrop-filter:blur(8px);border-radius:20px;
+      box-shadow:0 4px 24px rgba(13,43,107,0.10);overflow:hidden;}
+    .section-head{padding:16px 20px;border-bottom:1px solid #e8f0fe;
+      display:flex;align-items:center;gap:12px;}
+    .section-icon{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;
+      justify-content:center;font-size:1.3rem;flex-shrink:0;}
+    .section-icon.blue{background:#e8f0fe;}
+    .section-icon.amber{background:#fffbeb;}
+    .section-info{flex:1;}
+    .section-title{font-size:1rem;font-weight:700;color:#0d2b6b;}
+    .section-sub{font-size:0.76rem;color:#94a3b8;margin-top:2px;}
+    .section-badges{display:flex;gap:8px;align-items:center;}
+    .badge-count{background:#e8f0fe;color:#0d2b6b;font-size:0.78rem;font-weight:700;
+      padding:4px 14px;border-radius:20px;}
+    .badge-step{background:#0d2b6b;color:white;font-size:0.78rem;font-weight:700;
+      padding:4px 14px;border-radius:20px;}
+    .badge-step.amber{background:#f59e0b;}
+
+    /* Queue list */
+    .queue-list{padding:14px 16px;display:flex;flex-direction:column;gap:12px;}
+    .empty{text-align:center;padding:36px 16px;color:#94a3b8;font-size:0.9rem;}
+
+    /* Queue card */
+    .q-card{background:white;border-radius:16px;padding:18px;
+      box-shadow:0 2px 12px rgba(13,43,107,0.07);border:1px solid #e8f0fe;}
+    .q-card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+    .q-num{background:#0d2b6b;color:white;font-size:0.8rem;font-weight:700;
+      padding:5px 14px;border-radius:8px;letter-spacing:0.06em;}
+    .q-time{font-size:0.78rem;color:#94a3b8;display:flex;align-items:center;gap:5px;}
+
+    .q-name{font-size:1.35rem;font-weight:700;color:#0f172a;line-height:1.35;margin-bottom:3px;}
+    .q-org{font-size:0.8rem;color:#64748b;margin-bottom:14px;
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+    /* Poster block */
+    .q-poster{background:#f0f5ff;border-radius:12px;padding:13px 15px;
+      margin-bottom:10px;border-left:4px solid #0d2b6b;}
+    .q-poster:last-of-type{margin-bottom:0;}
+    .q-poster-row{display:flex;gap:8px;margin-bottom:6px;font-size:0.84rem;line-height:1.5;}
+    .q-poster-row.top{align-items:flex-start;}
+    .q-poster-row:last-child{margin-bottom:0;}
+    .q-poster-label{color:#64748b;font-weight:600;white-space:nowrap;min-width:40px;flex-shrink:0;}
+    .q-poster-code{background:#0d2b6b;color:white;font-size:0.78rem;font-weight:700;
+      padding:3px 12px;border-radius:6px;letter-spacing:0.06em;white-space:nowrap;}
+    .q-poster-val{color:#1e40af;font-weight:600;}
+    .q-poster-title{color:#1e293b;font-weight:600;line-height:1.55;}
+
+    /* Queue label */
+    .q-label{font-size:0.72rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;
+      padding:3px 10px;border-radius:20px;display:inline-block;margin-bottom:8px;}
+    .q-label.now{background:#dcfce7;color:#16a34a;}
+    .q-label.next{background:#e0e7ff;color:#3b5bdb;}
+    .q-label.cert-now{background:#fef3c7;color:#d97706;}
+
+    /* Search box */
+    .search-section{background:rgba(255,255,255,0.92);backdrop-filter:blur(8px);
+      border-radius:20px;box-shadow:0 4px 24px rgba(13,43,107,0.10);padding:20px;}
+    .search-title{font-size:0.9rem;font-weight:700;color:#0d2b6b;margin-bottom:4px;}
+    .search-sub{font-size:0.76rem;color:#94a3b8;margin-bottom:14px;}
+    .search-wrap{display:flex;gap:8px;}
+    .search-input{flex:1;padding:11px 14px;border-radius:12px;border:2px solid #c7d7f5;
+      font-family:'Sarabun',sans-serif;font-size:1rem;color:#1e293b;outline:none;
+      letter-spacing:0.1em;}
+    .search-input:focus{border-color:#0d2b6b;}
+    .search-btn{padding:11px 18px;border-radius:12px;border:none;background:#0d2b6b;
+      color:white;font-family:'Sarabun',sans-serif;font-size:0.9rem;font-weight:700;cursor:pointer;}
+    .search-result{margin-top:14px;padding:14px 16px;border-radius:12px;font-size:0.9rem;display:none;}
+    .search-result.found{background:#e0e7ff;color:#1e40af;}
+    .search-result.notfound{background:#fee2e2;color:#dc2626;}
+    .search-result.notcheckin{background:#fef9c3;color:#92400e;}
+
+    /* Status bar */
+    .q-status{display:flex;align-items:center;gap:8px;font-size:0.8rem;
+      color:#3b82f6;font-weight:600;margin-top:12px;padding-top:12px;
+      border-top:1px solid #f1f5f9;}
+    .q-dot{width:8px;height:8px;border-radius:50%;background:#3b82f6;
+      flex-shrink:0;animation:pulse 2s infinite;}
+    .q-card.cert .q-status{color:#d97706;}
+    .q-card.cert .q-dot{background:#d97706;}
+    @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.35;}}
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-logos">
+    <img src="https://raw.githubusercontent.com/poundpop35-creator/search-participant/main/logo-%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B8%8A%E0%B8%B8%E0%B8%A1%E0%B8%A7%E0%B8%B4%E0%B8%8A%E0%B8%B2%E0%B8%81%E0%B8%B2%E0%B8%A3-34-Final_0.png" style="height:36px;object-fit:contain;" alt="">
+    <img src="https://raw.githubusercontent.com/poundpop35-creator/search-participant/main/logo-DMSc-MOPH%20(1)%20(2)_0.png" style="height:36px;object-fit:contain;" alt="">
+  </div>
+  <div class="header-text">
+    <div class="header-title">Smart E-Queue</div>
+    <div class="header-sub">ระบบเช็คอินและบริหารคิวอัจฉริยะสำหรับงาน...</div>
+  </div>
+  <div class="header-update" id="lastUpdate">-</div>
+</div>
+
+<div class="content">
+
+  <!-- Step 1 -->
+  <div class="section">
+    <div class="section-head">
+      <div class="section-icon blue">👤</div>
+      <div class="section-info">
+        <div class="section-title">คิวเช็คอินเข้างาน</div>
+        <div class="section-sub">รอสแตนด์บายที่จุดนำเสนอ</div>
+      </div>
+      <div class="section-badges">
+        <div class="badge-count" id="countPresent">0 คิว</div>
+        <div class="badge-step">Step 1</div>
+      </div>
+    </div>
+    <div class="queue-list" id="listPresent">
+      <div class="empty">กำลังโหลด...</div>
+    </div>
+  </div>
+
+  <!-- Step 2 -->
+  <div class="section">
+    <div class="section-head">
+      <div class="section-icon amber">🏅</div>
+      <div class="section-info">
+        <div class="section-title">รอรับใบประกาศ</div>
+        <div class="section-sub">นำเสนอเสร็จสิ้น</div>
+      </div>
+      <div class="section-badges">
+        <div class="badge-count" id="countCert">0 คิว</div>
+        <div class="badge-step amber">Step 2</div>
+      </div>
+    </div>
+    <div class="queue-list" id="listCert">
+      <div class="empty">ยังไม่มีคิวมารับใบประกาศครับ 🎖️</div>
+    </div>
+  </div>
+
+  <!-- Search -->
+  <div class="search-section">
+    <div class="search-title">🔍 เช็คลำดับคิวของคุณ</div>
+    <div class="search-sub">ใส่ 5 ตัวท้ายของเลขบัตรประชาชน</div>
+    <div class="search-wrap">
+      <input class="search-input" id="searchInput" maxlength="5" placeholder="เช่น 12345"
+        type="tel" oninput="this.value=this.value.replace(/\D/g,'')"
+        onkeydown="if(event.key==='Enter') searchQueue()">
+      <button class="search-btn" onclick="searchQueue()">ค้นหา</button>
+    </div>
+    <div class="search-result" id="searchResult"></div>
+  </div>
+
+</div>
+
+<script>
+  const SB_URL  = "https://gvxytnjfyepqhbkmcjms.supabase.co";
+  const SB_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2eHl0bmpmeWVwcWhia21jam1zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0MzE2NDAsImV4cCI6MjA5NTAwNzY0MH0.RAr_ehb4cxfNliDR0h5XcihUaP-0ltZTTGIAv2Fw1kk";
+  const H = {'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON};
+
+  function fmt(iso){
+    return new Date(iso).toLocaleTimeString('th-TH',{timeZone:'Asia/Bangkok',hour:'2-digit',minute:'2-digit'});
+  }
+
+  function thaiPrefix(p){
+    return (p||'').replace(/\s*\([^)]*\)/g,'').trim();
+  }
+
+  function thaiField(f){
+    if(!f) return '-';
+    if(f.includes('R2R')||f.includes('Routine')) return 'งานประจำสู่งานวิจัย (R2R)';
+    if(f.includes('R&D')||f.includes('Research and Dev')) return 'การวิจัยและพัฒนา (R&D)';
+    return f.replace(/\(.*?\)/g,'').replace(/^ด้าน/,'').trim();
+  }
+
+  function thaiBranch(b){
+    if(!b) return '';
+    const m = b.match(/\(([^)]+)\)/);
+    if(m) return m[1].trim();
+    const n = b.match(/:\s*([^(]+)/);
+    return n ? n[1].trim() : b.trim();
+  }
+
+  function renderPosters(schedules){
+    if(!schedules||schedules.length===0) return '';
+    return schedules.map(s=>`
+      <div class="q-poster">
+        <div class="q-poster-row">
+          <span class="q-poster-label">รหัส</span>
+          <span class="q-poster-code">${s.presentation_code||'-'}</span>
+        </div>
+        <div class="q-poster-row">
+          <span class="q-poster-label">ด้าน</span>
+          <span class="q-poster-val">${thaiField(s.field)}</span>
+        </div>
+        ${thaiBranch(s.branch)?`<div class="q-poster-row">
+          <span class="q-poster-label">สาขา</span>
+          <span class="q-poster-val">${thaiBranch(s.branch)}</span>
+        </div>`:''}
+        <div class="q-poster-row top">
+          <span class="q-poster-label">เรื่อง</span>
+          <span class="q-poster-title">${s.title||'(ไม่มีชื่อผลงาน)'}</span>
+        </div>
+      </div>`).join('');
+  }
+
+  function renderCard(p, idx, type){
+    const isCert = type==='certificate';
+    const num    = idx+1;
+    const prefix = thaiPrefix(p.prefix);
+    const posters = renderPosters(p.schedules);
+    let labelHtml = '';
+    if(idx===0) labelHtml = `<div class="q-label ${isCert?'cert-now':'now'}">${isCert?'กำลังรับใบประกาศ':'กำลังนำเสนอ'}</div>`;
+    else if(idx===1) labelHtml = `<div class="q-label next">คิวถัดไป</div>`;
+    return`<div class="q-card${isCert?' cert':''}">
+      ${labelHtml}
+      <div class="q-card-top">
+        <div class="q-num">คิวที่ ${num}</div>
+        <div class="q-time">🕐 ${fmt(p.checkin_time)} น.</div>
+      </div>
+      <div class="q-name">${prefix} ${p.first_name||''} ${p.last_name||''}</div>
+      <div class="q-org">${p.dept||'-'}</div>
+      ${posters}
+      <div class="q-status">
+        <div class="q-dot"></div>
+        ${isCert?'รอรับใบประกาศ':'รอ ณ จุดพักคอยก่อนเวลา 15 นาที'}
+      </div>
+    </div>`;
+  }
+
+  async function load(){
+    try{
+      const [pRes, cRes, sRes] = await Promise.all([
+        fetch(SB_URL+'/rest/v1/participants?select=id,id_card,prefix,first_name,last_name,dept',{headers:{...H,'Range':'0-9999'}}),
+        fetch(SB_URL+'/rest/v1/presenter_checkins?select=participant_id,type,checkin_time&order=checkin_time.asc',{headers:{...H,'Range':'0-9999'}}),
+        fetch(SB_URL+'/rest/v1/presentation_schedule?select=id_card,presentation_code,poster_group,title,field,branch',{headers:{...H,'Range':'0-9999'}})
+      ]);
+      const [participants, checkins, schedules] = await Promise.all([pRes.json(), cRes.json(), sRes.json()]);
+
+      if(!Array.isArray(participants)||!Array.isArray(checkins)){
+        document.getElementById('listPresent').innerHTML='<div class="empty" style="color:#dc2626">โหลดข้อมูลไม่สำเร็จ</div>';
+        return;
+      }
+
+      const pMap = {};
+      participants.forEach(p=>{ pMap[p.id]=p; });
+
+      const schedMap = {};
+      if(Array.isArray(schedules)){
+        schedules.forEach(s=>{
+          if(!schedMap[s.id_card]) schedMap[s.id_card]=[];
+          schedMap[s.id_card].push(s);
+        });
+      }
+
+      function buildList(type){
+        return checkins
+          .filter(c=>c.type===type)
+          .map(c=>{ const p=pMap[c.participant_id]||{}; return {...p,...c,schedules:schedMap[p.id_card]||[]}; })
+          .filter(x=>x.first_name);
+      }
+
+      allPresentList = buildList('present');
+      allCertList    = buildList('certificate');
+
+      document.getElementById('countPresent').textContent = allPresentList.length+' คิว';
+      document.getElementById('countCert').textContent    = allCertList.length+' คิว';
+
+      document.getElementById('listPresent').innerHTML = allPresentList.length
+        ? allPresentList.slice(0,2).map((p,i)=>renderCard(p,i,'present')).join('')
+        : '<div class="empty">ยังไม่มีคิวเช็คอินครับ 👤</div>';
+
+      document.getElementById('listCert').innerHTML = allCertList.length
+        ? allCertList.slice(0,2).map((p,i)=>renderCard(p,i,'certificate')).join('')
+        : '<div class="empty">ยังไม่มีคิวมารับใบประกาศครับ 🎖️</div>';
+
+      document.getElementById('lastUpdate').textContent = 'อัปเดต '+new Date().toLocaleTimeString('th-TH',{timeZone:'Asia/Bangkok',hour:'2-digit',minute:'2-digit'});
+    }catch(e){
+      document.getElementById('listPresent').innerHTML='<div class="empty" style="color:#dc2626">Error: '+e.message+'</div>';
+      console.error(e);
+    }
+  }
+
+  let allPresentList = [], allCertList = [];
+
+  function searchQueue(){
+    const digits = document.getElementById('searchInput').value.trim();
+    const el = document.getElementById('searchResult');
+    el.style.display = 'block';
+    if(digits.length !== 5){
+      el.className = 'search-result notfound';
+      el.textContent = 'กรุณาใส่ตัวเลข 5 หลักท้ายของเลขบัตรประชาชน';
+      return;
+    }
+    const idx = allPresentList.findIndex(p => (p.id_card||'').endsWith(digits));
+    if(idx >= 0){
+      const p = allPresentList[idx];
+      const prefix = thaiPrefix(p.prefix);
+      el.className = 'search-result found';
+      el.textContent = `คุณอยู่ คิวที่ ${idx+1} — ${prefix} ${p.first_name||''} ${p.last_name||''}`;
+    } else {
+      el.className = 'search-result notcheckin';
+      el.textContent = 'ไม่พบในคิว — อาจยังไม่ได้เช็คอิน หรือเลขไม่ถูกต้อง';
+    }
+  }
+
+  load();
+  setInterval(load, 30000);
+</script>
+</body>
+</html>
