@@ -223,7 +223,7 @@ async function loadAll(){
     allData = res.filter(p=>{
       const isIn=(p.internal_external||'').includes('ภายใน');
       const pt=(p.participation_type||'');
-      return isIn && (pt.includes('ผู้เข้าร่วมงาน') || pt.includes('ผู้บริหาร+กรรมการ'));
+      return isIn && (pt.includes('ผู้เข้าร่วมงาน') || pt.includes('ผู้บริหาร') || pt === 'ผู้ส่งผลงาน');
     }).map(p=>{
       const isIn=(p.internal_external||'').includes('ภายใน');
       const dept=isIn?(p.dept||'-'):(p.ext_dept||p.dept||'-');
