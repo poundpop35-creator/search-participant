@@ -171,8 +171,29 @@
     }catch(e){console.error(e);}
   }
 
-  load();
-  setInterval(load, 30000);
+  // Demo data for testing UI
+  const DEMO = {
+    present: [
+      {prefix:'นาย',first_name:'มณฑล',last_name:'เลิศคณาวนิชกุล',dept:'สถาบันวิจัยวิทยาศาสตร์สาธารณสุข',participation_type:'ผู้ส่งผลงาน',checkin_time:new Date(Date.now()-25*60000).toISOString()},
+      {prefix:'นางสาว',first_name:'สุภาพร',last_name:'ทองดี',dept:'สำนักคุณภาพและความปลอดภัยอาหาร',participation_type:'ผู้ส่งผลงาน',checkin_time:new Date(Date.now()-18*60000).toISOString()},
+      {prefix:'นาง',first_name:'วรรณา',last_name:'พิมพ์ใจ',dept:'สถาบันชีววัตถุ',participation_type:'ผู้ส่งผลงาน',checkin_time:new Date(Date.now()-10*60000).toISOString()},
+    ],
+    certificate: [
+      {prefix:'ดร.',first_name:'ประสิทธิ์',last_name:'ศรีสมบูรณ์',dept:'กองทดสอบความชำนาญ',participation_type:'ผู้ส่งผลงาน',checkin_time:new Date(Date.now()-60*60000).toISOString()},
+    ]
+  };
+
+  function renderDemo(){
+    document.getElementById('countPresent').textContent = DEMO.present.length+' คิว';
+    document.getElementById('countCert').textContent    = DEMO.certificate.length+' คิว';
+    document.getElementById('listPresent').innerHTML = DEMO.present.map((p,i)=>renderCard(p,i,'present')).join('');
+    document.getElementById('listCert').innerHTML    = DEMO.certificate.map((p,i)=>renderCard(p,i,'certificate')).join('');
+    document.getElementById('lastUpdate').textContent = '⚠️ โหมด Demo';
+  }
+
+  // Toggle: set useDemoData=true to show demo, false to use real data
+  const useDemoData = false;
+  if(useDemoData){ renderDemo(); } else { load(); setInterval(load, 30000); }
 </script>
 </body>
 </html>
