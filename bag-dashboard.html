@@ -148,7 +148,7 @@
   <div class="tcard">
     <div class="thead-row">
       <div>
-        <span class="ttitle" id="tTitle">รายชื่อผู้มีสิทธิ์รับกระเป๋า</span>
+        <span class="ttitle" id="tTitle">ผู้มีสิทธิ์รับกระเป๋า (ก่อนวันงาน)</span>
         <span class="tcount" id="tCount"></span>
       </div>
       <div class="export-btns">
@@ -223,7 +223,7 @@ async function loadAll(){
     allData = res.filter(p=>{
       const isIn=(p.internal_external||'').includes('ภายใน');
       const pt=(p.participation_type||'');
-      return isIn && (pt.includes('ผู้เข้าร่วมงาน') || pt.includes('ผู้บริหาร+กรรมการ') || pt.includes('ผู้บริหาร+คณะทำงาน') || pt.includes('ผู้ส่งผลงาน'));
+      return isIn && (pt.includes('ผู้เข้าร่วมงาน') || pt.includes('ผู้บริหาร+กรรมการ'));
     }).map(p=>{
       const isIn=(p.internal_external||'').includes('ภายใน');
       const dept=isIn?(p.dept||'-'):(p.ext_dept||p.dept||'-');
