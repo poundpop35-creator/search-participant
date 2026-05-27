@@ -94,6 +94,12 @@
       </select>
     </div>
     <div class="filter-group">
+      <div class="filter-label">หน่วยงาน</div>
+      <select class="filter-select" id="fDept" onchange="applyFilters()" style="max-width:260px;">
+        <option value="">ทั้งหมด</option>
+      </select>
+    </div>
+    <div class="filter-group">
       <div class="filter-label">TAG</div>
       <select class="filter-select" id="fTag" onchange="applyFilters()">
         <option value="">ทั้งหมด</option>
@@ -150,11 +156,17 @@
 const SB_URL = "https://gvxytnjfyepqhbkmcjms.supabase.co";
 const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2eHl0bmpmeWVwcWhia21jam1zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0MzE2NDAsImV4cCI6MjA5NTAwNzY0MH0.RAr_ehb4cxfNliDR0h5XcihUaP-0ltZTTGIAv2Fw1kk";
 const PAGE = 10;
+const DEPTS = ['อธิบดีกรมวิทยาศาสตร์การแพทย์','รองอธิบดีกรมวิทยาศาสตร์การแพทย์','สำนักผู้ทรงคุณวุฒิกรมวิทยาศาสตร์การแพทย์','กองแผนงานและวิชาการ','กองทดสอบความชำนาญ','กลุ่มพัฒนาระบบบริหาร','กลุ่มตรวจสอบภายใน','กลุ่มงานจริยธรรม','สำนักงานเลขานุการกรม','สถาบันชีววัตถุ','สถาบันวิจัยวิทยาศาสตร์สาธารณสุข','สถาบันวิจัยสมุนไพร','สถาบันชีววิทยาศาสตร์ทางการแพทย์','สำนักคุณภาพและความปลอดภัยอาหาร','สำนักเครื่องสำอางและวัตถุอันตราย','สำนักรังสีและเครื่องมือแพทย์','สำนักมาตรฐานห้องปฏิบัติการ','สำนักยาและวัตถุเสพติด','ศูนย์รวมบริการ','ศูนย์เทคโนโลยีสารสนเทศและการสื่อสาร','กองความร่วมมือระหว่างประเทศ','กองบริหารทรัพยากรบุคคล','กองบริหารการคลัง','กองประชาสัมพันธ์และสื่อสารสาธารณะ','ศูนย์ตอบโต้เหตุฉุกเฉินด้านห้องปฏิบัติการและรังสี','ศูนย์วิทยาศาสตร์การแพทย์ที่ 1 เชียงใหม่','ศูนย์วิทยาศาสตร์การแพทย์ที่ 1/1 เชียงราย','ศูนย์วิทยาศาสตร์การแพทย์ที่ 2 พิษณุโลก','ศูนย์วิทยาศาสตร์การแพทย์ที่ 3 นครสวรรค์','ศูนย์วิทยาศาสตร์การแพทย์ที่ 4 สระบุรี','ศูนย์วิทยาศาสตร์การแพทย์ที่ 5 สมุทรสงคราม','ศูนย์วิทยาศาสตร์การแพทย์ที่ 6 ชลบุรี','ศูนย์วิทยาศาสตร์การแพทย์ที่ 7 ขอนแก่น','ศูนย์วิทยาศาสตร์การแพทย์ที่ 8 อุดรธานี','ศูนย์วิทยาศาสตร์การแพทย์ที่ 9 นครราชสีมา','ศูนย์วิทยาศาสตร์การแพทย์ที่ 10 อุบลราชธานี','ศูนย์วิทยาศาสตร์การแพทย์ที่ 11 สุราษฎร์ธานี','ศูนย์วิทยาศาสตร์การแพทย์ที่ 11/1 ภูเก็ต','ศูนย์วิทยาศาสตร์การแพทย์ที่ 12 สงขลา','ศูนย์วิทยาศาสตร์การแพทย์ที่ 12/1 ตรัง'];
 
 // Auth check
 if(sessionStorage.getItem('dmsc_auth')!=='ok') window.location.href='login.html';
 
 let allData=[], filtered=[], curPage=1;
+
+(function populateDeptFilter(){
+  const sel=document.getElementById('fDept');
+  DEPTS.forEach(d=>{const o=document.createElement('option');o.value=d;o.textContent=d;sel.appendChild(o);});
+})();
 
 async function loadAll(){
   document.getElementById('tBody').innerHTML='<tr><td colspan="7" class="loading-td">กำลังโหลด...</td></tr>';
@@ -215,11 +227,13 @@ function applyFilters(){
   const q=(document.getElementById('sBox').value||'').toLowerCase();
   const st=document.getElementById('fStatus').value;
   const tg=document.getElementById('fTag').value;
+  const dp=document.getElementById('fDept').value;
   filtered=allData.filter(r=>{
     const mQ=!q||r.name.toLowerCase().includes(q)||r.dept.toLowerCase().includes(q);
     const mSt=!st||(st==='received'&&r.received)||(st==='pending'&&!r.received);
     const mTg=!tg||r.tag===tg;
-    return mQ&&mSt&&mTg;
+    const mDp=!dp||r.dept===dp;
+    return mQ&&mSt&&mTg&&mDp;
   });
   curPage=1;
   document.getElementById('tCount').textContent=`(${filtered.length.toLocaleString()} รายการ)`;
@@ -251,6 +265,7 @@ function changePage(d){curPage+=d;renderTable();window.scrollTo({top:0,behavior:
 function resetFilters(){
   document.getElementById('fStatus').value='';
   document.getElementById('fTag').value='';
+  document.getElementById('fDept').value='';
   document.getElementById('sBox').value='';
   applyFilters();
 }
