@@ -74,12 +74,29 @@
     .q-poster-val{color:#1e40af;font-weight:600;}
     .q-poster-title{color:#1e293b;font-weight:600;line-height:1.55;}
 
-    /* Step 2 amber variant */
-    .q-card.cert{border-color:#fef3c7;}
-    .q-card.cert .q-num{background:#d97706;}
-    .q-card.cert .q-poster{background:#fffbeb;border-left-color:#d97706;}
-    .q-card.cert .q-poster-code{background:#d97706;}
-    .q-card.cert .q-poster-val{color:#92400e;}
+    /* Queue label */
+    .q-label{font-size:0.72rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;
+      padding:3px 10px;border-radius:20px;display:inline-block;margin-bottom:8px;}
+    .q-label.now{background:#dcfce7;color:#16a34a;}
+    .q-label.next{background:#e0e7ff;color:#3b5bdb;}
+    .q-label.cert-now{background:#fef3c7;color:#d97706;}
+
+    /* Search box */
+    .search-section{background:rgba(255,255,255,0.92);backdrop-filter:blur(8px);
+      border-radius:20px;box-shadow:0 4px 24px rgba(13,43,107,0.10);padding:20px;}
+    .search-title{font-size:0.9rem;font-weight:700;color:#0d2b6b;margin-bottom:4px;}
+    .search-sub{font-size:0.76rem;color:#94a3b8;margin-bottom:14px;}
+    .search-wrap{display:flex;gap:8px;}
+    .search-input{flex:1;padding:11px 14px;border-radius:12px;border:2px solid #c7d7f5;
+      font-family:'Sarabun',sans-serif;font-size:1rem;color:#1e293b;outline:none;
+      letter-spacing:0.1em;}
+    .search-input:focus{border-color:#0d2b6b;}
+    .search-btn{padding:11px 18px;border-radius:12px;border:none;background:#0d2b6b;
+      color:white;font-family:'Sarabun',sans-serif;font-size:0.9rem;font-weight:700;cursor:pointer;}
+    .search-result{margin-top:14px;padding:14px 16px;border-radius:12px;font-size:0.9rem;display:none;}
+    .search-result.found{background:#e0e7ff;color:#1e40af;}
+    .search-result.notfound{background:#fee2e2;color:#dc2626;}
+    .search-result.notcheckin{background:#fef9c3;color:#92400e;}
 
     /* Status bar */
     .q-status{display:flex;align-items:center;gap:8px;font-size:0.8rem;
@@ -144,6 +161,19 @@
     </div>
   </div>
 
+  <!-- Search -->
+  <div class="search-section">
+    <div class="search-title">🔍 เช็คลำดับคิวของคุณ</div>
+    <div class="search-sub">ใส่ 5 ตัวท้ายของเลขบัตรประชาชน</div>
+    <div class="search-wrap">
+      <input class="search-input" id="searchInput" maxlength="5" placeholder="เช่น 12345"
+        type="tel" oninput="this.value=this.value.replace(/\D/g,'')"
+        onkeydown="if(event.key==='Enter') searchQueue()">
+      <button class="search-btn" onclick="searchQueue()">ค้นหา</button>
+    </div>
+    <div class="search-result" id="searchResult"></div>
+  </div>
+
 </div>
 
 <script>
@@ -199,12 +229,16 @@
 
   function renderCard(p, idx, type){
     const isCert = type==='certificate';
-    const qNum   = (isCert?'C':'P')+'-'+(idx+1);
-    const prefix  = thaiPrefix(p.prefix);
+    const num    = idx+1;
+    const prefix = thaiPrefix(p.prefix);
     const posters = renderPosters(p.schedules);
+    let labelHtml = '';
+    if(idx===0) labelHtml = `<div class="q-label ${isCert?'cert-now':'now'}">${isCert?'กำลังรับใบประกาศ':'กำลังนำเสนอ'}</div>`;
+    else if(idx===1) labelHtml = `<div class="q-label next">คิวถัดไป</div>`;
     return`<div class="q-card${isCert?' cert':''}">
+      ${labelHtml}
       <div class="q-card-top">
-        <div class="q-num">${qNum}</div>
+        <div class="q-num">คิวที่ ${num}</div>
         <div class="q-time">🕐 ${fmt(p.checkin_time)} น.</div>
       </div>
       <div class="q-name">${prefix} ${p.first_name||''} ${p.last_name||''}</div>
@@ -249,24 +283,47 @@
           .filter(x=>x.first_name);
       }
 
-      const presentList = buildList('present');
-      const certList    = buildList('certificate');
+      allPresentList = buildList('present');
+      allCertList    = buildList('certificate');
 
-      document.getElementById('countPresent').textContent = presentList.length+' คิว';
-      document.getElementById('countCert').textContent    = certList.length+' คิว';
+      document.getElementById('countPresent').textContent = allPresentList.length+' คิว';
+      document.getElementById('countCert').textContent    = allCertList.length+' คิว';
 
-      document.getElementById('listPresent').innerHTML = presentList.length
-        ? presentList.map((p,i)=>renderCard(p,i,'present')).join('')
+      document.getElementById('listPresent').innerHTML = allPresentList.length
+        ? allPresentList.slice(0,2).map((p,i)=>renderCard(p,i,'present')).join('')
         : '<div class="empty">ยังไม่มีคิวเช็คอินครับ 👤</div>';
 
-      document.getElementById('listCert').innerHTML = certList.length
-        ? certList.map((p,i)=>renderCard(p,i,'certificate')).join('')
+      document.getElementById('listCert').innerHTML = allCertList.length
+        ? allCertList.slice(0,2).map((p,i)=>renderCard(p,i,'certificate')).join('')
         : '<div class="empty">ยังไม่มีคิวมารับใบประกาศครับ 🎖️</div>';
 
       document.getElementById('lastUpdate').textContent = 'อัปเดต '+new Date().toLocaleTimeString('th-TH',{timeZone:'Asia/Bangkok',hour:'2-digit',minute:'2-digit'});
     }catch(e){
       document.getElementById('listPresent').innerHTML='<div class="empty" style="color:#dc2626">Error: '+e.message+'</div>';
       console.error(e);
+    }
+  }
+
+  let allPresentList = [], allCertList = [];
+
+  function searchQueue(){
+    const digits = document.getElementById('searchInput').value.trim();
+    const el = document.getElementById('searchResult');
+    el.style.display = 'block';
+    if(digits.length !== 5){
+      el.className = 'search-result notfound';
+      el.textContent = 'กรุณาใส่ตัวเลข 5 หลักท้ายของเลขบัตรประชาชน';
+      return;
+    }
+    const idx = allPresentList.findIndex(p => (p.id_card||'').endsWith(digits));
+    if(idx >= 0){
+      const p = allPresentList[idx];
+      const prefix = thaiPrefix(p.prefix);
+      el.className = 'search-result found';
+      el.textContent = `คุณอยู่ คิวที่ ${idx+1} — ${prefix} ${p.first_name||''} ${p.last_name||''}`;
+    } else {
+      el.className = 'search-result notcheckin';
+      el.textContent = 'ไม่พบในคิว — อาจยังไม่ได้เช็คอิน หรือเลขไม่ถูกต้อง';
     }
   }
 
