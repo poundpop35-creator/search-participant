@@ -59,7 +59,6 @@
     <span class="last-update" id="lastUpdate">-</span>
     <button class="tbtn" onclick="loadAll()">รีเฟรช</button>
     <a class="tbtn" href="index.html">← ระบบสแกนผู้ส่งผลงาน</a>
-    <button class="tbtn danger" onclick="doLogout()">ออกจากระบบ</button>
   </div>
 </div>
 
@@ -123,8 +122,6 @@
 <script>
   const SB_URL  = "https://gvxytnjfyepqhbkmcjms.supabase.co";
   const SB_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2eHl0bmpmeWVwcWhia21jam1zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0MzE2NDAsImV4cCI6MjA5NTAwNzY0MH0.RAr_ehb4cxfNliDR0h5XcihUaP-0ltZTTGIAv2Fw1kk";
-
-  if(sessionStorage.getItem('presenter_auth')!=='ok') window.location.href='login.html';
 
   let allData=[], currentFilter='all';
   const H={'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON};
@@ -214,12 +211,6 @@
         <td>${certBadge}</td>
       </tr>`;
     }).join('');
-  }
-
-  function doLogout(){
-    sessionStorage.removeItem('presenter_auth');
-    sessionStorage.removeItem('presenter_user');
-    window.location.href='login.html';
   }
 
   loadAll();

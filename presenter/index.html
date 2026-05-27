@@ -89,7 +89,7 @@
       <img src="https://raw.githubusercontent.com/poundpop35-creator/search-participant/main/logo-DMSc-MOPH%20(1)%20(2)_0.png" style="height:48px;object-fit:contain;" alt="dmsc">
     </div>
     <div style="font-size:1.05rem;font-weight:700;color:#0d2b6b;line-height:1.5;">ระบบสแกนผู้ส่งผลงาน<br>กรมวิทยาศาสตร์การแพทย์</div>
-    <div style="font-size:0.78rem;color:#94a3b8;margin-top:4px;"><span id="userDisplay"></span></div>
+    <div style="font-size:0.78rem;color:#94a3b8;margin-top:4px;">กรมวิทยาศาสตร์การแพทย์</div>
   </div>
 
   <div class="row-label">เลือกโหมด</div>
@@ -132,7 +132,7 @@
   <div class="counter-sub" id="counterSub">กำลังโหลด...</div>
 
   <a class="btn-nav primary" href="dashboard.html" style="margin-top:16px;">ไปหน้า Dashboard ผู้ส่งผลงาน</a>
-  <button class="btn-nav danger" onclick="doLogout()">ออกจากระบบ</button>
+
 
   <div class="status-bar">
     <div class="dot"></div>
@@ -143,9 +143,6 @@
 <script>
   const SB_URL  = "https://gvxytnjfyepqhbkmcjms.supabase.co";
   const SB_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2eHl0bmpmeWVwcWhia21jam1zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0MzE2NDAsImV4cCI6MjA5NTAwNzY0MH0.RAr_ehb4cxfNliDR0h5XcihUaP-0ltZTTGIAv2Fw1kk";
-
-  if(sessionStorage.getItem('presenter_auth')!=='ok') window.location.href='login.html';
-  document.getElementById('userDisplay').textContent=sessionStorage.getItem('presenter_user')||'';
 
   let isProcessing=false, modeCount=0, qrCode=null;
   let presenterMode='present', scanMode='scanner', scanBuffer='', scanTimer=null;
@@ -305,11 +302,7 @@
     return fetch(SB_URL+path,opts);
   }
 
-  function doLogout(){
-    sessionStorage.removeItem('presenter_auth');
-    sessionStorage.removeItem('presenter_user');
-    window.location.href='login.html';
-  }
+
 </script>
 </body>
 </html>
