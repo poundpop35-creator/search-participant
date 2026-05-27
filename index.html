@@ -64,6 +64,7 @@
     .detail-val{color:#1e293b;font-weight:600;}
     .detail-val.done{color:var(--red);}
     .detail-val.ok{color:var(--green);}
+    .detail-val.warn{color:var(--yellow);}
     .btn-ok{width:100%;padding:13px;border-radius:12px;border:none;font-family:'Sarabun',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;}
     .btn-ok.success{background:var(--green);color:white;}
     .btn-ok.warning{background:var(--yellow);color:white;}
@@ -269,7 +270,7 @@
         if(p.bag_received===true){
           showModal('warning','รับกระเป๋าแล้ว','บุคคลนี้รับกระเป๋าไปแล้ว',fullName,[
             {label:'วันที่รับ',val:p.bag_received_date||'-',style:'normal'},
-            {label:'สถานะ',val:'รับกระเป๋าไปแล้ว ✓',style:'done'}
+            {label:'สถานะ',val:'รับกระเป๋าไปแล้ว ✓',style:'warn'}
           ]);
           return;
         }
@@ -380,7 +381,7 @@
     const det=document.getElementById('modalDetail');
     if(rows&&rows.length>0){
       det.style.display='block';
-      det.innerHTML=rows.map(r=>`<div class="detail-row"><span class="detail-label">${r.label}</span><span class="detail-val ${r.style==='done'?'done':r.style==='ok'?'ok':''}">${r.val}</span></div>`).join('');
+      det.innerHTML=rows.map(r=>`<div class="detail-row"><span class="detail-label">${r.label}</span><span class="detail-val ${r.style==='done'?'done':r.style==='ok'?'ok':r.style==='warn'?'warn':''}">${r.val}</span></div>`).join('');
     } else det.style.display='none';
     document.getElementById('modalOverlay').classList.remove('hidden');
   }
