@@ -84,6 +84,14 @@
   </div>
 </div>
 
+<div class="header">
+  <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:8px;">
+    <img src="https://raw.githubusercontent.com/poundpop35-creator/search-participant/main/logo-%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B8%8A%E0%B8%B8%E0%B8%A1%E0%B8%A7%E0%B8%B4%E0%B8%8A%E0%B8%B2%E0%B8%81%E0%B8%B2%E0%B8%A3-34-Final_0.png" style="height:44px;object-fit:contain;" alt="conference">
+    <img src="https://raw.githubusercontent.com/poundpop35-creator/search-participant/main/logo-DMSc-MOPH%20(1)%20(2)_0.png" style="height:44px;object-fit:contain;" alt="dmsc">
+  </div>
+  <h1>ระบบสแกนเช็คอินหน้างาน</h1>
+  <p>กรมวิทยาศาสตร์การแพทย์ | <span id="userDisplay"></span></p>
+</div>
 
 <div class="card">
   <div class="row-label">เลือกวันที่สแกน</div>
@@ -100,7 +108,7 @@
     <button class="mode-btn"        id="btnCamera"  onclick="setMode('camera')">กล้องมือถือ</button>
   </div>
 
-  <div id="cameraMode">
+  <div id="cameraMode" style="display:none">
     <div id="reader-container"><div class="spinner"></div></div>
   </div>
   <div class="scanner-mode" id="scannerMode">
