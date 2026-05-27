@@ -181,6 +181,11 @@ if (sessionStorage.getItem('dmsc_auth') !== 'ok') {
       <div class="stat-num" id="sWalkin" style="color:#7c3aed;">-</div>
       <div class="stat-sub" id="sWalkinSub">ราย (เช็คอินแล้ว)</div>
     </div>
+    <div class="stat-card" style="border-left:4px solid #ef4444;">
+      <div class="stat-label">ยังไม่ได้เช็คอิน</div>
+      <div class="stat-num" id="sNotChecked" style="color:#ef4444;">-</div>
+      <div class="stat-sub">ราย (ลงทะเบียนล่วงหน้า)</div>
+    </div>
   </div>
   <!-- แถวที่ 2: แยกวัน -->
   <div class="stats-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:20px;">
@@ -366,6 +371,7 @@ const DEPTS = ['อธิบดีกรมวิทยาศาสตร์ก�
 let allData=[], filtered=[], curTab=0, curPage=1;
 let selPT=new Set(), selDPT=new Set(), selDDept=new Set(), selFDept=new Set();
 let deptRaw=[], dView='table', dChart=null;
+let totalPreReg=0;
 
 async function fetchAll(path,ps=1000){
   let res=[],from=0;
@@ -384,13 +390,18 @@ async function loadAll(){
   document.getElementById('tBody').innerHTML='<tr><td colspan="9" class="loading-td">กำลังโหลด...</td></tr>';
   document.getElementById('dBody').innerHTML='<tr><td colspan="5" style="text-align:center;padding:30px;color:#94a3b8;">กำลังโหลด...</td></tr>';
 
-  const rows=await fetchAll('/rest/v1/checkins?select=id,day,checkin_time,scanned_by,participants(prefix,first_name,last_name,tag,dept,ext_dept,internal_external,participation_type,items,is_walkin)&order=checkin_time.desc');
+  const [rows, preRegRes]=await Promise.all([
+    fetchAll('/rest/v1/checkins?select=id,participant_id,day,checkin_time,scanned_by,participants(prefix,first_name,last_name,tag,dept,ext_dept,internal_external,participation_type,items,is_walkin)&order=checkin_time.desc'),
+    fetch(SB_URL+'/rest/v1/participants?is_walkin=not.is.true&select=id',{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'count=exact','Range':'0-0','Range-Unit':'items'}})
+  ]);
+  const cr=preRegRes.headers.get('Content-Range')||'';
+  totalPreReg=parseInt(cr.split('/')[1])||0;
 
   allData=rows.map(r=>{
     const p=r.participants||{};
     const isIn=(p.internal_external||'').includes('ภายใน');
     const dept=isIn?(p.dept||'-'):(p.ext_dept||p.dept||'-');
-    return{id:r.id,day:r.day,time:r.checkin_time,scannedBy:r.scanned_by||'-',
+    return{id:r.id,participantId:r.participant_id,day:r.day,time:r.checkin_time,scannedBy:r.scanned_by||'-',
       name:`${p.prefix||''} ${p.first_name||''} ${p.last_name||''}`.trim(),
       dept,isIn,tag:p.tag||'-',items:p.items||'-',
       pt:p.participation_type||'-',isWalkin:p.is_walkin===true};
@@ -567,10 +578,13 @@ function applyFilters(){
   const totalAll=allData.length;
   const walkinCount=allData.filter(r=>r.isWalkin).length;
   const preRegCount=totalAll-walkinCount;
+  const uniqueCheckedIn=new Set(allData.filter(r=>!r.isWalkin).map(r=>r.participantId)).size;
+  const notCheckedIn=totalPreReg>0?totalPreReg-uniqueCheckedIn:'-';
   document.getElementById('sFiltered').textContent=tot.toLocaleString();
   document.getElementById('sTotal').textContent=totalAll.toLocaleString();
   document.getElementById('sPreReg').textContent=preRegCount.toLocaleString();
   document.getElementById('sWalkin').textContent=walkinCount.toLocaleString();
+  document.getElementById('sNotChecked').textContent=typeof notCheckedIn==='number'?notCheckedIn.toLocaleString():'-';
   [1,2,3].forEach(d=>{
     const c=filtered.filter(r=>r.day===d).length;
     document.getElementById(`sD${d}`).textContent=c.toLocaleString();
