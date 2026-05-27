@@ -326,34 +326,35 @@
     const items=p.items||'';
     const hasBag=items.includes('กระเป๋า');
     const otherItems=items.replace('กระเป๋า','').replace(/\+\+/g,'+').replace(/^\+|\+$/g,'').trim();
-    const rows=[
-      {label:'เวลา',val:time,style:'normal'},
-      {label:'คูปองอาหาร',val:'รับได้เลย',style:'ok'},
-    ];
+    const rows=[{label:'เวลา',val:time,style:'normal'}];
     if(isWalkin){
-      rows.push({label:'ของที่ระลึก',val:'(ไม่มี)',style:'normal'});
-    } else if(isFirst){
-      if(hasBag) rows.push({label:'กระเป๋า',val:bagDone?'รับไปแล้ว':'รับได้เลย',style:bagDone?'done':'ok'});
-      if(otherItems) rows.push({label:'ของที่ระลึกอื่น',val:otherItems,style:'ok'});
-      if(!hasBag&&!otherItems) rows.push({label:'ของที่ระลึก',val:items||'(ไม่มี)',style:'ok'});
+      rows.push({label:'ประเภท',val:'Walk-in',style:'normal'});
     } else {
-      if(hasBag) rows.push({label:'กระเป๋า',val:bagDone?'รับไปแล้ว':'รับไปแล้ว',style:'done'});
-      if(otherItems) rows.push({label:'ของที่ระลึกอื่น',val:'รับไปแล้ว',style:'done'});
-      if(!hasBag&&!otherItems) rows.push({label:'ของที่ระลึก',val:'รับไปแล้ว',style:'done'});
+      rows.push({label:'คูปองอาหาร',val:'รับได้เลย',style:'ok'});
+      if(isFirst){
+        if(hasBag) rows.push({label:'กระเป๋า',val:bagDone?'รับไปแล้ว':'รับได้เลย',style:bagDone?'done':'ok'});
+        if(otherItems) rows.push({label:'ของที่ระลึกอื่น',val:otherItems,style:'ok'});
+        if(!hasBag&&!otherItems) rows.push({label:'ของที่ระลึก',val:items||'(ไม่มี)',style:'ok'});
+      } else {
+        if(hasBag) rows.push({label:'กระเป๋า',val:'รับไปแล้ว',style:'done'});
+        if(otherItems) rows.push({label:'ของที่ระลึกอื่น',val:'รับไปแล้ว',style:'done'});
+        if(!hasBag&&!otherItems) rows.push({label:'ของที่ระลึก',val:'รับไปแล้ว',style:'done'});
+      }
+      rows.push({label:'ประเภท',val:p.tag||'-',style:'normal'});
     }
-    rows.push({label:'ประเภท',val:p.tag||'-',style:'normal'});
-    if(isWalkin) rows.push({label:'หมายเหตุ',val:'Walk-in',style:'normal'});
     return rows;
   }
 
   function buildWarningRows(time,p,isWalkin){
+    if(isWalkin) return[
+      {label:'เวลาที่เช็คอิน',val:time,style:'normal'},
+      {label:'ประเภท',val:'Walk-in',style:'normal'}
+    ];
     return[
       {label:'เวลาที่เช็คอิน',val:time,style:'normal'},
       {label:'คูปองอาหาร',val:'รับแล้ว',style:'done'},
-      {label:'ของที่ระลึก',val:isWalkin?'(ไม่มี)':'รับแล้ว',style:'done'},
-      {label:'ประเภท',val:p.tag||'-',style:'normal'},
-      isWalkin?{label:'หมายเหตุ',val:'Walk-in',style:'normal'}:null
-    ].filter(Boolean);
+      {label:'ประเภท',val:p.tag||'-',style:'normal'}
+    ];
   }
 
   function showModal(type,status,title,name,rows){
