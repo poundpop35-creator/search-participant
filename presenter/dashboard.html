@@ -133,8 +133,10 @@
     let out=[],from=0;
     while(true){
       const r=await fetch(SB_URL+path,{headers:{...H,'Range-Unit':'items','Range':`${from}-${from+999}`,'Prefer':'count=exact'}});
+      if(!r.ok){const t=await r.text();throw new Error(`HTTP ${r.status}: ${t}`);}
       const d=await r.json();
-      if(!Array.isArray(d)||d.length===0) break;
+      if(!Array.isArray(d)) throw new Error('Not array: '+JSON.stringify(d));
+      if(d.length===0) break;
       out=out.concat(d);
       if(d.length<1000) break;
       from+=1000;
@@ -173,7 +175,7 @@
       document.getElementById('lastUpdate').textContent='อัปเดต: '+new Date().toLocaleTimeString('th-TH',{timeZone:'Asia/Bangkok'});
       renderTable();
     }catch(e){
-      document.getElementById('tableBody').innerHTML='<tr><td colspan="6" class="loading-row">โหลดข้อมูลไม่สำเร็จ กรุณารีเฟรช</td></tr>';
+      document.getElementById('tableBody').innerHTML=`<tr><td colspan="6" class="loading-row" style="color:#dc2626;">Error: ${e.message}</td></tr>`;
     }
   }
 
