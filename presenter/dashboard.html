@@ -144,10 +144,12 @@
 
   async function loadAll(){
     try{
-      const [presenters, checkins] = await Promise.all([
-        fetchAll('/rest/v1/participants?participation_type=like.*ผู้ส่งผลงาน*&select=id,prefix,first_name,last_name,dept,participation_type&order=last_name.asc'),
+      const [allParticipants, checkins] = await Promise.all([
+        fetchAll('/rest/v1/participants?select=id,prefix,first_name,last_name,dept,participation_type&order=last_name.asc'),
         fetchAll('/rest/v1/presenter_checkins?select=participant_id,type,checkin_time')
       ]);
+
+      const presenters = allParticipants.filter(p=>(p.participation_type||'').includes('ผู้ส่งผลงาน'));
 
       const presentMap={}, certMap={};
       checkins.forEach(c=>{
