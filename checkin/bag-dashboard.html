@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>จำนวนผู้มารับกระเป๋า (ก่อนวันงาน) — กรมวิทยาศาสตร์การแพทย์</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <style>
+    :root{--blue:#0d2b6b;--blue-light:#e8f0fe;--green:#16a34a;--red:#dc2626;--white:#fff;--shadow:0 2px 12px rgba(13,43,107,0.10);--border:#e2e8f0;}
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:linear-gradient(rgba(232,240,254,0.60),rgba(232,240,254,0.60)),url('https://raw.githubusercontent.com/poundpop35-creator/search-participant/main/DNA.png') center/cover fixed;font-family:'Sarabun',sans-serif;}
+    .topbar{background:rgba(255,255,255,0.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:#1e293b;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;position:sticky;top:0;z-index:50;}
+    .topbar h1{font-size:1rem;font-weight:700;color:#1e293b;}
+    .topbar-btns{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+    .tbtn{padding:7px 14px;border-radius:8px;border:1.5px solid #cbd5e1;color:#1e293b;background:transparent;font-family:'Sarabun',sans-serif;font-size:0.82rem;cursor:pointer;text-decoration:none;display:inline-block;}
+    .tbtn:hover{background:rgba(0,0,0,0.05);}
+    .last-update{font-size:0.75rem;color:#64748b;}
+    .clear-btn{padding:7px 16px;border-radius:8px;border:none;background:#dc2626;color:white;font-family:'Sarabun',sans-serif;font-size:0.85rem;cursor:pointer;font-weight:600;}
+    .clear-btn:hover{background:#b91c1c;}
+    .clear-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.65);display:flex;align-items:center;justify-content:center;z-index:9999;padding:24px;}
+    .clear-overlay.hidden{display:none;}
+    .clear-modal{background:white;border-radius:20px;padding:28px 24px 22px;width:100%;max-width:360px;box-shadow:0 8px 40px rgba(0,0,0,0.3);text-align:center;}
+    .clear-icon{font-size:2.5rem;margin-bottom:10px;}
+    .clear-modal h3{color:#dc2626;font-size:1.15rem;font-weight:700;margin-bottom:8px;}
+    .clear-modal p{font-size:0.86rem;color:#64748b;margin-bottom:18px;line-height:1.7;}
+    .clear-pw-input{width:100%;padding:11px 14px;border-radius:10px;border:2px solid #e2e8f0;font-family:'Sarabun',sans-serif;font-size:1rem;margin-bottom:6px;outline:none;text-align:center;letter-spacing:2px;}
+    .clear-pw-input:focus{border-color:#dc2626;}
+    .clear-err{color:#dc2626;font-size:0.82rem;margin-bottom:14px;min-height:20px;}
+    .clear-actions{display:flex;gap:8px;}
+    .clear-cancel{flex:1;padding:12px;border-radius:10px;border:2px solid #e2e8f0;background:white;font-family:'Sarabun',sans-serif;font-size:0.95rem;cursor:pointer;color:#64748b;}
+    .clear-confirm{flex:1;padding:12px;border-radius:10px;border:none;background:#dc2626;color:white;font-family:'Sarabun',sans-serif;font-size:0.95rem;font-weight:700;cursor:pointer;}
+    .clear-confirm:disabled{opacity:0.5;cursor:not-allowed;}
+    .main{padding:20px;max-width:1100px;margin:0 auto;}
+    /* Stats */
+    .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:20px;}
+    .stat-card{background:var(--white);border-radius:14px;padding:18px;box-shadow:var(--shadow);}
+    .stat-label{font-size:0.74rem;color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;}
+    .stat-num{font-size:2rem;font-weight:700;}
+    .stat-sub{font-size:0.76rem;color:#94a3b8;margin-top:3px;}
+    .stat-card.total .stat-num{color:var(--blue);}
+    .stat-card.received .stat-num{color:var(--green);}
+    .stat-card.pending .stat-num{color:var(--red);}
+    /* Filter */
+    .filter-bar{background:var(--white);border-radius:14px;padding:14px 18px;box-shadow:var(--shadow);margin-bottom:14px;display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;}
+    .filter-group{display:flex;flex-direction:column;gap:4px;}
+    .filter-label{font-size:0.71rem;font-weight:700;color:#64748b;text-transform:uppercase;}
+    .filter-select{padding:8px 12px;border-radius:8px;border:1.5px solid var(--border);font-family:'Sarabun',sans-serif;font-size:0.88rem;color:#1e293b;cursor:pointer;outline:none;}
+    .sbox{padding:8px 12px;border-radius:8px;border:1.5px solid var(--border);font-family:'Sarabun',sans-serif;font-size:0.88rem;width:200px;outline:none;}
+    .btn-reset{padding:8px 12px;border-radius:8px;border:1.5px solid var(--border);background:white;font-family:'Sarabun',sans-serif;font-size:0.83rem;cursor:pointer;color:#64748b;}
+    /* Table */
+    .tcard{background:var(--white);border-radius:14px;box-shadow:var(--shadow);overflow:hidden;}
+    .thead-row{padding:14px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:10px;}
+    .ttitle{font-weight:700;color:var(--blue);font-size:1rem;}
+    .tcount{font-size:0.82rem;color:#64748b;margin-left:6px;}
+    .export-btns{display:flex;gap:8px;}
+    .btn-xl{padding:8px 14px;border-radius:8px;border:none;font-family:'Sarabun',sans-serif;font-size:0.82rem;font-weight:600;cursor:pointer;}
+    .btn-xl.green{background:#16a34a;color:white;}
+    .btn-xl.teal{background:#0891b2;color:white;}
+    table{width:100%;border-collapse:collapse;}
+    th{background:#f8fafc;padding:10px 14px;text-align:left;font-size:0.73rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.04em;border-bottom:2px solid var(--border);}
+    td{padding:10px 14px;font-size:0.86rem;border-bottom:1px solid var(--border);color:#1e293b;}
+    tr:last-child td{border-bottom:none;}
+    tr:hover td{background:#f8fafc;}
+    .badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:0.72rem;font-weight:700;}
+    .b-received{background:#dcfce7;color:#166534;}
+    .b-pending{background:#fee2e2;color:#991b1b;}
+    .b-participant{background:#dbeafe;color:#1e40af;}
+    .b-staff{background:#fef9c3;color:#92400e;}
+    .loading-td{text-align:center;padding:40px;color:#94a3b8;}
+    /* Pager */
+    .pager{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-top:1px solid var(--border);font-size:0.83rem;color:#64748b;flex-wrap:wrap;gap:8px;}
+    .pbtn{padding:5px 12px;border-radius:6px;border:1.5px solid var(--border);background:var(--white);cursor:pointer;font-size:0.8rem;}
+    .pbtn:disabled{opacity:0.4;cursor:not-allowed;}
+  </style>
+</head>
+<body>
+<div class="topbar">
+  <div style="display:flex;align-items:center;gap:10px;">
+    <img src="https://raw.githubusercontent.com/poundpop35-creator/search-participant/main/logo-%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B8%8A%E0%B8%B8%E0%B8%A1%E0%B8%A7%E0%B8%B4%E0%B8%8A%E0%B8%B2%E0%B8%81%E0%B8%B2%E0%B8%A3-34-Final_0.png" style="height:36px;object-fit:contain;" alt="conf">
+    <img src="https://raw.githubusercontent.com/poundpop35-creator/search-participant/main/logo-DMSc-MOPH%20(1)%20(2)_0.png" style="height:36px;object-fit:contain;" alt="dmsc">
+    <h1>จำนวนผู้มารับกระเป๋า (ก่อนวันงาน)</h1>
+  </div>
+  <div class="topbar-btns">
+    <span class="last-update" id="lastUpdate">-</span>
+    <button class="tbtn" onclick="loadAll()">รีเฟรช</button>
+    <a class="tbtn" href="index.html">← ระบบสแกนเช็คอิน</a>
+    <button class="clear-btn" onclick="openClearModal()">ล้างข้อมูล</button>
+    <button class="tbtn" onclick="doLogout()" style="background:#dc2626;color:white;border-color:#dc2626;font-weight:600;">ออกจากระบบ</button>
+  </div>
+</div>
+
+<div class="clear-overlay hidden" id="clearOverlay">
+  <div class="clear-modal">
+    <div class="clear-icon">🗑️</div>
+    <h3>ล้างข้อมูลการรับกระเป๋าทั้งหมด</h3>
+    <p>การล้างข้อมูลจะ<strong>รีเซ็ตสถานะการรับกระเป๋าทั้งหมด</strong>ออกจากระบบถาวร<br>ข้อมูลผู้ลงทะเบียนจะยังคงอยู่</p>
+    <input class="clear-pw-input" type="password" id="clearPwInput" placeholder="ใส่รหัสผ่าน" onkeydown="if(event.key==='Enter')confirmClear()">
+    <div class="clear-err" id="clearErr"></div>
+    <div class="clear-actions">
+      <button class="clear-cancel" onclick="closeClearModal()">ยกเลิก</button>
+      <button class="clear-confirm" id="clearConfirmBtn" onclick="confirmClear()">ล้างข้อมูล</button>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+  <!-- Stats -->
+  <div class="stats-grid">
+    <div class="stat-card total"><div class="stat-label">มีสิทธิ์รับกระเป๋าทั้งหมด</div><div class="stat-num" id="sTotal">-</div><div class="stat-sub">ราย</div></div>
+    <div class="stat-card received"><div class="stat-label">รับแล้ว</div><div class="stat-num" id="sReceived">-</div><div class="stat-sub" id="sReceivedPct">-</div></div>
+    <div class="stat-card pending"><div class="stat-label">ยังไม่รับ</div><div class="stat-num" id="sPending">-</div><div class="stat-sub" id="sPendingPct">-</div></div>
+  </div>
+
+  <!-- Filter -->
+  <div class="filter-bar">
+    <div class="filter-group">
+      <div class="filter-label">สถานะกระเป๋า</div>
+      <select class="filter-select" id="fStatus" onchange="applyFilters()">
+        <option value="">ทั้งหมด</option>
+        <option value="received">รับแล้ว</option>
+        <option value="pending">ยังไม่รับ</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <div class="filter-label">ประเภทการเข้าร่วม</div>
+      <select class="filter-select" id="fPT" onchange="applyFilters()">
+        <option value="">ทั้งหมด</option>
+        <option value="ผู้เข้าร่วมงาน">ผู้เข้าร่วมงาน</option>
+        <option value="ผู้บริหาร">ผู้บริหาร</option>
+        <option value="ผู้บริหาร+กรรมการ">ผู้บริหาร+กรรมการ</option>
+        <option value="ผู้บริหาร+คณะทำงาน">ผู้บริหาร+คณะทำงาน</option>
+        <option value="ผู้บริหาร+ผู้ส่งผลงาน">ผู้บริหาร+ผู้ส่งผลงาน</option>
+        <option value="ผู้ส่งผลงาน">ผู้ส่งผลงาน</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <div class="filter-label">หน่วยงาน</div>
+      <select class="filter-select" id="fDept" onchange="applyFilters()" style="max-width:260px;">
+        <option value="">ทั้งหมด</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <div class="filter-label">TAG</div>
+      <select class="filter-select" id="fTag" onchange="applyFilters()">
+        <option value="">ทั้งหมด</option>
+        <option value="participant">participant</option>
+        <option value="Staff">Staff</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <div class="filter-label">ค้นหา</div>
+      <input class="sbox" id="sBox" placeholder="ชื่อ / หน่วยงาน..." oninput="applyFilters()">
+    </div>
+    <button class="btn-reset" onclick="resetFilters()">✕ ล้าง</button>
+  </div>
+
+  <!-- Table -->
+  <div class="tcard">
+    <div class="thead-row">
+      <div>
+        <span class="ttitle" id="tTitle">ผู้มีสิทธิ์รับกระเป๋า (ก่อนวันงาน)</span>
+        <span class="tcount" id="tCount"></span>
+      </div>
+      <div class="export-btns">
+        <button class="btn-xl green" onclick="exportExcel()">⬇ Excel</button>
+        <button class="btn-xl teal"  onclick="exportCSV()">⬇ CSV</button>
+      </div>
+    </div>
+    <div style="overflow-x:auto;">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>ชื่อ-นามสกุล</th>
+            <th>หน่วยงาน</th>
+            <th>ประเภทการเข้าร่วม</th>
+            <th>TAG</th>
+            <th>สถานะกระเป๋า</th>
+            <th>วันที่รับ</th>
+          </tr>
+        </thead>
+        <tbody id="tBody"><tr><td colspan="7" class="loading-td">กำลังโหลด...</td></tr></tbody>
+      </table>
+    </div>
+    <div class="pager">
+      <span id="pInfo">-</span>
+      <div style="display:flex;gap:6px;">
+        <button class="pbtn" id="bPrev" onclick="changePage(-1)">← ก่อนหน้า</button>
+        <button class="pbtn" id="bNext" onclick="changePage(1)">ถัดไป →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const SB_URL = "https://gvxytnjfyepqhbkmcjms.supabase.co";
+const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2eHl0bmpmeWVwcWhia21jam1zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0MzE2NDAsImV4cCI6MjA5NTAwNzY0MH0.RAr_ehb4cxfNliDR0h5XcihUaP-0ltZTTGIAv2Fw1kk";
+const PAGE = 10;
+const DEPTS = ['อธิบดีกรมวิทยาศาสตร์การแพทย์','รองอธิบดีกรมวิทยาศาสตร์การแพทย์','สำนักผู้ทรงคุณวุฒิกรมวิทยาศาสตร์การแพทย์','กองแผนงานและวิชาการ','กองทดสอบความชำนาญ','กลุ่มพัฒนาระบบบริหาร','กลุ่มตรวจสอบภายใน','กลุ่มงานจริยธรรม','สำนักงานเลขานุการกรม','สถาบันชีววัตถุ','สถาบันวิจัยวิทยาศาสตร์สาธารณสุข','สถาบันวิจัยสมุนไพร','สถาบันชีววิทยาศาสตร์ทางการแพทย์','สำนักคุณภาพและความปลอดภัยอาหาร','สำนักเครื่องสำอางและวัตถุอันตราย','สำนักรังสีและเครื่องมือแพทย์','สำนักมาตรฐานห้องปฏิบัติการ','สำนักยาและวัตถุเสพติด','ศูนย์รวมบริการ','ศูนย์เทคโนโลยีสารสนเทศและการสื่อสาร','กองความร่วมมือระหว่างประเทศ','กองบริหารทรัพยากรบุคคล','กองบริหารการคลัง','กองประชาสัมพันธ์และสื่อสารสาธารณะ','ศูนย์ตอบโต้เหตุฉุกเฉินด้านห้องปฏิบัติการและรังสี','ศูนย์วิทยาศาสตร์การแพทย์ที่ 1 เชียงใหม่','ศูนย์วิทยาศาสตร์การแพทย์ที่ 1/1 เชียงราย','ศูนย์วิทยาศาสตร์การแพทย์ที่ 2 พิษณุโลก','ศูนย์วิทยาศาสตร์การแพทย์ที่ 3 นครสวรรค์','ศูนย์วิทยาศาสตร์การแพทย์ที่ 4 สระบุรี','ศูนย์วิทยาศาสตร์การแพทย์ที่ 5 สมุทรสงคราม','ศูนย์วิทยาศาสตร์การแพทย์ที่ 6 ชลบุรี','ศูนย์วิทยาศาสตร์การแพทย์ที่ 7 ขอนแก่น','ศูนย์วิทยาศาสตร์การแพทย์ที่ 8 อุดรธานี','ศูนย์วิทยาศาสตร์การแพทย์ที่ 9 นครราชสีมา','ศูนย์วิทยาศาสตร์การแพทย์ที่ 10 อุบลราชธานี','ศูนย์วิทยาศาสตร์การแพทย์ที่ 11 สุราษฎร์ธานี','ศูนย์วิทยาศาสตร์การแพทย์ที่ 11/1 ภูเก็ต','ศูนย์วิทยาศาสตร์การแพทย์ที่ 12 สงขลา','ศูนย์วิทยาศาสตร์การแพทย์ที่ 12/1 ตรัง'];
+
+// Auth check
+if(sessionStorage.getItem('dmsc_auth')!=='ok') window.location.href='login.html';
+
+let allData=[], filtered=[], curPage=1;
+
+(function populateDeptFilter(){
+  const sel=document.getElementById('fDept');
+  DEPTS.forEach(d=>{const o=document.createElement('option');o.value=d;o.textContent=d;sel.appendChild(o);});
+})();
+
+async function loadAll(){
+  document.getElementById('tBody').innerHTML='<tr><td colspan="7" class="loading-td">กำลังโหลด...</td></tr>';
+  try{
+    let res=[], from=0;
+    while(true){
+      const r=await fetch(`${SB_URL}/rest/v1/participants?select=id,prefix,first_name,last_name,dept,ext_dept,internal_external,participation_type,tag,items,bag_received,bag_received_date&order=last_name.asc`,{
+        headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Range-Unit':'items','Range':`${from}-${from+999}`,'Prefer':'count=exact'}
+      });
+      if(!r.ok){
+        const errText=await r.text();
+        document.getElementById('tBody').innerHTML=`<tr><td colspan="7" class="loading-td" style="color:#dc2626;">API Error ${r.status}: ${errText}</td></tr>`;
+        return;
+      }
+      const d=await r.json();
+      if(!Array.isArray(d)){
+        document.getElementById('tBody').innerHTML=`<tr><td colspan="7" class="loading-td" style="color:#dc2626;">API Error: ${JSON.stringify(d)}</td></tr>`;
+        return;
+      }
+      if(d.length===0) break;
+      res=res.concat(d); if(d.length<1000) break; from+=1000;
+    }
+
+    allData = res.filter(p=>{
+      const isIn=(p.internal_external||'').includes('ภายใน');
+      const pt=(p.participation_type||'');
+      return isIn && (pt.includes('ผู้เข้าร่วมงาน') || pt.includes('ผู้บริหาร') || pt === 'ผู้ส่งผลงาน');
+    }).map(p=>{
+      const isIn=(p.internal_external||'').includes('ภายใน');
+      const dept=isIn?(p.dept||'-'):(p.ext_dept||p.dept||'-');
+      return{
+        name:`${p.prefix||''} ${p.first_name||''} ${p.last_name||''}`.trim(),
+        dept, pt:p.participation_type||'-', tag:p.tag||'-',
+        items:p.items||'-',
+        received:p.bag_received===true||p.bag_received===1||p.bag_received==='true',
+        receivedDate:p.bag_received_date||'-'
+      };
+    });
+
+    const total=allData.length;
+    const receivedCount=allData.filter(r=>r.received).length;
+    const pendingCount=total-receivedCount;
+
+    document.getElementById('sTotal').textContent=total.toLocaleString();
+    document.getElementById('sReceived').textContent=receivedCount.toLocaleString();
+    document.getElementById('sPending').textContent=pendingCount.toLocaleString();
+    document.getElementById('sReceivedPct').textContent=total?`${Math.round(receivedCount/total*100)}% ของทั้งหมด`:'-';
+    document.getElementById('sPendingPct').textContent=total?`${Math.round(pendingCount/total*100)}% ของทั้งหมด`:'-';
+    document.getElementById('lastUpdate').textContent='อัปเดต: '+new Date().toLocaleTimeString('th-TH',{timeZone:'Asia/Bangkok'});
+
+    applyFilters();
+  }catch(e){
+    document.getElementById('tBody').innerHTML='<tr><td colspan="7" class="loading-td">โหลดไม่สำเร็จ</td></tr>';
+  }
+}
+
+function applyFilters(){
+  const q=(document.getElementById('sBox').value||'').toLowerCase();
+  const st=document.getElementById('fStatus').value;
+  const pt=document.getElementById('fPT').value;
+  const tg=document.getElementById('fTag').value;
+  const dp=document.getElementById('fDept').value;
+  filtered=allData.filter(r=>{
+    const mQ=!q||r.name.toLowerCase().includes(q)||r.dept.toLowerCase().includes(q);
+    const mSt=!st||(st==='received'&&r.received)||(st==='pending'&&!r.received);
+    const mPt=!pt||r.pt===pt;
+    const mTg=!tg||r.tag===tg;
+    const mDp=!dp||r.dept===dp;
+    return mQ&&mSt&&mPt&&mTg&&mDp;
+  });
+  curPage=1;
+  document.getElementById('tCount').textContent=`(${filtered.length.toLocaleString()} รายการ)`;
+  renderTable();
+}
+
+function renderTable(){
+  const start=(curPage-1)*PAGE;
+  const page=filtered.slice(start,start+PAGE);
+  const tot=filtered.length;
+  const totPages=Math.ceil(tot/PAGE)||1;
+  document.getElementById('pInfo').textContent=`แสดง ${tot===0?0:start+1}–${Math.min(start+PAGE,tot)} จาก ${tot.toLocaleString()} รายการ`;
+  document.getElementById('bPrev').disabled=curPage<=1;
+  document.getElementById('bNext').disabled=curPage>=totPages;
+  if(!page.length){document.getElementById('tBody').innerHTML='<tr><td colspan="7" class="loading-td">ไม่พบข้อมูล</td></tr>';return;}
+  document.getElementById('tBody').innerHTML=page.map((r,i)=>`<tr>
+    <td>${start+i+1}</td>
+    <td>${r.name}</td>
+    <td style="max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${r.dept}">${r.dept}</td>
+    <td>${r.pt}</td>
+    <td><span class="badge ${r.tag==='Staff'?'b-staff':'b-participant'}">${r.tag}</span></td>
+    <td><span class="badge ${r.received?'b-received':'b-pending'}">${r.received?'รับแล้ว':'ยังไม่รับ'}</span></td>
+    <td>${r.received?r.receivedDate:'-'}</td>
+  </tr>`).join('');
+}
+
+function changePage(d){curPage+=d;renderTable();window.scrollTo({top:0,behavior:'smooth'});}
+
+function resetFilters(){
+  document.getElementById('fStatus').value='';
+  document.getElementById('fPT').value='';
+  document.getElementById('fTag').value='';
+  document.getElementById('fDept').value='';
+  document.getElementById('sBox').value='';
+  applyFilters();
+}
+
+function exportExcel(){
+  const ws=XLSX.utils.json_to_sheet(getRows());
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'กระเป๋า');
+  XLSX.writeFile(wb,`bag_dashboard_${new Date().toISOString().slice(0,10)}.xlsx`);
+}
+function exportCSV(){
+  const rows=getRows(),h=Object.keys(rows[0]);
+  const csv=[h.join(','),...rows.map(r=>h.map(k=>`"${String(r[k]).replace(/"/g,'""')}"`).join(','))].join('\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'}));
+  a.download=`bag_dashboard_${new Date().toISOString().slice(0,10)}.csv`;a.click();
+}
+function getRows(){
+  return filtered.map((r,i)=>({'ลำดับ':i+1,'ชื่อ-นามสกุล':r.name,'หน่วยงาน':r.dept,
+    'ประเภทการเข้าร่วม':r.pt,'TAG':r.tag,
+    'สถานะกระเป๋า':r.received?'รับแล้ว':'ยังไม่รับ',
+    'วันที่รับ':r.received?r.receivedDate:'-'}));
+}
+
+function doLogout(){sessionStorage.removeItem('dmsc_auth');sessionStorage.removeItem('dmsc_user');window.location.href='login.html';}
+
+const CLEAR_PASS='P@und3142';
+
+function openClearModal(){
+  document.getElementById('clearPwInput').value='';
+  document.getElementById('clearErr').textContent='';
+  document.getElementById('clearConfirmBtn').disabled=false;
+  document.getElementById('clearConfirmBtn').textContent='ล้างข้อมูล';
+  document.getElementById('clearOverlay').classList.remove('hidden');
+  setTimeout(()=>document.getElementById('clearPwInput').focus(),100);
+}
+
+function closeClearModal(){
+  document.getElementById('clearOverlay').classList.add('hidden');
+}
+
+async function confirmClear(){
+  const pw=document.getElementById('clearPwInput').value;
+  const errEl=document.getElementById('clearErr');
+  const btn=document.getElementById('clearConfirmBtn');
+  if(pw!==CLEAR_PASS){
+    errEl.textContent='❌ รหัสผ่านไม่ถูกต้อง';
+    document.getElementById('clearPwInput').value='';
+    document.getElementById('clearPwInput').focus();
+    return;
+  }
+  if(!confirm('⚠️ ยืนยันการล้างข้อมูลการรับกระเป๋าทั้งหมด?\n\nการกระทำนี้ไม่สามารถย้อนกลับได้')) return;
+  btn.disabled=true; btn.textContent='⏳ กำลังล้างข้อมูล...'; errEl.textContent='';
+  try{
+    const res=await fetch(`${SB_URL}/rest/v1/participants?id=gte.0`,{
+      method:'PATCH',
+      headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify({bag_received:false,bag_received_date:null})
+    });
+    if(res.ok||res.status===204){
+      closeClearModal();
+      alert('✅ ล้างข้อมูลการรับกระเป๋าเรียบร้อยแล้ว');
+      loadAll();
+    } else {
+      errEl.textContent='❌ เกิดข้อผิดพลาด: '+res.status;
+      btn.disabled=false; btn.textContent='ล้างข้อมูล';
+    }
+  }catch(e){
+    errEl.textContent='❌ '+e.message;
+    btn.disabled=false; btn.textContent='ล้างข้อมูล';
+  }
+}
+
+document.getElementById('clearOverlay').addEventListener('click',function(e){
+  if(e.target===this) closeClearModal();
+});
+
+loadAll();
+</script>
+</body>
+</html>
