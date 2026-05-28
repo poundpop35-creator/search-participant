@@ -154,6 +154,7 @@ if (sessionStorage.getItem('dmsc_auth') !== 'ok') {
     <a href="index.html" class="refresh-btn" style="text-decoration:none;">← ระบบสแกนเช็คอิน</a>
     <a href="bag-dashboard.html" class="refresh-btn" style="text-decoration:none;">จำนวนผู้มารับกระเป๋า</a>
     <a href="public.html" class="refresh-btn" style="text-decoration:none;">Live Dashboard</a>
+    <div id="activeSessions" style="font-size:0.78rem;color:#16a34a;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:5px 10px;display:none;">🟢 <span id="activeList"></span></div>
     <button class="refresh-btn" onclick="doLogout()" style="background:#dc2626;color:white;border-color:#dc2626;font-weight:600;">ออกจากระบบ</button>
   </div>
 </div>
@@ -879,6 +880,26 @@ function getRows(){
 }
 
 loadAll();
+loadActiveSessions();
+setInterval(loadActiveSessions, 30000);
+
+async function loadActiveSessions(){
+  try{
+    const r = await fetch(`${SB_URL}/rest/v1/staff_sessions?select=username,last_active&order=last_active.desc`,
+      {headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON}});
+    const rows = await r.json();
+    const now = Date.now();
+    const active = Array.isArray(rows) ? rows.filter(s=>(now-new Date(s.last_active))/60000<5).map(s=>s.username) : [];
+    const el = document.getElementById('activeSessions');
+    const lst = document.getElementById('activeList');
+    if(active.length>0){
+      lst.textContent = active.join(', ');
+      el.style.display='';
+    } else {
+      el.style.display='none';
+    }
+  }catch(e){}
+}
 
 // Auto-refresh
 let _refreshTimer = null;
