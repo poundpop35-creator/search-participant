@@ -168,11 +168,22 @@
     const m=now.getMonth()+1, d=now.getDate(), y=now.getFullYear();
     const confDays={24:1,25:2,26:3};
     const isBangkok2026June=y===2026&&m===6;
-    const bagOpt=document.getElementById('day').querySelector('option[value="bag"]');
+    const isAdmin=sessionStorage.getItem('dmsc_role')==='admin';
+    const sel=document.getElementById('day');
+    const bagOpt=sel.querySelector('option[value="bag"]');
+    const bagOpenAt=new Date(2026,4,29,8,0,0); // 29 พ.ค. 08:00 น.
+    if(now<bagOpenAt){
+      bagOpt.disabled=true;
+      bagOpt.textContent='รับกระเป๋า — เปิด 29 พ.ค. 08:00 น.';
+    }
     if(isBangkok2026June&&confDays[d]){
       bagOpt.disabled=true;
       bagOpt.textContent='รับกระเป๋า (ก่อนวันงาน) — ปิดแล้ว';
-      document.getElementById('day').value=String(confDays[d]);
+      sel.value=String(confDays[d]);
+      if(!isAdmin){
+        sel.disabled=true;
+        sel.title='วันที่ถูกล็อกตามวันงานจริง (เฉพาะ Admin เท่านั้นที่เปลี่ยนได้)';
+      }
     }
   }
 
