@@ -38,7 +38,6 @@
     .btn-nav{display:block;width:100%;margin-top:8px;padding:11px;border-radius:12px;border:none;font-family:'Sarabun',sans-serif;font-size:0.9rem;font-weight:600;cursor:pointer;text-align:center;text-decoration:none;}
     .btn-nav.primary{background:var(--blue);color:white;}
     .btn-nav.secondary{background:white;border:2px solid #c7d7f5;color:#64748b;}
-    .btn-nav.danger{background:#dc2626;color:white;}
     .status-bar{display:flex;align-items:center;gap:6px;font-size:0.78rem;color:#64748b;margin-top:12px;justify-content:center;}
     .dot{width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;}
     @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
@@ -46,6 +45,8 @@
     @keyframes spin{to{transform:rotate(360deg)}}
     .err-msg{color:#fff;text-align:center;font-size:0.85rem;padding:16px;}
     .retry-btn{display:block;margin:8px auto 16px;padding:8px 20px;border-radius:20px;background:#1a4eb8;color:white;border:none;font-family:'Sarabun',sans-serif;font-size:0.9rem;cursor:pointer;}
+
+    /* Modal */
     .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.55);display:flex;align-items:center;justify-content:center;z-index:999;padding:20px;}
     .modal-overlay.hidden{display:none;}
     .modal{background:white;border-radius:20px;padding:24px 22px 20px;width:100%;max-width:360px;box-shadow:0 8px 40px rgba(0,0,0,0.25);animation:slideUp .25s cubic-bezier(.34,1.56,.64,1);text-align:center;}
@@ -54,6 +55,7 @@
     .modal-status.success{color:var(--green);}
     .modal-status.warning{color:var(--yellow);}
     .modal-status.error{color:var(--red);}
+    .modal-status.info{color:var(--blue);}
     .modal-title{font-size:1.15rem;font-weight:700;color:#1e293b;margin-bottom:4px;}
     .modal-name{font-size:1rem;font-weight:600;color:var(--blue);margin-bottom:14px;}
     .modal-detail{background:#f8fafc;border-radius:12px;padding:12px 14px;margin-bottom:16px;text-align:left;border:1px solid #e2e8f0;}
@@ -68,10 +70,19 @@
     .btn-ok.success{background:var(--green);color:white;}
     .btn-ok.warning{background:var(--yellow);color:white;}
     .btn-ok.error{background:var(--red);color:white;}
+
+    /* Group select modal */
+    .gs-card{background:#f0f5ff;border:2px solid #c7d7f5;border-radius:14px;padding:14px 16px;margin-bottom:10px;cursor:pointer;text-align:left;width:100%;font-family:'Sarabun',sans-serif;transition:border-color .15s,background .15s;}
+    .gs-card:hover{background:#e0e7ff;border-color:#6366f1;}
+    .gs-card:last-of-type{margin-bottom:0;}
+    .gs-code{display:inline-block;background:#0d2b6b;color:white;font-size:0.8rem;font-weight:700;padding:3px 12px;border-radius:6px;letter-spacing:0.06em;margin-bottom:6px;}
+    .gs-title{font-size:0.88rem;color:#1e293b;font-weight:600;line-height:1.4;}
+    .gs-cancel{width:100%;margin-top:12px;padding:11px;border-radius:12px;border:2px solid #e2e8f0;background:white;color:#64748b;font-family:'Sarabun',sans-serif;font-size:0.9rem;font-weight:600;cursor:pointer;}
   </style>
 </head>
 <body>
 
+<!-- Result modal -->
 <div class="modal-overlay hidden" id="modalOverlay">
   <div class="modal">
     <div class="modal-status" id="modalStatus"></div>
@@ -79,6 +90,17 @@
     <div class="modal-name"   id="modalName"></div>
     <div class="modal-detail" id="modalDetail" style="display:none"></div>
     <button class="btn-ok success" id="btnOk" onclick="closeModal()">ตกลง</button>
+  </div>
+</div>
+
+<!-- Group select modal -->
+<div class="modal-overlay hidden" id="gsOverlay">
+  <div class="modal">
+    <div class="modal-status info">เลือกกลุ่มที่จะเข้าคิว</div>
+    <div class="modal-title">มีผลงานหลายกลุ่ม</div>
+    <div class="modal-name" id="gsName"></div>
+    <div id="gsCards"></div>
+    <button class="gs-cancel" onclick="cancelGroupSelect()">ยกเลิก</button>
   </div>
 </div>
 
@@ -134,7 +156,6 @@
   <a class="btn-nav primary" href="dashboard.html" style="margin-top:16px;">ไปหน้า Dashboard ผู้ส่งผลงาน</a>
   <a class="btn-nav" href="queue.html" style="margin-top:8px;background:#4f46e5;color:white;border-color:#4f46e5;">📋 Smart E-Queue</a>
 
-
   <div class="status-bar">
     <div class="dot"></div>
     <span id="statusText">รอเครื่องยิงบาร์โค้ด</span>
@@ -143,128 +164,216 @@
 
 <script>
   const SB_URL  = "https://gvxytnjfyepqhbkmcjms.supabase.co";
-  const SB_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2eHl0bmpmeWVwcWhia21jam1zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0MzE2NDAsImV4cCI6MjA5NTAwNzY0MH0.RAr_ehb4cxfNliDR0h5XcihUaP-0ltZTTGIAv2Fw1kk";
+  const SB_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2eHl0bmpmeWVwcWhia21cam1zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0MzE2NDAsImV4cCI6MjA5NTAwNzY0MH0.RAr_ehb4cxfNliDR0h5XcihUaP-0ltZTTGIAv2Fw1kk";
 
-  let isProcessing=false, modeCount=0, qrCode=null;
-  let presenterMode='present', scanMode='scanner', scanBuffer='', scanTimer=null;
+  let isProcessing = false, modeCount = 0, qrCode = null;
+  let presenterMode = 'present', scanMode = 'scanner', scanBuffer = '', scanTimer = null;
+  let pendingParticipant = null, pendingFullName = '';
 
-  window.addEventListener('load',()=>{ setScanMode('scanner'); loadCount(); });
+  window.addEventListener('load', () => { setScanMode('scanner'); loadCount(); });
 
   function setPresenterMode(mode){
-    presenterMode=mode;
-    document.getElementById('btnPresent').classList.toggle('active',mode==='present');
-    document.getElementById('btnCertificate').classList.toggle('active',mode==='certificate');
-    document.getElementById('counterLabel').textContent=mode==='present'?'เช็คอินรอนำเสนอแล้ว':'รับเกียรติบัตรแล้ว';
+    presenterMode = mode;
+    document.getElementById('btnPresent').classList.toggle('active', mode==='present');
+    document.getElementById('btnCertificate').classList.toggle('active', mode==='certificate');
+    document.getElementById('counterLabel').textContent = mode==='present' ? 'เช็คอินรอนำเสนอแล้ว' : 'รับเกียรติบัตรแล้ว';
     loadCount();
   }
 
   function setScanMode(mode){
-    scanMode=mode;
-    document.getElementById('btnScanner').classList.toggle('active',mode==='scanner');
-    document.getElementById('btnCamera').classList.toggle('active',mode==='camera');
-    document.getElementById('cameraMode').style.display=mode==='camera'?'':'none';
-    document.getElementById('scannerMode').style.display=mode==='scanner'?'':'none';
+    scanMode = mode;
+    document.getElementById('btnScanner').classList.toggle('active', mode==='scanner');
+    document.getElementById('btnCamera').classList.toggle('active', mode==='camera');
+    document.getElementById('cameraMode').style.display = mode==='camera' ? '' : 'none';
+    document.getElementById('scannerMode').style.display = mode==='scanner' ? '' : 'none';
     if(mode==='camera') startCamera();
-    else{ if(qrCode){qrCode.stop().catch(()=>{});qrCode=null;} setStatus('รอเครื่องยิงบาร์โค้ด'); }
+    else { if(qrCode){ qrCode.stop().catch(()=>{}); qrCode=null; } setStatus('รอเครื่องยิงบาร์โค้ด'); }
   }
 
   function startCamera(){
-    const c=document.getElementById('reader-container');
-    c.innerHTML='<div id="reader"></div>';
+    const c = document.getElementById('reader-container');
+    c.innerHTML = '<div id="reader"></div>';
     setStatus('กำลังเปิดกล้อง...');
-    qrCode=new Html5Qrcode('reader');
+    qrCode = new Html5Qrcode('reader');
     qrCode.start({facingMode:'environment'},{fps:10,qrbox:{width:220,height:220}},
-      text=>{ if(!isProcessing){ if(scanMode==='camera'){try{qrCode.pause();}catch(e){}} onScanSuccess(text); } },
+      text => { if(!isProcessing){ if(scanMode==='camera'){try{qrCode.pause();}catch(e){}} onScanSuccess(text); } },
       ()=>{}
     ).catch(()=>{
-      c.innerHTML=`<div><div class="err-msg">ไม่สามารถเปิดกล้องได้</div><button class="retry-btn" onclick="startCamera()">ลองใหม่</button></div>`;
+      c.innerHTML = `<div><div class="err-msg">ไม่สามารถเปิดกล้องได้</div><button class="retry-btn" onclick="startCamera()">ลองใหม่</button></div>`;
     });
   }
 
-  window.addEventListener('keydown',e=>{
-    if(scanMode!=='scanner'||isProcessing) return;
+  window.addEventListener('keydown', e => {
+    if(scanMode!=='scanner' || isProcessing) return;
     if(e.key==='Enter'){ if(scanBuffer.length>3){ onScanSuccess(scanBuffer); scanBuffer=''; } return; }
     if(e.key.length===1){ scanBuffer+=e.key; clearTimeout(scanTimer); scanTimer=setTimeout(()=>{scanBuffer='';},300); }
   });
 
   async function loadCount(){
-    document.getElementById('count').textContent='—';
-    document.getElementById('counterSub').textContent='กำลังโหลด...';
+    document.getElementById('count').textContent = '—';
+    document.getElementById('counterSub').textContent = 'กำลังโหลด...';
     try{
-      const res=await fetch(`${SB_URL}/rest/v1/presenter_checkins?type=eq.${presenterMode}&select=id`,
+      const res = await fetch(`${SB_URL}/rest/v1/presenter_checkins?type=eq.${presenterMode}&select=id`,
         {headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON,'Prefer':'count=exact','Range':'0-0'}});
-      const range=res.headers.get('Content-Range');
-      let count=0;
-      if(range){const m=range.match(/\/(\d+)/);if(m)count=parseInt(m[1]);}
-      modeCount=count;
-      document.getElementById('count').textContent=count.toLocaleString();
-      document.getElementById('counterSub').textContent=presenterMode==='present'?'ราย (เช็คอินรอนำเสนอ)':'ราย (รับเกียรติบัตร)';
+      const range = res.headers.get('Content-Range');
+      let count = 0;
+      if(range){ const m=range.match(/\/(\d+)/); if(m) count=parseInt(m[1]); }
+      modeCount = count;
+      document.getElementById('count').textContent = count.toLocaleString();
+      document.getElementById('counterSub').textContent = presenterMode==='present' ? 'ราย (เช็คอินรอนำเสนอ)' : 'ราย (รับเกียรติบัตร)';
     }catch(e){
-      document.getElementById('count').textContent='?';
-      document.getElementById('counterSub').textContent='โหลดไม่สำเร็จ';
+      document.getElementById('count').textContent = '?';
+      document.getElementById('counterSub').textContent = 'โหลดไม่สำเร็จ';
     }
   }
 
   function submitManual(){
-    const v=document.getElementById('manualInput').value.trim();
+    const v = document.getElementById('manualInput').value.trim();
     if(v) onScanSuccess(v);
   }
 
-  function setStatus(t){ document.getElementById('statusText').textContent=t; }
+  function setStatus(t){ document.getElementById('statusText').textContent = t; }
 
   async function onScanSuccess(decodedText){
     if(isProcessing) return;
-    isProcessing=true;
+    isProcessing = true;
     setStatus('กำลังค้นหา...');
-    if(scanMode==='scanner') document.getElementById('scanInput').value=decodedText;
+    if(scanMode==='scanner') document.getElementById('scanInput').value = decodedText;
     showModal('loading','กำลังดำเนินการ','กรุณารอสักครู่...','',null);
     try{
-      const keyword=decodedText.trim();
-      const searchRes=await sbFetch(`/rest/v1/participants?or=(id_card.eq.${encodeURIComponent(keyword)},passport.eq.${encodeURIComponent(keyword)})&select=id,prefix,first_name,last_name,participation_type,dept`,'GET');
-      if(!searchRes.ok){showModal('error','ข้อผิดพลาด','ไม่สามารถค้นหาข้อมูลได้','',null);return;}
-      const participants=await searchRes.json();
-      if(!participants||participants.length===0){showModal('error','ไม่พบข้อมูล','ไม่พบข้อมูลในระบบ','',null);return;}
+      const keyword = decodedText.trim();
+      const searchRes = await sbFetch(`/rest/v1/participants?or=(id_card.eq.${encodeURIComponent(keyword)},passport.eq.${encodeURIComponent(keyword)})&select=id,id_card,prefix,first_name,last_name,participation_type,dept`,'GET');
+      if(!searchRes.ok){ showModal('error','ข้อผิดพลาด','ไม่สามารถค้นหาข้อมูลได้','',null); return; }
+      const participants = await searchRes.json();
+      if(!participants || participants.length===0){ showModal('error','ไม่พบข้อมูล','ไม่พบข้อมูลในระบบ','',null); return; }
 
-      const p=participants[0];
-      const fullName=`${p.prefix||''} ${p.first_name||''} ${p.last_name||''}`.trim();
+      const p = participants[0];
+      const fullName = `${p.prefix||''} ${p.first_name||''} ${p.last_name||''}`.trim();
 
       if(!(p.participation_type||'').includes('ผู้ส่งผลงาน')){
-        showModal('error','ไม่มีสิทธิ์','บุคคลนี้ไม่ใช่ผู้ส่งผลงาน',fullName,[
-          {label:'ประเภท',val:p.participation_type||'-',style:'normal'}
+        showModal('error','ไม่มีสิทธิ์','บุคคลนี้ไม่ใช่ผู้ส่งผลงาน', fullName,[
+          {label:'ประเภท', val:p.participation_type||'-', style:'normal'}
         ]);
         return;
       }
 
-      const checkRes=await sbFetch(`/rest/v1/presenter_checkins?participant_id=eq.${p.id}&type=eq.${presenterMode}&select=id,checkin_time`,'GET');
-      const existing=await checkRes.json();
-      if(existing&&existing.length>0){
-        const t=new Date(existing[0].checkin_time).toLocaleTimeString('th-TH',{timeZone:'Asia/Bangkok'});
-        const doneLabel=presenterMode==='present'?'เช็คอินรอนำเสนอแล้ว':'รับเกียรติบัตรแล้ว';
-        showModal('warning',doneLabel,doneLabel+'ไปแล้ว',fullName,[
-          {label:'เวลาที่บันทึก',val:t,style:'normal'},
-          {label:'ประเภท',val:p.participation_type,style:'normal'}
-        ]);
+      // โหมดรับใบประกาศ — ไม่ต้องเลือก group
+      if(presenterMode === 'certificate'){
+        await doCertCheckin(p, fullName);
         return;
       }
 
-      const insertRes=await sbFetch('/rest/v1/presenter_checkins','POST',{
-        participant_id:p.id,
-        type:presenterMode,
-        checkin_time:new Date().toISOString(),
-        scanned_by:sessionStorage.getItem('presenter_user')||'unknown'
+      // โหมดเช็คอินนำเสนอ — ต้องเลือก group
+      hideModal();
+      await handlePresentCheckin(p, fullName);
+
+    }catch(e){
+      showModal('error','เชื่อมต่อไม่ได้','กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ต','',null);
+    }
+  }
+
+  async function handlePresentCheckin(p, fullName){
+    showModal('loading','กำลังตรวจสอบ','กรุณารอสักครู่...','',null);
+    try{
+      // ดึง presentation_schedule ของคนนี้
+      const schedRes = await sbFetch(`/rest/v1/presentation_schedule?id_card=eq.${encodeURIComponent(p.id_card)}&select=presentation_code,poster_group,title,field`,'GET');
+      const schedules = await schedRes.json();
+
+      if(!Array.isArray(schedules) || schedules.length===0){
+        showModal('error','ไม่พบข้อมูลผลงาน','ไม่พบรหัสการนำเสนอในระบบ', fullName, null);
+        return;
+      }
+
+      hideModal();
+
+      if(schedules.length === 1){
+        // กลุ่มเดียว → เข้าคิวเลย
+        await doPresentCheckin(p, fullName, schedules[0].poster_group, schedules[0]);
+      } else {
+        // หลายกลุ่ม → แสดง popup เลือก
+        pendingParticipant = p;
+        pendingFullName = fullName;
+        showGroupSelect(fullName, schedules);
+      }
+    }catch(e){
+      showModal('error','เชื่อมต่อไม่ได้','กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ต','',null);
+    }
+  }
+
+  function showGroupSelect(fullName, schedules){
+    document.getElementById('gsName').textContent = fullName;
+    const container = document.getElementById('gsCards');
+    container.innerHTML = schedules.map(s => `
+      <button class="gs-card" onclick="selectGroup('${s.poster_group}')">
+        <div class="gs-code">${s.poster_group}</div>
+        <div class="gs-title">${s.title || '(ไม่มีชื่อผลงาน)'}</div>
+      </button>`).join('');
+    document.getElementById('gsOverlay').classList.remove('hidden');
+  }
+
+  async function selectGroup(group){
+    document.getElementById('gsOverlay').classList.add('hidden');
+    if(!pendingParticipant) return;
+    const p = pendingParticipant;
+    const fullName = pendingFullName;
+    pendingParticipant = null;
+
+    const schedRes = await sbFetch(`/rest/v1/presentation_schedule?id_card=eq.${encodeURIComponent(p.id_card)}&poster_group=eq.${encodeURIComponent(group)}&select=presentation_code,poster_group,title,field`,'GET');
+    const schedules = await schedRes.json();
+    await doPresentCheckin(p, fullName, group, schedules[0]||{});
+  }
+
+  function cancelGroupSelect(){
+    document.getElementById('gsOverlay').classList.add('hidden');
+    pendingParticipant = null;
+    isProcessing = false;
+    setStatus(scanMode==='scanner' ? 'รอเครื่องยิงบาร์โค้ด' : 'พร้อมสแกน');
+    if(scanMode==='camera'){ try{qrCode.resume();}catch(e){} }
+  }
+
+  async function doPresentCheckin(p, fullName, groupCode, sched){
+    showModal('loading','กำลังตรวจสอบ','กรุณารอสักครู่...','',null);
+    try{
+      // เช็คว่าอยู่ในคิวนี้แล้วหรือยัง
+      const existRes = await sbFetch(`/rest/v1/presenter_checkins?participant_id=eq.${p.id}&group_code=eq.${encodeURIComponent(groupCode)}&select=id,status,checkin_time`,'GET');
+      const existing = await existRes.json();
+
+      if(existing && existing.length > 0){
+        const row = existing[0];
+        const t = new Date(row.checkin_time).toLocaleTimeString('th-TH',{timeZone:'Asia/Bangkok'});
+        if(row.status === 'done'){
+          showModal('warning','นำเสนอไปแล้ว',`นำเสนอกลุ่ม ${groupCode} ไปแล้ว`, fullName,[
+            {label:'เวลาที่บันทึก', val:t, style:'warn'},
+            {label:'กลุ่ม', val:groupCode, style:'normal'}
+          ]);
+        } else {
+          showModal('warning','อยู่ในคิวแล้ว',`อยู่ในคิวกลุ่ม ${groupCode} แล้ว`, fullName,[
+            {label:'เวลาเช็คอิน', val:t, style:'normal'},
+            {label:'สถานะ', val:row.status==='presenting'?'กำลังนำเสนอ':'รอคิว', style:'warn'}
+          ]);
+        }
+        return;
+      }
+
+      // บันทึกเข้าคิว
+      const insertRes = await sbFetch('/rest/v1/presenter_checkins','POST',{
+        participant_id: p.id,
+        type:           'present',
+        checkin_time:   new Date().toISOString(),
+        group_code:     groupCode,
+        status:         'waiting'
       });
 
-      if(insertRes.ok||insertRes.status===201){
+      if(insertRes.ok || insertRes.status===201){
         modeCount++;
-        document.getElementById('count').textContent=modeCount.toLocaleString();
-        const timeNow=new Date().toLocaleTimeString('th-TH',{timeZone:'Asia/Bangkok'});
-        const successLabel=presenterMode==='present'?'เช็คอินสำเร็จ':'รับเกียรติบัตรสำเร็จ';
-        const successTitle=presenterMode==='present'?'บันทึกเช็คอินรอนำเสนอแล้ว':'บันทึกการรับเกียรติบัตรแล้ว';
-        showModal('success',successLabel,successTitle,fullName,[
-          {label:'เวลา',val:timeNow,style:'normal'},
-          {label:'ประเภท',val:p.participation_type,style:'normal'}
+        document.getElementById('count').textContent = modeCount.toLocaleString();
+        const timeNow = new Date().toLocaleTimeString('th-TH',{timeZone:'Asia/Bangkok'});
+        showModal('success','เช็คอินสำเร็จ',`เข้าคิวกลุ่ม ${groupCode} แล้ว`, fullName,[
+          {label:'กลุ่ม', val:groupCode, style:'ok'},
+          {label:'เวลา', val:timeNow, style:'normal'},
+          {label:'ผลงาน', val:sched.title||'-', style:'normal'}
         ]);
-        setStatus(successLabel);
+        setStatus('เช็คอินสำเร็จ');
       } else {
         showModal('error','เกิดข้อผิดพลาด','ไม่สามารถบันทึกได้','',null);
       }
@@ -273,37 +382,73 @@
     }
   }
 
-  function showModal(type,status,title,name,rows){
-    document.getElementById('modalStatus').textContent=status;
-    document.getElementById('modalStatus').className='modal-status '+type;
-    document.getElementById('modalTitle').textContent=title;
-    document.getElementById('modalName').textContent=name||'';
-    document.getElementById('btnOk').className='btn-ok '+(type==='loading'?'loading':type);
-    document.getElementById('btnOk').style.display=type==='loading'?'none':'block';
-    const det=document.getElementById('modalDetail');
-    if(rows&&rows.length>0){
-      det.style.display='block';
-      det.innerHTML=rows.map(r=>`<div class="detail-row"><span class="detail-label">${r.label}</span><span class="detail-val ${r.style==='done'?'done':r.style==='ok'?'ok':r.style==='warn'?'warn':''}">${r.val}</span></div>`).join('');
-    } else det.style.display='none';
+  async function doCertCheckin(p, fullName){
+    try{
+      const checkRes = await sbFetch(`/rest/v1/presenter_checkins?participant_id=eq.${p.id}&type=eq.certificate&select=id,checkin_time`,'GET');
+      const existing = await checkRes.json();
+      if(existing && existing.length>0){
+        const t = new Date(existing[0].checkin_time).toLocaleTimeString('th-TH',{timeZone:'Asia/Bangkok'});
+        showModal('warning','รับเกียรติบัตรแล้ว','รับเกียรติบัตรไปแล้ว', fullName,[
+          {label:'เวลาที่บันทึก', val:t, style:'normal'}
+        ]);
+        return;
+      }
+      const insertRes = await sbFetch('/rest/v1/presenter_checkins','POST',{
+        participant_id: p.id,
+        type:           'certificate',
+        checkin_time:   new Date().toISOString(),
+        status:         'waiting'
+      });
+      if(insertRes.ok || insertRes.status===201){
+        modeCount++;
+        document.getElementById('count').textContent = modeCount.toLocaleString();
+        const timeNow = new Date().toLocaleTimeString('th-TH',{timeZone:'Asia/Bangkok'});
+        showModal('success','รับเกียรติบัตรสำเร็จ','บันทึกการรับเกียรติบัตรแล้ว', fullName,[
+          {label:'เวลา', val:timeNow, style:'normal'},
+          {label:'ประเภท', val:p.participation_type, style:'normal'}
+        ]);
+        setStatus('รับเกียรติบัตรสำเร็จ');
+      } else {
+        showModal('error','เกิดข้อผิดพลาด','ไม่สามารถบันทึกได้','',null);
+      }
+    }catch(e){
+      showModal('error','เชื่อมต่อไม่ได้','กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ต','',null);
+    }
+  }
+
+  function hideModal(){
+    document.getElementById('modalOverlay').classList.add('hidden');
+  }
+
+  function showModal(type, status, title, name, rows){
+    document.getElementById('modalStatus').textContent = status;
+    document.getElementById('modalStatus').className = 'modal-status ' + type;
+    document.getElementById('modalTitle').textContent = title;
+    document.getElementById('modalName').textContent = name||'';
+    document.getElementById('btnOk').className = 'btn-ok ' + (type==='loading'?'loading':type);
+    document.getElementById('btnOk').style.display = type==='loading' ? 'none' : 'block';
+    const det = document.getElementById('modalDetail');
+    if(rows && rows.length>0){
+      det.style.display = 'block';
+      det.innerHTML = rows.map(r=>`<div class="detail-row"><span class="detail-label">${r.label}</span><span class="detail-val ${r.style==='done'?'done':r.style==='ok'?'ok':r.style==='warn'?'warn':''}">${r.val}</span></div>`).join('');
+    } else det.style.display = 'none';
     document.getElementById('modalOverlay').classList.remove('hidden');
   }
 
   function closeModal(){
     document.getElementById('modalOverlay').classList.add('hidden');
-    document.getElementById('manualInput').value='';
-    document.getElementById('scanInput').value='';
-    isProcessing=false;
-    if(scanMode==='camera'){try{qrCode.resume();}catch(e){}}
-    setStatus(scanMode==='scanner'?'รอเครื่องยิงบาร์โค้ด':'พร้อมสแกน');
+    document.getElementById('manualInput').value = '';
+    document.getElementById('scanInput').value = '';
+    isProcessing = false;
+    if(scanMode==='camera'){ try{qrCode.resume();}catch(e){} }
+    setStatus(scanMode==='scanner' ? 'รอเครื่องยิงบาร์โค้ด' : 'พร้อมสแกน');
   }
 
-  function sbFetch(path,method,body){
-    const opts={method,headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON,'Content-Type':'application/json','Prefer':'return=minimal'}};
-    if(body) opts.body=JSON.stringify(body);
-    return fetch(SB_URL+path,opts);
+  function sbFetch(path, method, body){
+    const opts = {method, headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON,'Content-Type':'application/json','Prefer':'return=minimal'}};
+    if(body) opts.body = JSON.stringify(body);
+    return fetch(SB_URL+path, opts);
   }
-
-
 </script>
 </body>
 </html>
