@@ -89,7 +89,14 @@ async function doLogin(){
         {headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON}}
       );
       let sessions = [];
-      if(sessRes.ok){ sessions = await sessRes.json(); }
+      if(sessRes.ok){
+        sessions = await sessRes.json();
+      } else {
+        const errBody = await sessRes.text().catch(()=>'');
+        err.textContent = `[DB GET error ${sessRes.status}] ${errBody.substring(0,120)}`;
+        btn.textContent='เข้าสู่ระบบ'; btn.disabled=false;
+        return;
+      }
       if(Array.isArray(sessions) && sessions.length > 0){
         const diff = (Date.now() - new Date(sessions[0].last_active)) / 60000;
         if(diff < 5){
