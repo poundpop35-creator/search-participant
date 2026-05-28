@@ -10,7 +10,6 @@
     *{box-sizing:border-box;margin:0;padding:0;}
     body{background:#f0f4ff;font-family:'Sarabun',sans-serif;min-height:100vh;}
 
-    /* Hero — DNA background */
     .hero{
       position:relative;
       background-color:#e8f0fe;
@@ -22,28 +21,37 @@
       text-align:center;
       overflow:hidden;
     }
-    /* overlay ทำให้สีอ่อนลง */
-    .hero::before{
-      content:'';
-      position:absolute;
-      inset:0;
-      background:rgba(232,240,254,0.ุ60);
-      z-index:0;
-    }
+    .hero::before{content:'';position:absolute;inset:0;background:rgba(232,240,254,0.60);z-index:0;}
     .hero > *{position:relative;z-index:1;}
 
     .hero-badge{display:inline-block;background:rgba(13,43,107,0.08);border:1px solid rgba(13,43,107,0.2);border-radius:20px;padding:4px 16px;font-size:0.8rem;margin-bottom:14px;color:#1a4eb8;}
     .hero h1{font-size:1.4rem;font-weight:800;line-height:1.5;margin-bottom:6px;color:#0d2b6b;}
     .hero p{font-size:0.85rem;color:#1a4eb8;opacity:0.85;}
-    .hero-date{display:flex;justify-content:center;gap:12px;margin-top:20px;flex-wrap:wrap;}
-    .hero-date-item{background:rgba(13,43,107,0.08);border:1px solid rgba(13,43,107,0.15);border-radius:12px;padding:10px 20px;font-size:0.85rem;font-weight:600;color:#0d2b6b;}
+
+    .hero-date{display:flex;justify-content:center;gap:10px;margin-top:20px;flex-wrap:wrap;}
+    .day-btn{
+      background:rgba(13,43,107,0.08);
+      border:2px solid rgba(13,43,107,0.18);
+      border-radius:12px;
+      padding:10px 20px;
+      font-size:0.85rem;
+      font-weight:700;
+      color:#0d2b6b;
+      cursor:pointer;
+      font-family:'Sarabun',sans-serif;
+      transition:all 0.18s;
+    }
+    .day-btn:hover:not(.active){background:rgba(13,43,107,0.15);border-color:rgba(13,43,107,0.35);}
+    .day-btn.active{background:#0d2b6b;border-color:#0d2b6b;color:#fff;box-shadow:0 4px 14px rgba(13,43,107,0.35);}
+
     .hero-staff-btn{display:inline-block;margin-top:20px;padding:10px 24px;border-radius:20px;background:#0d2b6b;border:1.5px solid #0d2b6b;color:white;font-family:'Sarabun',sans-serif;font-size:0.88rem;font-weight:600;text-decoration:none;cursor:pointer;transition:opacity .15s;}
     .hero-staff-btn:hover{opacity:0.85;}
 
     .main{padding:24px 16px;max-width:900px;margin:0 auto;}
 
     .big-stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:14px;}
-    .big-card{background:var(--white);border-radius:18px;padding:20px 16px;box-shadow:var(--shadow);text-align:center;}
+    .big-card{background:var(--white);border-radius:18px;padding:20px 16px;box-shadow:var(--shadow);text-align:center;transition:opacity 0.3s,transform 0.2s;}
+    .big-card.dimmed{opacity:0.35;transform:scale(0.97);}
     .big-label{font-size:0.75rem;color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;}
     .big-num{font-size:2.4rem;font-weight:800;line-height:1;}
     .big-sub{font-size:0.78rem;color:#94a3b8;margin-top:6px;}
@@ -61,7 +69,7 @@
     .progress-label{font-weight:600;color:#1e293b;}
     .progress-pct{font-weight:700;color:var(--blue);}
     .progress-bar{height:10px;background:#e2e8f0;border-radius:5px;overflow:hidden;}
-    .progress-fill{height:100%;border-radius:5px;transition:width .8s ease;}
+    .progress-fill{height:100%;border-radius:5px;transition:width .8s ease,background .3s ease;}
 
     .dept-card{background:var(--white);border-radius:18px;box-shadow:var(--shadow);overflow:hidden;margin-bottom:24px;}
     .dept-card-header{padding:18px 24px;border-bottom:1px solid #e2e8f0;}
@@ -101,9 +109,10 @@
   <h1>ประชุมวิชาการวิทยาศาสตร์การแพทย์<br>ครั้งที่ 34</h1>
   <p>กรมวิทยาศาสตร์การแพทย์ กระทรวงสาธารณสุข</p>
   <div class="hero-date">
-    <div class="hero-date-item">24 มิถุนายน 2569</div>
-    <div class="hero-date-item">25 มิถุนายน 2569</div>
-    <div class="hero-date-item">26 มิถุนายน 2569</div>
+    <button class="day-btn active" data-day="all" onclick="setFilter('all')">รวม</button>
+    <button class="day-btn" data-day="1" onclick="setFilter(1)">24 มิถุนายน 2569</button>
+    <button class="day-btn" data-day="2" onclick="setFilter(2)">25 มิถุนายน 2569</button>
+    <button class="day-btn" data-day="3" onclick="setFilter(3)">26 มิถุนายน 2569</button>
   </div>
   <br>
   <a class="hero-staff-btn" href="login.html">เข้าสู่ระบบเจ้าหน้าที่</a>
@@ -117,7 +126,7 @@
       <div class="big-card total">
         <div class="big-label">ผู้เข้าร่วมทั้งหมด</div>
         <div class="big-num" id="pTotal">-</div>
-        <div class="big-sub">ราย (เช็คอินแล้ว)</div>
+        <div class="big-sub" id="pTotalS">ราย (เช็คอินแล้ว)</div>
       </div>
       <div class="big-card internal">
         <div class="big-label">บุคลากรภายใน</div>
@@ -131,17 +140,17 @@
       </div>
     </div>
     <div class="big-stats-row" style="margin-bottom:24px;">
-      <div class="big-card d1">
+      <div class="big-card d1" id="card-d1">
         <div class="big-label">วันที่ 1 — 24 มิ.ย.</div>
         <div class="big-num" id="pD1">-</div>
         <div class="big-sub" id="pD1s">ราย</div>
       </div>
-      <div class="big-card d2">
+      <div class="big-card d2" id="card-d2">
         <div class="big-label">วันที่ 2 — 25 มิ.ย.</div>
         <div class="big-num" id="pD2">-</div>
         <div class="big-sub" id="pD2s">ราย</div>
       </div>
-      <div class="big-card d3">
+      <div class="big-card d3" id="card-d3">
         <div class="big-label">วันที่ 3 — 26 มิ.ย.</div>
         <div class="big-num" id="pD3">-</div>
         <div class="big-sub" id="pD3s">ราย</div>
@@ -149,25 +158,25 @@
     </div>
 
     <div class="progress-card">
-      <div class="progress-title">สัดส่วนผู้เข้าร่วมแต่ละวัน</div>
-      <div class="progress-row">
-        <div class="progress-row-top"><span class="progress-label">วันที่ 1 — 24 มิ.ย.</span><span class="progress-pct" id="pg1">-</span></div>
+      <div class="progress-title" id="progressTitle">สัดส่วนผู้เข้าร่วมแต่ละวัน</div>
+      <div class="progress-row" id="pr1">
+        <div class="progress-row-top"><span class="progress-label" id="pl1">วันที่ 1 — 24 มิ.ย.</span><span class="progress-pct" id="pg1">-</span></div>
         <div class="progress-bar"><div class="progress-fill" id="pf1" style="width:0%;background:#2563eb;"></div></div>
       </div>
-      <div class="progress-row">
-        <div class="progress-row-top"><span class="progress-label">วันที่ 2 — 25 มิ.ย.</span><span class="progress-pct" id="pg2">-</span></div>
+      <div class="progress-row" id="pr2">
+        <div class="progress-row-top"><span class="progress-label" id="pl2">วันที่ 2 — 25 มิ.ย.</span><span class="progress-pct" id="pg2">-</span></div>
         <div class="progress-bar"><div class="progress-fill" id="pf2" style="width:0%;background:#7c3aed;"></div></div>
       </div>
-      <div class="progress-row">
-        <div class="progress-row-top"><span class="progress-label">วันที่ 3 — 26 มิ.ย.</span><span class="progress-pct" id="pg3">-</span></div>
+      <div class="progress-row" id="pr3">
+        <div class="progress-row-top"><span class="progress-label" id="pl3">วันที่ 3 — 26 มิ.ย.</span><span class="progress-pct" id="pg3">-</span></div>
         <div class="progress-bar"><div class="progress-fill" id="pf3" style="width:0%;background:#0891b2;"></div></div>
       </div>
     </div>
 
     <div class="dept-card">
       <div class="dept-card-header">
-        <div class="dept-card-title">จำนวนผู้เข้าร่วมแยกตามหน่วยงานภายใน</div>
-        <div class="dept-card-sub">เรียงตามจำนวนผู้เข้าร่วมสูงสุด</div>
+        <div class="dept-card-title" id="deptTitle">จำนวนผู้เข้าร่วมแยกตามหน่วยงานภายใน</div>
+        <div class="dept-card-sub" id="deptSub">เรียงตามจำนวนผู้เข้าร่วมสูงสุด</div>
       </div>
       <div style="overflow-x:auto;">
         <table>
@@ -220,6 +229,97 @@ const DEPTS = [
 ];
 const SHOW_FIRST = 10;
 let isExpanded = false;
+let allCheckins = [];
+let activeDay = 'all';
+
+function setFilter(day) {
+  activeDay = (day === 'all') ? 'all' : Number(day);
+  document.querySelectorAll('.day-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.day === String(day));
+  });
+  renderStats();
+}
+
+function renderStats() {
+  const filtered = activeDay === 'all' ? allCheckins : allCheckins.filter(r => r.day === activeDay);
+  const total = filtered.length;
+  const internal = filtered.filter(r => r.participants && (r.participants.internal_external||'').includes('ภายใน')).length;
+  const external = filtered.filter(r => r.participants && (r.participants.internal_external||'').includes('ภายนอก')).length;
+
+  // Top row: totals for selected period
+  document.getElementById('pTotal').textContent = total.toLocaleString();
+  document.getElementById('pInternal').textContent = internal.toLocaleString();
+  document.getElementById('pExternal').textContent = external.toLocaleString();
+  document.getElementById('pInternalS').textContent = `${total ? Math.round(internal/total*100) : 0}% ของทั้งหมด`;
+  document.getElementById('pExternalS').textContent = `${total ? Math.round(external/total*100) : 0}% ของทั้งหมด`;
+
+  // Day cards: always show all-days counts, dim non-selected
+  const dTotal = allCheckins.length;
+  [1,2,3].forEach(d => {
+    const cnt = allCheckins.filter(r => r.day === d).length;
+    document.getElementById(`pD${d}`).textContent = cnt.toLocaleString();
+    document.getElementById(`pD${d}s`).textContent = `${dTotal ? Math.round(cnt/dTotal*100) : 0}% ของผู้เข้าร่วมทั้งหมด`;
+    const card = document.getElementById(`card-d${d}`);
+    if(card) card.classList.toggle('dimmed', activeDay !== 'all' && activeDay !== d);
+  });
+
+  // Progress card
+  if(activeDay === 'all') {
+    document.getElementById('progressTitle').textContent = 'สัดส่วนผู้เข้าร่วมแต่ละวัน';
+    document.getElementById('pr3').style.display = '';
+    const labels = ['วันที่ 1 — 24 มิ.ย.','วันที่ 2 — 25 มิ.ย.','วันที่ 3 — 26 มิ.ย.'];
+    const colors = ['#2563eb','#7c3aed','#0891b2'];
+    [1,2,3].forEach((d,i) => {
+      const cnt = allCheckins.filter(r => r.day === d).length;
+      const pct = dTotal ? Math.round(cnt/dTotal*100) : 0;
+      document.getElementById(`pl${d}`).textContent = labels[i];
+      document.getElementById(`pg${d}`).textContent = `${pct}%`;
+      document.getElementById(`pf${d}`).style.width = pct + '%';
+      document.getElementById(`pf${d}`).style.background = colors[i];
+    });
+  } else {
+    const dayName = activeDay === 1 ? '24 มิ.ย.' : activeDay === 2 ? '25 มิ.ย.' : '26 มิ.ย.';
+    document.getElementById('progressTitle').textContent = `สัดส่วนผู้เข้าร่วม — ${dayName}`;
+    document.getElementById('pr3').style.display = 'none';
+    const intPct = total ? Math.round(internal/total*100) : 0;
+    const extPct = total ? Math.round(external/total*100) : 0;
+    document.getElementById('pl1').textContent = 'บุคลากรภายใน';
+    document.getElementById('pg1').textContent = `${intPct}%`;
+    document.getElementById('pf1').style.width = intPct + '%';
+    document.getElementById('pf1').style.background = '#16a34a';
+    document.getElementById('pl2').textContent = 'บุคคลภายนอก';
+    document.getElementById('pg2').textContent = `${extPct}%`;
+    document.getElementById('pf2').style.width = extPct + '%';
+    document.getElementById('pf2').style.background = '#ea580c';
+  }
+
+  // Dept card title
+  if(activeDay === 'all') {
+    document.getElementById('deptTitle').textContent = 'จำนวนผู้เข้าร่วมแยกตามหน่วยงานภายใน';
+    document.getElementById('deptSub').textContent = 'เรียงตามจำนวนผู้เข้าร่วมสูงสุด';
+  } else {
+    const dayName = activeDay === 1 ? '24 มิ.ย. 2569' : activeDay === 2 ? '25 มิ.ย. 2569' : '26 มิ.ย. 2569';
+    document.getElementById('deptTitle').textContent = 'จำนวนผู้เข้าร่วมแยกตามหน่วยงานภายใน';
+    document.getElementById('deptSub').textContent = `วันที่ ${dayName} — เรียงตามจำนวนสูงสุด`;
+  }
+
+  // Dept table filtered
+  const deptCount = {};
+  DEPTS.forEach(d => deptCount[d] = 0);
+  const deptSet = new Set(DEPTS);
+  filtered.forEach(r => {
+    const p = r.participants;
+    if(p && (p.internal_external||'').includes('ภายใน') && deptSet.has(p.dept)) {
+      deptCount[p.dept]++;
+    }
+  });
+  const sorted = DEPTS.map(d => ({name:d, count:deptCount[d]}))
+    .filter(d => d.count > 0)
+    .sort((a,b) => b.count - a.count);
+  const maxDept = sorted.length > 0 ? sorted[0].count : 1;
+  isExpanded = false;
+  renderDeptTable(sorted, maxDept);
+}
 
 async function fetchAll(path) {
   let res=[], from=0;
@@ -234,59 +334,17 @@ async function fetchAll(path) {
 
 async function loadData() {
   try {
-    const checkins = await fetchAll('/rest/v1/checkins?select=day,participants(dept,internal_external)&order=checkin_time.desc');
-    const total=checkins.length;
-    const d1=checkins.filter(r=>r.day===1).length;
-    const d2=checkins.filter(r=>r.day===2).length;
-    const d3=checkins.filter(r=>r.day===3).length;
-    const internal=checkins.filter(r=>r.participants&&(r.participants.internal_external||'').includes('ภายใน')).length;
-    const external=checkins.filter(r=>r.participants&&(r.participants.internal_external||'').includes('ภายนอก')).length;
-
-    document.getElementById('pTotal').textContent=total.toLocaleString();
-    document.getElementById('pInternal').textContent=internal.toLocaleString();
-    document.getElementById('pExternal').textContent=external.toLocaleString();
-    document.getElementById('pInternalS').textContent=`${total?Math.round(internal/total*100):0}% ของทั้งหมด`;
-    document.getElementById('pExternalS').textContent=`${total?Math.round(external/total*100):0}% ของทั้งหมด`;
-    document.getElementById('pD1').textContent=d1.toLocaleString();
-    document.getElementById('pD2').textContent=d2.toLocaleString();
-    document.getElementById('pD3').textContent=d3.toLocaleString();
-    document.getElementById('pD1s').textContent=`${total?Math.round(d1/total*100):0}% ของผู้เข้าร่วมทั้งหมด`;
-    document.getElementById('pD2s').textContent=`${total?Math.round(d2/total*100):0}% ของผู้เข้าร่วมทั้งหมด`;
-    document.getElementById('pD3s').textContent=`${total?Math.round(d3/total*100):0}% ของผู้เข้าร่วมทั้งหมด`;
-
-    [1,2,3].forEach(d=>{
-      const cnt=checkins.filter(r=>r.day===d).length;
-      const pct=total?Math.round(cnt/total*100):0;
-      document.getElementById(`pg${d}`).textContent=`${pct}%`;
-      setTimeout(()=>{document.getElementById(`pf${d}`).style.width=pct+'%';},200);
-    });
-
-    const deptSet=new Set(DEPTS);
-    const deptCount={};
-    DEPTS.forEach(d=>deptCount[d]=0);
-    checkins.forEach(r=>{
-      const p=r.participants;
-      if(p&&(p.internal_external||'').includes('ภายใน')&&deptSet.has(p.dept)){
-        deptCount[p.dept]++;
-      }
-    });
-
-    const sorted=DEPTS.map(d=>({name:d,count:deptCount[d]}))
-      .filter(d=>d.count>0)
-      .sort((a,b)=>b.count-a.count);
-
-    const maxDept=sorted.length>0?sorted[0].count:1;
-    renderDeptTable(sorted,maxDept);
-
-    document.getElementById('lastUpdate').textContent=new Date().toLocaleTimeString('th-TH',{timeZone:'Asia/Bangkok'});
-    document.getElementById('loadingArea').style.display='none';
-    document.getElementById('contentArea').style.display='';
+    allCheckins = await fetchAll('/rest/v1/checkins?select=day,participants(dept,internal_external)&order=checkin_time.desc');
+    renderStats();
+    document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString('th-TH',{timeZone:'Asia/Bangkok'});
+    document.getElementById('loadingArea').style.display = 'none';
+    document.getElementById('contentArea').style.display = '';
   } catch(e) {
-    document.getElementById('loadingArea').textContent='ไม่สามารถโหลดข้อมูลได้ กรุณารีเฟรชหน้า';
+    document.getElementById('loadingArea').textContent = 'ไม่สามารถโหลดข้อมูลได้ กรุณารีเฟรชหน้า';
   }
 }
 
-function renderDeptTable(sorted,maxDept) {
+function renderDeptTable(sorted, maxDept) {
   if(sorted.length===0){
     document.getElementById('deptBody').innerHTML='<tr><td colspan="4" style="text-align:center;padding:30px;color:#94a3b8;">ยังไม่มีข้อมูล</td></tr>';
     return;

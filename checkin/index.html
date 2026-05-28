@@ -154,7 +154,7 @@
     const _u=sessionStorage.getItem('dmsc_user');
     function _hb(){if(!_u)return;fetch(`${SB_URL}/rest/v1/staff_sessions?username=eq.${encodeURIComponent(_u)}`,{method:'PATCH',headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON,'Content-Type':'application/json'},body:JSON.stringify({last_active:new Date().toISOString()})}).catch(()=>{});}
     function _del(){if(!_u)return;fetch(`${SB_URL}/rest/v1/staff_sessions?username=eq.${encodeURIComponent(_u)}`,{method:'DELETE',headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON},keepalive:true}).catch(()=>{});}
-    setInterval(_hb,120000);
+    setInterval(_hb,60000);
     window.addEventListener('beforeunload',_del);
   })();
 
