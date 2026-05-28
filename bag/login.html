@@ -86,10 +86,10 @@ async function doLogin(){
     if(u !== 'adminpound'){
       const sessRes = await fetch(
         `${SB_URL}/rest/v1/staff_sessions?username=eq.${encodeURIComponent(u)}&select=username,last_active&_t=${Date.now()}`,
-        {headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON}, cache:'no-store'}
+        {headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON}}
       );
-      if(!sessRes.ok){ throw new Error('session_read_fail:'+sessRes.status); }
-      const sessions = await sessRes.json();
+      let sessions = [];
+      if(sessRes.ok){ sessions = await sessRes.json(); }
       if(Array.isArray(sessions) && sessions.length > 0){
         const diff = (Date.now() - new Date(sessions[0].last_active)) / 60000;
         if(diff < 5){
