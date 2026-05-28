@@ -201,6 +201,26 @@
       </div>
     </div>
 
+    <div class="dept-card">
+      <div class="dept-card-header">
+        <div class="dept-card-title" id="extDeptTitle">จำนวนผู้เข้าร่วมแยกตามหน่วยงานภายนอก</div>
+        <div class="dept-card-sub" id="extDeptSub">เรียงตามจำนวนผู้เข้าร่วมสูงสุด</div>
+      </div>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:40px;">#</th>
+              <th>หน่วยงาน</th>
+              <th style="text-align:right;width:80px;">จำนวน</th>
+              <th style="width:130px;">สัดส่วน</th>
+            </tr>
+          </thead>
+          <tbody id="extDeptBody"></tbody>
+        </table>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -235,8 +255,9 @@ const DEPTS = [
   'ศูนย์วิทยาศาสตร์การแพทย์ที่ 11/1 ภูเก็ต','ศูนย์วิทยาศาสตร์การแพทย์ที่ 12 สงขลา',
   'ศูนย์วิทยาศาสตร์การแพทย์ที่ 12/1 ตรัง'
 ];
-const SHOW_FIRST = 10;
-let isExpanded = false;
+const SHOW_FIRST = 5;
+let isExpandedInt = false;
+let isExpandedExt = false;
 let allCheckins = [];
 let activeDay = 'all';
 
@@ -308,23 +329,21 @@ function renderStats() {
     document.getElementById('pf3').style.background = '#d97706';
   }
 
-  // Dept card title
-  if(activeDay === 'all') {
-    document.getElementById('deptTitle').textContent = 'จำนวนผู้เข้าร่วมแยกตามหน่วยงานภายใน';
-    document.getElementById('deptSub').textContent = 'เรียงตามจำนวนผู้เข้าร่วมสูงสุด';
-  } else {
-    const dayName = activeDay === 1 ? '24 มิ.ย. 2569' : activeDay === 2 ? '25 มิ.ย. 2569' : '26 มิ.ย. 2569';
-    document.getElementById('deptTitle').textContent = 'จำนวนผู้เข้าร่วมแยกตามหน่วยงานภายใน';
-    document.getElementById('deptSub').textContent = `วันที่ ${dayName} — เรียงตามจำนวนสูงสุด`;
-  }
+  // Dept card subtitles
+  const daySubText = activeDay === 'all' ? 'เรียงตามจำนวนผู้เข้าร่วมสูงสุด'
+    : `วันที่ ${activeDay === 1 ? '24 มิ.ย. 2569' : activeDay === 2 ? '25 มิ.ย. 2569' : '26 มิ.ย. 2569'} — เรียงตามจำนวนสูงสุด`;
+  document.getElementById('deptTitle').textContent = 'จำนวนผู้เข้าร่วมแยกตามหน่วยงานภายใน';
+  document.getElementById('deptSub').textContent = daySubText;
+  document.getElementById('extDeptTitle').textContent = 'จำนวนผู้เข้าร่วมแยกตามหน่วยงานภายนอก';
+  document.getElementById('extDeptSub').textContent = daySubText;
 
-  // Dept table filtered
+  // Internal dept table
   const deptCount = {};
   DEPTS.forEach(d => deptCount[d] = 0);
   const deptSet = new Set(DEPTS);
   filtered.forEach(r => {
     const p = r.participants;
-    if(p && (p.internal_external||'').includes('ภายใน') && deptSet.has(p.dept)) {
+    if(p && !p.is_walkin && (p.internal_external||'').includes('ภายใน') && deptSet.has(p.dept)) {
       deptCount[p.dept]++;
     }
   });
@@ -332,8 +351,23 @@ function renderStats() {
     .filter(d => d.count > 0)
     .sort((a,b) => b.count - a.count);
   const maxDept = sorted.length > 0 ? sorted[0].count : 1;
-  isExpanded = false;
-  renderDeptTable(sorted, maxDept);
+  isExpandedInt = false;
+  renderDeptTable(sorted, maxDept, 'deptBody', false, 'toggleExpandInt', 'var(--blue-mid)');
+
+  // External dept table
+  const extDeptCount = {};
+  filtered.forEach(r => {
+    const p = r.participants;
+    if(p && !p.is_walkin && (p.internal_external||'').includes('ภายนอก')) {
+      const dname = p.ext_dept || '(ไม่ระบุ)';
+      extDeptCount[dname] = (extDeptCount[dname] || 0) + 1;
+    }
+  });
+  const extSorted = Object.entries(extDeptCount).map(([name, count]) => ({name, count}))
+    .sort((a,b) => b.count - a.count);
+  const maxExt = extSorted.length > 0 ? extSorted[0].count : 1;
+  isExpandedExt = false;
+  renderDeptTable(extSorted, maxExt, 'extDeptBody', false, 'toggleExpandExt', '#ea580c');
 }
 
 async function fetchAll(path) {
@@ -349,7 +383,7 @@ async function fetchAll(path) {
 
 async function loadData() {
   try {
-    allCheckins = await fetchAll('/rest/v1/checkins?select=day,participants(dept,internal_external,is_walkin)&order=checkin_time.desc');
+    allCheckins = await fetchAll('/rest/v1/checkins?select=day,participants(dept,ext_dept,internal_external,is_walkin)&order=checkin_time.desc');
     renderStats();
     document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString('th-TH',{timeZone:'Asia/Bangkok'});
     document.getElementById('loadingArea').style.display = 'none';
@@ -359,33 +393,44 @@ async function loadData() {
   }
 }
 
-function renderDeptTable(sorted, maxDept) {
+function renderDeptTable(sorted, maxDept, bodyId, isExp, toggleFnName, fillColor) {
+  const fc = fillColor || 'var(--blue-mid)';
   if(sorted.length===0){
-    document.getElementById('deptBody').innerHTML='<tr><td colspan="4" style="text-align:center;padding:30px;color:#94a3b8;">ยังไม่มีข้อมูล</td></tr>';
+    document.getElementById(bodyId).innerHTML='<tr><td colspan="4" style="text-align:center;padding:30px;color:#94a3b8;">ยังไม่มีข้อมูล</td></tr>';
     return;
   }
   const rows=sorted.map((d,i)=>{
-    const isHidden=i>=SHOW_FIRST&&!isExpanded;
+    const isHidden=i>=SHOW_FIRST&&!isExp;
     return`<tr class="${isHidden?'hidden-row':''}" data-idx="${i}">
       <td class="rank">${i+1}</td>
       <td class="dept-name">${d.name}</td>
       <td class="count-num">${d.count}</td>
-      <td><div class="mini-bar"><div class="mini-fill" style="width:${Math.round(d.count/maxDept*100)}%"></div></div></td>
+      <td><div class="mini-bar"><div class="mini-fill" style="width:${Math.round(d.count/maxDept*100)}%;background:${fc}"></div></div></td>
     </tr>`;
   }).join('');
   const collapseBtn=sorted.length>SHOW_FIRST
-    ?`<tr class="collapse-row"><td colspan="4"><button class="collapse-btn" onclick="toggleExpand()">${isExpanded?'แสดงน้อยลง':`แสดงทั้งหมด ${sorted.length} หน่วยงาน`}</button></td></tr>`:'';
-  document.getElementById('deptBody').innerHTML=rows+collapseBtn;
+    ?`<tr class="collapse-row"><td colspan="4"><button class="collapse-btn" onclick="${toggleFnName}()">${isExp?'แสดงน้อยลง':`แสดงทั้งหมด ${sorted.length} หน่วยงาน`}</button></td></tr>`:'';
+  document.getElementById(bodyId).innerHTML=rows+collapseBtn;
 }
 
-function toggleExpand(){
-  isExpanded=!isExpanded;
+function toggleExpandInt(){
+  isExpandedInt=!isExpandedInt;
   document.querySelectorAll('#deptBody tr[data-idx]').forEach(tr=>{
     const idx=parseInt(tr.getAttribute('data-idx'));
-    tr.classList.toggle('hidden-row',idx>=SHOW_FIRST&&!isExpanded);
+    tr.classList.toggle('hidden-row',idx>=SHOW_FIRST&&!isExpandedInt);
   });
-  const btn=document.querySelector('.collapse-btn');
-  if(btn) btn.textContent=isExpanded?'แสดงน้อยลง':'แสดงทั้งหมด';
+  const btn=document.querySelector('#deptBody tr.collapse-row .collapse-btn');
+  if(btn) btn.textContent=isExpandedInt?'แสดงน้อยลง':'แสดงทั้งหมด';
+}
+
+function toggleExpandExt(){
+  isExpandedExt=!isExpandedExt;
+  document.querySelectorAll('#extDeptBody tr[data-idx]').forEach(tr=>{
+    const idx=parseInt(tr.getAttribute('data-idx'));
+    tr.classList.toggle('hidden-row',idx>=SHOW_FIRST&&!isExpandedExt);
+  });
+  const btn=document.querySelector('#extDeptBody tr.collapse-row .collapse-btn');
+  if(btn) btn.textContent=isExpandedExt?'แสดงน้อยลง':'แสดงทั้งหมด';
 }
 
 loadData();
