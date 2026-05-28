@@ -178,9 +178,10 @@
             <th>TAG</th>
             <th>สถานะกระเป๋า</th>
             <th>วันที่รับ</th>
+            <th>เวลา</th>
           </tr>
         </thead>
-        <tbody id="tBody"><tr><td colspan="7" class="loading-td">กำลังโหลด...</td></tr></tbody>
+        <tbody id="tBody"><tr><td colspan="8" class="loading-td">กำลังโหลด...</td></tr></tbody>
       </table>
     </div>
     <div class="pager">
@@ -219,8 +220,22 @@ let allData=[], filtered=[], curPage=1;
   DEPTS.forEach(d=>{const o=document.createElement('option');o.value=d;o.textContent=d;sel.appendChild(o);});
 })();
 
+function fmtBagDate(v){
+  if(!v||v==='-') return '-';
+  if(v.includes('T')){
+    const d=new Date(v);
+    return d.toLocaleDateString('th-TH',{timeZone:'Asia/Bangkok',day:'numeric',month:'short'});
+  }
+  return v;
+}
+function fmtBagTime(v){
+  if(!v||v==='-'||!v.includes('T')) return '-';
+  const d=new Date(v);
+  return d.toLocaleTimeString('th-TH',{timeZone:'Asia/Bangkok',hour:'2-digit',minute:'2-digit'});
+}
+
 async function loadAll(){
-  document.getElementById('tBody').innerHTML='<tr><td colspan="7" class="loading-td">กำลังโหลด...</td></tr>';
+  document.getElementById('tBody').innerHTML='<tr><td colspan="8" class="loading-td">กำลังโหลด...</td></tr>';
   try{
     let res=[], from=0;
     while(true){
@@ -229,12 +244,12 @@ async function loadAll(){
       });
       if(!r.ok){
         const errText=await r.text();
-        document.getElementById('tBody').innerHTML=`<tr><td colspan="7" class="loading-td" style="color:#dc2626;">API Error ${r.status}: ${errText}</td></tr>`;
+        document.getElementById('tBody').innerHTML=`<tr><td colspan="8" class="loading-td" style="color:#dc2626;">API Error ${r.status}: ${errText}</td></tr>`;
         return;
       }
       const d=await r.json();
       if(!Array.isArray(d)){
-        document.getElementById('tBody').innerHTML=`<tr><td colspan="7" class="loading-td" style="color:#dc2626;">API Error: ${JSON.stringify(d)}</td></tr>`;
+        document.getElementById('tBody').innerHTML=`<tr><td colspan="8" class="loading-td" style="color:#dc2626;">API Error: ${JSON.stringify(d)}</td></tr>`;
         return;
       }
       if(d.length===0) break;
@@ -253,7 +268,8 @@ async function loadAll(){
         dept, pt:p.participation_type||'-', tag:p.tag||'-',
         items:p.items||'-',
         received:p.bag_received===true||p.bag_received===1||p.bag_received==='true',
-        receivedDate:p.bag_received_date||'-'
+        receivedDate:fmtBagDate(p.bag_received_date),
+        receivedTime:fmtBagTime(p.bag_received_date)
       };
     });
 
@@ -270,7 +286,7 @@ async function loadAll(){
 
     applyFilters();
   }catch(e){
-    document.getElementById('tBody').innerHTML='<tr><td colspan="7" class="loading-td">โหลดไม่สำเร็จ</td></tr>';
+    document.getElementById('tBody').innerHTML='<tr><td colspan="8" class="loading-td">โหลดไม่สำเร็จ</td></tr>';
   }
 }
 
@@ -301,7 +317,7 @@ function renderTable(){
   document.getElementById('pInfo').textContent=`แสดง ${tot===0?0:start+1}–${Math.min(start+PAGE,tot)} จาก ${tot.toLocaleString()} รายการ`;
   document.getElementById('bPrev').disabled=curPage<=1;
   document.getElementById('bNext').disabled=curPage>=totPages;
-  if(!page.length){document.getElementById('tBody').innerHTML='<tr><td colspan="7" class="loading-td">ไม่พบข้อมูล</td></tr>';return;}
+  if(!page.length){document.getElementById('tBody').innerHTML='<tr><td colspan="8" class="loading-td">ไม่พบข้อมูล</td></tr>';return;}
   document.getElementById('tBody').innerHTML=page.map((r,i)=>`<tr>
     <td>${start+i+1}</td>
     <td>${r.name}</td>
@@ -310,6 +326,7 @@ function renderTable(){
     <td><span class="badge ${r.tag==='Staff'?'b-staff':'b-participant'}">${r.tag}</span></td>
     <td><span class="badge ${r.received?'b-received':'b-pending'}">${r.received?'รับแล้ว':'ยังไม่รับ'}</span></td>
     <td>${r.received?r.receivedDate:'-'}</td>
+    <td>${r.received?r.receivedTime:'-'}</td>
   </tr>`).join('');
 }
 
@@ -340,7 +357,8 @@ function getRows(){
   return filtered.map((r,i)=>({'ลำดับ':i+1,'ชื่อ-นามสกุล':r.name,'หน่วยงาน':r.dept,
     'ประเภทการเข้าร่วม':r.pt,'TAG':r.tag,
     'สถานะกระเป๋า':r.received?'รับแล้ว':'ยังไม่รับ',
-    'วันที่รับ':r.received?r.receivedDate:'-'}));
+    'วันที่รับ':r.received?r.receivedDate:'-',
+    'เวลา':r.received?r.receivedTime:'-'}));
 }
 
 async function doLogout(){

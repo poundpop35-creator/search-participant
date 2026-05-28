@@ -250,7 +250,7 @@
       }
 
       // บันทึกว่ารับกระเป๋าแล้ว
-      const today=new Date().toLocaleDateString('th-TH',{timeZone:'Asia/Bangkok',year:'numeric',month:'long',day:'numeric'});
+      const today=new Date().toISOString();
       const updateRes=await sbFetch(
         `/rest/v1/participants?id=eq.${p.id}`,
         'PATCH',

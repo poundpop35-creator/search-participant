@@ -88,6 +88,7 @@ async function doLogin(){
         `${SB_URL}/rest/v1/staff_sessions?username=eq.${encodeURIComponent(u)}&select=username,last_active`,
         {headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON}}
       );
+      if(!sessRes.ok){ throw new Error('session_read_fail:'+sessRes.status); }
       const sessions = await sessRes.json();
       if(Array.isArray(sessions) && sessions.length > 0){
         const diff = (Date.now() - new Date(sessions[0].last_active)) / 60000;
@@ -97,13 +98,22 @@ async function doLogin(){
           return;
         }
       }
+      await fetch(`${SB_URL}/rest/v1/staff_sessions?username=eq.${encodeURIComponent(u)}`,{
+        method:'DELETE', headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON}
+      });
     }
-    await fetch(`${SB_URL}/rest/v1/staff_sessions`,{
+    const postRes = await fetch(`${SB_URL}/rest/v1/staff_sessions`,{
       method:'POST',
       headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON,
-               'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'},
+               'Content-Type':'application/json','Prefer':'return=minimal'},
       body:JSON.stringify({username:u, logged_in_at:new Date().toISOString(), last_active:new Date().toISOString()})
     });
+    if(!postRes.ok){
+      const t=await postRes.text();
+      err.textContent='Session error '+postRes.status+': '+t.substring(0,120);
+      btn.textContent='เข้าสู่ระบบ'; btn.disabled=false;
+      return;
+    }
     sessionStorage.setItem('dmsc_auth','ok');
     sessionStorage.setItem('dmsc_user', u);
     sessionStorage.setItem('dmsc_role', u==='adminpound'?'admin':'staff');
