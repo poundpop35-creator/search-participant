@@ -60,7 +60,10 @@
     .big-card.external .big-num{color:#ea580c;}
     .big-card.d1 .big-num{color:#2563eb;}
     .big-card.d2 .big-num{color:#7c3aed;}
+    .big-card.walkin .big-num{color:#d97706;}
     .big-card.d3 .big-num{color:#0891b2;}
+    .big-stats-row-4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;}
+    @media(max-width:600px){.big-stats-row-4{grid-template-columns:repeat(2,1fr);}}
 
     .progress-card{background:var(--white);border-radius:18px;padding:20px 24px;box-shadow:var(--shadow);margin-bottom:20px;}
     .progress-title{font-size:0.9rem;font-weight:700;color:var(--blue);margin-bottom:16px;}
@@ -122,7 +125,24 @@
   <div id="loadingArea" class="loading">กำลังโหลดข้อมูล...</div>
   <div id="contentArea" style="display:none;">
 
-    <div class="big-stats-row">
+    <div class="big-stats-row" style="margin-bottom:14px;">
+      <div class="big-card d1" id="card-d1">
+        <div class="big-label">วันที่ 1 — 24 มิ.ย.</div>
+        <div class="big-num" id="pD1">-</div>
+        <div class="big-sub" id="pD1s">ราย</div>
+      </div>
+      <div class="big-card d2" id="card-d2">
+        <div class="big-label">วันที่ 2 — 25 มิ.ย.</div>
+        <div class="big-num" id="pD2">-</div>
+        <div class="big-sub" id="pD2s">ราย</div>
+      </div>
+      <div class="big-card d3" id="card-d3">
+        <div class="big-label">วันที่ 3 — 26 มิ.ย.</div>
+        <div class="big-num" id="pD3">-</div>
+        <div class="big-sub" id="pD3s">ราย</div>
+      </div>
+    </div>
+    <div class="big-stats-row-4">
       <div class="big-card total">
         <div class="big-label">ผู้เข้าร่วมทั้งหมด</div>
         <div class="big-num" id="pTotal">-</div>
@@ -138,22 +158,10 @@
         <div class="big-num" id="pExternal">-</div>
         <div class="big-sub" id="pExternalS">ราย</div>
       </div>
-    </div>
-    <div class="big-stats-row" style="margin-bottom:24px;">
-      <div class="big-card d1" id="card-d1">
-        <div class="big-label">วันที่ 1 — 24 มิ.ย.</div>
-        <div class="big-num" id="pD1">-</div>
-        <div class="big-sub" id="pD1s">ราย</div>
-      </div>
-      <div class="big-card d2" id="card-d2">
-        <div class="big-label">วันที่ 2 — 25 มิ.ย.</div>
-        <div class="big-num" id="pD2">-</div>
-        <div class="big-sub" id="pD2s">ราย</div>
-      </div>
-      <div class="big-card d3" id="card-d3">
-        <div class="big-label">วันที่ 3 — 26 มิ.ย.</div>
-        <div class="big-num" id="pD3">-</div>
-        <div class="big-sub" id="pD3s">ราย</div>
+      <div class="big-card walkin">
+        <div class="big-label">Walk-in</div>
+        <div class="big-num" id="pWalkin">-</div>
+        <div class="big-sub" id="pWalkinS">ราย</div>
       </div>
     </div>
 
@@ -245,13 +253,15 @@ function renderStats() {
   const total = filtered.length;
   const internal = filtered.filter(r => r.participants && (r.participants.internal_external||'').includes('ภายใน')).length;
   const external = filtered.filter(r => r.participants && (r.participants.internal_external||'').includes('ภายนอก')).length;
+  const walkin   = filtered.filter(r => r.participants && r.participants.is_walkin === true).length;
 
-  // Top row: totals for selected period
   document.getElementById('pTotal').textContent = total.toLocaleString();
   document.getElementById('pInternal').textContent = internal.toLocaleString();
   document.getElementById('pExternal').textContent = external.toLocaleString();
+  document.getElementById('pWalkin').textContent = walkin.toLocaleString();
   document.getElementById('pInternalS').textContent = `${total ? Math.round(internal/total*100) : 0}% ของทั้งหมด`;
   document.getElementById('pExternalS').textContent = `${total ? Math.round(external/total*100) : 0}% ของทั้งหมด`;
+  document.getElementById('pWalkinS').textContent = `${total ? Math.round(walkin/total*100) : 0}% ของทั้งหมด`;
 
   // Day cards: always show all-days counts, dim non-selected
   const dTotal = allCheckins.length;
@@ -334,7 +344,7 @@ async function fetchAll(path) {
 
 async function loadData() {
   try {
-    allCheckins = await fetchAll('/rest/v1/checkins?select=day,participants(dept,internal_external)&order=checkin_time.desc');
+    allCheckins = await fetchAll('/rest/v1/checkins?select=day,participants(dept,internal_external,is_walkin)&order=checkin_time.desc');
     renderStats();
     document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString('th-TH',{timeZone:'Asia/Bangkok'});
     document.getElementById('loadingArea').style.display = 'none';
