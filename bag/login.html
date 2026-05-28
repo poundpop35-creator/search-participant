@@ -59,7 +59,8 @@
 </div>
 <script>
 const USERS={'staff01':'Dmsc@2569','staff02':'Dmsc@2569','staff03':'Dmsc@2569','staff04':'Dmsc@2569','staff05':'Dmsc@2569','staff06':'Dmsc@2569','staff07':'Dmsc@2569','staff08':'Dmsc@2569','staff09':'Dmsc@2569','staff10':'Dmsc@2569'};
-if(sessionStorage.getItem('dmsc_auth')==='ok') window.location.href='index.html';
+const _next = new URLSearchParams(window.location.search).get('next') || 'index.html';
+if(sessionStorage.getItem('dmsc_auth')==='ok') window.location.href=_next;
 function doLogin(){
   const u=document.getElementById('username').value.trim().toLowerCase();
   const p=document.getElementById('password').value;
@@ -68,7 +69,7 @@ function doLogin(){
   if(USERS[u]&&USERS[u]===p){
     sessionStorage.setItem('dmsc_auth','ok');
     sessionStorage.setItem('dmsc_user',u);
-    window.location.href='index.html';
+    window.location.href=_next;
   } else {
     err.textContent='ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง';
     document.getElementById('password').value='';
