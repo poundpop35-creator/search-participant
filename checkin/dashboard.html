@@ -399,6 +399,16 @@ if (sessionStorage.getItem('dmsc_auth') !== 'ok') {
 <script>
 const SB_URL = "https://gvxytnjfyepqhbkmcjms.supabase.co";
 const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2eHl0bmpmeWVwcWhia21jam1zIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3OTQzMTY0MCwiZXhwIjoyMDk1MDA3NjQwfQ.Hrfc0erkIatyVbmsOW2SU7piH3L65qbS2kdi2eYzbQk";
+const SB_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2eHl0bmpmeWVwcWhia21cam1zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0MzE2NDAsImV4cCI6MjA5NTAwNzY0MH0.RAr_ehb4cxfNliDR0h5XcihUaP-0ltZTTGIAv2Fw1kk";
+(function(){
+  const _u=sessionStorage.getItem('dmsc_user');
+  function _hb(){if(!_u)return;fetch(`${SB_URL}/rest/v1/staff_sessions?username=eq.${encodeURIComponent(_u)}`,{method:'PATCH',headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON,'Content-Type':'application/json'},body:JSON.stringify({last_active:new Date().toISOString()})}).catch(()=>{});}
+  function _del(){if(!_u)return;fetch(`${SB_URL}/rest/v1/staff_sessions?username=eq.${encodeURIComponent(_u)}`,{method:'DELETE',headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON},keepalive:true}).catch(()=>{});}
+  setInterval(_hb,120000);
+  window.addEventListener('beforeunload',_del);
+  if(sessionStorage.getItem('dmsc_role')!=='admin')
+    document.querySelectorAll('.clear-btn').forEach(el=>el.style.display='none');
+})();
 const DAY_L = {1:'24 มิ.ย.',2:'25 มิ.ย.',3:'26 มิ.ย.'};
 const PAGE  = 10;
 const DEPTS = ['อธิบดีกรมวิทยาศาสตร์การแพทย์','รองอธิบดีกรมวิทยาศาสตร์การแพทย์','สำนักผู้ทรงคุณวุฒิกรมวิทยาศาสตร์การแพทย์','กองแผนงานและวิชาการ','กองทดสอบความชำนาญ','กลุ่มพัฒนาระบบบริหาร','กลุ่มตรวจสอบภายใน','กลุ่มงานจริยธรรม','สำนักงานเลขานุการกรม','สถาบันชีววัตถุ','สถาบันวิจัยวิทยาศาสตร์สาธารณสุข','สถาบันวิจัยสมุนไพร','สถาบันชีววิทยาศาสตร์ทางการแพทย์','สำนักคุณภาพและความปลอดภัยอาหาร','สำนักเครื่องสำอางและวัตถุอันตราย','สำนักรังสีและเครื่องมือแพทย์','สำนักมาตรฐานห้องปฏิบัติการ','สำนักยาและวัตถุเสพติด','ศูนย์รวมบริการ','ศูนย์เทคโนโลยีสารสนเทศและการสื่อสาร','กองความร่วมมือระหว่างประเทศ','กองบริหารทรัพยากรบุคคล','กองบริหารการคลัง','กองประชาสัมพันธ์และสื่อสารสาธารณะ','ศูนย์ตอบโต้เหตุฉุกเฉินด้านห้องปฏิบัติการและรังสี','ศูนย์วิทยาศาสตร์การแพทย์ที่ 1 เชียงใหม่','ศูนย์วิทยาศาสตร์การแพทย์ที่ 1/1 เชียงราย','ศูนย์วิทยาศาสตร์การแพทย์ที่ 2 พิษณุโลก','ศูนย์วิทยาศาสตร์การแพทย์ที่ 3 นครสวรรค์','ศูนย์วิทยาศาสตร์การแพทย์ที่ 4 สระบุรี','ศูนย์วิทยาศาสตร์การแพทย์ที่ 5 สมุทรสงคราม','ศูนย์วิทยาศาสตร์การแพทย์ที่ 6 ชลบุรี','ศูนย์วิทยาศาสตร์การแพทย์ที่ 7 ขอนแก่น','ศูนย์วิทยาศาสตร์การแพทย์ที่ 8 อุดรธานี','ศูนย์วิทยาศาสตร์การแพทย์ที่ 9 นครราชสีมา','ศูนย์วิทยาศาสตร์การแพทย์ที่ 10 อุบลราชธานี','ศูนย์วิทยาศาสตร์การแพทย์ที่ 11 สุราษฎร์ธานี','ศูนย์วิทยาศาสตร์การแพทย์ที่ 11/1 ภูเก็ต','ศูนย์วิทยาศาสตร์การแพทย์ที่ 12 สงขลา','ศูนย์วิทยาศาสตร์การแพทย์ที่ 12/1 ตรัง'];
@@ -879,9 +889,12 @@ function setAutoRefresh() {
 }
 setAutoRefresh(); // เริ่มทันที (default 1 นาที)
 
-function doLogout() {
+async function doLogout() {
+  const _u=sessionStorage.getItem('dmsc_user');
+  if(_u) await fetch(`${SB_URL}/rest/v1/staff_sessions?username=eq.${encodeURIComponent(_u)}`,{method:'DELETE',headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON}}).catch(()=>{});
   sessionStorage.removeItem('dmsc_auth');
   sessionStorage.removeItem('dmsc_user');
+  sessionStorage.removeItem('dmsc_role');
   window.location.href = 'login.html';
 }const CLEAR_PASS = "P@und3142";
 

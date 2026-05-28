@@ -144,6 +144,14 @@
   if(sessionStorage.getItem('dmsc_auth')!=='ok') window.location.href='login.html';
   document.getElementById('userDisplay').textContent = sessionStorage.getItem('dmsc_user')||'';
 
+  (function(){
+    const _u=sessionStorage.getItem('dmsc_user');
+    function _hb(){if(!_u)return;fetch(`${SB_URL}/rest/v1/staff_sessions?username=eq.${encodeURIComponent(_u)}`,{method:'PATCH',headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON,'Content-Type':'application/json'},body:JSON.stringify({last_active:new Date().toISOString()})}).catch(()=>{});}
+    function _del(){if(!_u)return;fetch(`${SB_URL}/rest/v1/staff_sessions?username=eq.${encodeURIComponent(_u)}`,{method:'DELETE',headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON},keepalive:true}).catch(()=>{});}
+    setInterval(_hb,120000);
+    window.addEventListener('beforeunload',_del);
+  })();
+
   let isProcessing=false, qrCode=null;
   let currentMode='camera', scanBuffer='', scanTimer=null;
 
@@ -300,7 +308,12 @@
   }
 
   function setStatus(t){document.getElementById('statusText').textContent=t;}
-  function doLogout(){sessionStorage.removeItem('dmsc_auth');sessionStorage.removeItem('dmsc_user');window.location.href='login.html';}
+  async function doLogout(){
+    const _u=sessionStorage.getItem('dmsc_user');
+    if(_u) await fetch(`${SB_URL}/rest/v1/staff_sessions?username=eq.${encodeURIComponent(_u)}`,{method:'DELETE',headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON}}).catch(()=>{});
+    sessionStorage.removeItem('dmsc_auth');sessionStorage.removeItem('dmsc_user');sessionStorage.removeItem('dmsc_role');
+    window.location.href='login.html';
+  }
 </script>
 </body>
 </html>

@@ -202,6 +202,16 @@ const DEPTS = ['อธิบดีกรมวิทยาศาสตร์ก�
 // Auth check
 if(sessionStorage.getItem('dmsc_auth')!=='ok') window.location.href='login.html';
 
+(function(){
+  const _u=sessionStorage.getItem('dmsc_user');
+  function _hb(){if(!_u)return;fetch(`${SB_URL}/rest/v1/staff_sessions?username=eq.${encodeURIComponent(_u)}`,{method:'PATCH',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'},body:JSON.stringify({last_active:new Date().toISOString()})}).catch(()=>{});}
+  function _del(){if(!_u)return;fetch(`${SB_URL}/rest/v1/staff_sessions?username=eq.${encodeURIComponent(_u)}`,{method:'DELETE',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY},keepalive:true}).catch(()=>{});}
+  setInterval(_hb,120000);
+  window.addEventListener('beforeunload',_del);
+  if(sessionStorage.getItem('dmsc_role')!=='admin')
+    document.querySelectorAll('.clear-btn').forEach(el=>el.style.display='none');
+})();
+
 let allData=[], filtered=[], curPage=1;
 
 (function populateDeptFilter(){
@@ -333,7 +343,12 @@ function getRows(){
     'วันที่รับ':r.received?r.receivedDate:'-'}));
 }
 
-function doLogout(){sessionStorage.removeItem('dmsc_auth');sessionStorage.removeItem('dmsc_user');window.location.href='login.html';}
+async function doLogout(){
+  const _u=sessionStorage.getItem('dmsc_user');
+  if(_u) await fetch(`${SB_URL}/rest/v1/staff_sessions?username=eq.${encodeURIComponent(_u)}`,{method:'DELETE',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}}).catch(()=>{});
+  sessionStorage.removeItem('dmsc_auth');sessionStorage.removeItem('dmsc_user');sessionStorage.removeItem('dmsc_role');
+  window.location.href='login.html';
+}
 
 const CLEAR_PASS='P@und3142';
 
