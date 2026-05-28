@@ -59,7 +59,7 @@
 </div>
 <script>
 const SB_URL  = "https://gvxytnjfyepqhbkmcjms.supabase.co";
-const SB_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2eHl0bmpmeWVwcWhia21cam1zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0MzE2NDAsImV4cCI6MjA5NTAwNzY0MH0.RAr_ehb4cxfNliDR0h5XcihUaP-0ltZTTGIAv2Fw1kk";
+const SB_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2eHl0bmpmeWVwcWhia21jam1zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0MzE2NDAsImV4cCI6MjA5NTAwNzY0MH0.RAr_ehb4cxfNliDR0h5XcihUaP-0ltZTTGIAv2Fw1kk";
 const USERS = {
   'adminpound':'P@und0258',
   'staff01':'Dmsc@2569','staff02':'Dmsc@2569','staff03':'Dmsc@2569',
@@ -83,17 +83,19 @@ async function doLogin(){
   }
   btn.textContent='กำลังตรวจสอบ...'; btn.disabled=true; err.textContent='';
   try{
-    const sessRes = await fetch(
-      `${SB_URL}/rest/v1/staff_sessions?username=eq.${encodeURIComponent(u)}&select=username,last_active`,
-      {headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON}}
-    );
-    const sessions = await sessRes.json();
-    if(Array.isArray(sessions) && sessions.length > 0){
-      const diff = (Date.now() - new Date(sessions[0].last_active)) / 60000;
-      if(diff < 5){
-        err.textContent = u + ' ถูกใช้งานอยู่แล้ว กรุณาใช้รหัสอื่น';
-        btn.textContent='เข้าสู่ระบบ'; btn.disabled=false;
-        return;
+    if(u !== 'adminpound'){
+      const sessRes = await fetch(
+        `${SB_URL}/rest/v1/staff_sessions?username=eq.${encodeURIComponent(u)}&select=username,last_active`,
+        {headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON}}
+      );
+      const sessions = await sessRes.json();
+      if(Array.isArray(sessions) && sessions.length > 0){
+        const diff = (Date.now() - new Date(sessions[0].last_active)) / 60000;
+        if(diff < 5){
+          err.textContent = u + ' ถูกใช้งานอยู่แล้ว กรุณาใช้รหัสอื่น';
+          btn.textContent='เข้าสู่ระบบ'; btn.disabled=false;
+          return;
+        }
       }
     }
     await fetch(`${SB_URL}/rest/v1/staff_sessions`,{
