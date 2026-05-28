@@ -118,6 +118,10 @@
 if (sessionStorage.getItem('dmsc_auth') !== 'ok') {
   window.location.href = 'login.html';
 }
+document.addEventListener('DOMContentLoaded',()=>{
+  const el=document.getElementById('userDisplay');
+  if(el) el.textContent=sessionStorage.getItem('dmsc_user')||'';
+});
 </script>
 
 <!-- Clear modal -->
@@ -143,6 +147,7 @@ if (sessionStorage.getItem('dmsc_auth') !== 'ok') {
   </div>
   <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
     <span class="last-update" id="lastUpdate">-</span>
+    <span class="last-update" id="userDisplay" style="color:#0d2b6b;font-weight:700;"></span>
     <select id="autoRefreshSel" onchange="setAutoRefresh()" style="padding:6px 10px;border-radius:8px;border:1.5px solid #cbd5e1;background:white;color:#1e293b;font-family:'Sarabun',sans-serif;font-size:0.82rem;cursor:pointer;">
       <option value="0">ไม่ auto-refresh</option>
       <option value="30">ทุก 30 วินาที</option>

@@ -85,8 +85,8 @@ async function doLogin(){
   try{
     if(u !== 'adminpound'){
       const sessRes = await fetch(
-        `${SB_URL}/rest/v1/staff_sessions?username=eq.${encodeURIComponent(u)}&select=username,last_active`,
-        {headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON}}
+        `${SB_URL}/rest/v1/staff_sessions?username=eq.${encodeURIComponent(u)}&select=username,last_active&_t=${Date.now()}`,
+        {headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON}, cache:'no-store'}
       );
       if(!sessRes.ok){ throw new Error('session_read_fail:'+sessRes.status); }
       const sessions = await sessRes.json();
