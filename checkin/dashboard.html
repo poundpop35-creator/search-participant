@@ -43,7 +43,8 @@
     .stat-card.day2 .stat-num{color:#7c3aed;}
     .stat-card.day3 .stat-num{color:#0891b2;}
     .stat-card.internal .stat-num{color:#16a34a;}
-    .stat-card.external .stat-num{color:#d97706;}
+    .stat-card.external .stat-num{color:#ea580c;}
+    .stat-card.walkin .stat-num{color:#d97706;}
     /* Filter */
     .filter-bar{background:var(--white);border-radius:14px;padding:16px 20px;box-shadow:var(--shadow);margin-bottom:14px;display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end;}
     .filter-group{display:flex;flex-direction:column;gap:4px;}
@@ -190,7 +191,13 @@ document.addEventListener('DOMContentLoaded',()=>{
       <div class="stat-sub">ราย</div>
     </div>
   </div>
-  <!-- แถวที่ 2: แยกวัน -->
+  <!-- แถวที่ 2: บุคลากรภายใน / ภายนอก / Walk-in -->
+  <div class="stats-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:10px;">
+    <div class="stat-card internal"><div class="stat-label">บุคลากรภายใน</div><div class="stat-num" id="sInternal">-</div><div class="stat-sub" id="sInternalS">ราย</div></div>
+    <div class="stat-card external"><div class="stat-label">บุคคลภายนอก</div><div class="stat-num" id="sExternal">-</div><div class="stat-sub" id="sExternalS">ราย</div></div>
+    <div class="stat-card walkin"><div class="stat-label">Walk-in</div><div class="stat-num" id="sWalkin2">-</div><div class="stat-sub" id="sWalkin2S">ราย</div></div>
+  </div>
+  <!-- แถวที่ 3: แยกวัน -->
   <div class="stats-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:20px;">
     <div class="stat-card day1"><div class="stat-label">วันที่ 1 — 24 มิ.ย.</div><div class="stat-num" id="sD1">-</div><div class="stat-sub" id="sD1p">-</div></div>
     <div class="stat-card day2"><div class="stat-label">วันที่ 2 — 25 มิ.ย.</div><div class="stat-num" id="sD2">-</div><div class="stat-sub" id="sD2p">-</div></div>
@@ -699,11 +706,19 @@ function applyFilters(){
   const totalAll=allData.length;
   const walkinCount=allData.filter(r=>r.isWalkin).length;
   const preRegCount=totalAll-walkinCount;
+  const internalCount=allData.filter(r=>!r.isWalkin&&r.isIn).length;
+  const externalCount=allData.filter(r=>!r.isWalkin&&!r.isIn).length;
   const uniqueCheckedIn=new Set(allData.filter(r=>!r.isWalkin).map(r=>r.participantId)).size;
   const notCheckedIn=totalPreReg>0?totalPreReg-uniqueCheckedIn:'-';
   document.getElementById('sTotal').textContent=totalAll>0?totalAll.toLocaleString():'-';
   document.getElementById('sPreReg').textContent=preRegCount.toLocaleString();
   document.getElementById('sWalkin').textContent=walkinCount.toLocaleString();
+  document.getElementById('sInternal').textContent=internalCount.toLocaleString();
+  document.getElementById('sExternal').textContent=externalCount.toLocaleString();
+  document.getElementById('sWalkin2').textContent=walkinCount.toLocaleString();
+  document.getElementById('sInternalS').textContent=`${totalAll?Math.round(internalCount/totalAll*100):0}% ของทั้งหมด`;
+  document.getElementById('sExternalS').textContent=`${totalAll?Math.round(externalCount/totalAll*100):0}% ของทั้งหมด`;
+  document.getElementById('sWalkin2S').textContent=`${totalAll?Math.round(walkinCount/totalAll*100):0}% ของทั้งหมด`;
   document.getElementById('sNotChecked').textContent=typeof notCheckedIn==='number'?notCheckedIn.toLocaleString():'-';
   [1,2,3].forEach(d=>{
     const c=filtered.filter(r=>r.day===d).length;
