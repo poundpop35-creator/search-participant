@@ -171,6 +171,11 @@
     const isAdmin=sessionStorage.getItem('dmsc_role')==='admin';
     const sel=document.getElementById('day');
     const bagOpt=sel.querySelector('option[value="bag"]');
+    const bagOpenAt=new Date(2026,4,29,8,0,0); // 29 พ.ค. 08:00 น.
+    if(now<bagOpenAt){
+      bagOpt.disabled=true;
+      bagOpt.textContent='รับกระเป๋า — เปิด 29 พ.ค. 08:00 น.';
+    }
     if(isBangkok2026June&&confDays[d]){
       bagOpt.disabled=true;
       bagOpt.textContent='รับกระเป๋า (ก่อนวันงาน) — ปิดแล้ว';
