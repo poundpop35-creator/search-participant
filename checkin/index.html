@@ -67,6 +67,17 @@
     .btn-ok.warning{background:var(--yellow);color:white;}
     .btn-ok.error{background:var(--red);color:white;}
     .btn-ok.loading{background:#94a3b8;color:white;pointer-events:none;}
+    .help-btn{position:absolute;top:16px;right:16px;width:32px;height:32px;border-radius:50%;border:2px solid #c7d7f5;background:white;font-family:'Sarabun',sans-serif;font-size:1rem;font-weight:700;color:var(--blue);cursor:pointer;display:flex;align-items:center;justify-content:center;}
+    .help-btn:hover{background:var(--blue-light);}
+    .help-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.55);display:flex;align-items:center;justify-content:center;z-index:1000;padding:20px;}
+    .help-overlay.hidden{display:none;}
+    .help-modal{background:white;border-radius:20px;padding:24px 22px 20px;width:100%;max-width:400px;max-height:85vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,0.25);}
+    .help-title{font-size:1.1rem;font-weight:700;color:var(--blue);margin-bottom:16px;text-align:center;}
+    .help-section{margin-bottom:14px;}
+    .help-section-title{font-size:0.82rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px;}
+    .help-text{font-size:0.9rem;color:#1e293b;line-height:1.7;}
+    .help-text li{margin-left:16px;margin-bottom:2px;}
+    .help-close{width:100%;padding:12px;border-radius:12px;border:none;background:var(--blue);color:white;font-family:'Sarabun',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;margin-top:16px;}
   </style>
 </head>
 <body>
@@ -81,7 +92,42 @@
   </div>
 </div>
 
-<div class="card">
+<div class="help-overlay hidden" id="helpOverlay" onclick="if(event.target===this)closeHelp()">
+  <div class="help-modal">
+    <div class="help-title">คู่มือการใช้งานระบบเช็คอิน</div>
+    <div class="help-section">
+      <div class="help-section-title">1. เลือกวันที่</div>
+      <div class="help-text">ระบบจะเลือกวันให้อัตโนมัติและล็อกตามวันงานจริง ไม่ต้องทำอะไร</div>
+    </div>
+    <div class="help-section">
+      <div class="help-section-title">2. เลือกวิธีสแกน</div>
+      <div class="help-text"><ul>
+        <li><b>เครื่องยิงบาร์โค้ด</b> — ยิง QR Code บนบัตรผู้เข้าร่วม หรือพิมพ์เลขบัตรประชาชน/Passport ในช่องด้านล่างแล้วกดค้นหา</li>
+        <li><b>กล้องมือถือ</b> — กดปุ่มแล้วส่องกล้องที่ QR Code</li>
+      </ul></div>
+    </div>
+    <div class="help-section">
+      <div class="help-section-title">3. ผลลัพธ์ที่จะขึ้น</div>
+      <div class="help-text"><ul>
+        <li>✅ <b>เช็คอินสำเร็จ</b> — แจ้งสิทธิ์คูปองอาหาร กระเป๋า และของที่ระลึก</li>
+        <li>⚠️ <b>เช็คอินซ้ำ</b> — คนนี้เช็คอินวันนี้ไปแล้ว ไม่ต้องทำอะไร</li>
+        <li>❌ <b>ไม่พบข้อมูล</b> — ยังไม่มีในระบบ ให้รอผู้เข้าร่วมกรอกแบบฟอร์ม Walk-in แล้วลองสแกนใหม่ใน 1 นาที</li>
+      </ul></div>
+    </div>
+    <div class="help-section">
+      <div class="help-section-title">4. Walk-in</div>
+      <div class="help-text">ผู้เข้าร่วมที่ไม่ได้ลงทะเบียนล่วงหน้า กรอกแบบฟอร์ม Walk-in เอง ข้อมูลจะเข้าระบบอัตโนมัติผ่าน Sheet ภายใน ~1 นาที จากนั้น staff สแกนได้เลย</div>
+    </div>
+    <div class="help-section">
+      <div class="help-section-title">5. โหมดรับกระเป๋า (ก่อนวันงาน)</div>
+      <div class="help-text">เลือก "รับกระเป๋า" ที่ dropdown → สแกน QR → ระบบบันทึกว่ารับแล้ว (บันทึกได้ครั้งเดียว)</div>
+    </div>
+    <button class="help-close" onclick="closeHelp()">ปิด</button>
+  </div>
+</div>
+
+<div class="card" style="position:relative;">
+  <button class="help-btn" onclick="openHelp()" title="คู่มือการใช้งาน">?</button>
   <div style="text-align:center;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #f1f5f9;">
     <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:10px;">
       <img src="https://raw.githubusercontent.com/poundpop35-creator/search-participant/main/logo-%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B8%8A%E0%B8%B8%E0%B8%A1%E0%B8%A7%E0%B8%B4%E0%B8%8A%E0%B8%B2%E0%B8%81%E0%B8%B2%E0%B8%A3-34-Final_0.png" style="height:48px;object-fit:contain;" alt="conference">
@@ -430,6 +476,8 @@
     return fetch(SB_URL+path,opts);
   }
 
+  function openHelp(){document.getElementById('helpOverlay').classList.remove('hidden');}
+  function closeHelp(){document.getElementById('helpOverlay').classList.add('hidden');}
   function setStatus(t){document.getElementById('statusText').textContent=t;}
   async function doLogout(){
     const _u=sessionStorage.getItem('dmsc_user');
