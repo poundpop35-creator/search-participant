@@ -343,7 +343,7 @@ function renderStats() {
   const deptSet = new Set(DEPTS);
   filtered.forEach(r => {
     const p = r.participants;
-    if(p && !p.is_walkin && (p.internal_external||'').includes('ภายใน') && deptSet.has(p.dept)) {
+    if(p && (p.internal_external||'').includes('ภายใน') && deptSet.has(p.dept)) {
       deptCount[p.dept]++;
     }
   });
