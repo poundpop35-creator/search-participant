@@ -706,19 +706,22 @@ function applyFilters(){
   const totalAll=allData.length;
   const walkinCount=allData.filter(r=>r.isWalkin).length;
   const preRegCount=totalAll-walkinCount;
-  const internalCount=allData.filter(r=>!r.isWalkin&&r.isIn).length;
-  const externalCount=allData.filter(r=>!r.isWalkin&&!r.isIn).length;
   const uniqueCheckedIn=new Set(allData.filter(r=>!r.isWalkin).map(r=>r.participantId)).size;
   const notCheckedIn=totalPreReg>0?totalPreReg-uniqueCheckedIn:'-';
   document.getElementById('sTotal').textContent=totalAll>0?totalAll.toLocaleString():'-';
   document.getElementById('sPreReg').textContent=preRegCount.toLocaleString();
   document.getElementById('sWalkin').textContent=walkinCount.toLocaleString();
+  // Row 2: internal/external/walk-in filtered by current day/filter selection
+  const internalCount=filtered.filter(r=>!r.isWalkin&&r.isIn).length;
+  const externalCount=filtered.filter(r=>!r.isWalkin&&!r.isIn).length;
+  const walkin2Count=filtered.filter(r=>r.isWalkin).length;
+  const sub=tot?'% ของที่กรอง':'';
   document.getElementById('sInternal').textContent=internalCount.toLocaleString();
   document.getElementById('sExternal').textContent=externalCount.toLocaleString();
-  document.getElementById('sWalkin2').textContent=walkinCount.toLocaleString();
-  document.getElementById('sInternalS').textContent=`${totalAll?Math.round(internalCount/totalAll*100):0}% ของทั้งหมด`;
-  document.getElementById('sExternalS').textContent=`${totalAll?Math.round(externalCount/totalAll*100):0}% ของทั้งหมด`;
-  document.getElementById('sWalkin2S').textContent=`${totalAll?Math.round(walkinCount/totalAll*100):0}% ของทั้งหมด`;
+  document.getElementById('sWalkin2').textContent=walkin2Count.toLocaleString();
+  document.getElementById('sInternalS').textContent=tot?`${Math.round(internalCount/tot*100)}${sub}`:'0 ราย';
+  document.getElementById('sExternalS').textContent=tot?`${Math.round(externalCount/tot*100)}${sub}`:'0 ราย';
+  document.getElementById('sWalkin2S').textContent=tot?`${Math.round(walkin2Count/tot*100)}${sub}`:'0 ราย';
   document.getElementById('sNotChecked').textContent=typeof notCheckedIn==='number'?notCheckedIn.toLocaleString():'-';
   [1,2,3].forEach(d=>{
     const c=filtered.filter(r=>r.day===d).length;
