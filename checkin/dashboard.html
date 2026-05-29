@@ -312,140 +312,135 @@ document.addEventListener('DOMContentLoaded',()=>{
       <button class="btn-xl" id="pToggleBtn" style="background:var(--blue);color:white;pointer-events:none;">▼ ดูรายชื่อ</button>
     </div>
     <div id="pRegSection" style="display:none;">
-      <div style="display:flex;border-bottom:2px solid var(--border);padding:0 8px;">
-        <button class="ptab active" id="ptab0" onclick="event.stopPropagation();switchPTab(0)">ลงทะเบียนล่วงหน้า <span id="pPreCount"></span></button>
-        <button class="ptab" id="ptab1" onclick="event.stopPropagation();switchPTab(1)">Walk-in <span id="pWiCount"></span></button>
+      <!-- View toggle -->
+      <div style="padding:8px 16px;border-bottom:1px solid var(--border);display:flex;gap:6px;align-items:center;">
+        <button class="vbtn active" id="pVListBtn" onclick="setPRegView('list')">📋 รายชื่อ</button>
+        <button class="vbtn" id="pVZoneBtn" onclick="setPRegView('zone')">📊 สถิติเขตสุขภาพ <span id="zoneChartCount" style="font-weight:400;font-size:0.78rem;color:#94a3b8;"></span></button>
       </div>
-      <div style="padding:12px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-        <input class="sbox" id="pSearch" placeholder="🔍 ค้นหาชื่อ / หน่วยงาน" oninput="renderParticipants()" style="flex:1;min-width:160px;">
-        <span id="pCountBar" style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:20px;padding:3px 12px;font-size:0.8rem;color:#1e40af;white-space:nowrap;flex-shrink:0;">พบ <b id="pCountFiltered">-</b> ราย <span id="pCountBreakdown" style="color:#94a3b8;font-size:0.75rem;"></span></span>
-      </div>
-      <div class="p-filter-bar">
-        <div class="p-filter-group">
-          <div class="p-filter-label">ประเภทการเข้าร่วม</div>
-          <div class="multi-wrap">
-            <button class="multi-btn" id="pFIntExtBtn" onclick="toggleDD('pFIntExtDD')">ทั้งหมด</button>
-            <div class="multi-dd" id="pFIntExtDD">
-              <label class="all-label"><input type="checkbox" id="pFIntExtAll" checked onchange="onPFIntExtAll()"> เลือกทั้งหมด</label>
-              <label><input type="checkbox" class="pFIntExtCb" value="ภายใน" checked onchange="onPFIntExtChange()"> ภายใน</label>
-              <label><input type="checkbox" class="pFIntExtCb" value="ภายนอก" checked onchange="onPFIntExtChange()"> ภายนอก</label>
+      <!-- LIST VIEW -->
+      <div id="pListView">
+        <div style="display:flex;border-bottom:2px solid var(--border);padding:0 8px;">
+          <button class="ptab active" id="ptab0" onclick="event.stopPropagation();switchPTab(0)">ลงทะเบียนล่วงหน้า <span id="pPreCount"></span></button>
+          <button class="ptab" id="ptab1" onclick="event.stopPropagation();switchPTab(1)">Walk-in <span id="pWiCount"></span></button>
+        </div>
+        <div style="padding:12px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+          <input class="sbox" id="pSearch" placeholder="🔍 ค้นหาชื่อ / หน่วยงาน" oninput="renderParticipants()" style="flex:1;min-width:160px;">
+          <span id="pCountBar" style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:20px;padding:3px 12px;font-size:0.8rem;color:#1e40af;white-space:nowrap;flex-shrink:0;">พบ <b id="pCountFiltered">-</b> ราย <span id="pCountBreakdown" style="color:#94a3b8;font-size:0.75rem;"></span></span>
+        </div>
+        <div class="p-filter-bar">
+          <div class="p-filter-group">
+            <div class="p-filter-label">ประเภทการเข้าร่วม</div>
+            <div class="multi-wrap">
+              <button class="multi-btn" id="pFIntExtBtn" onclick="toggleDD('pFIntExtDD')">ทั้งหมด</button>
+              <div class="multi-dd" id="pFIntExtDD">
+                <label class="all-label"><input type="checkbox" id="pFIntExtAll" checked onchange="onPFIntExtAll()"> เลือกทั้งหมด</label>
+                <label><input type="checkbox" class="pFIntExtCb" value="ภายใน" checked onchange="onPFIntExtChange()"> ภายใน</label>
+                <label><input type="checkbox" class="pFIntExtCb" value="ภายนอก" checked onchange="onPFIntExtChange()"> ภายนอก</label>
+              </div>
             </div>
           </div>
-        </div>
-        <div class="p-filter-group">
-          <div class="p-filter-label">หน่วยงาน</div>
-          <div class="multi-wrap">
-            <button class="multi-btn" id="pFDeptBtn" onclick="toggleDD('pFDeptDD')">ทั้งหมด</button>
-            <div class="multi-dd" id="pFDeptDD" style="min-width:220px;">
-              <label class="all-label"><input type="checkbox" id="pFDeptAll" checked onchange="onPFDeptAll()"> เลือกทั้งหมด</label>
+          <div class="p-filter-group">
+            <div class="p-filter-label">หน่วยงาน</div>
+            <div class="multi-wrap">
+              <button class="multi-btn" id="pFDeptBtn" onclick="toggleDD('pFDeptDD')">ทั้งหมด</button>
+              <div class="multi-dd" id="pFDeptDD" style="min-width:220px;">
+                <label class="all-label"><input type="checkbox" id="pFDeptAll" checked onchange="onPFDeptAll()"> เลือกทั้งหมด</label>
+              </div>
             </div>
           </div>
-        </div>
-        <div class="p-filter-group">
-          <div class="p-filter-label">TAG</div>
-          <div class="multi-wrap">
-            <button class="multi-btn" id="pFTagBtn" onclick="toggleDD('pFTagDD')">ทั้งหมด</button>
-            <div class="multi-dd" id="pFTagDD">
-              <label class="all-label"><input type="checkbox" id="pFTagAll" checked onchange="onPFTagAll()"> เลือกทั้งหมด</label>
+          <div class="p-filter-group">
+            <div class="p-filter-label">TAG</div>
+            <div class="multi-wrap">
+              <button class="multi-btn" id="pFTagBtn" onclick="toggleDD('pFTagDD')">ทั้งหมด</button>
+              <div class="multi-dd" id="pFTagDD">
+                <label class="all-label"><input type="checkbox" id="pFTagAll" checked onchange="onPFTagAll()"> เลือกทั้งหมด</label>
+              </div>
             </div>
           </div>
-        </div>
-        <div class="p-filter-group">
-          <div class="p-filter-label">ประเภท</div>
-          <div class="multi-wrap">
-            <button class="multi-btn" id="pFPTypeBtn" onclick="toggleDD('pFPTypeDD')">ทั้งหมด</button>
-            <div class="multi-dd" id="pFPTypeDD" style="min-width:220px;">
-              <label class="all-label"><input type="checkbox" id="pFPTypeAll" checked onchange="onPFPTypeAll()"> เลือกทั้งหมด</label>
+          <div class="p-filter-group">
+            <div class="p-filter-label">ประเภท</div>
+            <div class="multi-wrap">
+              <button class="multi-btn" id="pFPTypeBtn" onclick="toggleDD('pFPTypeDD')">ทั้งหมด</button>
+              <div class="multi-dd" id="pFPTypeDD" style="min-width:220px;">
+                <label class="all-label"><input type="checkbox" id="pFPTypeAll" checked onchange="onPFPTypeAll()"> เลือกทั้งหมด</label>
+              </div>
             </div>
           </div>
-        </div>
-        <div class="p-filter-group">
-          <div class="p-filter-label">เขตสุขภาพ</div>
-          <div class="multi-wrap">
-            <button class="multi-btn" id="pFZoneBtn" onclick="toggleDD('pFZoneDD')">ทั้งหมด</button>
-            <div class="multi-dd" id="pFZoneDD" style="min-width:200px;">
-              <label class="all-label"><input type="checkbox" id="pFZoneAll" checked onchange="onPFZoneAll()"> เลือกทั้งหมด</label>
-              <label><input type="checkbox" class="pFZoneCb" value="1" checked onchange="onPFZoneChange()"> เขต 1 (เหนือ)</label>
-              <label><input type="checkbox" class="pFZoneCb" value="2" checked onchange="onPFZoneChange()"> เขต 2 (เหนือล่าง)</label>
-              <label><input type="checkbox" class="pFZoneCb" value="3" checked onchange="onPFZoneChange()"> เขต 3 (กลางบน)</label>
-              <label><input type="checkbox" class="pFZoneCb" value="4" checked onchange="onPFZoneChange()"> เขต 4 (กลาง)</label>
-              <label><input type="checkbox" class="pFZoneCb" value="5" checked onchange="onPFZoneChange()"> เขต 5 (ตะวันตก)</label>
-              <label><input type="checkbox" class="pFZoneCb" value="6" checked onchange="onPFZoneChange()"> เขต 6 (ตะวันออก)</label>
-              <label><input type="checkbox" class="pFZoneCb" value="7" checked onchange="onPFZoneChange()"> เขต 7 (อีสานกลาง)</label>
-              <label><input type="checkbox" class="pFZoneCb" value="8" checked onchange="onPFZoneChange()"> เขต 8 (อีสานบน)</label>
-              <label><input type="checkbox" class="pFZoneCb" value="9" checked onchange="onPFZoneChange()"> เขต 9 (อีสานล่าง)</label>
-              <label><input type="checkbox" class="pFZoneCb" value="10" checked onchange="onPFZoneChange()"> เขต 10 (อีสานใต้)</label>
-              <label><input type="checkbox" class="pFZoneCb" value="11" checked onchange="onPFZoneChange()"> เขต 11 (ใต้บน)</label>
-              <label><input type="checkbox" class="pFZoneCb" value="12" checked onchange="onPFZoneChange()"> เขต 12 (ใต้ล่าง)</label>
-              <label><input type="checkbox" class="pFZoneCb" value="13" checked onchange="onPFZoneChange()"> เขต 13 (กทม./กรมวิทย์)</label>
+          <div class="p-filter-group">
+            <div class="p-filter-label">เขตสุขภาพ</div>
+            <div class="multi-wrap">
+              <button class="multi-btn" id="pFZoneBtn" onclick="toggleDD('pFZoneDD')">ทั้งหมด</button>
+              <div class="multi-dd" id="pFZoneDD" style="min-width:200px;">
+                <label class="all-label"><input type="checkbox" id="pFZoneAll" checked onchange="onPFZoneAll()"> เลือกทั้งหมด</label>
+                <label><input type="checkbox" class="pFZoneCb" value="1" checked onchange="onPFZoneChange()"> เขตสุขภาพที่ 1</label>
+                <label><input type="checkbox" class="pFZoneCb" value="2" checked onchange="onPFZoneChange()"> เขตสุขภาพที่ 2</label>
+                <label><input type="checkbox" class="pFZoneCb" value="3" checked onchange="onPFZoneChange()"> เขตสุขภาพที่ 3</label>
+                <label><input type="checkbox" class="pFZoneCb" value="4" checked onchange="onPFZoneChange()"> เขตสุขภาพที่ 4</label>
+                <label><input type="checkbox" class="pFZoneCb" value="5" checked onchange="onPFZoneChange()"> เขตสุขภาพที่ 5</label>
+                <label><input type="checkbox" class="pFZoneCb" value="6" checked onchange="onPFZoneChange()"> เขตสุขภาพที่ 6</label>
+                <label><input type="checkbox" class="pFZoneCb" value="7" checked onchange="onPFZoneChange()"> เขตสุขภาพที่ 7</label>
+                <label><input type="checkbox" class="pFZoneCb" value="8" checked onchange="onPFZoneChange()"> เขตสุขภาพที่ 8</label>
+                <label><input type="checkbox" class="pFZoneCb" value="9" checked onchange="onPFZoneChange()"> เขตสุขภาพที่ 9</label>
+                <label><input type="checkbox" class="pFZoneCb" value="10" checked onchange="onPFZoneChange()"> เขตสุขภาพที่ 10</label>
+                <label><input type="checkbox" class="pFZoneCb" value="11" checked onchange="onPFZoneChange()"> เขตสุขภาพที่ 11</label>
+                <label><input type="checkbox" class="pFZoneCb" value="12" checked onchange="onPFZoneChange()"> เขตสุขภาพที่ 12</label>
+                <label><input type="checkbox" class="pFZoneCb" value="13" checked onchange="onPFZoneChange()"> เขตสุขภาพที่ 13</label>
+              </div>
             </div>
           </div>
-        </div>
-        <div class="p-filter-group">
-          <div class="p-filter-label">จังหวัด</div>
-          <div class="multi-wrap">
-            <button class="multi-btn" id="pFProvBtn" onclick="toggleDD('pFProvDD')">ทั้งหมด</button>
-            <div class="multi-dd" id="pFProvDD" style="min-width:180px;">
-              <label class="all-label"><input type="checkbox" id="pFProvAll" checked onchange="onPFProvAll()"> เลือกทั้งหมด</label>
+          <div class="p-filter-group">
+            <div class="p-filter-label">จังหวัด</div>
+            <div class="multi-wrap">
+              <button class="multi-btn" id="pFProvBtn" onclick="toggleDD('pFProvDD')">ทั้งหมด</button>
+              <div class="multi-dd" id="pFProvDD" style="min-width:180px;">
+                <label class="all-label"><input type="checkbox" id="pFProvAll" checked onchange="onPFProvAll()"> เลือกทั้งหมด</label>
+              </div>
             </div>
           </div>
+          <button class="p-reset-btn" onclick="resetPFilters()">↺ รีเซ็ต</button>
         </div>
-        <button class="p-reset-btn" onclick="resetPFilters()">↺ รีเซ็ต</button>
-      </div>
-      <div style="overflow-x:auto;">
-        <table>
-          <thead>
-            <tr>
-              <th>#</th><th>ชื่อ-นามสกุล</th><th>หน่วยงาน</th>
-              <th>จังหวัด</th><th>เขตสุขภาพ</th>
-              <th>ประเภทการเข้าร่วม</th><th>TAG</th>
-            </tr>
-          </thead>
-          <tbody id="pBody"><tr><td colspan="7" class="loading-td">กำลังโหลด...</td></tr></tbody>
-        </table>
-      </div>
-      <div class="pager">
-        <span id="pRegInfo">-</span>
-        <div style="display:flex;gap:6px;">
-          <button class="pbtn" id="pPrev" onclick="changePPage(-1)">← ก่อนหน้า</button>
-          <button class="pbtn" id="pNext" onclick="changePPage(1)">ถัดไป →</button>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th><th>ชื่อ-นามสกุล</th><th>หน่วยงาน</th>
+                <th>จังหวัด</th><th>เขตสุขภาพ</th>
+                <th>ประเภทการเข้าร่วม</th><th>TAG</th>
+              </tr>
+            </thead>
+            <tbody id="pBody"><tr><td colspan="7" class="loading-td">กำลังโหลด...</td></tr></tbody>
+          </table>
         </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ZONE CHART CARD -->
-  <div class="tcard" style="margin-bottom:24px;">
-    <div class="thead-row">
-      <div>
-        <span class="ttitle">📊 สถิติแยกตามเขตสุขภาพ</span>
-        <span class="tcount" id="zoneChartCount"></span>
-      </div>
-    </div>
-    <div style="padding:16px 20px;display:grid;grid-template-columns:1fr 1fr;gap:24px;">
-      <!-- ลงทะเบียนล่วงหน้า -->
-      <div>
-        <div style="font-weight:700;color:var(--blue-mid);font-size:0.88rem;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid var(--blue-light);">ลงทะเบียนล่วงหน้า <span id="zonePreCount" style="font-weight:400;color:#64748b;"></span></div>
-        <div style="display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap;">
-          <div style="flex:0 0 160px;max-width:180px;"><canvas id="zoneChartPre"></canvas></div>
-          <div style="flex:1;min-width:180px;overflow-x:auto;">
-            <table class="dtable">
-              <thead><tr><th>เขตสุขภาพ</th><th style="text-align:right;">คน</th><th style="text-align:right;">%</th></tr></thead>
-              <tbody id="zoneBodyPre"><tr><td colspan="3" style="text-align:center;padding:16px;color:#94a3b8;">กำลังโหลด...</td></tr></tbody>
-            </table>
+        <div class="pager">
+          <span id="pRegInfo">-</span>
+          <div style="display:flex;gap:6px;">
+            <button class="pbtn" id="pPrev" onclick="changePPage(-1)">← ก่อนหน้า</button>
+            <button class="pbtn" id="pNext" onclick="changePPage(1)">ถัดไป →</button>
           </div>
         </div>
       </div>
-      <!-- Walk-in -->
-      <div>
-        <div style="font-weight:700;color:#d97706;font-size:0.88rem;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid #fef3c7;">Walk-in <span id="zoneWiCount" style="font-weight:400;color:#64748b;"></span></div>
-        <div style="display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap;">
-          <div style="flex:0 0 160px;max-width:180px;"><canvas id="zoneChartWi"></canvas></div>
-          <div style="flex:1;min-width:180px;overflow-x:auto;">
-            <table class="dtable">
-              <thead><tr><th>เขตสุขภาพ</th><th style="text-align:right;">คน</th><th style="text-align:right;">%</th></tr></thead>
-              <tbody id="zoneBodyWi"><tr><td colspan="3" style="text-align:center;padding:16px;color:#94a3b8;">กำลังโหลด...</td></tr></tbody>
-            </table>
+      <!-- ZONE CHART VIEW -->
+      <div id="pZoneView" style="display:none;padding:16px 20px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+          <div>
+            <div style="font-weight:700;color:var(--blue-mid);font-size:0.88rem;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid var(--blue-light);">ลงทะเบียนล่วงหน้า <span id="zonePreCount" style="font-weight:400;color:#64748b;"></span></div>
+            <div style="display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap;">
+              <div style="flex:0 0 160px;max-width:180px;"><canvas id="zoneChartPre"></canvas></div>
+              <div style="flex:1;min-width:180px;overflow-x:auto;">
+                <table class="dtable"><thead><tr><th>เขตสุขภาพ</th><th style="text-align:right;">คน</th><th style="text-align:right;">%</th></tr></thead>
+                  <tbody id="zoneBodyPre"></tbody></table>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div style="font-weight:700;color:#d97706;font-size:0.88rem;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid #fef3c7;">Walk-in <span id="zoneWiCount" style="font-weight:400;color:#64748b;"></span></div>
+            <div style="display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap;">
+              <div style="flex:0 0 160px;max-width:180px;"><canvas id="zoneChartWi"></canvas></div>
+              <div style="flex:1;min-width:180px;overflow-x:auto;">
+                <table class="dtable"><thead><tr><th>เขตสุขภาพ</th><th style="text-align:right;">คน</th><th style="text-align:right;">%</th></tr></thead>
+                  <tbody id="zoneBodyWi"></tbody></table>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -840,25 +835,43 @@ function renderParticipants(){
 function changePPage(d){curPPage+=d;renderParticipants();window.scrollTo({top:0,behavior:'smooth'});}
 
 const ZONE_COLORS=['#3b82f6','#8b5cf6','#06b6d4','#10b981','#f59e0b','#ef4444','#f97316','#84cc16','#ec4899','#6366f1','#14b8a6','#a78bfa','#0ea5e9','#94a3b8'];
-const ZONE_NAMES={1:'เขต 1 (เหนือ)',2:'เขต 2 (เหนือล่าง)',3:'เขต 3 (กลางบน)',4:'เขต 4 (กลาง)',5:'เขต 5 (ตะวันตก)',6:'เขต 6 (ตะวันออก)',7:'เขต 7 (อีสานกลาง)',8:'เขต 8 (อีสานบน)',9:'เขต 9 (อีสานล่าง)',10:'เขต 10 (อีสานใต้)',11:'เขต 11 (ใต้บน)',12:'เขต 12 (ใต้ล่าง)',13:'เขต 13 (กทม./กรมวิทย์)',0:'ไม่ระบุ'};
+const ZONE_NAMES={1:'เขตสุขภาพที่ 1',2:'เขตสุขภาพที่ 2',3:'เขตสุขภาพที่ 3',4:'เขตสุขภาพที่ 4',5:'เขตสุขภาพที่ 5',6:'เขตสุขภาพที่ 6',7:'เขตสุขภาพที่ 7',8:'เขตสุขภาพที่ 8',9:'เขตสุขภาพที่ 9',10:'เขตสุขภาพที่ 10',11:'เขตสุขภาพที่ 11',12:'เขตสุขภาพที่ 12',13:'เขตสุขภาพที่ 13',0:'ไม่ระบุ'};
+let pRegViewMode='list';
+function setPRegView(v){
+  pRegViewMode=v;
+  document.getElementById('pListView').style.display=v==='list'?'':'none';
+  document.getElementById('pZoneView').style.display=v==='zone'?'':'none';
+  document.getElementById('pVListBtn').classList.toggle('active',v==='list');
+  document.getElementById('pVZoneBtn').classList.toggle('active',v==='zone');
+}
+function toggleZoneRow(type,zone){
+  const row=document.getElementById(`zDetail-${type}-${zone}`);
+  const arrow=document.getElementById(`zArrow-${type}-${zone}`);
+  if(!row) return;
+  const open=row.style.display!=='none';
+  row.style.display=open?'none':'';
+  if(arrow) arrow.textContent=open?'▶':'▼';
+}
 function buildZoneChart(participants, canvasId, bodyId, countId, instKey){
-  const counts={};
-  const noZone=[];
+  // build zone counts + province breakdown
+  const counts={}, provByZone={};
   participants.forEach(p=>{
     const prov=(p.province||'').trim();
     const z=getZone(prov)||0;
     counts[z]=(counts[z]||0)+1;
-    if(z===0) noZone.push({name:`${p.prefix||''} ${p.first_name||''} ${p.last_name||''}`.trim(), prov:prov||'(ว่าง)'});
+    if(!provByZone[z]) provByZone[z]={};
+    const k=prov||'(ว่าง)';
+    provByZone[z][k]=(provByZone[z][k]||0)+1;
   });
   const entries=Object.entries(counts).map(([z,n])=>({z:Number(z),n})).sort((a,b)=>a.z-b.z);
   const total=participants.length;
   document.getElementById(countId).textContent=`(${total.toLocaleString()} คน)`;
   if(!total){document.getElementById(bodyId).innerHTML='<tr><td colspan="3" style="text-align:center;padding:16px;color:#94a3b8;">ไม่มีข้อมูล</td></tr>';return null;}
-  const labels=entries.map(e=>ZONE_NAMES[e.z]||`เขต ${e.z}`);
+  const labels=entries.map(e=>ZONE_NAMES[e.z]||`เขตสุขภาพที่ ${e.z}`);
   const data=entries.map(e=>e.n);
   const bgColors=entries.map(e=>ZONE_COLORS[e.z%ZONE_COLORS.length]);
   const prev=instKey==='pre'?zoneChartPreInst:zoneChartWiInst;
-  if(prev){prev.destroy();}
+  if(prev) prev.destroy();
   const ctx=document.getElementById(canvasId).getContext('2d');
   const inst=new Chart(ctx,{
     type:'doughnut',
@@ -867,19 +880,26 @@ function buildZoneChart(participants, canvasId, bodyId, countId, instKey){
   });
   if(instKey==='pre') zoneChartPreInst=inst; else zoneChartWiInst=inst;
   document.getElementById(bodyId).innerHTML=entries.map((e,i)=>{
-    const noZoneNote=e.z===0&&noZone.length?`<div style="font-size:0.7rem;color:#94a3b8;margin-top:2px;">จังหวัดว่างเปล่า/ไม่พบในระบบ</div>`:'';
-    return`<tr>
-      <td><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:${bgColors[i]};margin-right:5px;vertical-align:middle;"></span>${ZONE_NAMES[e.z]||'เขต '+e.z}${noZoneNote}</td>
+    const provEntries=Object.entries(provByZone[e.z]||{}).sort((a,b)=>b[1]-a[1]);
+    const detailRows=provEntries.map(([prov,cnt])=>`
+      <tr style="background:#f8fafc;">
+        <td style="padding:3px 12px 3px 32px;font-size:0.79rem;color:#475569;">⌙ ${prov}</td>
+        <td style="text-align:right;font-size:0.79rem;color:#475569;padding-right:12px;">${cnt.toLocaleString()}</td>
+        <td style="text-align:right;font-size:0.79rem;color:#94a3b8;padding-right:12px;">${Math.round(cnt/total*100)}%</td>
+      </tr>`).join('');
+    return`<tr style="cursor:pointer;" onclick="toggleZoneRow('${instKey}',${e.z})">
+      <td><span id="zArrow-${instKey}-${e.z}" style="display:inline-block;width:14px;font-size:0.7rem;color:#94a3b8;">▶</span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:${bgColors[i]};margin-right:5px;vertical-align:middle;"></span>${ZONE_NAMES[e.z]||'เขตสุขภาพที่ '+e.z}</td>
       <td style="text-align:right;font-weight:700;">${e.n.toLocaleString()}</td>
       <td style="text-align:right;color:#64748b;">${total?Math.round(e.n/total*100):0}%</td>
-    </tr>`;
+    </tr>
+    <tr id="zDetail-${instKey}-${e.z}" style="display:none;"><td colspan="3" style="padding:0;border-bottom:2px solid var(--border);"><table style="width:100%;border-collapse:collapse;">${detailRows}</table></td></tr>`;
   }).join('');
   return inst;
 }
 function renderZoneChart(){
   const pre=allParticipants.filter(p=>!p.is_walkin);
   const wi=allParticipants.filter(p=>p.is_walkin===true);
-  document.getElementById('zoneChartCount').textContent=`(${allParticipants.length.toLocaleString()} คน รวม)`;
+  document.getElementById('zoneChartCount').textContent=`(${allParticipants.length.toLocaleString()} คน)`;
   buildZoneChart(pre,'zoneChartPre','zoneBodyPre','zonePreCount','pre');
   buildZoneChart(wi,'zoneChartWi','zoneBodyWi','zoneWiCount','wi');
 }
