@@ -420,26 +420,29 @@ document.addEventListener('DOMContentLoaded',()=>{
         </div>
       </div>
       <!-- ZONE CHART VIEW -->
-      <div id="pZoneView" style="display:none;padding:16px 20px;">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
-          <div>
-            <div style="font-weight:700;color:var(--blue-mid);font-size:0.88rem;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid var(--blue-light);">ลงทะเบียนล่วงหน้า <span id="zonePreCount" style="font-weight:400;color:#64748b;"></span></div>
-            <div style="display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap;">
-              <div style="flex:0 0 160px;max-width:180px;"><canvas id="zoneChartPre"></canvas></div>
-              <div style="flex:1;min-width:180px;overflow-x:auto;">
-                <table class="dtable"><thead><tr><th>เขตสุขภาพ</th><th style="text-align:right;">คน</th><th style="text-align:right;">%</th></tr></thead>
-                  <tbody id="zoneBodyPre"></tbody></table>
-              </div>
+      <div id="pZoneView" style="display:none;">
+        <!-- Zone sub-tabs -->
+        <div style="display:flex;border-bottom:2px solid var(--border);padding:0 8px;">
+          <button class="ptab active" id="zoneTabPre" onclick="setZoneTab('pre')">ลงทะเบียนล่วงหน้า <span id="zonePreCount" style="font-size:0.8rem;color:#64748b;font-weight:400;"></span></button>
+          <button class="ptab" id="zoneTabWi" onclick="setZoneTab('wi')">Walk-in <span id="zoneWiCount" style="font-size:0.8rem;color:#64748b;font-weight:400;"></span></button>
+        </div>
+        <!-- Pre panel -->
+        <div id="zonePanelPre" style="padding:20px;">
+          <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap;">
+            <div style="flex:0 0 220px;max-width:240px;"><canvas id="zoneChartPre"></canvas></div>
+            <div style="flex:1;min-width:240px;overflow-x:auto;">
+              <table class="dtable"><thead><tr><th>เขตสุขภาพ</th><th style="text-align:right;">คน</th><th style="text-align:right;">%</th></tr></thead>
+                <tbody id="zoneBodyPre"></tbody></table>
             </div>
           </div>
-          <div>
-            <div style="font-weight:700;color:#d97706;font-size:0.88rem;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid #fef3c7;">Walk-in <span id="zoneWiCount" style="font-weight:400;color:#64748b;"></span></div>
-            <div style="display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap;">
-              <div style="flex:0 0 160px;max-width:180px;"><canvas id="zoneChartWi"></canvas></div>
-              <div style="flex:1;min-width:180px;overflow-x:auto;">
-                <table class="dtable"><thead><tr><th>เขตสุขภาพ</th><th style="text-align:right;">คน</th><th style="text-align:right;">%</th></tr></thead>
-                  <tbody id="zoneBodyWi"></tbody></table>
-              </div>
+        </div>
+        <!-- Walk-in panel -->
+        <div id="zonePanelWi" style="padding:20px;display:none;">
+          <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap;">
+            <div style="flex:0 0 220px;max-width:240px;"><canvas id="zoneChartWi"></canvas></div>
+            <div style="flex:1;min-width:240px;overflow-x:auto;">
+              <table class="dtable"><thead><tr><th>เขตสุขภาพ</th><th style="text-align:right;">คน</th><th style="text-align:right;">%</th></tr></thead>
+                <tbody id="zoneBodyWi"></tbody></table>
             </div>
           </div>
         </div>
@@ -843,6 +846,12 @@ function setPRegView(v){
   document.getElementById('pZoneView').style.display=v==='zone'?'':'none';
   document.getElementById('pVListBtn').classList.toggle('active',v==='list');
   document.getElementById('pVZoneBtn').classList.toggle('active',v==='zone');
+}
+function setZoneTab(t){
+  document.getElementById('zonePanelPre').style.display=t==='pre'?'':'none';
+  document.getElementById('zonePanelWi').style.display=t==='wi'?'':'none';
+  document.getElementById('zoneTabPre').classList.toggle('active',t==='pre');
+  document.getElementById('zoneTabWi').classList.toggle('active',t==='wi');
 }
 function toggleZoneRow(type,zone){
   const row=document.getElementById(`zDetail-${type}-${zone}`);
