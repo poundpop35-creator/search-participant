@@ -359,7 +359,7 @@ function renderStats() {
   filtered.forEach(r => {
     const p = r.participants;
     if(p && (p.internal_external||'').includes('ภายนอก')) {
-      const dname = p.ext_dept || '(ไม่ระบุ)';
+      const dname = p.ext_dept || p.dept || '(ไม่ระบุ)';
       extDeptCount[dname] = (extDeptCount[dname] || 0) + 1;
     }
   });
