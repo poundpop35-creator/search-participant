@@ -905,7 +905,8 @@ function buildZoneChart(participants, canvasId, bodyId, countId, instKey){
     if(z===0){
       if(!namesByZone[0]) namesByZone[0]=[];
       const name=`${p.prefix||''} ${p.first_name||''} ${p.last_name||''}`.trim()||'(ไม่มีชื่อ)';
-      namesByZone[0].push(name);
+      const provLabel=prov||'(ว่าง)';
+      namesByZone[0].push({name, prov:provLabel});
     }
   });
   const entries=Object.entries(counts).map(([z,n])=>({z:Number(z),n})).sort((a,b)=>a.z-b.z);
@@ -927,9 +928,10 @@ function buildZoneChart(participants, canvasId, bodyId, countId, instKey){
   document.getElementById(bodyId).innerHTML=entries.map((e,i)=>{
     let detailRows;
     if(e.z===0){
-      detailRows=(namesByZone[0]||[]).map(name=>`
+      detailRows=(namesByZone[0]||[]).map(({name,prov})=>`
         <tr style="background:#fff7ed;">
-          <td colspan="3" style="padding:4px 12px 4px 32px;font-size:0.79rem;color:#92400e;">⌙ ${name}</td>
+          <td style="padding:4px 12px 4px 32px;font-size:0.79rem;color:#92400e;">⌙ ${name}</td>
+          <td colspan="2" style="padding:4px 12px;font-size:0.79rem;color:#b45309;">จังหวัด: ${prov}</td>
         </tr>`).join('');
     } else {
       const provEntries=Object.entries(provByZone[e.z]||{}).sort((a,b)=>b[1]-a[1]);
