@@ -110,6 +110,7 @@
     .dtable tr:last-child td{border-bottom:none;}
     .dtable tr:nth-child(even) td{background:#fafafa;}
     .dsearch{padding:7px 12px;border-radius:8px;border:1.5px solid var(--border);font-family:'Sarabun',sans-serif;font-size:0.85rem;width:200px;outline:none;}
+    .zone-badge{display:inline-block;padding:2px 7px;border-radius:12px;font-size:0.7rem;font-weight:700;background:#e0e7ff;color:#3730a3;white-space:nowrap;}
     /* Participant filters */
     .p-filter-bar{padding:10px 20px;background:#f8fafc;border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end;}
     .p-filter-select{padding:6px 10px;border-radius:8px;border:1.5px solid var(--border);font-family:'Sarabun',sans-serif;font-size:0.84rem;color:#1e293b;cursor:pointer;outline:none;max-width:180px;}
@@ -351,6 +352,31 @@ document.addEventListener('DOMContentLoaded',()=>{
             <option value="">ทั้งหมด</option>
           </select>
         </div>
+        <div class="p-filter-group">
+          <div class="p-filter-label">เขตสุขภาพ</div>
+          <select class="p-filter-select" id="pFZone" onchange="renderParticipants()">
+            <option value="">ทั้งหมด</option>
+            <option value="1">เขต 1 (เหนือ)</option>
+            <option value="2">เขต 2 (เหนือล่าง)</option>
+            <option value="3">เขต 3 (กลางบน)</option>
+            <option value="4">เขต 4 (กลาง)</option>
+            <option value="5">เขต 5 (ตะวันตก)</option>
+            <option value="6">เขต 6 (ตะวันออก)</option>
+            <option value="7">เขต 7 (อีสานกลาง)</option>
+            <option value="8">เขต 8 (อีสานบน)</option>
+            <option value="9">เขต 9 (อีสานล่าง)</option>
+            <option value="10">เขต 10 (อีสานใต้)</option>
+            <option value="11">เขต 11 (ใต้บน)</option>
+            <option value="12">เขต 12 (ใต้ล่าง)</option>
+            <option value="13">เขต 13 (กทม.)</option>
+          </select>
+        </div>
+        <div class="p-filter-group">
+          <div class="p-filter-label">จังหวัด</div>
+          <select class="p-filter-select" id="pFProvince" onchange="renderParticipants()">
+            <option value="">ทั้งหมด</option>
+          </select>
+        </div>
         <button class="p-reset-btn" onclick="resetPFilters()">↺ รีเซ็ต</button>
       </div>
       <div style="overflow-x:auto;">
@@ -358,10 +384,11 @@ document.addEventListener('DOMContentLoaded',()=>{
           <thead>
             <tr>
               <th>#</th><th>ชื่อ-นามสกุล</th><th>หน่วยงาน</th>
+              <th>จังหวัด</th><th>เขตสุขภาพ</th>
               <th>ประเภทการเข้าร่วม</th><th>TAG</th>
             </tr>
           </thead>
-          <tbody id="pBody"><tr><td colspan="5" class="loading-td">กำลังโหลด...</td></tr></tbody>
+          <tbody id="pBody"><tr><td colspan="7" class="loading-td">กำลังโหลด...</td></tr></tbody>
         </table>
       </div>
       <div class="pager">
@@ -469,6 +496,22 @@ let deptRaw=[], dView='table', dChart=null;
 let totalPreReg=0, totalAll=0;
 let allParticipants=[], curPTab=0, curPPage=1;
 const P_PAGE=20;
+const HEALTH_ZONE={
+  'เชียงราย':1,'น่าน':1,'พะเยา':1,'แพร่':1,'เชียงใหม่':1,'แม่ฮ่องสอน':1,'ลำปาง':1,'ลำพูน':1,
+  'ตาก':2,'พิษณุโลก':2,'เพชรบูรณ์':2,'สุโขทัย':2,'อุตรดิตถ์':2,
+  'กำแพงเพชร':3,'พิจิตร':3,'นครสวรรค์':3,'อุทัยธานี':3,
+  'นนทบุรี':4,'ปทุมธานี':4,'พระนครศรีอยุธยา':4,'สระบุรี':4,'ลพบุรี':4,'สิงห์บุรี':4,'อ่างทอง':4,'ชัยนาท':4,
+  'กาญจนบุรี':5,'นครปฐม':5,'ราชบุรี':5,'สุพรรณบุรี':5,'ประจวบคีรีขันธ์':5,'เพชรบุรี':5,'สมุทรสงคราม':5,'สมุทรสาคร':5,
+  'ฉะเชิงเทรา':6,'ปราจีนบุรี':6,'สระแก้ว':6,'สมุทรปราการ':6,'จันทบุรี':6,'ชลบุรี':6,'ตราด':6,'ระยอง':6,'นครนายก':6,
+  'กาฬสินธุ์':7,'ขอนแก่น':7,'มหาสารคาม':7,'ร้อยเอ็ด':7,
+  'บึงกาฬ':8,'เลย':8,'หนองคาย':8,'หนองบัวลำภู':8,'อุดรธานี':8,'นครพนม':8,'สกลนคร':8,'มุกดาหาร':8,
+  'ชัยภูมิ':9,'นครราชสีมา':9,'บุรีรัมย์':9,'สุรินทร์':9,
+  'ยโสธร':10,'ศรีสะเกษ':10,'อุบลราชธานี':10,'อำนาจเจริญ':10,
+  'ชุมพร':11,'นครศรีธรรมราช':11,'สุราษฎร์ธานี':11,'กระบี่':11,'พังงา':11,'ภูเก็ต':11,'ระนอง':11,'พัทลุง':11,'ตรัง':11,
+  'นราธิวาส':12,'ปัตตานี':12,'ยะลา':12,'สงขลา':12,'สตูล':12,
+  'กรุงเทพมหานคร':13
+};
+function getZone(prov){return prov&&HEALTH_ZONE[prov]?HEALTH_ZONE[prov]:null;}
 
 async function fetchAll(path,ps=1000){
   let res=[],from=0;
@@ -563,7 +606,7 @@ async function loadAll(){
 }
 
 async function loadParticipants(){
-  allParticipants=await fetchAll('/rest/v1/participants?select=id,prefix,first_name,last_name,dept,ext_dept,internal_external,participation_type,tag,is_walkin&order=last_name.asc');
+  allParticipants=await fetchAll('/rest/v1/participants?select=id,prefix,first_name,last_name,dept,ext_dept,internal_external,participation_type,tag,province,is_walkin&order=last_name.asc');
   const preC=allParticipants.filter(p=>!p.is_walkin).length;
   const wiC=allParticipants.filter(p=>p.is_walkin===true).length;
   document.getElementById('pRegCount').textContent=`(ล่วงหน้า ${preC.toLocaleString()} | Walk-in ${wiC.toLocaleString()})`;
@@ -583,6 +626,25 @@ async function loadParticipants(){
   fillSel('pFDept',depts);
   fillSel('pFTag',tags);
   fillSel('pFPType',ptypes);
+  // Build province dropdown grouped by health zone
+  const provSel=document.getElementById('pFProvince');
+  const zoneGroups={};
+  allParticipants.forEach(p=>{
+    const prov=(p.province||'').trim();
+    if(!prov) return;
+    const z=HEALTH_ZONE[prov]||0;
+    if(!zoneGroups[z]) zoneGroups[z]=new Set();
+    zoneGroups[z].add(prov);
+  });
+  const zoneKeys=Object.keys(zoneGroups).map(Number).sort((a,b)=>a-b);
+  zoneKeys.forEach(z=>{
+    const grp=document.createElement('optgroup');
+    grp.label=z===0?'ไม่ระบุเขต':`เขตสุขภาพที่ ${z}`;
+    [...zoneGroups[z]].sort((a,b)=>a.localeCompare(b,'th')).forEach(prov=>{
+      const o=document.createElement('option');o.value=prov;o.textContent=prov;grp.appendChild(o);
+    });
+    provSel.appendChild(grp);
+  });
 }
 
 function toggleParticipants(){
@@ -610,6 +672,8 @@ function resetPFilters(){
   document.getElementById('pFDept').value='';
   document.getElementById('pFTag').value='';
   document.getElementById('pFPType').value='';
+  document.getElementById('pFZone').value='';
+  document.getElementById('pFProvince').value='';
   curPPage=1;
   renderParticipants();
 }
@@ -620,18 +684,24 @@ function renderParticipants(){
   const fDept=document.getElementById('pFDept').value;
   const fTag=document.getElementById('pFTag').value;
   const fPType=document.getElementById('pFPType').value;
+  const fZone=document.getElementById('pFZone').value;
+  const fProv=document.getElementById('pFProvince').value;
   const data=allParticipants.filter(p=>{
     const isWI=p.is_walkin===true;
     const matchTab=curPTab===0?!isWI:isWI;
     const name=`${p.prefix||''} ${p.first_name||''} ${p.last_name||''}`.trim();
     const isIn=(p.internal_external||'').includes('ภายใน');
     const dept=isIn?(p.dept||'-'):(p.ext_dept||p.dept||'-');
-    const matchQ=!q||name.toLowerCase().includes(q)||dept.toLowerCase().includes(q);
+    const prov=(p.province||'').trim();
+    const matchQ=!q||name.toLowerCase().includes(q)||dept.toLowerCase().includes(q)||(prov&&prov.toLowerCase().includes(q));
     const matchIntExt=!fIntExt||(p.internal_external||'').includes(fIntExt);
     const matchDept=!fDept||dept===fDept;
-    const matchTag=!fTag||(p.tag||'')=== fTag;
+    const matchTag=!fTag||(p.tag||'')===fTag;
     const matchPType=!fPType||(p.participation_type||'')===fPType;
-    return matchTab&&matchQ&&matchIntExt&&matchDept&&matchTag&&matchPType;
+    const zone=getZone(prov);
+    const matchZone=!fZone||String(zone)===fZone;
+    const matchProv=!fProv||prov===fProv;
+    return matchTab&&matchQ&&matchIntExt&&matchDept&&matchTag&&matchPType&&matchZone&&matchProv;
   });
   const tot=data.length;
   const totPages=Math.ceil(tot/P_PAGE)||1;
@@ -641,15 +711,20 @@ function renderParticipants(){
   document.getElementById('pRegInfo').textContent=`แสดง ${tot===0?0:start+1}–${Math.min(start+P_PAGE,tot)} จาก ${tot.toLocaleString()} รายการ`;
   document.getElementById('pPrev').disabled=curPPage<=1;
   document.getElementById('pNext').disabled=curPPage>=totPages;
-  if(!page.length){document.getElementById('pBody').innerHTML='<tr><td colspan="5" class="loading-td">ไม่พบข้อมูล</td></tr>';return;}
+  if(!page.length){document.getElementById('pBody').innerHTML='<tr><td colspan="7" class="loading-td">ไม่พบข้อมูล</td></tr>';return;}
   document.getElementById('pBody').innerHTML=page.map((p,i)=>{
     const name=`${p.prefix||''} ${p.first_name||''} ${p.last_name||''}`.trim();
     const isIn=(p.internal_external||'').includes('ภายใน');
     const dept=isIn?(p.dept||'-'):(p.ext_dept||p.dept||'-');
+    const prov=(p.province||'').trim()||'-';
+    const zone=prov!=='-'?getZone(prov):null;
+    const zoneBadge=zone?`<span class="zone-badge">เขต ${zone}</span>`:'-';
     return`<tr>
       <td>${start+i+1}</td>
       <td>${name}</td>
-      <td style="max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${dept}">${dept}</td>
+      <td style="max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${dept}">${dept}</td>
+      <td>${prov}</td>
+      <td>${zoneBadge}</td>
       <td>${p.participation_type||'-'}</td>
       <td>${p.tag||'-'}</td>
     </tr>`;
