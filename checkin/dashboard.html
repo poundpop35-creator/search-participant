@@ -422,15 +422,32 @@ document.addEventListener('DOMContentLoaded',()=>{
         <span class="tcount" id="zoneChartCount"></span>
       </div>
     </div>
-    <div style="padding:16px 20px;display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start;">
-      <div style="flex:0 0 280px;position:relative;max-width:300px;">
-        <canvas id="zoneChart"></canvas>
+    <div style="padding:16px 20px;display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+      <!-- ลงทะเบียนล่วงหน้า -->
+      <div>
+        <div style="font-weight:700;color:var(--blue-mid);font-size:0.88rem;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid var(--blue-light);">ลงทะเบียนล่วงหน้า <span id="zonePreCount" style="font-weight:400;color:#64748b;"></span></div>
+        <div style="display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap;">
+          <div style="flex:0 0 160px;max-width:180px;"><canvas id="zoneChartPre"></canvas></div>
+          <div style="flex:1;min-width:180px;overflow-x:auto;">
+            <table class="dtable">
+              <thead><tr><th>เขตสุขภาพ</th><th style="text-align:right;">คน</th><th style="text-align:right;">%</th></tr></thead>
+              <tbody id="zoneBodyPre"><tr><td colspan="3" style="text-align:center;padding:16px;color:#94a3b8;">กำลังโหลด...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
       </div>
-      <div style="flex:1;min-width:220px;overflow-x:auto;">
-        <table class="dtable">
-          <thead><tr><th>เขตสุขภาพ</th><th style="text-align:right;">จำนวน</th><th style="text-align:right;">%</th></tr></thead>
-          <tbody id="zoneBody"><tr><td colspan="3" style="text-align:center;padding:20px;color:#94a3b8;">กำลังโหลด...</td></tr></tbody>
-        </table>
+      <!-- Walk-in -->
+      <div>
+        <div style="font-weight:700;color:#d97706;font-size:0.88rem;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid #fef3c7;">Walk-in <span id="zoneWiCount" style="font-weight:400;color:#64748b;"></span></div>
+        <div style="display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap;">
+          <div style="flex:0 0 160px;max-width:180px;"><canvas id="zoneChartWi"></canvas></div>
+          <div style="flex:1;min-width:180px;overflow-x:auto;">
+            <table class="dtable">
+              <thead><tr><th>เขตสุขภาพ</th><th style="text-align:right;">คน</th><th style="text-align:right;">%</th></tr></thead>
+              <tbody id="zoneBodyWi"><tr><td colspan="3" style="text-align:center;padding:16px;color:#94a3b8;">กำลังโหลด...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -529,7 +546,7 @@ let allData=[], filtered=[], curTab=0, curPage=1;
 let selPT=new Set(), selDPT=new Set(), selDDept=new Set(), selFDept=new Set();
 let deptRaw=[], dView='table', dChart=null;
 let totalPreReg=0, totalAll=0;
-let allParticipants=[], curPTab=0, curPPage=1, zoneChartInst=null;
+let allParticipants=[], curPTab=0, curPPage=1, zoneChartPreInst=null, zoneChartWiInst=null;
 const P_PAGE=20;
 const HEALTH_ZONE={
   'เชียงราย':1,'น่าน':1,'พะเยา':1,'แพร่':1,'เชียงใหม่':1,'แม่ฮ่องสอน':1,'ลำปาง':1,'ลำพูน':1,
@@ -824,38 +841,47 @@ function changePPage(d){curPPage+=d;renderParticipants();window.scrollTo({top:0,
 
 const ZONE_COLORS=['#3b82f6','#8b5cf6','#06b6d4','#10b981','#f59e0b','#ef4444','#f97316','#84cc16','#ec4899','#6366f1','#14b8a6','#a78bfa','#0ea5e9','#94a3b8'];
 const ZONE_NAMES={1:'เขต 1 (เหนือ)',2:'เขต 2 (เหนือล่าง)',3:'เขต 3 (กลางบน)',4:'เขต 4 (กลาง)',5:'เขต 5 (ตะวันตก)',6:'เขต 6 (ตะวันออก)',7:'เขต 7 (อีสานกลาง)',8:'เขต 8 (อีสานบน)',9:'เขต 9 (อีสานล่าง)',10:'เขต 10 (อีสานใต้)',11:'เขต 11 (ใต้บน)',12:'เขต 12 (ใต้ล่าง)',13:'เขต 13 (กทม./กรมวิทย์)',0:'ไม่ระบุ'};
-function renderZoneChart(){
+function buildZoneChart(participants, canvasId, bodyId, countId, instKey){
   const counts={};
-  allParticipants.forEach(p=>{
+  const noZone=[];
+  participants.forEach(p=>{
     const prov=(p.province||'').trim();
     const z=getZone(prov)||0;
     counts[z]=(counts[z]||0)+1;
+    if(z===0) noZone.push({name:`${p.prefix||''} ${p.first_name||''} ${p.last_name||''}`.trim(), prov:prov||'(ว่าง)'});
   });
   const entries=Object.entries(counts).map(([z,n])=>({z:Number(z),n})).sort((a,b)=>a.z-b.z);
-  const total=allParticipants.length;
-  document.getElementById('zoneChartCount').textContent=`(${total.toLocaleString()} คน)`;
+  const total=participants.length;
+  document.getElementById(countId).textContent=`(${total.toLocaleString()} คน)`;
+  if(!total){document.getElementById(bodyId).innerHTML='<tr><td colspan="3" style="text-align:center;padding:16px;color:#94a3b8;">ไม่มีข้อมูล</td></tr>';return null;}
   const labels=entries.map(e=>ZONE_NAMES[e.z]||`เขต ${e.z}`);
   const data=entries.map(e=>e.n);
   const bgColors=entries.map(e=>ZONE_COLORS[e.z%ZONE_COLORS.length]);
-  if(zoneChartInst){zoneChartInst.destroy();zoneChartInst=null;}
-  const ctx=document.getElementById('zoneChart').getContext('2d');
-  zoneChartInst=new Chart(ctx,{
+  const prev=instKey==='pre'?zoneChartPreInst:zoneChartWiInst;
+  if(prev){prev.destroy();}
+  const ctx=document.getElementById(canvasId).getContext('2d');
+  const inst=new Chart(ctx,{
     type:'doughnut',
     data:{labels,datasets:[{data,backgroundColor:bgColors,borderWidth:2,borderColor:'#fff',hoverOffset:6}]},
-    options:{
-      responsive:true,cutout:'60%',
-      plugins:{
-        legend:{display:false},
-        tooltip:{callbacks:{label:c=>` ${c.label}: ${c.raw.toLocaleString()} คน (${Math.round(c.raw/total*100)}%)`}}
-      }
-    }
+    options:{responsive:true,cutout:'58%',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.label}: ${c.raw.toLocaleString()} คน (${Math.round(c.raw/total*100)}%)`}}}}
   });
-  document.getElementById('zoneBody').innerHTML=entries.map((e,i)=>`
-    <tr>
-      <td><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:${bgColors[i]};margin-right:6px;vertical-align:middle;"></span>${ZONE_NAMES[e.z]||'เขต '+e.z}</td>
+  if(instKey==='pre') zoneChartPreInst=inst; else zoneChartWiInst=inst;
+  document.getElementById(bodyId).innerHTML=entries.map((e,i)=>{
+    const noZoneNote=e.z===0&&noZone.length?`<div style="font-size:0.7rem;color:#94a3b8;margin-top:2px;">จังหวัดว่างเปล่า/ไม่พบในระบบ</div>`:'';
+    return`<tr>
+      <td><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:${bgColors[i]};margin-right:5px;vertical-align:middle;"></span>${ZONE_NAMES[e.z]||'เขต '+e.z}${noZoneNote}</td>
       <td style="text-align:right;font-weight:700;">${e.n.toLocaleString()}</td>
       <td style="text-align:right;color:#64748b;">${total?Math.round(e.n/total*100):0}%</td>
-    </tr>`).join('');
+    </tr>`;
+  }).join('');
+  return inst;
+}
+function renderZoneChart(){
+  const pre=allParticipants.filter(p=>!p.is_walkin);
+  const wi=allParticipants.filter(p=>p.is_walkin===true);
+  document.getElementById('zoneChartCount').textContent=`(${allParticipants.length.toLocaleString()} คน รวม)`;
+  buildZoneChart(pre,'zoneChartPre','zoneBodyPre','zonePreCount','pre');
+  buildZoneChart(wi,'zoneChartWi','zoneBodyWi','zoneWiCount','wi');
 }
 
 function toggleFDeptAll(){
