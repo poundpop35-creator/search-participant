@@ -309,7 +309,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   </div>
 
   <!-- ALL PARTICIPANTS SECTION -->
-  <div class="tcard" style="margin-bottom:24px;">
+  <div class="tcard" style="margin-bottom:24px;overflow:visible;">
     <div class="thead-row" style="cursor:pointer;" onclick="toggleParticipants()">
       <div>
         <span class="ttitle">รายชื่อผู้ลงทะเบียนทั้งหมด</span>
@@ -328,56 +328,78 @@ document.addEventListener('DOMContentLoaded',()=>{
       <div class="p-filter-bar">
         <div class="p-filter-group">
           <div class="p-filter-label">ประเภทการเข้าร่วม</div>
-          <select class="p-filter-select" id="pFIntExt" onchange="renderParticipants()">
-            <option value="">ทั้งหมด</option>
-            <option value="ภายใน">ภายใน</option>
-            <option value="ภายนอก">ภายนอก</option>
-          </select>
+          <div class="multi-wrap">
+            <button class="multi-btn" id="pFIntExtBtn" onclick="toggleDD('pFIntExtDD')">ทั้งหมด</button>
+            <div class="multi-dd" id="pFIntExtDD">
+              <label class="all-label"><input type="checkbox" id="pFIntExtAll" checked onchange="onPFIntExtAll()"> เลือกทั้งหมด</label>
+              <label><input type="checkbox" class="pFIntExtCb" value="ภายใน" checked onchange="onPFIntExtChange()"> ภายใน</label>
+              <label><input type="checkbox" class="pFIntExtCb" value="ภายนอก" checked onchange="onPFIntExtChange()"> ภายนอก</label>
+            </div>
+          </div>
         </div>
         <div class="p-filter-group">
           <div class="p-filter-label">หน่วยงาน</div>
-          <select class="p-filter-select" id="pFDept" onchange="renderParticipants()">
-            <option value="">ทั้งหมด</option>
-          </select>
+          <div class="multi-wrap">
+            <button class="multi-btn" id="pFDeptBtn" onclick="toggleDD('pFDeptDD')">ทั้งหมด</button>
+            <div class="multi-dd" id="pFDeptDD" style="min-width:220px;">
+              <label class="all-label"><input type="checkbox" id="pFDeptAll" checked onchange="onPFDeptAll()"> เลือกทั้งหมด</label>
+            </div>
+          </div>
         </div>
         <div class="p-filter-group">
           <div class="p-filter-label">TAG</div>
-          <select class="p-filter-select" id="pFTag" onchange="renderParticipants()">
-            <option value="">ทั้งหมด</option>
-          </select>
+          <div class="multi-wrap">
+            <button class="multi-btn" id="pFTagBtn" onclick="toggleDD('pFTagDD')">ทั้งหมด</button>
+            <div class="multi-dd" id="pFTagDD">
+              <label class="all-label"><input type="checkbox" id="pFTagAll" checked onchange="onPFTagAll()"> เลือกทั้งหมด</label>
+            </div>
+          </div>
         </div>
         <div class="p-filter-group">
           <div class="p-filter-label">ประเภท</div>
-          <select class="p-filter-select" id="pFPType" onchange="renderParticipants()">
-            <option value="">ทั้งหมด</option>
-          </select>
+          <div class="multi-wrap">
+            <button class="multi-btn" id="pFPTypeBtn" onclick="toggleDD('pFPTypeDD')">ทั้งหมด</button>
+            <div class="multi-dd" id="pFPTypeDD" style="min-width:220px;">
+              <label class="all-label"><input type="checkbox" id="pFPTypeAll" checked onchange="onPFPTypeAll()"> เลือกทั้งหมด</label>
+            </div>
+          </div>
         </div>
         <div class="p-filter-group">
           <div class="p-filter-label">เขตสุขภาพ</div>
-          <select class="p-filter-select" id="pFZone" onchange="renderParticipants()">
-            <option value="">ทั้งหมด</option>
-            <option value="1">เขต 1 (เหนือ)</option>
-            <option value="2">เขต 2 (เหนือล่าง)</option>
-            <option value="3">เขต 3 (กลางบน)</option>
-            <option value="4">เขต 4 (กลาง)</option>
-            <option value="5">เขต 5 (ตะวันตก)</option>
-            <option value="6">เขต 6 (ตะวันออก)</option>
-            <option value="7">เขต 7 (อีสานกลาง)</option>
-            <option value="8">เขต 8 (อีสานบน)</option>
-            <option value="9">เขต 9 (อีสานล่าง)</option>
-            <option value="10">เขต 10 (อีสานใต้)</option>
-            <option value="11">เขต 11 (ใต้บน)</option>
-            <option value="12">เขต 12 (ใต้ล่าง)</option>
-            <option value="13">เขต 13 (กทม.)</option>
-          </select>
+          <div class="multi-wrap">
+            <button class="multi-btn" id="pFZoneBtn" onclick="toggleDD('pFZoneDD')">ทั้งหมด</button>
+            <div class="multi-dd" id="pFZoneDD" style="min-width:200px;">
+              <label class="all-label"><input type="checkbox" id="pFZoneAll" checked onchange="onPFZoneAll()"> เลือกทั้งหมด</label>
+              <label><input type="checkbox" class="pFZoneCb" value="1" checked onchange="onPFZoneChange()"> เขต 1 (เหนือ)</label>
+              <label><input type="checkbox" class="pFZoneCb" value="2" checked onchange="onPFZoneChange()"> เขต 2 (เหนือล่าง)</label>
+              <label><input type="checkbox" class="pFZoneCb" value="3" checked onchange="onPFZoneChange()"> เขต 3 (กลางบน)</label>
+              <label><input type="checkbox" class="pFZoneCb" value="4" checked onchange="onPFZoneChange()"> เขต 4 (กลาง)</label>
+              <label><input type="checkbox" class="pFZoneCb" value="5" checked onchange="onPFZoneChange()"> เขต 5 (ตะวันตก)</label>
+              <label><input type="checkbox" class="pFZoneCb" value="6" checked onchange="onPFZoneChange()"> เขต 6 (ตะวันออก)</label>
+              <label><input type="checkbox" class="pFZoneCb" value="7" checked onchange="onPFZoneChange()"> เขต 7 (อีสานกลาง)</label>
+              <label><input type="checkbox" class="pFZoneCb" value="8" checked onchange="onPFZoneChange()"> เขต 8 (อีสานบน)</label>
+              <label><input type="checkbox" class="pFZoneCb" value="9" checked onchange="onPFZoneChange()"> เขต 9 (อีสานล่าง)</label>
+              <label><input type="checkbox" class="pFZoneCb" value="10" checked onchange="onPFZoneChange()"> เขต 10 (อีสานใต้)</label>
+              <label><input type="checkbox" class="pFZoneCb" value="11" checked onchange="onPFZoneChange()"> เขต 11 (ใต้บน)</label>
+              <label><input type="checkbox" class="pFZoneCb" value="12" checked onchange="onPFZoneChange()"> เขต 12 (ใต้ล่าง)</label>
+              <label><input type="checkbox" class="pFZoneCb" value="13" checked onchange="onPFZoneChange()"> เขต 13 (กทม./กรมวิทย์)</label>
+            </div>
+          </div>
         </div>
         <div class="p-filter-group">
           <div class="p-filter-label">จังหวัด</div>
-          <select class="p-filter-select" id="pFProvince" onchange="renderParticipants()">
-            <option value="">ทั้งหมด</option>
-          </select>
+          <div class="multi-wrap">
+            <button class="multi-btn" id="pFProvBtn" onclick="toggleDD('pFProvDD')">ทั้งหมด</button>
+            <div class="multi-dd" id="pFProvDD" style="min-width:180px;">
+              <label class="all-label"><input type="checkbox" id="pFProvAll" checked onchange="onPFProvAll()"> เลือกทั้งหมด</label>
+            </div>
+          </div>
         </div>
         <button class="p-reset-btn" onclick="resetPFilters()">↺ รีเซ็ต</button>
+      </div>
+      <div id="pCountBar" style="padding:5px 20px;background:#eff6ff;border-bottom:1px solid #dbeafe;font-size:0.82rem;color:#1e40af;display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+        <span>พบ <b id="pCountFiltered">-</b> รายการ</span>
+        <span id="pCountBreakdown" style="color:#64748b;font-size:0.78rem;"></span>
       </div>
       <div style="overflow-x:auto;">
         <table>
@@ -509,9 +531,39 @@ const HEALTH_ZONE={
   'ยโสธร':10,'ศรีสะเกษ':10,'อุบลราชธานี':10,'อำนาจเจริญ':10,
   'ชุมพร':11,'นครศรีธรรมราช':11,'สุราษฎร์ธานี':11,'กระบี่':11,'พังงา':11,'ภูเก็ต':11,'ระนอง':11,'พัทลุง':11,'ตรัง':11,
   'นราธิวาส':12,'ปัตตานี':12,'ยะลา':12,'สงขลา':12,'สตูล':12,
-  'กรุงเทพมหานคร':13
+  'กรุงเทพมหานคร':13,'กรมวิทยาศาสตร์การแพทย์':13
 };
-function getZone(prov){return prov&&HEALTH_ZONE[prov]?HEALTH_ZONE[prov]:null;}
+function getZone(prov){
+  if(!prov) return null;
+  if(HEALTH_ZONE[prov]) return HEALTH_ZONE[prov];
+  if(prov.includes('กรมวิทยาศาสตร์')) return 13;
+  return null;
+}
+// Participant filter state (empty Set = no filter = show all)
+let pFSelIntExt=new Set(),pFSelDept=new Set(),pFSelTag=new Set(),
+    pFSelPType=new Set(),pFSelZone=new Set(),pFSelProv=new Set();
+function pFGetChecked(cbClass){
+  const all=[...document.querySelectorAll('.'+cbClass)];
+  if(!all.length||all.every(c=>c.checked)) return new Set();
+  const s=new Set();all.filter(c=>c.checked).forEach(c=>s.add(c.value));return s;
+}
+function pFUpdateBtn(btnId,sel){
+  const b=document.getElementById(btnId);if(!b)return;
+  if(sel.size===0){b.textContent='ทั้งหมด';b.classList.remove('on');}
+  else{b.textContent=`เลือก ${sel.size}`;b.classList.add('on');}
+}
+function onPFIntExtChange(){const cbs=[...document.querySelectorAll('.pFIntExtCb')];document.getElementById('pFIntExtAll').checked=cbs.every(c=>c.checked);pFSelIntExt=pFGetChecked('pFIntExtCb');pFUpdateBtn('pFIntExtBtn',pFSelIntExt);curPPage=1;renderParticipants();}
+function onPFIntExtAll(){const c=document.getElementById('pFIntExtAll').checked;document.querySelectorAll('.pFIntExtCb').forEach(cb=>cb.checked=c);pFSelIntExt=new Set();pFUpdateBtn('pFIntExtBtn',pFSelIntExt);curPPage=1;renderParticipants();}
+function onPFDeptChange(){const cbs=[...document.querySelectorAll('.pFDeptCb')];document.getElementById('pFDeptAll').checked=cbs.every(c=>c.checked);pFSelDept=pFGetChecked('pFDeptCb');pFUpdateBtn('pFDeptBtn',pFSelDept);curPPage=1;renderParticipants();}
+function onPFDeptAll(){const c=document.getElementById('pFDeptAll').checked;document.querySelectorAll('.pFDeptCb').forEach(cb=>cb.checked=c);pFSelDept=new Set();pFUpdateBtn('pFDeptBtn',pFSelDept);curPPage=1;renderParticipants();}
+function onPFTagChange(){const cbs=[...document.querySelectorAll('.pFTagCb')];document.getElementById('pFTagAll').checked=cbs.every(c=>c.checked);pFSelTag=pFGetChecked('pFTagCb');pFUpdateBtn('pFTagBtn',pFSelTag);curPPage=1;renderParticipants();}
+function onPFTagAll(){const c=document.getElementById('pFTagAll').checked;document.querySelectorAll('.pFTagCb').forEach(cb=>cb.checked=c);pFSelTag=new Set();pFUpdateBtn('pFTagBtn',pFSelTag);curPPage=1;renderParticipants();}
+function onPFPTypeChange(){const cbs=[...document.querySelectorAll('.pFPTypeCb')];document.getElementById('pFPTypeAll').checked=cbs.every(c=>c.checked);pFSelPType=pFGetChecked('pFPTypeCb');pFUpdateBtn('pFPTypeBtn',pFSelPType);curPPage=1;renderParticipants();}
+function onPFPTypeAll(){const c=document.getElementById('pFPTypeAll').checked;document.querySelectorAll('.pFPTypeCb').forEach(cb=>cb.checked=c);pFSelPType=new Set();pFUpdateBtn('pFPTypeBtn',pFSelPType);curPPage=1;renderParticipants();}
+function onPFZoneChange(){const cbs=[...document.querySelectorAll('.pFZoneCb')];document.getElementById('pFZoneAll').checked=cbs.every(c=>c.checked);pFSelZone=pFGetChecked('pFZoneCb');pFUpdateBtn('pFZoneBtn',pFSelZone);curPPage=1;renderParticipants();}
+function onPFZoneAll(){const c=document.getElementById('pFZoneAll').checked;document.querySelectorAll('.pFZoneCb').forEach(cb=>cb.checked=c);pFSelZone=new Set();pFUpdateBtn('pFZoneBtn',pFSelZone);curPPage=1;renderParticipants();}
+function onPFProvChange(){const cbs=[...document.querySelectorAll('.pFProvCb')];document.getElementById('pFProvAll').checked=cbs.every(c=>c.checked);pFSelProv=pFGetChecked('pFProvCb');pFUpdateBtn('pFProvBtn',pFSelProv);curPPage=1;renderParticipants();}
+function onPFProvAll(){const c=document.getElementById('pFProvAll').checked;document.querySelectorAll('.pFProvCb').forEach(cb=>cb.checked=c);pFSelProv=new Set();pFUpdateBtn('pFProvBtn',pFSelProv);curPPage=1;renderParticipants();}
 
 async function fetchAll(path,ps=1000){
   let res=[],from=0;
@@ -612,38 +664,52 @@ async function loadParticipants(){
   document.getElementById('pRegCount').textContent=`(ล่วงหน้า ${preC.toLocaleString()} | Walk-in ${wiC.toLocaleString()})`;
   document.getElementById('pPreCount').textContent=`(${preC.toLocaleString()})`;
   document.getElementById('pWiCount').textContent=`(${wiC.toLocaleString()})`;
-  // Build dynamic filter options
+  // Build dynamic filter checkboxes
   const depts=[...new Set(allParticipants.map(p=>{
     const isIn=(p.internal_external||'').includes('ภายใน');
-    return isIn?(p.dept||''):(p.ext_dept||p.dept||'');
+    return (isIn?(p.dept||''):(p.ext_dept||p.dept||'')).trim();
   }).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'th'));
-  const tags=[...new Set(allParticipants.map(p=>p.tag||'').filter(Boolean))].sort((a,b)=>a.localeCompare(b,'th'));
-  const ptypes=[...new Set(allParticipants.map(p=>p.participation_type||'').filter(Boolean))].sort((a,b)=>a.localeCompare(b,'th'));
-  const fillSel=(id,opts)=>{
-    const sel=document.getElementById(id);
-    opts.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;sel.appendChild(o);});
-  };
-  fillSel('pFDept',depts);
-  fillSel('pFTag',tags);
-  fillSel('pFPType',ptypes);
-  // Build province dropdown grouped by health zone
-  const provSel=document.getElementById('pFProvince');
+  const tags=[...new Set(allParticipants.map(p=>(p.tag||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'th'));
+  const ptypes=[...new Set(allParticipants.map(p=>(p.participation_type||'').replace(/\s+/g,' ').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'th'));
+  function buildPFCB(ddId,allId,cbClass,onAllFn,onChangeFn,vals){
+    const dd=document.getElementById(ddId);
+    const allLbl=dd.querySelector('.all-label');
+    dd.innerHTML='';dd.appendChild(allLbl);
+    document.getElementById(allId).onchange=onAllFn;
+    vals.forEach(v=>{
+      const lbl=document.createElement('label');
+      lbl.innerHTML=`<input type="checkbox" class="${cbClass}" value="${v.replace(/"/g,'&quot;')}" checked> ${v}`;
+      lbl.querySelector('input').onchange=onChangeFn;
+      dd.appendChild(lbl);
+    });
+  }
+  buildPFCB('pFDeptDD','pFDeptAll','pFDeptCb',onPFDeptAll,onPFDeptChange,depts);
+  buildPFCB('pFTagDD','pFTagAll','pFTagCb',onPFTagAll,onPFTagChange,tags);
+  buildPFCB('pFPTypeDD','pFPTypeAll','pFPTypeCb',onPFPTypeAll,onPFPTypeChange,ptypes);
+  // Province dropdown grouped by health zone
+  const dd=document.getElementById('pFProvDD');
+  const allLbl=dd.querySelector('.all-label');
+  dd.innerHTML='';dd.appendChild(allLbl);
+  document.getElementById('pFProvAll').onchange=onPFProvAll;
   const zoneGroups={};
   allParticipants.forEach(p=>{
-    const prov=(p.province||'').trim();
-    if(!prov) return;
-    const z=HEALTH_ZONE[prov]||0;
+    const prov=(p.province||'').trim();if(!prov) return;
+    const z=getZone(prov)||0;
     if(!zoneGroups[z]) zoneGroups[z]=new Set();
     zoneGroups[z].add(prov);
   });
-  const zoneKeys=Object.keys(zoneGroups).map(Number).sort((a,b)=>a-b);
-  zoneKeys.forEach(z=>{
-    const grp=document.createElement('optgroup');
-    grp.label=z===0?'ไม่ระบุเขต':`เขตสุขภาพที่ ${z}`;
+  const zLabels={1:'เขต 1 เหนือ',2:'เขต 2 เหนือล่าง',3:'เขต 3 กลางบน',4:'เขต 4 กลาง',5:'เขต 5 ตะวันตก',6:'เขต 6 ตะวันออก',7:'เขต 7 อีสานกลาง',8:'เขต 8 อีสานบน',9:'เขต 9 อีสานล่าง',10:'เขต 10 อีสานใต้',11:'เขต 11 ใต้บน',12:'เขต 12 ใต้ล่าง',13:'เขต 13 กทม./กรมวิทย์',0:'ไม่ระบุ'};
+  Object.keys(zoneGroups).map(Number).sort((a,b)=>a-b).forEach(z=>{
+    const hdr=document.createElement('div');
+    hdr.style='padding:3px 14px;font-size:0.69rem;font-weight:700;color:#6366f1;background:#f5f3ff;border-top:1px solid #e2e8f0;pointer-events:none;';
+    hdr.textContent='── '+(zLabels[z]||`เขต ${z}`)+' ──';
+    dd.appendChild(hdr);
     [...zoneGroups[z]].sort((a,b)=>a.localeCompare(b,'th')).forEach(prov=>{
-      const o=document.createElement('option');o.value=prov;o.textContent=prov;grp.appendChild(o);
+      const lbl=document.createElement('label');
+      lbl.innerHTML=`<input type="checkbox" class="pFProvCb" value="${prov}" checked> ${prov}`;
+      lbl.querySelector('input').onchange=onPFProvChange;
+      dd.appendChild(lbl);
     });
-    provSel.appendChild(grp);
   });
 }
 
@@ -668,40 +734,48 @@ function switchPTab(t){
 
 function resetPFilters(){
   document.getElementById('pSearch').value='';
-  document.getElementById('pFIntExt').value='';
-  document.getElementById('pFDept').value='';
-  document.getElementById('pFTag').value='';
-  document.getElementById('pFPType').value='';
-  document.getElementById('pFZone').value='';
-  document.getElementById('pFProvince').value='';
-  curPPage=1;
-  renderParticipants();
+  [['pFIntExtAll','.pFIntExtCb','pFIntExtBtn'],
+   ['pFDeptAll','.pFDeptCb','pFDeptBtn'],
+   ['pFTagAll','.pFTagCb','pFTagBtn'],
+   ['pFPTypeAll','.pFPTypeCb','pFPTypeBtn'],
+   ['pFZoneAll','.pFZoneCb','pFZoneBtn'],
+   ['pFProvAll','.pFProvCb','pFProvBtn']].forEach(([allId,cbSel,btnId])=>{
+    document.getElementById(allId).checked=true;
+    document.querySelectorAll(cbSel).forEach(cb=>cb.checked=true);
+    const b=document.getElementById(btnId);if(b){b.textContent='ทั้งหมด';b.classList.remove('on');}
+  });
+  pFSelIntExt=new Set();pFSelDept=new Set();pFSelTag=new Set();
+  pFSelPType=new Set();pFSelZone=new Set();pFSelProv=new Set();
+  curPPage=1;renderParticipants();
 }
 
+function pMatchRow(p,q){
+  const isIn=(p.internal_external||'').includes('ภายใน');
+  const dept=(isIn?(p.dept||''):(p.ext_dept||p.dept||'')).trim()||'-';
+  const prov=(p.province||'').trim();
+  const ptNorm=(p.participation_type||'').replace(/\s+/g,' ').trim();
+  const name=`${p.prefix||''} ${p.first_name||''} ${p.last_name||''}`.trim();
+  const matchQ=!q||name.toLowerCase().includes(q)||dept.toLowerCase().includes(q)||(prov&&prov.toLowerCase().includes(q));
+  const intExtVal=isIn?'ภายใน':'ภายนอก';
+  const matchIntExt=pFSelIntExt.size===0||pFSelIntExt.has(intExtVal);
+  const matchDept=pFSelDept.size===0||pFSelDept.has(dept);
+  const matchTag=pFSelTag.size===0||pFSelTag.has((p.tag||'').trim());
+  const matchPType=pFSelPType.size===0||pFSelPType.has(ptNorm);
+  const zone=getZone(prov);
+  const matchZone=pFSelZone.size===0||pFSelZone.has(String(zone));
+  const matchProv=pFSelProv.size===0||pFSelProv.has(prov);
+  return matchQ&&matchIntExt&&matchDept&&matchTag&&matchPType&&matchZone&&matchProv;
+}
 function renderParticipants(){
   const q=(document.getElementById('pSearch').value||'').toLowerCase();
-  const fIntExt=document.getElementById('pFIntExt').value;
-  const fDept=document.getElementById('pFDept').value;
-  const fTag=document.getElementById('pFTag').value;
-  const fPType=document.getElementById('pFPType').value;
-  const fZone=document.getElementById('pFZone').value;
-  const fProv=document.getElementById('pFProvince').value;
-  const data=allParticipants.filter(p=>{
+  const allFiltered=allParticipants.filter(p=>pMatchRow(p,q));
+  const preFiltered=allFiltered.filter(p=>!p.is_walkin).length;
+  const wiFiltered=allFiltered.filter(p=>p.is_walkin===true).length;
+  document.getElementById('pCountFiltered').textContent=allFiltered.length.toLocaleString();
+  document.getElementById('pCountBreakdown').textContent=`(ล่วงหน้า ${preFiltered.toLocaleString()} | Walk-in ${wiFiltered.toLocaleString()})`;
+  const data=allFiltered.filter(p=>{
     const isWI=p.is_walkin===true;
-    const matchTab=curPTab===0?!isWI:isWI;
-    const name=`${p.prefix||''} ${p.first_name||''} ${p.last_name||''}`.trim();
-    const isIn=(p.internal_external||'').includes('ภายใน');
-    const dept=isIn?(p.dept||'-'):(p.ext_dept||p.dept||'-');
-    const prov=(p.province||'').trim();
-    const matchQ=!q||name.toLowerCase().includes(q)||dept.toLowerCase().includes(q)||(prov&&prov.toLowerCase().includes(q));
-    const matchIntExt=!fIntExt||(p.internal_external||'').includes(fIntExt);
-    const matchDept=!fDept||dept===fDept;
-    const matchTag=!fTag||(p.tag||'')===fTag;
-    const matchPType=!fPType||(p.participation_type||'')===fPType;
-    const zone=getZone(prov);
-    const matchZone=!fZone||String(zone)===fZone;
-    const matchProv=!fProv||prov===fProv;
-    return matchTab&&matchQ&&matchIntExt&&matchDept&&matchTag&&matchPType&&matchZone&&matchProv;
+    return curPTab===0?!isWI:isWI;
   });
   const tot=data.length;
   const totPages=Math.ceil(tot/P_PAGE)||1;
@@ -719,13 +793,14 @@ function renderParticipants(){
     const prov=(p.province||'').trim()||'-';
     const zone=prov!=='-'?getZone(prov):null;
     const zoneBadge=zone?`<span class="zone-badge">เขต ${zone}</span>`:'-';
+    const ptNorm=(p.participation_type||'').replace(/\s+/g,' ').trim()||'-';
     return`<tr>
       <td>${start+i+1}</td>
       <td>${name}</td>
       <td style="max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${dept}">${dept}</td>
       <td>${prov}</td>
       <td>${zoneBadge}</td>
-      <td>${p.participation_type||'-'}</td>
+      <td>${ptNorm}</td>
       <td>${p.tag||'-'}</td>
     </tr>`;
   }).join('');
