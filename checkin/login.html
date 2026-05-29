@@ -99,7 +99,7 @@ async function doLogin(){
       }
       if(Array.isArray(sessions) && sessions.length > 0){
         const diff = (Date.now() - new Date(sessions[0].last_active)) / 60000;
-        if(diff < 2){
+        if(diff < 10){
           err.textContent = u + ' ถูกใช้งานอยู่แล้ว กรุณาใช้รหัสอื่น';
           btn.textContent='เข้าสู่ระบบ'; btn.disabled=false;
           return;

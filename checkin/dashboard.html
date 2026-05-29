@@ -322,8 +322,9 @@ document.addEventListener('DOMContentLoaded',()=>{
         <button class="ptab active" id="ptab0" onclick="event.stopPropagation();switchPTab(0)">ลงทะเบียนล่วงหน้า <span id="pPreCount"></span></button>
         <button class="ptab" id="ptab1" onclick="event.stopPropagation();switchPTab(1)">Walk-in <span id="pWiCount"></span></button>
       </div>
-      <div style="padding:12px 20px;border-bottom:1px solid var(--border);">
-        <input class="sbox" id="pSearch" placeholder="🔍 ค้นหาชื่อ / หน่วยงาน" oninput="renderParticipants()">
+      <div style="padding:12px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <input class="sbox" id="pSearch" placeholder="🔍 ค้นหาชื่อ / หน่วยงาน" oninput="renderParticipants()" style="flex:1;min-width:160px;">
+        <span id="pCountBar" style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:20px;padding:3px 12px;font-size:0.8rem;color:#1e40af;white-space:nowrap;flex-shrink:0;">พบ <b id="pCountFiltered">-</b> ราย <span id="pCountBreakdown" style="color:#94a3b8;font-size:0.75rem;"></span></span>
       </div>
       <div class="p-filter-bar">
         <div class="p-filter-group">
@@ -396,10 +397,6 @@ document.addEventListener('DOMContentLoaded',()=>{
           </div>
         </div>
         <button class="p-reset-btn" onclick="resetPFilters()">↺ รีเซ็ต</button>
-      </div>
-      <div id="pCountBar" style="padding:5px 20px;background:#eff6ff;border-bottom:1px solid #dbeafe;font-size:0.82rem;color:#1e40af;display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-        <span>พบ <b id="pCountFiltered">-</b> รายการ</span>
-        <span id="pCountBreakdown" style="color:#64748b;font-size:0.78rem;"></span>
       </div>
       <div style="overflow-x:auto;">
         <table>
@@ -504,6 +501,7 @@ const SB_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsIn
   function _hb(){if(!_u)return;fetch(`${SB_URL}/rest/v1/staff_sessions?username=eq.${encodeURIComponent(_u)}`,{method:'PATCH',headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON,'Content-Type':'application/json'},body:JSON.stringify({last_active:new Date().toISOString()})}).catch(()=>{});}
   function _del(){if(!_u)return;fetch(`${SB_URL}/rest/v1/staff_sessions?username=eq.${encodeURIComponent(_u)}`,{method:'DELETE',headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON},keepalive:true}).catch(()=>{});}
   setInterval(_hb,60000);
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible') _hb();});
   window.addEventListener('beforeunload',_del);
   if(sessionStorage.getItem('dmsc_role')!=='admin')
     document.querySelectorAll('.clear-btn').forEach(el=>el.style.display='none');
