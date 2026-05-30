@@ -609,6 +609,10 @@ const HEALTH_ZONE={
   'นราธิวาส':12,'ปัตตานี':12,'ยะลา':12,'สงขลา':12,'สตูล':12,
   'กรุงเทพมหานคร':13,'กรมวิทยาศาสตร์การแพทย์':13
 };
+function buildName(p){
+  const pfx=(p.prefix||'').replace(/\s*\([^)]*\)/g,'').trim();
+  return `${pfx} ${p.first_name||''} ${p.last_name||''}`.trim().replace(/\s+/g,' ');
+}
 function getZone(prov){
   if(!prov) return null;
   if(HEALTH_ZONE[prov]) return HEALTH_ZONE[prov];
@@ -673,7 +677,7 @@ async function loadAll(){
     const isIn=(p.internal_external||'').includes('ภายใน');
     const dept=isIn?(p.dept||'-'):(p.ext_dept||p.dept||'-');
     return{id:r.id,participantId:r.participant_id,day:r.day,time:r.checkin_time,scannedBy:r.scanned_by||'-',
-      name:`${p.prefix||''} ${p.first_name||''} ${p.last_name||''}`.trim(),
+      name:buildName(p),
       dept,isIn,tag:p.tag||'-',items:p.items||'-',
       pt:p.participation_type||'-',isWalkin:p.is_walkin===true};
   });
@@ -838,7 +842,7 @@ function pMatchRow(p,q){
   const dept=(isIn?(p.dept||''):(p.ext_dept||p.dept||'')).trim()||'-';
   const prov=(p.province||'').trim();
   const ptNorm=(p.participation_type||'').replace(/\s+/g,' ').trim();
-  const name=`${p.prefix||''} ${p.first_name||''} ${p.last_name||''}`.trim();
+  const name=buildName(p);
   const matchQ=!q||name.toLowerCase().includes(q)||dept.toLowerCase().includes(q)||(prov&&prov.toLowerCase().includes(q));
   const intExtVal=isIn?'ภายใน':'ภายนอก';
   const matchIntExt=pFSelIntExt.size===0||pFSelIntExt.has(intExtVal);
@@ -871,7 +875,7 @@ function renderParticipants(){
   document.getElementById('pNext').disabled=curPPage>=totPages;
   if(!page.length){document.getElementById('pBody').innerHTML='<tr><td colspan="7" class="loading-td">ไม่พบข้อมูล</td></tr>';return;}
   document.getElementById('pBody').innerHTML=page.map((p,i)=>{
-    const name=`${p.prefix||''} ${p.first_name||''} ${p.last_name||''}`.trim();
+    const name=buildName(p);
     const isIn=(p.internal_external||'').includes('ภายใน');
     const dept=isIn?(p.dept||'-'):(p.ext_dept||p.dept||'-');
     const prov=(p.province||'').trim()||'-';
@@ -935,7 +939,7 @@ function buildZoneChart(participants, canvasId, bodyId, countId, instKey){
     provByZone[z][k]=(provByZone[z][k]||0)+1;
     if(!namesByZoneProv[z]) namesByZoneProv[z]={};
     if(!namesByZoneProv[z][k]) namesByZoneProv[z][k]=[];
-    const name=`${p.prefix||''} ${p.first_name||''} ${p.last_name||''}`.trim()||'(ไม่มีชื่อ)';
+    const name=buildName(p)||'(ไม่มีชื่อ)';
     namesByZoneProv[z][k].push(name);
   });
   const entries=Object.entries(counts).map(([z,n])=>({z:Number(z),n})).sort((a,b)=>a.z-b.z);
@@ -1312,7 +1316,7 @@ function exportParticipantsExcel(){
   const rows=allParticipants.filter(p=>pMatchRow(p,q)).map((p,i)=>{
     const isIn=(p.internal_external||'').includes('ภายใน');
     const dept=(isIn?(p.dept||''):(p.ext_dept||p.dept||'')).trim()||'-';
-    const name=`${p.prefix||''} ${p.first_name||''} ${p.last_name||''}`.trim();
+    const name=buildName(p);
     const prov=(p.province||'').trim()||'-';
     return {'ลำดับ':i+1,'ชื่อ-นามสกุล':name,'หน่วยงาน':dept,
       'จังหวัด':prov,'เขตสุขภาพ':getZone(prov)||'ไม่ระบุ',
