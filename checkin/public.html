@@ -149,35 +149,42 @@
         <div class="big-sub" id="pD3s">ราย</div>
       </div>
     </div>
-    <div class="big-stats-row">
-      <div class="big-card internal">
-        <div class="big-label">บุคลากรภายใน</div>
-        <div class="big-num" id="pInternal">-</div>
-        <div class="big-sub" id="pInternalS">ราย</div>
+    <div class="progress-card" style="margin-bottom:14px;">
+      <div class="progress-title" style="margin-bottom:14px;">สัดส่วนผู้เข้าร่วม</div>
+      <div class="progress-row">
+        <div class="progress-row-top">
+          <span class="progress-label" style="color:#16a34a;">บุคลากรภายใน</span>
+          <span><span id="pInternal" style="font-weight:700;color:#16a34a;">-</span> <span id="pInternalS" style="font-size:0.78rem;color:#94a3b8;">คน</span></span>
+        </div>
+        <div class="progress-bar"><div id="pBarInternal" class="progress-fill" style="width:0%;background:#16a34a;"></div></div>
       </div>
-      <div class="big-card external">
-        <div class="big-label">บุคคลภายนอก</div>
-        <div class="big-num" id="pExternal">-</div>
-        <div class="big-sub" id="pExternalS">ราย</div>
+      <div class="progress-row">
+        <div class="progress-row-top">
+          <span class="progress-label" style="color:#ea580c;">บุคคลภายนอก</span>
+          <span><span id="pExternal" style="font-weight:700;color:#ea580c;">-</span> <span id="pExternalS" style="font-size:0.78rem;color:#94a3b8;">คน</span></span>
+        </div>
+        <div class="progress-bar"><div id="pBarExternal" class="progress-fill" style="width:0%;background:#ea580c;"></div></div>
       </div>
-      <div class="big-card walkin">
-        <div class="big-label">Walk-in</div>
-        <div class="big-num" id="pWalkin">-</div>
-        <div class="big-sub" id="pWalkinS">ราย</div>
+      <div class="progress-row" style="margin-bottom:0;">
+        <div class="progress-row-top">
+          <span class="progress-label" style="color:#d97706;">Walk-in</span>
+          <span><span id="pWalkin" style="font-weight:700;color:#d97706;">-</span> <span id="pWalkinS" style="font-size:0.78rem;color:#94a3b8;">คน</span></span>
+        </div>
+        <div class="progress-bar"><div id="pBarWalkin" class="progress-fill" style="width:0%;background:#d97706;"></div></div>
       </div>
     </div>
 
     <div class="progress-card">
       <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;">
-        <div class="progress-title" style="margin-bottom:0;">เป้าหมายผู้เข้าร่วม (3 วันรวม)</div>
+        <div class="progress-title" style="margin-bottom:0;" id="goalTitle">เป้าหมายผู้เข้าร่วม (3 วันรวม)</div>
         <div style="font-size:0.82rem;color:#64748b;"><span id="goalCurrent" style="font-weight:700;color:#0d2b6b;">-</span> / <span style="font-weight:600;">1,800 คน</span></div>
       </div>
       <div class="progress-bar" style="height:18px;border-radius:9px;">
-        <div id="goalBar" class="progress-fill" style="width:0%;background:linear-gradient(90deg,#1a4eb8,#38bdf8);border-radius:9px;transition:width 1s ease;"></div>
+        <div id="goalBar" class="progress-fill" style="width:0%;border-radius:9px;transition:width 1s ease;"></div>
       </div>
       <div style="display:flex;justify-content:space-between;margin-top:8px;">
-        <div style="font-size:0.8rem;color:#16a34a;font-weight:700;" id="goalPct">0%</div>
-        <div style="font-size:0.8rem;color:#94a3b8;">เป้าหมาย 1,800 คน</div>
+        <div style="font-size:0.8rem;font-weight:700;" id="goalPct">0%</div>
+        <div style="font-size:0.8rem;color:#94a3b8;" id="goalExtra"></div>
       </div>
     </div>
 
@@ -280,9 +287,15 @@ function renderStats() {
   document.getElementById('pInternal').textContent = internal.toLocaleString();
   document.getElementById('pExternal').textContent = external.toLocaleString();
   document.getElementById('pWalkin').textContent = walkin.toLocaleString();
-  document.getElementById('pInternalS').textContent = `${total ? Math.round(internal/total*100) : 0}% ของทั้งหมด`;
-  document.getElementById('pExternalS').textContent = `${total ? Math.round(external/total*100) : 0}% ของทั้งหมด`;
-  document.getElementById('pWalkinS').textContent = `${total ? Math.round(walkin/total*100) : 0}% ของทั้งหมด`;
+  const intPct = total ? Math.round(internal/total*100) : 0;
+  const extPct = total ? Math.round(external/total*100) : 0;
+  const wkPct  = total ? Math.round(walkin/total*100)  : 0;
+  document.getElementById('pInternalS').textContent = `${intPct}% ของทั้งหมด`;
+  document.getElementById('pExternalS').textContent = `${extPct}% ของทั้งหมด`;
+  document.getElementById('pWalkinS').textContent   = `${wkPct}% ของทั้งหมด`;
+  document.getElementById('pBarInternal').style.width = intPct + '%';
+  document.getElementById('pBarExternal').style.width = extPct + '%';
+  document.getElementById('pBarWalkin').style.width   = wkPct  + '%';
 
   // Day cards: always show all-days counts, dim non-selected
   const dTotal = allCheckins.length;
@@ -294,16 +307,25 @@ function renderStats() {
     if(card) card.classList.toggle('dimmed', activeDay !== 'all' && activeDay !== d);
   });
 
-  // Goal progress bar (always shows all-days total vs 1800)
+  // Goal progress bar — uses filtered total (responds to day filter)
   const GOAL = 1800;
-  const goalPct = Math.min(Math.round(dTotal / GOAL * 100), 100);
-  document.getElementById('goalCurrent').textContent = dTotal.toLocaleString();
+  const goalVal = total;
+  const goalPct = Math.min(Math.round(goalVal / GOAL * 100), 100);
+  const overGoal = goalVal >= GOAL;
+  const dayNames = {1:'วันที่ 1',2:'วันที่ 2',3:'วันที่ 3'};
+  document.getElementById('goalTitle').textContent = activeDay === 'all'
+    ? 'เป้าหมายผู้เข้าร่วม (3 วันรวม)'
+    : `เป้าหมายผู้เข้าร่วม — ${dayNames[activeDay]}`;
+  document.getElementById('goalCurrent').textContent = goalVal.toLocaleString();
   document.getElementById('goalBar').style.width = goalPct + '%';
-  document.getElementById('goalBar').style.background = dTotal >= GOAL
+  document.getElementById('goalBar').style.background = overGoal
     ? 'linear-gradient(90deg,#16a34a,#4ade80)'
     : 'linear-gradient(90deg,#1a4eb8,#38bdf8)';
-  document.getElementById('goalPct').textContent = goalPct + '%';
-  document.getElementById('goalPct').style.color = dTotal >= GOAL ? '#16a34a' : '#1a4eb8';
+  document.getElementById('goalPct').textContent = overGoal
+    ? `${goalPct}% — เกินเป้า +${(goalVal-GOAL).toLocaleString()} คน 🎉`
+    : `${goalPct}%`;
+  document.getElementById('goalPct').style.color = overGoal ? '#16a34a' : '#1a4eb8';
+  document.getElementById('goalExtra').textContent = `เป้าหมาย 1,800 คน`;
 
   // Dept card subtitles
   const daySubText = activeDay === 'all' ? 'เรียงตามจำนวนผู้เข้าร่วมสูงสุด'
