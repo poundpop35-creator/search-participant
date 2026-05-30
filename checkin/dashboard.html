@@ -944,8 +944,10 @@ function buildZoneChart(participants, canvasId, bodyId, countId, instKey){
     provByZone[z][k]=(provByZone[z][k]||0)+1;
     if(!namesByZoneProv[z]) namesByZoneProv[z]={};
     if(!namesByZoneProv[z][k]) namesByZoneProv[z][k]=[];
+    const isIn=(p.internal_external||'').includes('ภายใน');
+    const dept=(isIn?(p.dept||''):(p.ext_dept||p.dept||'')).trim()||'-';
     const name=buildName(p)||'(ไม่มีชื่อ)';
-    namesByZoneProv[z][k].push(name);
+    namesByZoneProv[z][k].push({name,dept});
   });
   const entries=Object.entries(counts).map(([z,n])=>({z:Number(z),n})).sort((a,b)=>a.z-b.z);
   const total=participants.length;
@@ -967,9 +969,10 @@ function buildZoneChart(participants, canvasId, bodyId, countId, instKey){
     const provEntries=Object.entries(provByZone[e.z]||{}).sort((a,b)=>b[1]-a[1]);
     const detailRows=provEntries.map(([prov,cnt],pi)=>{
       const pid=`zProv-${instKey}-${e.z}-${pi}`;
-      const nameRows=(namesByZoneProv[e.z]?.[prov]||[]).map(n=>`
+      const nameRows=(namesByZoneProv[e.z]?.[prov]||[]).map(({name,dept})=>`
         <tr style="background:#f0f9ff;">
-          <td colspan="3" style="padding:3px 12px 3px 52px;font-size:0.77rem;color:#0369a1;">⌙ ${n}</td>
+          <td style="padding:3px 12px 3px 52px;font-size:0.77rem;color:#0369a1;">⌙ ${name}</td>
+          <td colspan="2" style="padding:3px 12px;font-size:0.72rem;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px;">${dept}</td>
         </tr>`).join('');
       const bg=e.z===0?'#fff7ed':'#f8fafc';
       const tc=e.z===0?'#92400e':'#475569';
