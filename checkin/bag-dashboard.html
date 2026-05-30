@@ -267,7 +267,7 @@ async function loadAll(){
       const isIn=(p.internal_external||'').includes('ภายใน');
       const dept=isIn?(p.dept||'-'):(p.ext_dept||p.dept||'-');
       return{
-        name:`${p.prefix||''} ${p.first_name||''} ${p.last_name||''}`.trim(),
+        name:`${(p.prefix||'').replace(/\s*\([^)]*\)/g,'').trim()} ${p.first_name||''} ${p.last_name||''}`.trim().replace(/\s+/g,' '),
         dept, pt:p.participation_type||'-', tag:p.tag||'-',
         items:p.items||'-',
         received:p.bag_received===true||p.bag_received===1||p.bag_received==='true',

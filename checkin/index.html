@@ -355,7 +355,7 @@
         return;
       }
       const p=participants[0];
-      const fullName=`${p.prefix||''} ${p.first_name||''} ${p.last_name||''}`.trim();
+      const fullName=`${(p.prefix||'').replace(/\s*\([^)]*\)/g,'').trim()} ${p.first_name||''} ${p.last_name||''}`.trim().replace(/\s+/g,' ');
       const isWalkin=p.is_walkin===true;
 
       // โหมดรับกระเป๋า

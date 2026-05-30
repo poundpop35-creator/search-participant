@@ -609,6 +609,11 @@ const HEALTH_ZONE={
   'นราธิวาส':12,'ปัตตานี':12,'ยะลา':12,'สงขลา':12,'สตูล':12,
   'กรุงเทพมหานคร':13,'กรมวิทยาศาสตร์การแพทย์':13
 };
+function fmtPct(cnt,total){
+  if(!total||!cnt) return '0%';
+  const v=cnt/total*100;
+  return v<1?v.toFixed(1)+'%':Math.round(v)+'%';
+}
 function buildName(p){
   const pfx=(p.prefix||'').replace(/\s*\([^)]*\)/g,'').trim();
   return `${pfx} ${p.first_name||''} ${p.last_name||''}`.trim().replace(/\s+/g,' ');
@@ -973,14 +978,14 @@ function buildZoneChart(participants, canvasId, bodyId, countId, instKey){
           <td style="padding:3px 12px 3px 32px;font-size:0.79rem;color:${tc};">
             <span class="zProvArrow" style="display:inline-block;width:12px;font-size:0.65rem;color:#94a3b8;">▶</span> ${prov}</td>
           <td style="text-align:right;font-size:0.79rem;color:${tc};padding-right:12px;">${cnt.toLocaleString()}</td>
-          <td style="text-align:right;font-size:0.79rem;color:#94a3b8;padding-right:12px;">${Math.round(cnt/total*100)}%</td>
+          <td style="text-align:right;font-size:0.79rem;color:#94a3b8;padding-right:12px;">${fmtPct(cnt,total)}</td>
         </tr>
         <tr id="${pid}" style="display:none;"><td colspan="3" style="padding:0;"><table style="width:100%;border-collapse:collapse;">${nameRows}</table></td></tr>`;
     }).join('');
     return`<tr style="cursor:pointer;" onclick="toggleZoneRow('${instKey}',${e.z})">
       <td><span id="zArrow-${instKey}-${e.z}" style="display:inline-block;width:14px;font-size:0.7rem;color:#94a3b8;">▶</span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:${bgColors[i]};margin-right:5px;vertical-align:middle;"></span>${ZONE_NAMES[e.z]||'เขตสุขภาพที่ '+e.z}</td>
       <td style="text-align:right;font-weight:700;">${e.n.toLocaleString()}</td>
-      <td style="text-align:right;color:#64748b;">${total?Math.round(e.n/total*100):0}%</td>
+      <td style="text-align:right;color:#64748b;">${fmtPct(e.n,total)}</td>
     </tr>
     <tr id="zDetail-${instKey}-${e.z}" style="display:none;"><td colspan="3" style="padding:0;border-bottom:2px solid var(--border);"><table style="width:100%;border-collapse:collapse;">${detailRows}</table></td></tr>`;
   }).join('');
