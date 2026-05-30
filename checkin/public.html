@@ -302,7 +302,7 @@ function renderStats() {
   [1,2,3].forEach(d => {
     const cnt = allCheckins.filter(r => r.day === d).length;
     document.getElementById(`pD${d}`).textContent = cnt.toLocaleString();
-    document.getElementById(`pD${d}s`).textContent = `${dTotal ? Math.round(cnt/dTotal*100) : 0}% ของผู้เข้าร่วมทั้งหมด`;
+    document.getElementById(`pD${d}s`).textContent = 'ราย';
     const card = document.getElementById(`card-d${d}`);
     if(card) card.classList.toggle('dimmed', activeDay !== 'all' && activeDay !== d);
   });

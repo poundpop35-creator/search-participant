@@ -176,6 +176,11 @@
     <span>ราย</span>
   </div>
   <div class="counter-sub" id="counterSub">กำลังโหลด...</div>
+  <div class="counter" id="staffCounterBox" style="margin-top:8px;background:#f0fdf4;color:#15803d;">
+    <span id="staffCounterLabel">สแกนโดย <b id="staffCounterName">—</b></span>
+    <strong id="staffCount">—</strong>
+    <span>ราย</span>
+  </div>
 
   <a class="btn-nav primary" href="dashboard.html">ไปหน้า Dashboard</a>
   <a class="btn-nav secondary" href="bag-dashboard.html">จำนวนผู้มารับกระเป๋า</a>
@@ -204,7 +209,7 @@
     window.addEventListener('beforeunload',_del);
   })();
 
-  let isProcessing=false, todayCount=0, qrCode=null;
+  let isProcessing=false, todayCount=0, staffCount=0, qrCode=null;
   let currentMode='scanner', scanBuffer='', scanTimer=null;
 
   window.addEventListener('load',()=>{ initDaySelect(); setMode('scanner'); loadTodayCount(); });
@@ -241,6 +246,9 @@
     const day=document.getElementById('day').value;
     document.getElementById('count').textContent='—';
     document.getElementById('counterSub').textContent='กำลังโหลด...';
+    const user=sessionStorage.getItem('dmsc_user')||'';
+    document.getElementById('staffCounterName').textContent=user||'—';
+    document.getElementById('staffCounterBox').style.display=day==='bag'?'none':'flex';
     if(day==='bag'){
       document.getElementById('counterLabel').textContent='รับกระเป๋าแล้ว';
       try{
@@ -259,14 +267,25 @@
     } else {
       document.getElementById('counterLabel').textContent='เช็คอินสำเร็จวันนี้';
       try{
-        const res=await fetch(`${SB_URL}/rest/v1/checkins?day=eq.${day}&select=id`,
-          {headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON,'Prefer':'count=exact','Range':'0-0'}});
-        const range=res.headers.get('Content-Range');
+        const [totalRes,staffRes]=await Promise.all([
+          fetch(`${SB_URL}/rest/v1/checkins?day=eq.${day}&select=id`,
+            {headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON,'Prefer':'count=exact','Range':'0-0'}}),
+          user?fetch(`${SB_URL}/rest/v1/checkins?day=eq.${day}&scanned_by=eq.${encodeURIComponent(user)}&select=id`,
+            {headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON,'Prefer':'count=exact','Range':'0-0'}}):null
+        ]);
+        const range=totalRes.headers.get('Content-Range');
         let count=0;
         if(range){const m=range.match(/\/(\d+)/);if(m)count=parseInt(m[1]);}
         todayCount=count;
         document.getElementById('count').textContent=count.toLocaleString();
         document.getElementById('counterSub').textContent='วันที่ '+DAY_TH[parseInt(day)];
+        if(staffRes){
+          const sr=staffRes.headers.get('Content-Range');
+          let sc=0;
+          if(sr){const m=sr.match(/\/(\d+)/);if(m)sc=parseInt(m[1]);}
+          staffCount=sc;
+          document.getElementById('staffCount').textContent=sc.toLocaleString();
+        }
       }catch(e){
         document.getElementById('count').textContent='?';
         document.getElementById('counterSub').textContent='โหลดไม่สำเร็จ';
@@ -386,6 +405,8 @@
       if(insertRes.ok||insertRes.status===201){
         todayCount++;
         document.getElementById('count').textContent=todayCount.toLocaleString();
+        staffCount++;
+        document.getElementById('staffCount').textContent=staffCount.toLocaleString();
         const timeNow=new Date().toLocaleTimeString('th-TH',{timeZone:'Asia/Bangkok'});
         showModal('success','เช็คอินสำเร็จ',`วันที่ ${day} — ${DAY_TH[parseInt(day)]}`,fullName,buildSuccessRows(timeNow,p,isFirst,isWalkin));
         setStatus('เช็คอินสำเร็จ');
