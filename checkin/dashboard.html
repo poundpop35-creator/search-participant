@@ -229,57 +229,6 @@ document.addEventListener('DOMContentLoaded',()=>{
     </div>
   </div>
 
-  <!-- FILTER BAR -->
-  <div class="filter-bar">
-    <div class="filter-group">
-      <div class="filter-label">ประเภทบุคคล</div>
-      <select class="filter-select" id="fIntExt" onchange="applyFilters()">
-        <option value="">ทั้งหมด</option>
-        <option value="internal">บุคลากรภายใน</option>
-        <option value="external">บุคคลภายนอก</option>
-      </select>
-    </div>
-    <div class="filter-group">
-      <div class="filter-label">ประเภทการเข้าร่วม</div>
-      <div class="multi-wrap">
-        <button class="multi-btn" id="ptBtn" onclick="toggleDD('ptDD')">ทั้งหมด</button>
-        <div class="multi-dd" id="ptDD">
-          <label class="all-label"><input type="checkbox" id="ptAll" checked onchange="toggleAll()"> เลือกทั้งหมด</label>
-        </div>
-      </div>
-    </div>
-    <div class="filter-group">
-      <div class="filter-label">หน่วยงาน</div>
-      <div class="multi-wrap">
-        <button class="multi-btn" id="fDeptBtn" onclick="toggleDD('fDeptDD')">ทั้งหมด</button>
-        <div class="multi-dd" id="fDeptDD" style="min-width:300px;max-height:300px;">
-          <label class="all-label"><input type="checkbox" id="fDeptAll" checked onchange="toggleFDeptAll()"> เลือกทั้งหมด</label>
-          <div style="padding:6px 14px;font-size:0.75rem;font-weight:700;color:#0d2b6b;background:#f0f4ff;border-bottom:1px solid #e2e8f0;">— หน่วยงานภายใน —</div>
-          <div id="fDeptInternal"></div>
-          <div style="padding:6px 14px;font-size:0.75rem;font-weight:700;color:#d97706;background:#fffbeb;border-bottom:1px solid #e2e8f0;">— หน่วยงานภายนอก —</div>
-          <div id="fDeptExternal"></div>
-        </div>
-      </div>
-    </div>
-    <div class="filter-group">
-      <div class="filter-label">TAG</div>
-      <select class="filter-select" id="fTag" onchange="applyFilters()">
-        <option value="">ทั้งหมด</option>
-        <option value="participant">participant</option>
-        <option value="Staff">Staff</option>
-      </select>
-    </div>
-    <div class="filter-group">
-      <div class="filter-label">ประเภท</div>
-      <select class="filter-select" id="fWalkin" onchange="applyFilters()">
-        <option value="">ทั้งหมด</option>
-        <option value="preReg">ลงทะเบียนล่วงหน้า</option>
-        <option value="walkin">Walk-in</option>
-      </select>
-    </div>
-    <button class="btn-reset" onclick="resetFilters()">✕ ล้าง filter</button>
-  </div>
-
   <!-- TABS -->
   <div class="tabs">
     <button class="tab active" onclick="switchTab(0)">ทั้งหมด</button>
@@ -302,6 +251,56 @@ document.addEventListener('DOMContentLoaded',()=>{
           <button class="btn-xl teal"  onclick="exportCSV()">⬇ CSV</button>
         </div>
       </div>
+    </div>
+    <!-- Filter bar inside table card -->
+    <div class="filter-bar" style="border-radius:0;box-shadow:none;border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:#f8fafc;margin:0;">
+      <div class="filter-group">
+        <div class="filter-label">ประเภทบุคคล</div>
+        <select class="filter-select" id="fIntExt" onchange="applyFilters()">
+          <option value="">ทั้งหมด</option>
+          <option value="internal">บุคลากรภายใน</option>
+          <option value="external">บุคคลภายนอก</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <div class="filter-label">ประเภทการเข้าร่วม</div>
+        <div class="multi-wrap">
+          <button class="multi-btn" id="ptBtn" onclick="toggleDD('ptDD')">ทั้งหมด</button>
+          <div class="multi-dd" id="ptDD">
+            <label class="all-label"><input type="checkbox" id="ptAll" checked onchange="toggleAll()"> เลือกทั้งหมด</label>
+          </div>
+        </div>
+      </div>
+      <div class="filter-group">
+        <div class="filter-label">หน่วยงาน</div>
+        <div class="multi-wrap">
+          <button class="multi-btn" id="fDeptBtn" onclick="toggleDD('fDeptDD')">ทั้งหมด</button>
+          <div class="multi-dd" id="fDeptDD" style="min-width:300px;max-height:300px;">
+            <label class="all-label"><input type="checkbox" id="fDeptAll" checked onchange="toggleFDeptAll()"> เลือกทั้งหมด</label>
+            <div style="padding:6px 14px;font-size:0.75rem;font-weight:700;color:#0d2b6b;background:#f0f4ff;border-bottom:1px solid #e2e8f0;">— หน่วยงานภายใน —</div>
+            <div id="fDeptInternal"></div>
+            <div style="padding:6px 14px;font-size:0.75rem;font-weight:700;color:#d97706;background:#fffbeb;border-bottom:1px solid #e2e8f0;">— หน่วยงานภายนอก —</div>
+            <div id="fDeptExternal"></div>
+          </div>
+        </div>
+      </div>
+      <div class="filter-group">
+        <div class="filter-label">TAG</div>
+        <select class="filter-select" id="fTag" onchange="applyFilters()">
+          <option value="">ทั้งหมด</option>
+          <option value="participant">participant</option>
+          <option value="Staff">Staff</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <div class="filter-label">ประเภท</div>
+        <select class="filter-select" id="fWalkin" onchange="applyFilters()">
+          <option value="">ทั้งหมด</option>
+          <option value="preReg">ลงทะเบียนล่วงหน้า</option>
+          <option value="walkin">Walk-in</option>
+        </select>
+      </div>
+      <button class="btn-reset" onclick="resetFilters()">✕ ล้าง filter</button>
     </div>
     <div style="overflow-x:auto;">
       <table>
