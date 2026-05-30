@@ -286,6 +286,13 @@ function getZonePub(prov){if(!prov)return null;if(HEALTH_ZONE[prov])return HEALT
 function fmtPctPub(cnt,total){if(!total||!cnt)return'0%';const v=cnt/total*100;return v<1?v.toFixed(1)+'%':Math.round(v)+'%';}
 
 let zoneChartPubInst=null;
+function toggleZonePub(id,arrow){
+  const row=document.getElementById(id);
+  if(!row) return;
+  const open=row.style.display!=='none';
+  row.style.display=open?'none':'';
+  if(arrow) arrow.textContent=open?'▶':'▼';
+}
 function renderZoneChartPub(filtered){
   const total=filtered.length;
   if(!total){
@@ -294,11 +301,13 @@ function renderZoneChartPub(filtered){
     return;
   }
   document.getElementById('zoneChartCountPub').textContent=`(${total.toLocaleString()} คน)`;
-  const counts={};
+  const counts={}, provByZone={};
   filtered.forEach(r=>{
-    const prov=(r.participants?.province||'').trim();
-    const z=getZonePub(prov)||13;
+    const prov=(r.participants?.province||'').trim()||'(ว่าง)';
+    const z=getZonePub(prov==='(ว่าง)'?'':prov)||13;
     counts[z]=(counts[z]||0)+1;
+    if(!provByZone[z]) provByZone[z]={};
+    provByZone[z][prov]=(provByZone[z][prov]||0)+1;
   });
   const entries=Object.entries(counts).map(([z,n])=>({z:Number(z),n})).sort((a,b)=>a.z-b.z);
   const labels=entries.map(e=>ZONE_NAMES_PUB[e.z]||'เขต '+e.z);
@@ -311,12 +320,23 @@ function renderZoneChartPub(filtered){
     data:{labels,datasets:[{data,backgroundColor:bgColors,borderWidth:2,borderColor:'#fff',hoverOffset:6}]},
     options:{responsive:true,cutout:'58%',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.label}: ${c.raw.toLocaleString()} คน (${Math.round(c.raw/total*100)}%)`}}}}
   });
-  document.getElementById('zoneBodyPub').innerHTML=entries.map((e,idx)=>`
-    <tr style="border-bottom:1px solid #e2e8f0;">
-      <td style="padding:5px 10px;"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:${bgColors[idx]};margin-right:6px;vertical-align:middle;"></span>${ZONE_NAMES_PUB[e.z]||'เขต '+e.z}</td>
+  document.getElementById('zoneBodyPub').innerHTML=entries.map((e,idx)=>{
+    const pid=`zpub-${e.z}`;
+    const provRows=Object.entries(provByZone[e.z]||{}).sort((a,b)=>b[1]-a[1]).map(([prov,cnt])=>`
+      <tr style="background:#f8fafc;">
+        <td style="padding:3px 10px 3px 28px;font-size:0.78rem;color:#475569;">⌙ ${prov}</td>
+        <td style="padding:3px 10px;text-align:right;font-size:0.78rem;color:#475569;">${cnt.toLocaleString()}</td>
+        <td style="padding:3px 10px;text-align:right;font-size:0.78rem;color:#94a3b8;">${fmtPctPub(cnt,total)}</td>
+      </tr>`).join('');
+    return`<tr style="cursor:pointer;border-bottom:1px solid #e2e8f0;" onclick="toggleZonePub('${pid}',this.querySelector('.zarr'))">
+      <td style="padding:5px 10px;">
+        <span class="zarr" style="display:inline-block;width:12px;font-size:0.65rem;color:#94a3b8;">▶</span>
+        <span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:${bgColors[idx]};margin:0 4px 0 2px;vertical-align:middle;"></span>${ZONE_NAMES_PUB[e.z]||'เขต '+e.z}</td>
       <td style="padding:5px 10px;text-align:right;font-weight:700;">${e.n.toLocaleString()}</td>
       <td style="padding:5px 10px;text-align:right;color:#94a3b8;">${fmtPctPub(e.n,total)}</td>
-    </tr>`).join('');
+    </tr>
+    <tr id="${pid}" style="display:none;"><td colspan="3" style="padding:0;border-bottom:1px solid #e2e8f0;"><table style="width:100%;border-collapse:collapse;">${provRows}</table></td></tr>`;
+  }).join('');
 }
 
 const DEPTS = [
