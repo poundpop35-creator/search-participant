@@ -62,8 +62,22 @@
     .big-card.d2 .big-num{color:#7c3aed;}
     .big-card.walkin .big-num{color:#d97706;}
     .big-card.d3 .big-num{color:#0891b2;}
-    .big-stats-row-4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;}
-    @media(max-width:600px){.big-stats-row-4{grid-template-columns:repeat(2,1fr);}}
+    /* Scoreboard flip counter */
+    .scoreboard-wrap{background:#1a1a1a;border-radius:20px;padding:24px 20px 20px;box-shadow:0 8px 32px rgba(0,0,0,0.35);margin-bottom:14px;text-align:center;}
+    .scoreboard-label{font-size:0.78rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#94a3b8;margin-bottom:16px;}
+    .scoreboard-digits{display:flex;justify-content:center;align-items:center;gap:6px;flex-wrap:wrap;}
+    .score-digit{
+      position:relative;background:#e85d04;border-radius:10px;
+      width:64px;height:84px;display:flex;align-items:center;justify-content:center;
+      font-size:3.2rem;font-weight:800;color:#fff;font-family:'Sarabun',sans-serif;
+      box-shadow:0 4px 12px rgba(0,0,0,0.4);
+      overflow:hidden;
+    }
+    .score-digit::after{content:'';position:absolute;left:0;right:0;top:50%;height:2px;background:rgba(0,0,0,0.35);z-index:2;}
+    .score-digit::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,0.10) 0%,rgba(0,0,0,0.15) 100%);}
+    .score-sep{font-size:2.8rem;font-weight:800;color:#555;line-height:1;padding:0 2px;}
+    .scoreboard-sub{font-size:0.82rem;color:#64748b;margin-top:14px;}
+    @media(max-width:480px){.score-digit{width:52px;height:70px;font-size:2.6rem;}}
 
     .progress-card{background:var(--white);border-radius:18px;padding:20px 24px;box-shadow:var(--shadow);margin-bottom:20px;}
     .progress-title{font-size:0.9rem;font-weight:700;color:var(--blue);margin-bottom:16px;}
@@ -125,12 +139,10 @@
   <div id="loadingArea" class="loading">กำลังโหลดข้อมูล...</div>
   <div id="contentArea" style="display:none;">
 
-    <div style="margin-bottom:14px;">
-      <div class="big-card total" style="text-align:center;">
-        <div class="big-label">ผู้เข้าร่วมทั้งหมด</div>
-        <div class="big-num" id="pTotal">-</div>
-        <div class="big-sub" id="pTotalS">ราย (เช็คอินแล้ว)</div>
-      </div>
+    <div class="scoreboard-wrap">
+      <div class="scoreboard-label">ผู้เข้าร่วมทั้งหมด</div>
+      <div class="scoreboard-digits" id="scoreDigits"></div>
+      <div class="scoreboard-sub" id="pTotalS">ราย (เช็คอินแล้ว)</div>
     </div>
     <div class="big-stats-row" style="margin-bottom:14px;">
       <div class="big-card d1" id="card-d1">
@@ -278,7 +290,12 @@ function renderStats() {
   const internal = filtered.filter(r => r.participants && !r.participants.is_walkin && (r.participants.internal_external||'').includes('ภายใน')).length;
   const external = filtered.filter(r => r.participants && !r.participants.is_walkin && (r.participants.internal_external||'').includes('ภายนอก')).length;
 
-  document.getElementById('pTotal').textContent = total.toLocaleString();
+  const digits = total.toLocaleString().split('');
+  document.getElementById('scoreDigits').innerHTML = digits.map(d=>
+    d===','||d==='.'
+      ? `<span class="score-sep">,</span>`
+      : `<div class="score-digit">${d}</div>`
+  ).join('');
   document.getElementById('pInternal').textContent = internal.toLocaleString();
   document.getElementById('pExternal').textContent = external.toLocaleString();
   document.getElementById('pWalkin').textContent = walkin.toLocaleString();
