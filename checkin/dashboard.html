@@ -119,6 +119,8 @@
     .p-filter-group{display:flex;flex-direction:column;}
     .p-reset-btn{padding:6px 12px;border-radius:8px;border:1.5px solid var(--border);background:white;font-family:'Sarabun',sans-serif;font-size:0.82rem;cursor:pointer;color:#64748b;align-self:flex-end;}
     .p-reset-btn:hover{background:#f1f5f9;}
+    .checkin-progress-grid{display:grid;grid-template-columns:1fr 2fr;gap:12px;margin-bottom:10px;}
+    @media(max-width:640px){.checkin-progress-grid{grid-template-columns:1fr;}}
   </style>
 </head>
 <body>
@@ -178,7 +180,7 @@ document.addEventListener('DOMContentLoaded',()=>{
 
   <!-- STATS -->
   <!-- แถวที่ 1: ทั้งหมด + progress -->
-  <div style="display:grid;grid-template-columns:minmax(140px,1fr) minmax(220px,2fr);gap:12px;margin-bottom:10px;">
+  <div class="checkin-progress-grid">
     <div class="stat-card" style="border-left:4px solid #0891b2;">
       <div class="stat-label">ทั้งหมด</div>
       <div class="stat-num" id="sTotal" style="color:#0891b2;">-</div>
