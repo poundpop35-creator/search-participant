@@ -215,9 +215,9 @@
         <div class="dept-card-title" id="deptTitle">จำนวนผู้เข้าร่วมแยกตามหน่วยงานภายใน</div>
         <div class="dept-card-sub" id="deptSub">เรียงตามจำนวนผู้เข้าร่วมสูงสุด</div>
       </div>
-      <div style="overflow-x:auto;">
+      <div style="overflow-x:auto;max-height:320px;overflow-y:auto;">
         <table>
-          <thead>
+          <thead style="position:sticky;top:0;z-index:1;">
             <tr>
               <th style="width:40px;">#</th>
               <th>หน่วยงาน</th>
@@ -235,9 +235,9 @@
         <div class="dept-card-title" id="extDeptTitle">จำนวนผู้เข้าร่วมแยกตามหน่วยงานภายนอก</div>
         <div class="dept-card-sub" id="extDeptSub">เรียงตามจำนวนผู้เข้าร่วมสูงสุด</div>
       </div>
-      <div style="overflow-x:auto;">
+      <div style="overflow-x:auto;max-height:320px;overflow-y:auto;">
         <table>
-          <thead>
+          <thead style="position:sticky;top:0;z-index:1;">
             <tr>
               <th style="width:40px;">#</th>
               <th>หน่วยงาน</th>
@@ -358,9 +358,6 @@ const DEPTS = [
   'ศูนย์วิทยาศาสตร์การแพทย์ที่ 11/1 ภูเก็ต','ศูนย์วิทยาศาสตร์การแพทย์ที่ 12 สงขลา',
   'ศูนย์วิทยาศาสตร์การแพทย์ที่ 12/1 ตรัง'
 ];
-const SHOW_FIRST = 5;
-let isExpandedInt = false;
-let isExpandedExt = false;
 let allCheckins = [];
 let activeDay = 'all';
 
@@ -445,8 +442,7 @@ function renderStats() {
     .filter(d => d.count > 0)
     .sort((a,b) => b.count - a.count);
   const maxDept = sorted.length > 0 ? sorted[0].count : 1;
-  isExpandedInt = false;
-  renderDeptTable(sorted, maxDept, 'deptBody', false, 'toggleExpandInt', 'var(--blue-mid)');
+  renderDeptTable(sorted, maxDept, 'deptBody', 'var(--blue-mid)');
 
   // External dept table
   const extDeptCount = {};
@@ -460,8 +456,7 @@ function renderStats() {
   const extSorted = Object.entries(extDeptCount).map(([name, count]) => ({name, count}))
     .sort((a,b) => b.count - a.count);
   const maxExt = extSorted.length > 0 ? extSorted[0].count : 1;
-  isExpandedExt = false;
-  renderDeptTable(extSorted, maxExt, 'extDeptBody', false, 'toggleExpandExt', '#ea580c');
+  renderDeptTable(extSorted, maxExt, 'extDeptBody', '#ea580c');
 
   // Zone chart (check-in data)
   renderZoneChartPub(filtered);
@@ -490,44 +485,18 @@ async function loadData() {
   }
 }
 
-function renderDeptTable(sorted, maxDept, bodyId, isExp, toggleFnName, fillColor) {
+function renderDeptTable(sorted, maxDept, bodyId, fillColor) {
   const fc = fillColor || 'var(--blue-mid)';
   if(sorted.length===0){
     document.getElementById(bodyId).innerHTML='<tr><td colspan="4" style="text-align:center;padding:30px;color:#94a3b8;">ยังไม่มีข้อมูล</td></tr>';
     return;
   }
-  const rows=sorted.map((d,i)=>{
-    const isHidden=i>=SHOW_FIRST&&!isExp;
-    return`<tr class="${isHidden?'hidden-row':''}" data-idx="${i}">
-      <td class="rank">${i+1}</td>
-      <td class="dept-name">${d.name}</td>
-      <td class="count-num">${d.count}</td>
-      <td><div class="mini-bar"><div class="mini-fill" style="width:${Math.round(d.count/maxDept*100)}%;background:${fc}"></div></div></td>
-    </tr>`;
-  }).join('');
-  const collapseBtn=sorted.length>SHOW_FIRST
-    ?`<tr class="collapse-row"><td colspan="4"><button class="collapse-btn" onclick="${toggleFnName}()">${isExp?'แสดงน้อยลง':`แสดงทั้งหมด ${sorted.length} หน่วยงาน`}</button></td></tr>`:'';
-  document.getElementById(bodyId).innerHTML=rows+collapseBtn;
-}
-
-function toggleExpandInt(){
-  isExpandedInt=!isExpandedInt;
-  document.querySelectorAll('#deptBody tr[data-idx]').forEach(tr=>{
-    const idx=parseInt(tr.getAttribute('data-idx'));
-    tr.classList.toggle('hidden-row',idx>=SHOW_FIRST&&!isExpandedInt);
-  });
-  const btn=document.querySelector('#deptBody tr.collapse-row .collapse-btn');
-  if(btn) btn.textContent=isExpandedInt?'แสดงน้อยลง':'แสดงทั้งหมด';
-}
-
-function toggleExpandExt(){
-  isExpandedExt=!isExpandedExt;
-  document.querySelectorAll('#extDeptBody tr[data-idx]').forEach(tr=>{
-    const idx=parseInt(tr.getAttribute('data-idx'));
-    tr.classList.toggle('hidden-row',idx>=SHOW_FIRST&&!isExpandedExt);
-  });
-  const btn=document.querySelector('#extDeptBody tr.collapse-row .collapse-btn');
-  if(btn) btn.textContent=isExpandedExt?'แสดงน้อยลง':'แสดงทั้งหมด';
+  document.getElementById(bodyId).innerHTML=sorted.map((d,i)=>`<tr>
+    <td class="rank">${i+1}</td>
+    <td class="dept-name">${d.name}</td>
+    <td class="count-num">${d.count}</td>
+    <td><div class="mini-bar"><div class="mini-fill" style="width:${Math.round(d.count/maxDept*100)}%;background:${fc}"></div></div></td>
+  </tr>`).join('');
 }
 
 loadData();
