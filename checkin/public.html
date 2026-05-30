@@ -297,7 +297,7 @@ function renderZoneChartPub(filtered){
   const counts={};
   filtered.forEach(r=>{
     const prov=(r.participants?.province||'').trim();
-    const z=getZonePub(prov)||0;
+    const z=getZonePub(prov)||13;
     counts[z]=(counts[z]||0)+1;
   });
   const entries=Object.entries(counts).map(([z,n])=>({z:Number(z),n})).sort((a,b)=>a.z-b.z);
