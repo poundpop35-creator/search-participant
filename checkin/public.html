@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>จำนวนผู้เข้าร่วมงาน ประชุมวิชาการวิทยาศาสตร์การแพทย์ ครั้งที่ 34</title>
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
   <style>
     :root{--blue:#0d2b6b;--blue-mid:#1a4eb8;--blue-light:#e8f0fe;--green:#16a34a;--white:#fff;--shadow:0 2px 16px rgba(13,43,107,0.10);}
     *{box-sizing:border-box;margin:0;padding:0;}
@@ -188,6 +189,27 @@
       </div>
     </div>
 
+    <!-- Zone chart (check-in data) -->
+    <div class="dept-card">
+      <div class="dept-card-header">
+        <div class="dept-card-title">สถิติเขตสุขภาพ <span id="zoneChartCountPub" style="font-weight:400;font-size:0.8rem;color:#94a3b8;"></span></div>
+        <div class="dept-card-sub">จากผู้ที่เช็คอินแล้ว</div>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:12px;padding:16px;align-items:flex-start;">
+        <div style="flex:0 0 180px;max-width:220px;margin:0 auto;"><canvas id="zoneChartPub"></canvas></div>
+        <div style="flex:1;min-width:200px;overflow-x:auto;">
+          <table style="width:100%;border-collapse:collapse;font-size:0.83rem;">
+            <thead><tr>
+              <th style="padding:6px 10px;text-align:left;font-size:0.72rem;font-weight:700;color:#64748b;border-bottom:2px solid #e2e8f0;">เขตสุขภาพ</th>
+              <th style="padding:6px 10px;text-align:right;font-size:0.72rem;font-weight:700;color:#64748b;border-bottom:2px solid #e2e8f0;">คน</th>
+              <th style="padding:6px 10px;text-align:right;font-size:0.72rem;font-weight:700;color:#64748b;border-bottom:2px solid #e2e8f0;">%</th>
+            </tr></thead>
+            <tbody id="zoneBodyPub"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
     <div class="dept-card">
       <div class="dept-card-header">
         <div class="dept-card-title" id="deptTitle">จำนวนผู้เข้าร่วมแยกตามหน่วยงานภายใน</div>
@@ -242,6 +264,60 @@
 <script>
 const SUPABASE_URL  = "https://gvxytnjfyepqhbkmcjms.supabase.co";
 const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2eHl0bmpmeWVwcWhia21jam1zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0MzE2NDAsImV4cCI6MjA5NTAwNzY0MH0.RAr_ehb4cxfNliDR0h5XcihUaP-0ltZTTGIAv2Fw1kk";
+
+const HEALTH_ZONE={
+  'เชียงราย':1,'น่าน':1,'พะเยา':1,'แพร่':1,'เชียงใหม่':1,'แม่ฮ่องสอน':1,'ลำปาง':1,'ลำพูน':1,
+  'ตาก':2,'พิษณุโลก':2,'เพชรบูรณ์':2,'สุโขทัย':2,'อุตรดิตถ์':2,
+  'กำแพงเพชร':3,'พิจิตร':3,'นครสวรรค์':3,'อุทัยธานี':3,
+  'นนทบุรี':4,'ปทุมธานี':4,'พระนครศรีอยุธยา':4,'สระบุรี':4,'ลพบุรี':4,'สิงห์บุรี':4,'อ่างทอง':4,'ชัยนาท':4,
+  'กาญจนบุรี':5,'นครปฐม':5,'ราชบุรี':5,'สุพรรณบุรี':5,'ประจวบคีรีขันธ์':5,'เพชรบุรี':5,'สมุทรสงคราม':5,'สมุทรสาคร':5,
+  'ฉะเชิงเทรา':6,'ปราจีนบุรี':6,'สระแก้ว':6,'สมุทรปราการ':6,'จันทบุรี':6,'ชลบุรี':6,'ตราด':6,'ระยอง':6,'นครนายก':6,
+  'กาฬสินธุ์':7,'ขอนแก่น':7,'มหาสารคาม':7,'ร้อยเอ็ด':7,
+  'บึงกาฬ':8,'เลย':8,'หนองคาย':8,'หนองบัวลำภู':8,'อุดรธานี':8,'นครพนม':8,'สกลนคร':8,'มุกดาหาร':8,
+  'ชัยภูมิ':9,'นครราชสีมา':9,'บุรีรัมย์':9,'สุรินทร์':9,
+  'ยโสธร':10,'ศรีสะเกษ':10,'อุบลราชธานี':10,'อำนาจเจริญ':10,
+  'ชุมพร':11,'นครศรีธรรมราช':11,'สุราษฎร์ธานี':11,'กระบี่':11,'พังงา':11,'ภูเก็ต':11,'ระนอง':11,'พัทลุง':11,'ตรัง':11,
+  'นราธิวาส':12,'ปัตตานี':12,'ยะลา':12,'สงขลา':12,'สตูล':12,
+  'กรุงเทพมหานคร':13,'กรมวิทยาศาสตร์การแพทย์':13
+};
+const ZONE_NAMES_PUB={0:'ไม่ระบุ',1:'เขต 1',2:'เขต 2',3:'เขต 3',4:'เขต 4',5:'เขต 5',6:'เขต 6',7:'เขต 7',8:'เขต 8',9:'เขต 9',10:'เขต 10',11:'เขต 11',12:'เขต 12',13:'เขต 13 (กทม.)'};
+const ZONE_COLORS_PUB=['#94a3b8','#3b82f6','#10b981','#f59e0b','#ef4444','#8b5cf6','#06b6d4','#84cc16','#f97316','#ec4899','#14b8a6','#a855f7','#64748b','#0ea5e9'];
+function getZonePub(prov){if(!prov)return null;if(HEALTH_ZONE[prov])return HEALTH_ZONE[prov];if(prov.includes('กรมวิทยาศาสตร์'))return 13;return null;}
+function fmtPctPub(cnt,total){if(!total||!cnt)return'0%';const v=cnt/total*100;return v<1?v.toFixed(1)+'%':Math.round(v)+'%';}
+
+let zoneChartPubInst=null;
+function renderZoneChartPub(filtered){
+  const total=filtered.length;
+  if(!total){
+    document.getElementById('zoneBodyPub').innerHTML='<tr><td colspan="3" style="text-align:center;padding:16px;color:#94a3b8;">ยังไม่มีข้อมูล</td></tr>';
+    document.getElementById('zoneChartCountPub').textContent='';
+    return;
+  }
+  document.getElementById('zoneChartCountPub').textContent=`(${total.toLocaleString()} คน)`;
+  const counts={};
+  filtered.forEach(r=>{
+    const prov=(r.participants?.province||'').trim();
+    const z=getZonePub(prov)||0;
+    counts[z]=(counts[z]||0)+1;
+  });
+  const entries=Object.entries(counts).map(([z,n])=>({z:Number(z),n})).sort((a,b)=>a.z-b.z);
+  const labels=entries.map(e=>ZONE_NAMES_PUB[e.z]||'เขต '+e.z);
+  const data=entries.map(e=>e.n);
+  const bgColors=entries.map(e=>ZONE_COLORS_PUB[e.z%ZONE_COLORS_PUB.length]);
+  if(zoneChartPubInst) zoneChartPubInst.destroy();
+  const ctx=document.getElementById('zoneChartPub').getContext('2d');
+  zoneChartPubInst=new Chart(ctx,{
+    type:'doughnut',
+    data:{labels,datasets:[{data,backgroundColor:bgColors,borderWidth:2,borderColor:'#fff',hoverOffset:6}]},
+    options:{responsive:true,cutout:'58%',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.label}: ${c.raw.toLocaleString()} คน (${Math.round(c.raw/total*100)}%)`}}}}
+  });
+  document.getElementById('zoneBodyPub').innerHTML=entries.map((e,idx)=>`
+    <tr style="border-bottom:1px solid #e2e8f0;">
+      <td style="padding:5px 10px;"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:${bgColors[idx]};margin-right:6px;vertical-align:middle;"></span>${ZONE_NAMES_PUB[e.z]||'เขต '+e.z}</td>
+      <td style="padding:5px 10px;text-align:right;font-weight:700;">${e.n.toLocaleString()}</td>
+      <td style="padding:5px 10px;text-align:right;color:#94a3b8;">${fmtPctPub(e.n,total)}</td>
+    </tr>`).join('');
+}
 
 const DEPTS = [
   'สำนักผู้ทรงคุณวุฒิกรมวิทยาศาสตร์การแพทย์','กองแผนงานและวิชาการ','กองทดสอบความชำนาญ',
@@ -366,6 +442,9 @@ function renderStats() {
   const maxExt = extSorted.length > 0 ? extSorted[0].count : 1;
   isExpandedExt = false;
   renderDeptTable(extSorted, maxExt, 'extDeptBody', false, 'toggleExpandExt', '#ea580c');
+
+  // Zone chart (check-in data)
+  renderZoneChartPub(filtered);
 }
 
 async function fetchAll(path) {
@@ -381,7 +460,7 @@ async function fetchAll(path) {
 
 async function loadData() {
   try {
-    allCheckins = await fetchAll('/rest/v1/checkins?select=day,participants(dept,ext_dept,internal_external,is_walkin)&order=checkin_time.desc');
+    allCheckins = await fetchAll('/rest/v1/checkins?select=day,participants(dept,ext_dept,internal_external,is_walkin,province)&order=checkin_time.desc');
     renderStats();
     document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString('th-TH',{timeZone:'Asia/Bangkok'});
     document.getElementById('loadingArea').style.display = 'none';
