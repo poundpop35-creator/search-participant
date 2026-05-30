@@ -330,7 +330,10 @@ document.addEventListener('DOMContentLoaded',()=>{
         <span class="ttitle">รายชื่อผู้ลงทะเบียนทั้งหมด</span>
         <span class="tcount" id="pRegCount"></span>
       </div>
-      <button class="btn-xl" id="pToggleBtn" style="background:var(--blue);color:white;pointer-events:none;">▼ ดูรายชื่อ</button>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button class="btn-xl green" onclick="event.stopPropagation();exportParticipantsExcel()" style="font-size:0.78rem;">⬇ Excel</button>
+        <button class="btn-xl" id="pToggleBtn" style="background:var(--blue);color:white;pointer-events:none;">▼ ดูรายชื่อ</button>
+      </div>
     </div>
     <div id="pRegSection" style="display:none;">
       <!-- View toggle -->
@@ -905,6 +908,14 @@ function setZoneTab(t){
   document.getElementById('zoneTabPre').classList.toggle('active',t==='pre');
   document.getElementById('zoneTabWi').classList.toggle('active',t==='wi');
 }
+function toggleProvRow(pid, tr){
+  const row=document.getElementById(pid);
+  if(!row) return;
+  const open=row.style.display!=='none';
+  row.style.display=open?'none':'';
+  const arrow=tr.querySelector('.zProvArrow');
+  if(arrow) arrow.textContent=open?'▶':'▼';
+}
 function toggleZoneRow(type,zone){
   const row=document.getElementById(`zDetail-${type}-${zone}`);
   const arrow=document.getElementById(`zArrow-${type}-${zone}`);
@@ -914,8 +925,7 @@ function toggleZoneRow(type,zone){
   if(arrow) arrow.textContent=open?'▶':'▼';
 }
 function buildZoneChart(participants, canvasId, bodyId, countId, instKey){
-  // build zone counts + province breakdown + name list for zone 0
-  const counts={}, provByZone={}, namesByZone={};
+  const counts={}, provByZone={}, namesByZoneProv={};
   participants.forEach(p=>{
     const prov=(p.province||'').trim();
     const z=getZone(prov)||0;
@@ -923,12 +933,10 @@ function buildZoneChart(participants, canvasId, bodyId, countId, instKey){
     if(!provByZone[z]) provByZone[z]={};
     const k=prov||'(ว่าง)';
     provByZone[z][k]=(provByZone[z][k]||0)+1;
-    if(z===0){
-      if(!namesByZone[0]) namesByZone[0]=[];
-      const name=`${p.prefix||''} ${p.first_name||''} ${p.last_name||''}`.trim()||'(ไม่มีชื่อ)';
-      const provLabel=prov||'(ว่าง)';
-      namesByZone[0].push({name, prov:provLabel});
-    }
+    if(!namesByZoneProv[z]) namesByZoneProv[z]={};
+    if(!namesByZoneProv[z][k]) namesByZoneProv[z][k]=[];
+    const name=`${p.prefix||''} ${p.first_name||''} ${p.last_name||''}`.trim()||'(ไม่มีชื่อ)';
+    namesByZoneProv[z][k].push(name);
   });
   const entries=Object.entries(counts).map(([z,n])=>({z:Number(z),n})).sort((a,b)=>a.z-b.z);
   const total=participants.length;
@@ -947,22 +955,24 @@ function buildZoneChart(participants, canvasId, bodyId, countId, instKey){
   });
   if(instKey==='pre') zoneChartPreInst=inst; else zoneChartWiInst=inst;
   document.getElementById(bodyId).innerHTML=entries.map((e,i)=>{
-    let detailRows;
-    if(e.z===0){
-      detailRows=(namesByZone[0]||[]).map(({name,prov})=>`
-        <tr style="background:#fff7ed;">
-          <td style="padding:4px 12px 4px 32px;font-size:0.79rem;color:#92400e;">⌙ ${name}</td>
-          <td colspan="2" style="padding:4px 12px;font-size:0.79rem;color:#b45309;">จังหวัด: ${prov}</td>
+    const provEntries=Object.entries(provByZone[e.z]||{}).sort((a,b)=>b[1]-a[1]);
+    const detailRows=provEntries.map(([prov,cnt],pi)=>{
+      const pid=`zProv-${instKey}-${e.z}-${pi}`;
+      const nameRows=(namesByZoneProv[e.z]?.[prov]||[]).map(n=>`
+        <tr style="background:#f0f9ff;">
+          <td colspan="3" style="padding:3px 12px 3px 52px;font-size:0.77rem;color:#0369a1;">⌙ ${n}</td>
         </tr>`).join('');
-    } else {
-      const provEntries=Object.entries(provByZone[e.z]||{}).sort((a,b)=>b[1]-a[1]);
-      detailRows=provEntries.map(([prov,cnt])=>`
-        <tr style="background:#f8fafc;">
-          <td style="padding:3px 12px 3px 32px;font-size:0.79rem;color:#475569;">⌙ ${prov}</td>
-          <td style="text-align:right;font-size:0.79rem;color:#475569;padding-right:12px;">${cnt.toLocaleString()}</td>
+      const bg=e.z===0?'#fff7ed':'#f8fafc';
+      const tc=e.z===0?'#92400e':'#475569';
+      return `
+        <tr style="background:${bg};cursor:pointer;" onclick="toggleProvRow('${pid}',this)">
+          <td style="padding:3px 12px 3px 32px;font-size:0.79rem;color:${tc};">
+            <span class="zProvArrow" style="display:inline-block;width:12px;font-size:0.65rem;color:#94a3b8;">▶</span> ${prov}</td>
+          <td style="text-align:right;font-size:0.79rem;color:${tc};padding-right:12px;">${cnt.toLocaleString()}</td>
           <td style="text-align:right;font-size:0.79rem;color:#94a3b8;padding-right:12px;">${Math.round(cnt/total*100)}%</td>
-        </tr>`).join('');
-    }
+        </tr>
+        <tr id="${pid}" style="display:none;"><td colspan="3" style="padding:0;"><table style="width:100%;border-collapse:collapse;">${nameRows}</table></td></tr>`;
+    }).join('');
     return`<tr style="cursor:pointer;" onclick="toggleZoneRow('${instKey}',${e.z})">
       <td><span id="zArrow-${instKey}-${e.z}" style="display:inline-block;width:14px;font-size:0.7rem;color:#94a3b8;">▶</span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:${bgColors[i]};margin-right:5px;vertical-align:middle;"></span>${ZONE_NAMES[e.z]||'เขตสุขภาพที่ '+e.z}</td>
       <td style="text-align:right;font-weight:700;">${e.n.toLocaleString()}</td>
@@ -1297,6 +1307,25 @@ function renderDeptChart(depts,stats,dayF){
   });
 }
 
+function exportParticipantsExcel(){
+  const q=(document.getElementById('pSearch').value||'').toLowerCase();
+  const rows=allParticipants.filter(p=>pMatchRow(p,q)).map((p,i)=>{
+    const isIn=(p.internal_external||'').includes('ภายใน');
+    const dept=(isIn?(p.dept||''):(p.ext_dept||p.dept||'')).trim()||'-';
+    const name=`${p.prefix||''} ${p.first_name||''} ${p.last_name||''}`.trim();
+    const prov=(p.province||'').trim()||'-';
+    return {'ลำดับ':i+1,'ชื่อ-นามสกุล':name,'หน่วยงาน':dept,
+      'จังหวัด':prov,'เขตสุขภาพ':getZone(prov)||'ไม่ระบุ',
+      'ประเภทบุคคล':isIn?'บุคลากรภายใน':'บุคคลภายนอก',
+      'ประเภทการเข้าร่วม':(p.participation_type||'').trim(),
+      'TAG':(p.tag||'').trim(),
+      'ประเภท':p.is_walkin?'Walk-in':'ลงทะเบียนล่วงหน้า'};
+  });
+  if(!rows.length){alert('ไม่มีข้อมูล');return;}
+  const ws=XLSX.utils.json_to_sheet(rows);
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Participants');
+  XLSX.writeFile(wb,`participants_dmsc_${new Date().toISOString().slice(0,10)}.xlsx`);
+}
 function exportExcel(){
   const ws=XLSX.utils.json_to_sheet(getRows());
   const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'CheckIn');
