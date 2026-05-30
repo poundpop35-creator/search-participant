@@ -187,25 +187,20 @@ document.addEventListener('DOMContentLoaded',()=>{
       <div class="stat-sub">ราย (ลงทะเบียนล่วงหน้า + Walk-in)</div>
     </div>
     <div class="stat-card" style="border-left:4px solid #16a34a;">
-      <div class="stat-label" style="margin-bottom:12px;">ความคืบหน้าการเช็คอิน</div>
+      <div class="stat-label" style="margin-bottom:12px;">ความคืบหน้าการเช็คอิน <span style="font-weight:400;color:#94a3b8;">(ผู้ลงทะเบียนล่วงหน้า)</span></div>
       <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px;">
-        <span style="font-size:0.8rem;color:#64748b;">ลงทะเบียนล่วงหน้า <b id="sPreReg" style="color:#16a34a;">-</b> ราย</span>
+        <span style="font-size:0.8rem;color:#64748b;">เช็คอินแล้ว <b id="sPreReg" style="color:#16a34a;">-</b> ราย</span>
         <span style="font-size:0.75rem;color:#94a3b8;">จาก <span id="sTotalPreRegDisp">-</span> ราย (<span id="sPreRegPct" style="color:#16a34a;font-weight:700;">0%</span>)</span>
       </div>
-      <div style="height:10px;background:#e2e8f0;border-radius:5px;margin-bottom:12px;overflow:hidden;">
+      <div style="height:10px;background:#e2e8f0;border-radius:5px;margin-bottom:16px;overflow:hidden;">
         <div id="barPreReg" style="height:100%;border-radius:5px;background:#16a34a;width:0%;transition:width 0.6s ease;"></div>
       </div>
-      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px;">
-        <span style="font-size:0.8rem;color:#64748b;">Walk-in <b id="sWalkin" style="color:#7c3aed;">-</b> ราย</span>
-        <span id="sWalkinPct" style="font-size:0.75rem;color:#94a3b8;">0%</span>
-      </div>
-      <div style="height:10px;background:#e2e8f0;border-radius:5px;margin-bottom:12px;overflow:hidden;">
-        <div id="barWalkinCheckin" style="height:100%;border-radius:5px;background:#7c3aed;width:0%;transition:width 0.6s ease;"></div>
-      </div>
       <div style="display:flex;justify-content:space-between;align-items:center;padding-top:10px;border-top:1px solid #e2e8f0;">
-        <span style="font-size:0.78rem;color:#64748b;">ยังไม่ได้เช็คอิน (ลงทะเบียนล่วงหน้า)</span>
+        <span style="font-size:0.78rem;color:#64748b;">ยังไม่ได้เช็คอิน</span>
         <b id="sNotChecked" style="font-size:1.1rem;color:#ef4444;">-</b>
       </div>
+      <span id="sWalkin" style="display:none;"></span>
+      <div id="barWalkinCheckin" style="display:none;"></div>
     </div>
   </div>
   <!-- แถวที่ 2: บุคลากรภายใน / ภายนอก / Walk-in (progress bars) -->
@@ -1131,10 +1126,6 @@ function applyFilters(){
   const preRegPct=totalPreReg>0?Math.round(filtPreReg/totalPreReg*100):0;
   document.getElementById('sPreRegPct').textContent=preRegPct+'%';
   document.getElementById('barPreReg').style.width=Math.min(preRegPct,100)+'%';
-  document.getElementById('sWalkin').textContent=filtWalkin.toLocaleString();
-  const wiPct=tot>0?Math.round(filtWalkin/tot*100):0;
-  document.getElementById('sWalkinPct').textContent=wiPct+'% ของที่กรอง';
-  document.getElementById('barWalkinCheckin').style.width=wiPct+'%';
   document.getElementById('sNotChecked').textContent=typeof notCheckedIn==='number'?notCheckedIn.toLocaleString():'-';
   // Row 2: internal/external/walk-in progress bars
   const internalCount=filtered.filter(r=>!r.isWalkin&&r.isIn).length;
