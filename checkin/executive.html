@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard ผู้บริหาร — ประชุมวิชาการวิทยาศาสตร์การแพทย์ ครั้งที่ 34</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{--blue:#0d2b6b;--blue-mid:#1a4eb8;--blue-light:#e8f0fe;--green:#16a34a;--white:#fff;--shadow:0 2px 16px rgba(13,43,107,0.10);}
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:#f0f4ff;font-family:'Sarabun',sans-serif;min-height:100vh;}
+
+    .hero{
+      position:relative;
+      background-color:#e8f0fe;
+      background-image:url('https://raw.githubusercontent.com/poundpop35-creator/search-participant/main/DNA.png');
+      background-size:cover;
+      background-position:center right;
+      color:#0d2b6b;
+      padding:36px 24px 32px;
+      text-align:center;
+      overflow:hidden;
+    }
+    .hero::before{content:'';position:absolute;inset:0;background:rgba(232,240,254,0.60);z-index:0;}
+    .hero > *{position:relative;z-index:1;}
+    .hero-badge{display:inline-block;background:rgba(13,43,107,0.08);border:1px solid rgba(13,43,107,0.2);border-radius:20px;padding:4px 16px;font-size:0.8rem;margin-bottom:14px;color:#1a4eb8;}
+    .hero h1{font-size:1.4rem;font-weight:800;line-height:1.5;margin-bottom:6px;color:#0d2b6b;}
+    .hero p{font-size:0.85rem;color:#1a4eb8;opacity:0.85;}
+    .hero-btn{display:inline-block;margin-top:20px;margin-right:8px;padding:10px 24px;border-radius:20px;background:rgba(13,43,107,0.08);border:1.5px solid rgba(13,43,107,0.2);color:#0d2b6b;font-family:'Sarabun',sans-serif;font-size:0.88rem;font-weight:600;text-decoration:none;cursor:pointer;transition:opacity .15s;}
+    .hero-btn:hover{background:rgba(13,43,107,0.15);}
+
+    .main{padding:24px 16px;max-width:960px;margin:0 auto;}
+
+    .stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;}
+    @media(max-width:600px){.stat-row{grid-template-columns:repeat(2,1fr);}}
+    .stat-card{background:var(--white);border-radius:16px;padding:16px;box-shadow:var(--shadow);text-align:center;}
+    .stat-label{font-size:0.72rem;color:#64748b;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;}
+    .stat-num{font-size:2rem;font-weight:800;line-height:1;}
+    .stat-sub{font-size:0.75rem;color:#94a3b8;margin-top:4px;}
+    .s-total .stat-num{color:#0d2b6b;}
+    .s-d1 .stat-num{color:#2563eb;}
+    .s-d2 .stat-num{color:#7c3aed;}
+    .s-d3 .stat-num{color:#0891b2;}
+
+    .dept-card{background:var(--white);border-radius:18px;box-shadow:var(--shadow);overflow:hidden;margin-bottom:24px;}
+    .dept-card-header{padding:18px 24px;border-bottom:1px solid #e2e8f0;}
+    .dept-card-title{font-size:1rem;font-weight:700;color:var(--blue);}
+    .dept-card-sub{font-size:0.8rem;color:#94a3b8;margin-top:2px;}
+
+    .scroll-wrap{overflow-x:auto;max-height:420px;overflow-y:auto;}
+    table{width:100%;border-collapse:collapse;}
+    thead{position:sticky;top:0;z-index:1;}
+    th{background:#f8fafc;padding:10px 14px;text-align:left;font-size:0.72rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.04em;border-bottom:2px solid #e2e8f0;}
+    th.num{text-align:right;}
+    td{padding:10px 14px;font-size:0.86rem;border-bottom:1px solid #f1f5f9;color:#1e293b;}
+    tr:last-child td{border-bottom:none;}
+    tr:nth-child(even) td{background:#fafafa;}
+    tr:hover td{background:#eff6ff;}
+    .dept-name-cell{font-weight:600;max-width:200px;}
+    .num-cell{text-align:right;font-weight:700;font-size:0.9rem;}
+    .total-cell{text-align:right;font-weight:800;font-size:0.95rem;color:#0d2b6b;}
+    .d1-num{color:#2563eb;}
+    .d2-num{color:#7c3aed;}
+    .d3-num{color:#0891b2;}
+    .zero{color:#cbd5e1;font-weight:400;}
+
+    .footer{text-align:center;padding:20px;font-size:0.78rem;color:#94a3b8;}
+    .update-info{display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:8px;}
+    .dot-live{width:8px;height:8px;border-radius:50%;background:#16a34a;animation:pulse 2s infinite;}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+    .loading{text-align:center;padding:60px;color:#94a3b8;font-size:1rem;}
+  </style>
+</head>
+<body>
+
+<div class="hero">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;justify-content:center;">
+    <img src="https://raw.githubusercontent.com/poundpop35-creator/search-participant/main/logo-%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B8%8A%E0%B8%B8%E0%B8%A1%E0%B8%A7%E0%B8%B4%E0%B8%8A%E0%B8%B2%E0%B8%81%E0%B8%B2%E0%B8%A3-34-Final_0.png" style="height:60px;object-fit:contain;" alt="34th Conference">
+    <img src="https://raw.githubusercontent.com/poundpop35-creator/search-participant/main/logo-DMSc-MOPH%20(1)%20(2)_0.png" style="height:60px;object-fit:contain;" alt="DMSc">
+  </div>
+  <div class="hero-badge">Dashboard ผู้บริหาร</div>
+  <h1>ประชุมวิชาการวิทยาศาสตร์การแพทย์<br>ครั้งที่ 34</h1>
+  <p>กรมวิทยาศาสตร์การแพทย์ กระทรวงสาธารณสุข</p>
+  <div style="margin-top:20px;">
+    <a class="hero-btn" href="public.html">← Live Dashboard</a>
+  </div>
+</div>
+
+<div class="main">
+  <div id="loadingArea" class="loading">กำลังโหลดข้อมูล...</div>
+  <div id="contentArea" style="display:none;">
+
+    <div class="stat-row">
+      <div class="stat-card s-total">
+        <div class="stat-label">เช็คอินทั้งหมด</div>
+        <div class="stat-num" id="eTotal">-</div>
+        <div class="stat-sub">ราย</div>
+      </div>
+      <div class="stat-card s-d1">
+        <div class="stat-label">24 มิ.ย.</div>
+        <div class="stat-num" id="eD1">-</div>
+        <div class="stat-sub">วันที่ 1</div>
+      </div>
+      <div class="stat-card s-d2">
+        <div class="stat-label">25 มิ.ย.</div>
+        <div class="stat-num" id="eD2">-</div>
+        <div class="stat-sub">วันที่ 2</div>
+      </div>
+      <div class="stat-card s-d3">
+        <div class="stat-label">26 มิ.ย.</div>
+        <div class="stat-num" id="eD3">-</div>
+        <div class="stat-sub">วันที่ 3</div>
+      </div>
+    </div>
+
+    <div class="dept-card">
+      <div class="dept-card-header">
+        <div class="dept-card-title">จำนวนผู้เข้าร่วมแยกตามหน่วยงานภายใน (กรมวิทยาศาสตร์การแพทย์)</div>
+        <div class="dept-card-sub">ข้อมูลจากการเช็คอินจริง — อัปเดตอัตโนมัติทุก 1 นาที</div>
+      </div>
+      <div class="scroll-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:36px;">#</th>
+              <th>หน่วยงาน</th>
+              <th class="num" style="color:#2563eb;min-width:70px;">24 มิ.ย.</th>
+              <th class="num" style="color:#7c3aed;min-width:70px;">25 มิ.ย.</th>
+              <th class="num" style="color:#0891b2;min-width:70px;">26 มิ.ย.</th>
+              <th class="num" style="min-width:60px;">รวม</th>
+            </tr>
+          </thead>
+          <tbody id="execDeptBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="footer">
+  <div class="update-info">
+    <div class="dot-live"></div>
+    <span>อัปเดตอัตโนมัติทุก 1 นาที — ล่าสุด: <span id="lastUpdate">-</span></span>
+  </div>
+  <div>ประชุมวิชาการวิทยาศาสตร์การแพทย์ ครั้งที่ 34 | กรมวิทยาศาสตร์การแพทย์</div>
+</div>
+
+<script>
+const SUPABASE_URL  = "https://gvxytnjfyepqhbkmcjms.supabase.co";
+const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2eHl0bmpmeWVwcWhia21jam1zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0MzE2NDAsImV4cCI6MjA5NTAwNzY0MH0.RAr_ehb4cxfNliDR0h5XcihUaP-0ltZTTGIAv2Fw1kk";
+
+const DEPTS = [
+  'สำนักผู้ทรงคุณวุฒิกรมวิทยาศาสตร์การแพทย์','กองแผนงานและวิชาการ','กองทดสอบความชำนาญ',
+  'กลุ่มพัฒนาระบบบริหาร','กลุ่มตรวจสอบภายใน','กลุ่มงานจริยธรรม','สำนักงานเลขานุการกรม',
+  'สถาบันชีววัตถุ','สถาบันวิจัยวิทยาศาสตร์สาธารณสุข','สถาบันวิจัยสมุนไพร',
+  'สถาบันชีววิทยาศาสตร์ทางการแพทย์','สำนักคุณภาพและความปลอดภัยอาหาร',
+  'สำนักเครื่องสำอางและวัตถุอันตราย','สำนักรังสีและเครื่องมือแพทย์',
+  'สำนักมาตรฐานห้องปฏิบัติการ','สำนักยาและวัตถุเสพติด','ศูนย์รวมบริการ',
+  'ศูนย์เทคโนโลยีสารสนเทศและการสื่อสาร','กองความร่วมมือระหว่างประเทศ',
+  'กองบริหารทรัพยากรบุคคล','กองบริหารการคลัง','กองประชาสัมพันธ์และสื่อสารสาธารณะ',
+  'ศูนย์ตอบโต้เหตุฉุกเฉินด้านห้องปฏิบัติการและรังสี',
+  'ศูนย์วิทยาศาสตร์การแพทย์ที่ 1 เชียงใหม่','ศูนย์วิทยาศาสตร์การแพทย์ที่ 1/1 เชียงราย',
+  'ศูนย์วิทยาศาสตร์การแพทย์ที่ 2 พิษณุโลก','ศูนย์วิทยาศาสตร์การแพทย์ที่ 3 นครสวรรค์',
+  'ศูนย์วิทยาศาสตร์การแพทย์ที่ 4 สระบุรี','ศูนย์วิทยาศาสตร์การแพทย์ที่ 5 สมุทรสงคราม',
+  'ศูนย์วิทยาศาสตร์การแพทย์ที่ 6 ชลบุรี','ศูนย์วิทยาศาสตร์การแพทย์ที่ 7 ขอนแก่น',
+  'ศูนย์วิทยาศาสตร์การแพทย์ที่ 8 อุดรธานี','ศูนย์วิทยาศาสตร์การแพทย์ที่ 9 นครราชสีมา',
+  'ศูนย์วิทยาศาสตร์การแพทย์ที่ 10 อุบลราชธานี','ศูนย์วิทยาศาสตร์การแพทย์ที่ 11 สุราษฎร์ธานี',
+  'ศูนย์วิทยาศาสตร์การแพทย์ที่ 11/1 ภูเก็ต','ศูนย์วิทยาศาสตร์การแพทย์ที่ 12 สงขลา',
+  'ศูนย์วิทยาศาสตร์การแพทย์ที่ 12/1 ตรัง'
+];
+
+async function fetchAll(path) {
+  let res = [], from = 0;
+  while(true) {
+    const r = await fetch(SUPABASE_URL + path, {
+      headers: {'apikey': SUPABASE_ANON, 'Authorization': 'Bearer ' + SUPABASE_ANON,
+        'Range-Unit': 'items', 'Range': `${from}-${from+999}`, 'Prefer': 'count=exact'}
+    });
+    const d = await r.json();
+    if(!Array.isArray(d) || d.length === 0) break;
+    res = res.concat(d);
+    if(d.length < 1000) break;
+    from += 1000;
+  }
+  return res;
+}
+
+function num(v) {
+  return v ? `<span class="num-cell">${v.toLocaleString()}</span>` : `<span class="zero">—</span>`;
+}
+
+async function loadData() {
+  try {
+    const rows = await fetchAll('/rest/v1/checkins?select=day,participants(dept,internal_external,is_walkin)&order=checkin_time.desc');
+
+    // Summary counts
+    const total = rows.length;
+    const d1 = rows.filter(r => r.day === 1).length;
+    const d2 = rows.filter(r => r.day === 2).length;
+    const d3 = rows.filter(r => r.day === 3).length;
+
+    document.getElementById('eTotal').textContent = total.toLocaleString();
+    document.getElementById('eD1').textContent = d1.toLocaleString();
+    document.getElementById('eD2').textContent = d2.toLocaleString();
+    document.getElementById('eD3').textContent = d3.toLocaleString();
+
+    // Dept breakdown: only internal participants
+    const deptSet = new Set(DEPTS);
+    const map = {};
+    DEPTS.forEach(d => { map[d] = {d1:0, d2:0, d3:0}; });
+
+    rows.forEach(r => {
+      const p = r.participants;
+      if(!p || p.is_walkin || !(p.internal_external||'').includes('ภายใน')) return;
+      const dept = p.dept || '';
+      if(!deptSet.has(dept)) return;
+      if(r.day === 1) map[dept].d1++;
+      else if(r.day === 2) map[dept].d2++;
+      else if(r.day === 3) map[dept].d3++;
+    });
+
+    let rowIdx = 0;
+    document.getElementById('execDeptBody').innerHTML = DEPTS.map(dept => {
+      const c = map[dept];
+      const total = c.d1 + c.d2 + c.d3;
+      rowIdx++;
+      return `<tr>
+        <td style="font-weight:700;color:#94a3b8;font-size:0.8rem;">${rowIdx}</td>
+        <td class="dept-name-cell">${dept}</td>
+        <td style="text-align:right;" class="d1-num">${c.d1 || '<span class="zero">—</span>'}</td>
+        <td style="text-align:right;" class="d2-num">${c.d2 || '<span class="zero">—</span>'}</td>
+        <td style="text-align:right;" class="d3-num">${c.d3 || '<span class="zero">—</span>'}</td>
+        <td class="total-cell">${total > 0 ? total.toLocaleString() : '<span class="zero">0</span>'}</td>
+      </tr>`;
+    }).join('');
+
+    document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString('th-TH', {timeZone: 'Asia/Bangkok'});
+    document.getElementById('loadingArea').style.display = 'none';
+    document.getElementById('contentArea').style.display = '';
+  } catch(e) {
+    document.getElementById('loadingArea').textContent = 'ไม่สามารถโหลดข้อมูลได้ กรุณารีเฟรชหน้า';
+  }
+}
+
+loadData();
+setInterval(loadData, 60000);
+</script>
+</body>
+</html>
