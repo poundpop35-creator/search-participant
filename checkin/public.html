@@ -168,18 +168,16 @@
     </div>
 
     <div class="progress-card">
-      <div class="progress-title" id="progressTitle">สัดส่วนผู้เข้าร่วมแต่ละวัน</div>
-      <div class="progress-row" id="pr1">
-        <div class="progress-row-top"><span class="progress-label" id="pl1">วันที่ 1 — 24 มิ.ย.</span><span class="progress-pct" id="pg1">-</span></div>
-        <div class="progress-bar"><div class="progress-fill" id="pf1" style="width:0%;background:#2563eb;"></div></div>
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;">
+        <div class="progress-title" style="margin-bottom:0;">เป้าหมายผู้เข้าร่วม (3 วันรวม)</div>
+        <div style="font-size:0.82rem;color:#64748b;"><span id="goalCurrent" style="font-weight:700;color:#0d2b6b;">-</span> / <span style="font-weight:600;">1,800 คน</span></div>
       </div>
-      <div class="progress-row" id="pr2">
-        <div class="progress-row-top"><span class="progress-label" id="pl2">วันที่ 2 — 25 มิ.ย.</span><span class="progress-pct" id="pg2">-</span></div>
-        <div class="progress-bar"><div class="progress-fill" id="pf2" style="width:0%;background:#7c3aed;"></div></div>
+      <div class="progress-bar" style="height:18px;border-radius:9px;">
+        <div id="goalBar" class="progress-fill" style="width:0%;background:linear-gradient(90deg,#1a4eb8,#38bdf8);border-radius:9px;transition:width 1s ease;"></div>
       </div>
-      <div class="progress-row" id="pr3">
-        <div class="progress-row-top"><span class="progress-label" id="pl3">วันที่ 3 — 26 มิ.ย.</span><span class="progress-pct" id="pg3">-</span></div>
-        <div class="progress-bar"><div class="progress-fill" id="pf3" style="width:0%;background:#0891b2;"></div></div>
+      <div style="display:flex;justify-content:space-between;margin-top:8px;">
+        <div style="font-size:0.8rem;color:#16a34a;font-weight:700;" id="goalPct">0%</div>
+        <div style="font-size:0.8rem;color:#94a3b8;">เป้าหมาย 1,800 คน</div>
       </div>
     </div>
 
@@ -296,40 +294,16 @@ function renderStats() {
     if(card) card.classList.toggle('dimmed', activeDay !== 'all' && activeDay !== d);
   });
 
-  // Progress card
-  if(activeDay === 'all') {
-    document.getElementById('progressTitle').textContent = 'สัดส่วนผู้เข้าร่วมแต่ละวัน';
-    document.getElementById('pr3').style.display = '';
-    const labels = ['วันที่ 1 — 24 มิ.ย.','วันที่ 2 — 25 มิ.ย.','วันที่ 3 — 26 มิ.ย.'];
-    const colors = ['#2563eb','#7c3aed','#0891b2'];
-    [1,2,3].forEach((d,i) => {
-      const cnt = allCheckins.filter(r => r.day === d).length;
-      const pct = dTotal ? Math.round(cnt/dTotal*100) : 0;
-      document.getElementById(`pl${d}`).textContent = labels[i];
-      document.getElementById(`pg${d}`).textContent = `${pct}%`;
-      document.getElementById(`pf${d}`).style.width = pct + '%';
-      document.getElementById(`pf${d}`).style.background = colors[i];
-    });
-  } else {
-    const dayName = activeDay === 1 ? '24 มิ.ย.' : activeDay === 2 ? '25 มิ.ย.' : '26 มิ.ย.';
-    document.getElementById('progressTitle').textContent = `สัดส่วนผู้เข้าร่วม — ${dayName}`;
-    document.getElementById('pr3').style.display = '';
-    const intPct  = total ? Math.round(internal/total*100) : 0;
-    const extPct  = total ? Math.round(external/total*100) : 0;
-    const wkPct   = total ? Math.round(walkin/total*100)   : 0;
-    document.getElementById('pl1').textContent = 'บุคลากรภายใน';
-    document.getElementById('pg1').textContent = `${intPct}%`;
-    document.getElementById('pf1').style.width = intPct + '%';
-    document.getElementById('pf1').style.background = '#16a34a';
-    document.getElementById('pl2').textContent = 'บุคคลภายนอก';
-    document.getElementById('pg2').textContent = `${extPct}%`;
-    document.getElementById('pf2').style.width = extPct + '%';
-    document.getElementById('pf2').style.background = '#ea580c';
-    document.getElementById('pl3').textContent = 'Walk-in';
-    document.getElementById('pg3').textContent = `${wkPct}%`;
-    document.getElementById('pf3').style.width = wkPct + '%';
-    document.getElementById('pf3').style.background = '#d97706';
-  }
+  // Goal progress bar (always shows all-days total vs 1800)
+  const GOAL = 1800;
+  const goalPct = Math.min(Math.round(dTotal / GOAL * 100), 100);
+  document.getElementById('goalCurrent').textContent = dTotal.toLocaleString();
+  document.getElementById('goalBar').style.width = goalPct + '%';
+  document.getElementById('goalBar').style.background = dTotal >= GOAL
+    ? 'linear-gradient(90deg,#16a34a,#4ade80)'
+    : 'linear-gradient(90deg,#1a4eb8,#38bdf8)';
+  document.getElementById('goalPct').textContent = goalPct + '%';
+  document.getElementById('goalPct').style.color = dTotal >= GOAL ? '#16a34a' : '#1a4eb8';
 
   // Dept card subtitles
   const daySubText = activeDay === 'all' ? 'เรียงตามจำนวนผู้เข้าร่วมสูงสุด'
