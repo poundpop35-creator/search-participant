@@ -1122,9 +1122,10 @@ function applyFilters(){
   // Progress card — row 1
   document.getElementById('sPreReg').textContent=filtPreReg.toLocaleString();
   document.getElementById('sTotalPreRegDisp').textContent=totalPreReg>0?totalPreReg.toLocaleString():'-';
-  const preRegPct=totalPreReg>0?Math.round(filtPreReg/totalPreReg*100):0;
-  document.getElementById('sPreRegPct').textContent=preRegPct+'%';
-  document.getElementById('barPreReg').style.width=Math.min(preRegPct,100)+'%';
+  const preRegRaw=totalPreReg>0?filtPreReg/totalPreReg*100:0;
+  const preRegPctText=preRegRaw===0?'0%':preRegRaw<1?(preRegRaw.toFixed(1)+'%'):(Math.round(preRegRaw)+'%');
+  document.getElementById('sPreRegPct').textContent=preRegPctText;
+  document.getElementById('barPreReg').style.width=Math.min(preRegRaw,100)+'%';
   document.getElementById('sNotChecked').textContent=typeof notCheckedIn==='number'?notCheckedIn.toLocaleString():'-';
   // Row 2: internal/external/walk-in progress bars
   const internalCount=filtered.filter(r=>!r.isWalkin&&r.isIn).length;
