@@ -870,6 +870,14 @@ function renderParticipants(){
     const isWI=p.is_walkin===true;
     return curPTab===0?!isWI:isWI;
   });
+  data.sort((a,b)=>{
+    const dA=(((a.internal_external||'').includes('ภายใน'))?(a.dept||''):(a.ext_dept||a.dept||'')).trim();
+    const dB=(((b.internal_external||'').includes('ภายใน'))?(b.dept||''):(b.ext_dept||b.dept||'')).trim();
+    const iA=DEPTS.indexOf(dA), iB=DEPTS.indexOf(dB);
+    const oA=iA>=0?iA:DEPTS.length, oB=iB>=0?iB:DEPTS.length;
+    if(oA!==oB) return oA-oB;
+    return buildName(a).localeCompare(buildName(b),'th');
+  });
   const tot=data.length;
   const totPages=Math.ceil(tot/P_PAGE)||1;
   if(curPPage>totPages) curPPage=1;
