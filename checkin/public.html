@@ -190,6 +190,23 @@
         <div class="big-sub" id="pD3s">ราย</div>
       </div>
     </div>
+    <div class="progress-card">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;">
+        <div class="progress-title" style="margin-bottom:0;" id="goalTitle">เป้าหมายผู้เข้าร่วม (3 วันรวม)</div>
+        <div style="font-size:0.82rem;color:var(--big-sub-c);"><span id="goalCurrent" style="font-weight:700;color:var(--navy);">-</span> / <span style="font-weight:600;">1,800 คน</span></div>
+      </div>
+      <div class="goal-bar-wrap">
+        <span id="goalRunner" style="left:0%;display:inline-block;transform:scaleX(-1);">🏃</span>
+        <div class="progress-bar" style="height:18px;border-radius:9px;">
+          <div id="goalBar" class="progress-fill" style="width:0%;border-radius:9px;transition:width 1s ease;"></div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-top:8px;">
+        <div style="font-size:0.8rem;font-weight:700;" id="goalPct">0%</div>
+        <div style="font-size:0.8rem;color:#94a3b8;" id="goalExtra"></div>
+      </div>
+    </div>
+
     <div class="progress-card" style="margin-bottom:14px;">
       <div class="progress-title" style="margin-bottom:14px;">สัดส่วนผู้เข้าร่วม</div>
       <div class="progress-row">
@@ -214,22 +231,6 @@
         <div class="progress-bar"><div id="pBarWalkin" class="progress-fill" style="width:0%;background:#d97706;"></div></div>
       </div>
     </div>
-
-    <div class="progress-card">
-      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;">
-        <div class="progress-title" style="margin-bottom:0;" id="goalTitle">เป้าหมายผู้เข้าร่วม (3 วันรวม)</div>
-        <div style="font-size:0.82rem;color:var(--big-sub-c);"><span id="goalCurrent" style="font-weight:700;color:var(--navy);">-</span> / <span style="font-weight:600;">1,800 คน</span></div>
-      </div>
-      <div class="goal-bar-wrap">
-        <span id="goalRunner" style="left:0%;">🏃</span>
-        <div class="progress-bar" style="height:18px;border-radius:9px;">
-          <div id="goalBar" class="progress-fill" style="width:0%;border-radius:9px;transition:width 1s ease;"></div>
-        </div>
-      </div>
-      <div style="display:flex;justify-content:space-between;margin-top:8px;">
-        <div style="font-size:0.8rem;font-weight:700;" id="goalPct">0%</div>
-        <div style="font-size:0.8rem;color:#94a3b8;" id="goalExtra"></div>
-      </div>
     </div>
 
     <!-- Zone chart (check-in data) -->
@@ -459,7 +460,9 @@ function renderStats() {
   document.getElementById('goalBar').style.width = goalPct + '%';
   const _runnerPct = Math.min(goalVal / GOAL * 100, 100);
   document.getElementById('goalRunner').style.left = `calc(${_runnerPct}% - 12px)`;
-  document.getElementById('goalRunner').textContent = overGoal ? '🎉' : '🏃';
+  const _runner = document.getElementById('goalRunner');
+  _runner.textContent = overGoal ? '🎉' : '🏃';
+  _runner.style.transform = overGoal ? 'scaleX(1)' : 'scaleX(-1)';
   const _css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
   document.getElementById('goalBar').style.background = overGoal
     ? 'linear-gradient(90deg,#16a34a,#4ade80)'
