@@ -112,7 +112,7 @@ async function doLogin(){
     const postRes = await fetch(`${SB_URL}/rest/v1/staff_sessions`,{
       method:'POST',
       headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON,
-               'Content-Type':'application/json','Prefer':'return=minimal'},
+               'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'},
       body:JSON.stringify({username:u, logged_in_at:new Date().toISOString(), last_active:new Date().toISOString()})
     });
     if(!postRes.ok){
