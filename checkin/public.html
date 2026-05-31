@@ -100,6 +100,9 @@
     .total-card .big-sub{color:var(--big-sub-c);font-size:0.85rem;}
 
     .progress-card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:20px 24px;box-shadow:var(--shadow);margin-bottom:20px;}
+    @keyframes run-bob{0%,100%{transform:translateY(0);}50%{transform:translateY(-3px);}}
+    .goal-bar-wrap{position:relative;padding-top:28px;margin-bottom:4px;}
+    #goalRunner{position:absolute;top:0;font-size:1.5rem;line-height:1;transition:left 1s ease;animation:run-bob 0.35s infinite;will-change:left;}
     .progress-title{font-size:0.9rem;font-weight:700;color:var(--navy);margin-bottom:16px;}
     .progress-row{margin-bottom:14px;}
     .progress-row-top{display:flex;justify-content:space-between;font-size:0.85rem;margin-bottom:6px;}
@@ -217,8 +220,11 @@
         <div class="progress-title" style="margin-bottom:0;" id="goalTitle">เป้าหมายผู้เข้าร่วม (3 วันรวม)</div>
         <div style="font-size:0.82rem;color:var(--big-sub-c);"><span id="goalCurrent" style="font-weight:700;color:var(--navy);">-</span> / <span style="font-weight:600;">1,800 คน</span></div>
       </div>
-      <div class="progress-bar" style="height:18px;border-radius:9px;">
-        <div id="goalBar" class="progress-fill" style="width:0%;border-radius:9px;transition:width 1s ease;"></div>
+      <div class="goal-bar-wrap">
+        <span id="goalRunner" style="left:0%;">🏃</span>
+        <div class="progress-bar" style="height:18px;border-radius:9px;">
+          <div id="goalBar" class="progress-fill" style="width:0%;border-radius:9px;transition:width 1s ease;"></div>
+        </div>
       </div>
       <div style="display:flex;justify-content:space-between;margin-top:8px;">
         <div style="font-size:0.8rem;font-weight:700;" id="goalPct">0%</div>
@@ -451,6 +457,9 @@ function renderStats() {
     : `เป้าหมายผู้เข้าร่วม — ${dayNames[activeDay]}`;
   document.getElementById('goalCurrent').textContent = goalVal.toLocaleString();
   document.getElementById('goalBar').style.width = goalPct + '%';
+  const _runnerPct = Math.min(goalVal / GOAL * 100, 100);
+  document.getElementById('goalRunner').style.left = `calc(${_runnerPct}% - 12px)`;
+  document.getElementById('goalRunner').textContent = overGoal ? '🎉' : '🏃';
   const _css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
   document.getElementById('goalBar').style.background = overGoal
     ? 'linear-gradient(90deg,#16a34a,#4ade80)'
