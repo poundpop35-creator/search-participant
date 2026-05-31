@@ -81,10 +81,10 @@
     .big-card.d2 .big-num{color:var(--d2);}
     .big-card.d3 .big-num{color:var(--d3);}
     .big-card.walkin .big-num{color:var(--dw);}
-    .total-card{background:var(--total-grad);border:1px solid var(--total-bdr);border-radius:20px;padding:28px 20px;box-shadow:0 8px 28px var(--total-shad);margin-bottom:14px;text-align:center;}
-    .total-card .big-label{color:var(--total-lbl);letter-spacing:0.1em;}
-    .total-card .big-num{font-size:4rem;color:#ffffff;}
-    .total-card .big-sub{color:var(--total-sub-c);font-size:0.85rem;}
+    .total-card{background:linear-gradient(135deg,var(--surface),var(--gold-light));border:2px solid var(--border);border-radius:20px;padding:28px 20px;box-shadow:var(--shadow);margin-bottom:14px;text-align:center;}
+    .total-card .big-label{color:var(--gold);letter-spacing:0.1em;}
+    .total-card .big-num{font-size:4rem;color:var(--navy);}
+    .total-card .big-sub{color:var(--big-sub-c);font-size:0.85rem;}
 
     .progress-card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:20px 24px;box-shadow:var(--shadow);margin-bottom:20px;}
     .progress-title{font-size:0.9rem;font-weight:700;color:var(--navy);margin-bottom:16px;}
@@ -613,7 +613,7 @@ async function loadThemeFromSupabase() {
 }
 
 // Apply cached theme instantly, then sync from Supabase
-applyTheme(parseInt(localStorage.getItem('pubTheme')||'1'), false);
+applyTheme(parseInt(localStorage.getItem('pubTheme')||'3'), false);
 loadThemeFromSupabase();
 loadData();
 setInterval(loadData, 60000);
