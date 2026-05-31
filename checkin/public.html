@@ -7,7 +7,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
   <style>
-    :root{--gold:#b8912a;--gold-light:#fdf6e3;--navy:#1a2438;--card:#ffffff;--border:#e8e2d8;--shadow:0 2px 16px rgba(26,36,56,0.07);}
+    :root{--gold:#0ABAB5;--gold-light:#e4f7f7;--navy:#1a2438;--card:#ffffff;--border:#e8e2d8;--shadow:0 2px 16px rgba(26,36,56,0.07);}
     *{box-sizing:border-box;margin:0;padding:0;}
     body{background:#f5f3ef;font-family:'Sarabun',sans-serif;min-height:100vh;}
 
@@ -25,7 +25,7 @@
     .hero::before{content:'';position:absolute;inset:0;background:rgba(18,26,46,0.78);z-index:0;}
     .hero > *{position:relative;z-index:1;}
 
-    .hero-badge{display:inline-block;background:rgba(184,145,42,0.15);border:1px solid rgba(184,145,42,0.4);border-radius:20px;padding:4px 16px;font-size:0.8rem;margin-bottom:14px;color:#e5c76b;}
+    .hero-badge{display:inline-block;background:rgba(10,186,181,0.15);border:1px solid rgba(10,186,181,0.4);border-radius:20px;padding:4px 16px;font-size:0.8rem;margin-bottom:14px;color:#5ddbd8;}
     .hero h1{font-size:clamp(1rem,4vw,1.4rem);font-weight:800;line-height:1.5;margin-bottom:6px;color:#f8f6f0;}
     .hero p{font-size:0.85rem;color:#c9b99a;opacity:0.9;}
 
@@ -43,7 +43,7 @@
       transition:all 0.18s;
     }
     .day-btn:hover:not(.active){background:rgba(255,255,255,0.13);border-color:rgba(255,255,255,0.3);}
-    .day-btn.active{background:#b8912a;border-color:#b8912a;color:#fff;box-shadow:0 4px 14px rgba(184,145,42,0.45);}
+    .day-btn.active{background:#0ABAB5;border-color:#0ABAB5;color:#fff;box-shadow:0 4px 14px rgba(10,186,181,0.45);}
 
     .hero-staff-btn{display:inline-block;margin-top:20px;padding:10px 24px;border-radius:20px;background:rgba(255,255,255,0.1);border:1.5px solid rgba(255,255,255,0.2);color:#f8f6f0;font-family:'Sarabun',sans-serif;font-size:0.88rem;font-weight:600;text-decoration:none;cursor:pointer;transition:all .15s;}
     .hero-staff-btn:hover{background:rgba(255,255,255,0.18);}
@@ -61,9 +61,9 @@
     .big-card.d3 .big-num{color:#0891b2;}
     .big-card.walkin .big-num{color:#d97706;}
     .total-card{background:linear-gradient(135deg,#1a2438 0%,#243354 100%);border:1px solid #2e3f60;border-radius:20px;padding:28px 20px;box-shadow:0 8px 28px rgba(26,36,56,0.25);margin-bottom:14px;text-align:center;}
-    .total-card .big-label{color:#c9a85c;letter-spacing:0.1em;}
+    .total-card .big-label{color:#5ddbd8;letter-spacing:0.1em;}
     .total-card .big-num{font-size:4rem;color:#f8f6f0;}
-    .total-card .big-sub{color:#c9a85c;font-size:0.85rem;}
+    .total-card .big-sub{color:#5ddbd8;font-size:0.85rem;}
 
     .progress-card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:20px 24px;box-shadow:var(--shadow);margin-bottom:20px;}
     .progress-title{font-size:0.9rem;font-weight:700;color:var(--navy);margin-bottom:16px;}
@@ -416,7 +416,7 @@ function renderStats() {
   document.getElementById('goalBar').style.width = goalPct + '%';
   document.getElementById('goalBar').style.background = overGoal
     ? 'linear-gradient(90deg,#16a34a,#4ade80)'
-    : 'linear-gradient(90deg,#b8912a,#e5c76b)';
+    : 'linear-gradient(90deg,#0ABAB5,#5ddbd8)';
   document.getElementById('goalPct').textContent = overGoal
     ? `${goalPct}% — เกินเป้า +${(goalVal-GOAL).toLocaleString()} คน 🎉`
     : `${goalPct}%`;
