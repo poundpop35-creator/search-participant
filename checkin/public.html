@@ -7,101 +7,98 @@
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
   <style>
-    :root{--blue:#0d2b6b;--blue-mid:#1a4eb8;--blue-light:#e8f0fe;--green:#16a34a;--white:#fff;--shadow:0 2px 16px rgba(13,43,107,0.10);}
+    :root{--blue:#93c5fd;--blue-mid:#38bdf8;--blue-light:#1e3a5c;--green:#4ade80;--card:#1e293b;--border:#334155;--shadow:0 2px 20px rgba(0,0,0,0.4);}
     *{box-sizing:border-box;margin:0;padding:0;}
-    body{background:#f0f4ff;font-family:'Sarabun',sans-serif;min-height:100vh;}
+    body{background:#0f172a;font-family:'Sarabun',sans-serif;min-height:100vh;}
 
     .hero{
       position:relative;
-      background-color:#e8f0fe;
+      background-color:#0d1f3c;
       background-image:url('https://raw.githubusercontent.com/poundpop35-creator/search-participant/main/DNA.png');
       background-size:cover;
       background-position:center right;
-      color:#0d2b6b;
+      color:#f1f5f9;
       padding:36px 24px 32px;
       text-align:center;
       overflow:hidden;
     }
-    .hero::before{content:'';position:absolute;inset:0;background:rgba(232,240,254,0.60);z-index:0;}
+    .hero::before{content:'';position:absolute;inset:0;background:rgba(8,14,28,0.75);z-index:0;}
     .hero > *{position:relative;z-index:1;}
 
-    .hero-badge{display:inline-block;background:rgba(13,43,107,0.08);border:1px solid rgba(13,43,107,0.2);border-radius:20px;padding:4px 16px;font-size:0.8rem;margin-bottom:14px;color:#1a4eb8;}
-    .hero h1{font-size:1.4rem;font-weight:800;line-height:1.5;margin-bottom:6px;color:#0d2b6b;}
-    .hero p{font-size:0.85rem;color:#1a4eb8;opacity:0.85;}
+    .hero-badge{display:inline-block;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:20px;padding:4px 16px;font-size:0.8rem;margin-bottom:14px;color:#93c5fd;}
+    .hero h1{font-size:clamp(1rem,4vw,1.4rem);font-weight:800;line-height:1.5;margin-bottom:6px;color:#f1f5f9;}
+    .hero p{font-size:0.85rem;color:#94a3b8;opacity:0.9;}
 
     .hero-date{display:flex;justify-content:center;gap:10px;margin-top:20px;flex-wrap:wrap;}
     .day-btn{
-      background:rgba(13,43,107,0.08);
-      border:2px solid rgba(13,43,107,0.18);
+      background:rgba(255,255,255,0.07);
+      border:1.5px solid rgba(255,255,255,0.15);
       border-radius:12px;
       padding:10px 20px;
       font-size:0.85rem;
       font-weight:700;
-      color:#0d2b6b;
+      color:#cbd5e1;
       cursor:pointer;
       font-family:'Sarabun',sans-serif;
       transition:all 0.18s;
     }
-    .day-btn:hover:not(.active){background:rgba(13,43,107,0.15);border-color:rgba(13,43,107,0.35);}
-    .day-btn.active{background:#0d2b6b;border-color:#0d2b6b;color:#fff;box-shadow:0 4px 14px rgba(13,43,107,0.35);}
+    .day-btn:hover:not(.active){background:rgba(255,255,255,0.13);border-color:rgba(255,255,255,0.28);}
+    .day-btn.active{background:#38bdf8;border-color:#38bdf8;color:#0f172a;box-shadow:0 4px 14px rgba(56,189,248,0.4);}
 
-    .hero-staff-btn{display:inline-block;margin-top:20px;padding:10px 24px;border-radius:20px;background:#0d2b6b;border:1.5px solid #0d2b6b;color:white;font-family:'Sarabun',sans-serif;font-size:0.88rem;font-weight:600;text-decoration:none;cursor:pointer;transition:opacity .15s;}
-    .hero-staff-btn:hover{opacity:0.85;}
+    .hero-staff-btn{display:inline-block;margin-top:20px;padding:10px 24px;border-radius:20px;background:rgba(255,255,255,0.1);border:1.5px solid rgba(255,255,255,0.2);color:#f1f5f9;font-family:'Sarabun',sans-serif;font-size:0.88rem;font-weight:600;text-decoration:none;cursor:pointer;transition:all .15s;}
+    .hero-staff-btn:hover{background:rgba(255,255,255,0.18);}
 
     .main{padding:24px 16px;max-width:900px;margin:0 auto;}
 
     .big-stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:14px;}
-    .big-card{background:var(--white);border-radius:18px;padding:20px 16px;box-shadow:var(--shadow);text-align:center;transition:opacity 0.3s,transform 0.2s;}
-    .big-card.dimmed{opacity:0.35;transform:scale(0.97);}
-    .big-label{font-size:0.75rem;color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;}
+    .big-card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:20px 16px;box-shadow:var(--shadow);text-align:center;transition:opacity 0.3s,transform 0.2s;}
+    .big-card.dimmed{opacity:0.25;transform:scale(0.97);}
+    .big-label{font-size:0.75rem;color:#475569;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;}
     .big-num{font-size:2.4rem;font-weight:800;line-height:1;}
-    .big-sub{font-size:0.78rem;color:#94a3b8;margin-top:6px;}
-    .big-card.total .big-num{color:#0d2b6b;}
-    .big-card.internal .big-num{color:#16a34a;}
-    .big-card.external .big-num{color:#ea580c;}
-    .big-card.d1 .big-num{color:#2563eb;}
-    .big-card.d2 .big-num{color:#7c3aed;}
-    .big-card.walkin .big-num{color:#d97706;}
-    .big-card.d3 .big-num{color:#0891b2;}
-    .total-card{background:linear-gradient(135deg,#dbeafe 0%,#bfdbfe 100%);border-radius:20px;padding:28px 20px;box-shadow:0 8px 28px rgba(13,43,107,0.15);margin-bottom:14px;text-align:center;}
-    .total-card .big-label{color:#1e40af;letter-spacing:0.1em;}
-    .total-card .big-num{font-size:4rem;color:#0d2b6b;}
-    .total-card .big-sub{color:#3b82f6;font-size:0.85rem;}
+    .big-sub{font-size:0.78rem;color:#475569;margin-top:6px;}
+    .big-card.d1 .big-num{color:#60a5fa;}
+    .big-card.d2 .big-num{color:#a78bfa;}
+    .big-card.d3 .big-num{color:#22d3ee;}
+    .big-card.walkin .big-num{color:#fbbf24;}
+    .total-card{background:linear-gradient(135deg,#0f2855 0%,#162d55 100%);border:1px solid #1e3d6b;border-radius:20px;padding:28px 20px;box-shadow:0 8px 32px rgba(0,0,0,0.5);margin-bottom:14px;text-align:center;}
+    .total-card .big-label{color:#93c5fd;letter-spacing:0.1em;}
+    .total-card .big-num{font-size:4rem;color:#f1f5f9;}
+    .total-card .big-sub{color:#60a5fa;font-size:0.85rem;}
 
-    .progress-card{background:var(--white);border-radius:18px;padding:20px 24px;box-shadow:var(--shadow);margin-bottom:20px;}
-    .progress-title{font-size:0.9rem;font-weight:700;color:var(--blue);margin-bottom:16px;}
+    .progress-card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:20px 24px;box-shadow:var(--shadow);margin-bottom:20px;}
+    .progress-title{font-size:0.9rem;font-weight:700;color:#e2e8f0;margin-bottom:16px;}
     .progress-row{margin-bottom:14px;}
     .progress-row-top{display:flex;justify-content:space-between;font-size:0.85rem;margin-bottom:6px;}
-    .progress-label{font-weight:600;color:#1e293b;}
-    .progress-pct{font-weight:700;color:var(--blue);}
-    .progress-bar{height:10px;background:#e2e8f0;border-radius:5px;overflow:hidden;}
+    .progress-label{font-weight:600;color:#e2e8f0;}
+    .progress-pct{font-weight:700;color:#60a5fa;}
+    .progress-bar{height:10px;background:#334155;border-radius:5px;overflow:hidden;}
     .progress-fill{height:100%;border-radius:5px;transition:width .8s ease,background .3s ease;}
 
-    .dept-card{background:var(--white);border-radius:18px;box-shadow:var(--shadow);overflow:hidden;margin-bottom:24px;}
-    .dept-card-header{padding:18px 24px;border-bottom:1px solid #e2e8f0;}
-    .dept-card-title{font-size:1rem;font-weight:700;color:var(--blue);}
-    .dept-card-sub{font-size:0.8rem;color:#94a3b8;margin-top:2px;}
+    .dept-card{background:var(--card);border:1px solid var(--border);border-radius:18px;box-shadow:var(--shadow);overflow:hidden;margin-bottom:24px;}
+    .dept-card-header{padding:18px 24px;border-bottom:1px solid var(--border);}
+    .dept-card-title{font-size:1rem;font-weight:700;color:#e2e8f0;}
+    .dept-card-sub{font-size:0.8rem;color:#475569;margin-top:2px;}
     table{width:100%;border-collapse:collapse;}
-    th{background:#f8fafc;padding:10px 16px;text-align:left;font-size:0.75rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.04em;border-bottom:2px solid #e2e8f0;}
-    td{padding:10px 16px;font-size:0.88rem;border-bottom:1px solid #f1f5f9;color:#1e293b;}
+    th{background:#162032;padding:10px 16px;text-align:left;font-size:0.75rem;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:0.04em;border-bottom:2px solid var(--border);}
+    td{padding:10px 16px;font-size:0.88rem;border-bottom:1px solid #243044;color:#cbd5e1;}
     tr:last-child td{border-bottom:none;}
-    tr:nth-child(even) td{background:#fafafa;}
-    .rank{font-weight:700;color:#94a3b8;width:36px;}
-    .dept-name{font-weight:600;}
-    .count-num{font-weight:700;color:var(--blue);text-align:right;width:70px;}
-    .mini-bar{height:6px;background:#e2e8f0;border-radius:3px;overflow:hidden;min-width:80px;}
-    .mini-fill{height:100%;background:var(--blue-mid);border-radius:3px;transition:width .6s ease;}
+    tr:nth-child(even) td{background:rgba(255,255,255,0.02);}
+    .rank{font-weight:700;color:#475569;width:36px;}
+    .dept-name{font-weight:600;color:#e2e8f0;}
+    .count-num{font-weight:700;color:#38bdf8;text-align:right;width:70px;}
+    .mini-bar{height:6px;background:#334155;border-radius:3px;overflow:hidden;min-width:80px;}
+    .mini-fill{height:100%;background:#38bdf8;border-radius:3px;transition:width .6s ease;}
 
-    .collapse-row td{padding:12px 16px;text-align:center;background:#f8fafc;border-top:1px solid #e2e8f0;}
-    .collapse-btn{padding:8px 20px;border-radius:20px;border:2px solid #c7d7f5;background:white;font-family:'Sarabun',sans-serif;font-size:0.85rem;font-weight:600;color:var(--blue);cursor:pointer;}
-    .collapse-btn:hover{background:var(--blue-light);}
+    .collapse-row td{padding:12px 16px;text-align:center;background:#162032;border-top:1px solid var(--border);}
+    .collapse-btn{padding:8px 20px;border-radius:20px;border:2px solid var(--border);background:transparent;font-family:'Sarabun',sans-serif;font-size:0.85rem;font-weight:600;color:#94a3b8;cursor:pointer;}
+    .collapse-btn:hover{background:#1e3a5c;color:#e2e8f0;}
     .hidden-row{display:none;}
 
-    .footer{text-align:center;padding:20px;font-size:0.78rem;color:#94a3b8;}
+    .footer{text-align:center;padding:20px;font-size:0.78rem;color:#334155;}
     .update-info{display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:8px;}
-    .dot-live{width:8px;height:8px;border-radius:50%;background:#16a34a;animation:pulse 2s infinite;}
+    .dot-live{width:8px;height:8px;border-radius:50%;background:#4ade80;animation:pulse 2s infinite;}
     @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
-    .loading{text-align:center;padding:60px;color:#94a3b8;font-size:1rem;}
+    .loading{text-align:center;padding:60px;color:#475569;font-size:1rem;}
   </style>
 <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
 </head>
@@ -126,7 +123,7 @@
     <button class="day-btn" data-day="3" onclick="setFilter(3)">26 มิถุนายน 2569</button>
   </div>
   <br>
-  <a class="hero-staff-btn" href="executive.html" style="background:rgba(13,43,107,0.08);border:1.5px solid rgba(13,43,107,0.25);color:#0d2b6b;">Dashboard ผู้บริหาร</a>
+  <a class="hero-staff-btn" href="executive.html">Dashboard ผู้บริหาร</a>
   <a class="hero-staff-btn" href="login.html">สำหรับเจ้าหน้าที่</a>
 </div>
 
@@ -184,7 +181,7 @@
     <div class="progress-card">
       <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;">
         <div class="progress-title" style="margin-bottom:0;" id="goalTitle">เป้าหมายผู้เข้าร่วม (3 วันรวม)</div>
-        <div style="font-size:0.82rem;color:#64748b;"><span id="goalCurrent" style="font-weight:700;color:#0d2b6b;">-</span> / <span style="font-weight:600;">1,800 คน</span></div>
+        <div style="font-size:0.82rem;color:#475569;"><span id="goalCurrent" style="font-weight:700;color:#93c5fd;">-</span> / <span style="font-weight:600;">1,800 คน</span></div>
       </div>
       <div class="progress-bar" style="height:18px;border-radius:9px;">
         <div id="goalBar" class="progress-fill" style="width:0%;border-radius:9px;transition:width 1s ease;"></div>
@@ -329,10 +326,10 @@ function renderZoneChartPub(filtered){
   document.getElementById('zoneBodyPub').innerHTML=entries.map((e,idx)=>{
     const pid=`zpub-${e.z}`;
     const provRows=Object.entries(provByZone[e.z]||{}).sort((a,b)=>b[1]-a[1]).map(([prov,cnt])=>`
-      <tr style="background:#f8fafc;">
-        <td style="padding:3px 10px 3px 28px;font-size:0.78rem;color:#475569;">⌙ ${prov}</td>
-        <td style="padding:3px 10px;text-align:right;font-size:0.78rem;color:#475569;">${cnt.toLocaleString()}</td>
-        <td style="padding:3px 10px;text-align:right;font-size:0.78rem;color:#94a3b8;">${fmtPctPub(cnt,total)}</td>
+      <tr style="background:rgba(255,255,255,0.03);">
+        <td style="padding:3px 10px 3px 28px;font-size:0.78rem;color:#94a3b8;">⌙ ${prov}</td>
+        <td style="padding:3px 10px;text-align:right;font-size:0.78rem;color:#94a3b8;">${cnt.toLocaleString()}</td>
+        <td style="padding:3px 10px;text-align:right;font-size:0.78rem;color:#64748b;">${fmtPctPub(cnt,total)}</td>
       </tr>`).join('');
     return`<tr style="cursor:pointer;border-bottom:1px solid #e2e8f0;" onclick="toggleZonePub('${pid}',this.querySelector('.zarr'))">
       <td style="padding:5px 10px;">
@@ -418,12 +415,12 @@ function renderStats() {
   document.getElementById('goalCurrent').textContent = goalVal.toLocaleString();
   document.getElementById('goalBar').style.width = goalPct + '%';
   document.getElementById('goalBar').style.background = overGoal
-    ? 'linear-gradient(90deg,#16a34a,#4ade80)'
-    : 'linear-gradient(90deg,#1a4eb8,#38bdf8)';
+    ? 'linear-gradient(90deg,#4ade80,#86efac)'
+    : 'linear-gradient(90deg,#38bdf8,#818cf8)';
   document.getElementById('goalPct').textContent = overGoal
     ? `${goalPct}% — เกินเป้า +${(goalVal-GOAL).toLocaleString()} คน 🎉`
     : `${goalPct}%`;
-  document.getElementById('goalPct').style.color = overGoal ? '#16a34a' : '#1a4eb8';
+  document.getElementById('goalPct').style.color = overGoal ? '#4ade80' : '#38bdf8';
   document.getElementById('goalExtra').textContent = `เป้าหมาย 1,800 คน`;
 
   // Dept card subtitles
