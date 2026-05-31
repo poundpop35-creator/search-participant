@@ -1472,5 +1472,55 @@ document.getElementById('clearOverlay').addEventListener('click', function(e) {
 });
 </script>
 <div style="text-align:center;padding:16px 20px;font-size:0.75rem;color:#0d2b6b;">© 2026 Built by <span style="font-family:'Dancing Script',cursive;font-weight:700;font-size:1.25em;color:#0ABAB5;letter-spacing:0.01em;">Saharat Phetrnitchakun</span> · <span style="font-weight:800;letter-spacing:0.04em;font-size:1.05em;"><span style="color:#2563eb;">D</span><span style="color:#f59e0b;">P</span><span style="color:#16a34a;">T</span><span style="color:#dc2626;">C</span></span> · DMSc</div>
+
+<!-- Floating Theme Picker -->
+<div id="themeFab" onclick="toggleThemePanel()" style="position:fixed;bottom:28px;right:24px;z-index:9000;width:52px;height:52px;border-radius:50%;background:#fff;box-shadow:0 4px 20px rgba(0,0,0,0.18);display:flex;align-items:center;justify-content:center;cursor:pointer;border:2px solid #e2e8f0;transition:transform 0.15s;" onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'">
+  <span style="font-size:1.4rem;">🎨</span>
+</div>
+
+<div id="themePanel" style="display:none;position:fixed;bottom:92px;right:24px;z-index:9000;background:#fff;border-radius:18px;padding:18px 20px;box-shadow:0 8px 32px rgba(0,0,0,0.18);min-width:230px;border:1px solid #e2e8f0;">
+  <div style="font-size:0.8rem;font-weight:700;color:#1e293b;margin-bottom:14px;letter-spacing:0.04em;">🎨 ธีมสี Dashboard สาธารณะ</div>
+  <div style="display:flex;flex-direction:column;gap:10px;" id="themeList"></div>
+  <div style="margin-top:14px;padding-top:12px;border-top:1px solid #f0f0f0;font-size:0.73rem;color:#94a3b8;text-align:center;">ธีมจะแสดงบน Public Dashboard</div>
+</div>
+
+<script>
+const DASH_THEMES = [
+  { id:1, name:'โทนสีชมพู',  sw:['#9C7564','#D9BAA4','#D6BDAB','#F7DFCB','#F3ECE0'] },
+  { id:2, name:'โทนสีเขียว', sw:['#2D3B2E','#97A397','#937A52','#E5E4E2','#F2F6F2'] },
+  { id:3, name:'โทนสีน้ำเงิน',sw:['#1F3540','#2C4B5D','#6A8694','#A1AFBA','#EDF3F8'] },
+  { id:4, name:'โทนสีม่วง',  sw:['#4D4A5B','#6E6576','#A0808B','#C8B7AF','#F6F3F5'] },
+  { id:5, name:'โทนสีน้ำตาล',sw:['#4B1B0D','#793E21','#BE7E4E','#F9DCB4','#FBF6EE'] },
+];
+
+function buildThemeList() {
+  const cur = parseInt(localStorage.getItem('pubTheme')||'1');
+  document.getElementById('themeList').innerHTML = DASH_THEMES.map(t=>`
+    <div onclick="pickTheme(${t.id})" style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:8px 10px;border-radius:10px;background:${cur===t.id?'#f1f5f9':'transparent'};border:2px solid ${cur===t.id?'#cbd5e1':'transparent'};transition:all 0.15s;" id="trow-${t.id}">
+      <div style="display:flex;gap:3px;flex-shrink:0;">
+        ${t.sw.map(c=>`<div style="width:16px;height:16px;border-radius:50%;background:${c};"></div>`).join('')}
+      </div>
+      <span style="font-size:0.82rem;font-weight:600;color:#1e293b;">${t.name}</span>
+      ${cur===t.id?'<span style="margin-left:auto;font-size:0.7rem;background:#16a34a;color:white;padding:2px 7px;border-radius:8px;font-weight:700;">ใช้งาน</span>':''}
+    </div>`).join('');
+}
+
+function pickTheme(id) {
+  localStorage.setItem('pubTheme', String(id));
+  buildThemeList();
+}
+
+function toggleThemePanel() {
+  const p = document.getElementById('themePanel');
+  const open = p.style.display !== 'none';
+  if(!open) buildThemeList();
+  p.style.display = open ? 'none' : 'block';
+}
+
+document.addEventListener('click', e => {
+  if(!document.getElementById('themePanel').contains(e.target) && !document.getElementById('themeFab').contains(e.target))
+    document.getElementById('themePanel').style.display = 'none';
+});
+</script>
 </body>
 </html>
