@@ -45,27 +45,29 @@
     .hero > *{position:relative;z-index:1;}
 
     .hero-badge{display:inline-block;background:var(--badge-bg);border:1px solid var(--badge-bdr);border-radius:20px;padding:4px 16px;font-size:0.8rem;margin-bottom:14px;color:var(--badge-clr);}
-    .hero h1{font-size:clamp(1rem,4vw,1.4rem);font-weight:800;line-height:1.5;margin-bottom:6px;color:#f8f6f0;}
-    .hero p{font-size:0.85rem;color:var(--hero-p);opacity:0.9;}
+    .hero h1{font-size:clamp(1rem,4vw,1.4rem);font-weight:800;line-height:1.5;margin-bottom:6px;color:#ffffff;text-shadow:0 2px 14px rgba(0,0,0,0.95),0 0 32px rgba(0,0,0,0.7);}
+    .hero p{font-size:0.85rem;color:rgba(255,255,255,0.88);text-shadow:0 1px 8px rgba(0,0,0,0.95);}
 
     .hero-date{display:flex;justify-content:center;gap:10px;margin-top:20px;flex-wrap:wrap;}
     .day-btn{
-      background:rgba(255,255,255,0.07);
-      border:1.5px solid rgba(255,255,255,0.18);
+      background:rgba(0,0,0,0.35);
+      border:1.5px solid rgba(255,255,255,0.30);
       border-radius:12px;
       padding:10px 20px;
       font-size:0.85rem;
       font-weight:700;
-      color:var(--day-clr);
+      color:#ffffff;
       cursor:pointer;
       font-family:'Sarabun',sans-serif;
       transition:all 0.18s;
+      backdrop-filter:blur(6px);
+      text-shadow:0 1px 4px rgba(0,0,0,0.8);
     }
-    .day-btn:hover:not(.active){background:rgba(255,255,255,0.13);border-color:rgba(255,255,255,0.3);}
-    .day-btn.active{background:var(--day-active);border-color:var(--day-active-bdr);color:#fff;box-shadow:0 4px 14px var(--day-shadow);}
+    .day-btn:hover:not(.active){background:rgba(0,0,0,0.50);border-color:rgba(255,255,255,0.50);}
+    .day-btn.active{background:var(--day-active);border-color:var(--day-active-bdr);color:#fff;box-shadow:0 4px 14px var(--day-shadow);text-shadow:none;}
 
-    .hero-staff-btn{display:inline-block;margin-top:20px;padding:10px 24px;border-radius:20px;background:rgba(255,255,255,0.1);border:1.5px solid rgba(255,255,255,0.2);color:#f8f6f0;font-family:'Sarabun',sans-serif;font-size:0.88rem;font-weight:600;text-decoration:none;cursor:pointer;transition:all .15s;}
-    .hero-staff-btn:hover{background:rgba(255,255,255,0.18);}
+    .hero-staff-btn{display:inline-block;margin-top:20px;padding:10px 24px;border-radius:20px;background:rgba(0,0,0,0.35);border:1.5px solid rgba(255,255,255,0.30);color:#ffffff;font-family:'Sarabun',sans-serif;font-size:0.88rem;font-weight:600;text-decoration:none;cursor:pointer;transition:all .15s;backdrop-filter:blur(6px);}
+    .hero-staff-btn:hover{background:rgba(0,0,0,0.55);border-color:rgba(255,255,255,0.50);}
 
     .main{padding:24px 16px;max-width:900px;margin:0 auto;}
 
@@ -597,9 +599,25 @@ function applyTheme(id, save=true) {
   if(save) localStorage.setItem('pubTheme', String(id));
 }
 
-loadData();
-setInterval(loadData,60000);
+async function loadThemeFromSupabase() {
+  try {
+    const r = await fetch(SUPABASE_URL + "/rest/v1/app_settings?key=eq.theme&select=value", {
+      headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}
+    });
+    const d = await r.json();
+    if(Array.isArray(d) && d.length > 0) {
+      const id = parseInt(d[0].value) || 1;
+      applyTheme(id, true);
+    }
+  } catch(e) {}
+}
+
+// Apply cached theme instantly, then sync from Supabase
 applyTheme(parseInt(localStorage.getItem('pubTheme')||'1'), false);
+loadThemeFromSupabase();
+loadData();
+setInterval(loadData, 60000);
+setInterval(loadThemeFromSupabase, 30000);
 </script>
 </body>
 </html>

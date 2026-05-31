@@ -1481,7 +1481,7 @@ document.getElementById('clearOverlay').addEventListener('click', function(e) {
 <div id="themePanel" style="display:none;position:fixed;bottom:92px;right:24px;z-index:9000;background:#fff;border-radius:18px;padding:18px 20px;box-shadow:0 8px 32px rgba(0,0,0,0.18);min-width:230px;border:1px solid #e2e8f0;">
   <div style="font-size:0.8rem;font-weight:700;color:#1e293b;margin-bottom:14px;letter-spacing:0.04em;">🎨 ธีมสี Dashboard สาธารณะ</div>
   <div style="display:flex;flex-direction:column;gap:10px;" id="themeList"></div>
-  <div style="margin-top:14px;padding-top:12px;border-top:1px solid #f0f0f0;font-size:0.73rem;color:#94a3b8;text-align:center;">ธีมจะแสดงบน Public Dashboard</div>
+  <div class="theme-tip" style="margin-top:14px;padding-top:12px;border-top:1px solid #f0f0f0;font-size:0.73rem;color:#94a3b8;text-align:center;">ธีมจะแสดงบน Public Dashboard ทุก device</div>
 </div>
 
 <script>
@@ -1505,9 +1505,26 @@ function buildThemeList() {
     </div>`).join('');
 }
 
-function pickTheme(id) {
+async function pickTheme(id) {
   localStorage.setItem('pubTheme', String(id));
   buildThemeList();
+  // Show saving indicator
+  const panel = document.getElementById('themePanel');
+  const tip = panel.querySelector('.theme-tip');
+  if(tip) { tip.textContent = '⏳ กำลังบันทึก...'; tip.style.color = '#64748b'; }
+  try {
+    const r = await fetch(SB_URL + "/rest/v1/app_settings?key=eq.theme", {
+      method:'PATCH',
+      headers:{
+        'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON,
+        'Content-Type':'application/json','Prefer':'return=minimal'
+      },
+      body: JSON.stringify({value: String(id)})
+    });
+    if(tip) { tip.textContent = r.ok ? '✅ บันทึกแล้ว — ทุก device จะเห็นธีมนี้' : '⚠️ บันทึกไม่สำเร็จ'; tip.style.color = r.ok ? '#16a34a' : '#dc2626'; }
+  } catch(e) {
+    if(tip) { tip.textContent = '⚠️ บันทึกไม่สำเร็จ (ออฟไลน์)'; tip.style.color = '#dc2626'; }
+  }
 }
 
 function toggleThemePanel() {
