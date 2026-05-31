@@ -413,7 +413,10 @@ function renderStats() {
   const internal = filtered.filter(r => r.participants && !r.participants.is_walkin && (r.participants.internal_external||'').includes('ภายใน')).length;
   const external = filtered.filter(r => r.participants && !r.participants.is_walkin && (r.participants.internal_external||'').includes('ภายนอก')).length;
 
-  document.getElementById('pTotal').textContent = total.toLocaleString();
+  const _ptEl = document.getElementById('pTotal');
+  _ptEl.textContent = total.toLocaleString();
+  const _digits = String(total).length;
+  _ptEl.style.fontSize = _digits <= 2 ? '7.5rem' : _digits === 3 ? '6rem' : _digits === 4 ? '5rem' : '4rem';
   document.getElementById('pInternal').textContent = internal.toLocaleString();
   document.getElementById('pExternal').textContent = external.toLocaleString();
   document.getElementById('pWalkin').textContent = walkin.toLocaleString();
