@@ -7,13 +7,13 @@
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
   <style>
-    :root{--gold:#0ABAB5;--gold-light:#e4f7f7;--navy:#1a2438;--card:#ffffff;--border:#e8e2d8;--shadow:0 2px 16px rgba(26,36,56,0.07);}
+    :root{--gold:#d97706;--gold-light:#fef9e8;--navy:#1e1b4b;--card:#ffffff;--border:#e5e3f5;--shadow:0 2px 16px rgba(30,27,75,0.07);}
     *{box-sizing:border-box;margin:0;padding:0;}
-    body{background:#f5f3ef;font-family:'Sarabun',sans-serif;min-height:100vh;}
+    body{background:#f5f4ff;font-family:'Sarabun',sans-serif;min-height:100vh;}
 
     .hero{
       position:relative;
-      background-color:#1a2438;
+      background-color:#1e1b4b;
       background-image:url('https://raw.githubusercontent.com/poundpop35-creator/search-participant/main/DNA.png');
       background-size:cover;
       background-position:center right;
@@ -22,12 +22,12 @@
       text-align:center;
       overflow:hidden;
     }
-    .hero::before{content:'';position:absolute;inset:0;background:rgba(18,26,46,0.78);z-index:0;}
+    .hero::before{content:'';position:absolute;inset:0;background:rgba(12,10,35,0.82);z-index:0;}
     .hero > *{position:relative;z-index:1;}
 
-    .hero-badge{display:inline-block;background:rgba(10,186,181,0.15);border:1px solid rgba(10,186,181,0.4);border-radius:20px;padding:4px 16px;font-size:0.8rem;margin-bottom:14px;color:#5ddbd8;}
+    .hero-badge{display:inline-block;background:rgba(217,119,6,0.15);border:1px solid rgba(217,119,6,0.4);border-radius:20px;padding:4px 16px;font-size:0.8rem;margin-bottom:14px;color:#fbbf24;}
     .hero h1{font-size:clamp(1rem,4vw,1.4rem);font-weight:800;line-height:1.5;margin-bottom:6px;color:#f8f6f0;}
-    .hero p{font-size:0.85rem;color:#c9b99a;opacity:0.9;}
+    .hero p{font-size:0.85rem;color:#c4b8e8;opacity:0.9;}
 
     .hero-date{display:flex;justify-content:center;gap:10px;margin-top:20px;flex-wrap:wrap;}
     .day-btn{
@@ -37,13 +37,13 @@
       padding:10px 20px;
       font-size:0.85rem;
       font-weight:700;
-      color:#d4c9b8;
+      color:#d4c8f0;
       cursor:pointer;
       font-family:'Sarabun',sans-serif;
       transition:all 0.18s;
     }
     .day-btn:hover:not(.active){background:rgba(255,255,255,0.13);border-color:rgba(255,255,255,0.3);}
-    .day-btn.active{background:#0ABAB5;border-color:#0ABAB5;color:#fff;box-shadow:0 4px 14px rgba(10,186,181,0.45);}
+    .day-btn.active{background:#d97706;border-color:#d97706;color:#fff;box-shadow:0 4px 14px rgba(217,119,6,0.45);}
 
     .hero-staff-btn{display:inline-block;margin-top:20px;padding:10px 24px;border-radius:20px;background:rgba(255,255,255,0.1);border:1.5px solid rgba(255,255,255,0.2);color:#f8f6f0;font-family:'Sarabun',sans-serif;font-size:0.88rem;font-weight:600;text-decoration:none;cursor:pointer;transition:all .15s;}
     .hero-staff-btn:hover{background:rgba(255,255,255,0.18);}
@@ -53,52 +53,52 @@
     .big-stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:14px;}
     .big-card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:20px 16px;box-shadow:var(--shadow);text-align:center;transition:opacity 0.3s,transform 0.2s;}
     .big-card.dimmed{opacity:0.35;transform:scale(0.97);}
-    .big-label{font-size:0.75rem;color:#94897a;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;}
+    .big-label{font-size:0.75rem;color:#7c6ba8;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;}
     .big-num{font-size:2.4rem;font-weight:800;line-height:1;}
-    .big-sub{font-size:0.78rem;color:#a89d8e;margin-top:6px;}
+    .big-sub{font-size:0.78rem;color:#9491c0;margin-top:6px;}
     .big-card.d1 .big-num{color:#2563eb;}
     .big-card.d2 .big-num{color:#7c3aed;}
     .big-card.d3 .big-num{color:#0891b2;}
     .big-card.walkin .big-num{color:#d97706;}
-    .total-card{background:linear-gradient(135deg,#1a2438 0%,#243354 100%);border:1px solid #2e3f60;border-radius:20px;padding:28px 20px;box-shadow:0 8px 28px rgba(26,36,56,0.25);margin-bottom:14px;text-align:center;}
-    .total-card .big-label{color:#5ddbd8;letter-spacing:0.1em;}
+    .total-card{background:linear-gradient(135deg,#1e1b4b 0%,#312e81 100%);border:1px solid #4338ca;border-radius:20px;padding:28px 20px;box-shadow:0 8px 28px rgba(30,27,75,0.25);margin-bottom:14px;text-align:center;}
+    .total-card .big-label{color:#fbbf24;letter-spacing:0.1em;}
     .total-card .big-num{font-size:4rem;color:#f8f6f0;}
-    .total-card .big-sub{color:#5ddbd8;font-size:0.85rem;}
+    .total-card .big-sub{color:#a5b4fc;font-size:0.85rem;}
 
     .progress-card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:20px 24px;box-shadow:var(--shadow);margin-bottom:20px;}
     .progress-title{font-size:0.9rem;font-weight:700;color:var(--navy);margin-bottom:16px;}
     .progress-row{margin-bottom:14px;}
     .progress-row-top{display:flex;justify-content:space-between;font-size:0.85rem;margin-bottom:6px;}
-    .progress-label{font-weight:600;color:#1a2438;}
+    .progress-label{font-weight:600;color:#1e1b4b;}
     .progress-pct{font-weight:700;color:var(--gold);}
-    .progress-bar{height:10px;background:#ede8de;border-radius:5px;overflow:hidden;}
+    .progress-bar{height:10px;background:#e9e7f9;border-radius:5px;overflow:hidden;}
     .progress-fill{height:100%;border-radius:5px;transition:width .8s ease,background .3s ease;}
 
     .dept-card{background:var(--card);border:1px solid var(--border);border-radius:18px;box-shadow:var(--shadow);overflow:hidden;margin-bottom:24px;}
     .dept-card-header{padding:18px 24px;border-bottom:1px solid var(--border);}
     .dept-card-title{font-size:1rem;font-weight:700;color:var(--navy);}
-    .dept-card-sub{font-size:0.8rem;color:#a89d8e;margin-top:2px;}
+    .dept-card-sub{font-size:0.8rem;color:#9491c0;margin-top:2px;}
     table{width:100%;border-collapse:collapse;}
-    th{background:#faf7f2;padding:10px 16px;text-align:left;font-size:0.75rem;font-weight:700;color:#94897a;text-transform:uppercase;letter-spacing:0.04em;border-bottom:2px solid var(--border);}
-    td{padding:10px 16px;font-size:0.88rem;border-bottom:1px solid #f0ebe2;color:#1a2438;}
+    th{background:#f4f3ff;padding:10px 16px;text-align:left;font-size:0.75rem;font-weight:700;color:#7c6ba8;text-transform:uppercase;letter-spacing:0.04em;border-bottom:2px solid var(--border);}
+    td{padding:10px 16px;font-size:0.88rem;border-bottom:1px solid #ede9f8;color:#1e1b4b;}
     tr:last-child td{border-bottom:none;}
-    tr:nth-child(even) td{background:#fdf9f4;}
-    .rank{font-weight:700;color:#a89d8e;width:36px;}
-    .dept-name{font-weight:600;color:#1a2438;}
+    tr:nth-child(even) td{background:#f9f8ff;}
+    .rank{font-weight:700;color:#9491c0;width:36px;}
+    .dept-name{font-weight:600;color:#1e1b4b;}
     .count-num{font-weight:700;color:var(--gold);text-align:right;width:70px;}
-    .mini-bar{height:6px;background:#ede8de;border-radius:3px;overflow:hidden;min-width:80px;}
+    .mini-bar{height:6px;background:#e9e7f9;border-radius:3px;overflow:hidden;min-width:80px;}
     .mini-fill{height:100%;background:var(--gold);border-radius:3px;transition:width .6s ease;}
 
-    .collapse-row td{padding:12px 16px;text-align:center;background:#faf7f2;border-top:1px solid var(--border);}
+    .collapse-row td{padding:12px 16px;text-align:center;background:#f4f3ff;border-top:1px solid var(--border);}
     .collapse-btn{padding:8px 20px;border-radius:20px;border:2px solid var(--border);background:white;font-family:'Sarabun',sans-serif;font-size:0.85rem;font-weight:600;color:var(--navy);cursor:pointer;}
     .collapse-btn:hover{background:var(--gold-light);}
     .hidden-row{display:none;}
 
-    .footer{text-align:center;padding:20px;font-size:0.78rem;color:#a89d8e;}
+    .footer{text-align:center;padding:20px;font-size:0.78rem;color:#9491c0;}
     .update-info{display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:8px;}
     .dot-live{width:8px;height:8px;border-radius:50%;background:#16a34a;animation:pulse 2s infinite;}
     @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
-    .loading{text-align:center;padding:60px;color:#a89d8e;font-size:1rem;}
+    .loading{text-align:center;padding:60px;color:#9491c0;font-size:1rem;}
   </style>
 <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
 </head>
@@ -181,7 +181,7 @@
     <div class="progress-card">
       <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;">
         <div class="progress-title" style="margin-bottom:0;" id="goalTitle">เป้าหมายผู้เข้าร่วม (3 วันรวม)</div>
-        <div style="font-size:0.82rem;color:#a89d8e;"><span id="goalCurrent" style="font-weight:700;color:#1a2438;">-</span> / <span style="font-weight:600;">1,800 คน</span></div>
+        <div style="font-size:0.82rem;color:#9491c0;"><span id="goalCurrent" style="font-weight:700;color:#1e1b4b;">-</span> / <span style="font-weight:600;">1,800 คน</span></div>
       </div>
       <div class="progress-bar" style="height:18px;border-radius:9px;">
         <div id="goalBar" class="progress-fill" style="width:0%;border-radius:9px;transition:width 1s ease;"></div>
@@ -203,9 +203,9 @@
         <div style="flex:1;min-width:200px;overflow-x:auto;">
           <table style="width:100%;border-collapse:collapse;font-size:0.83rem;">
             <thead><tr>
-              <th style="padding:6px 10px;text-align:left;font-size:0.72rem;font-weight:700;color:#64748b;border-bottom:2px solid #e2e8f0;">เขตสุขภาพ</th>
-              <th style="padding:6px 10px;text-align:right;font-size:0.72rem;font-weight:700;color:#64748b;border-bottom:2px solid #e2e8f0;">คน</th>
-              <th style="padding:6px 10px;text-align:right;font-size:0.72rem;font-weight:700;color:#64748b;border-bottom:2px solid #e2e8f0;">%</th>
+              <th style="padding:6px 10px;text-align:left;font-size:0.72rem;font-weight:700;color:#7c6ba8;border-bottom:2px solid #e5e3f5;">เขตสุขภาพ</th>
+              <th style="padding:6px 10px;text-align:right;font-size:0.72rem;font-weight:700;color:#7c6ba8;border-bottom:2px solid #e5e3f5;">คน</th>
+              <th style="padding:6px 10px;text-align:right;font-size:0.72rem;font-weight:700;color:#7c6ba8;border-bottom:2px solid #e5e3f5;">%</th>
             </tr></thead>
             <tbody id="zoneBodyPub"></tbody>
           </table>
@@ -326,10 +326,10 @@ function renderZoneChartPub(filtered){
   document.getElementById('zoneBodyPub').innerHTML=entries.map((e,idx)=>{
     const pid=`zpub-${e.z}`;
     const provRows=Object.entries(provByZone[e.z]||{}).sort((a,b)=>b[1]-a[1]).map(([prov,cnt])=>`
-      <tr style="background:#fdf9f4;">
-        <td style="padding:3px 10px 3px 28px;font-size:0.78rem;color:#94897a;">⌙ ${prov}</td>
-        <td style="padding:3px 10px;text-align:right;font-size:0.78rem;color:#94897a;">${cnt.toLocaleString()}</td>
-        <td style="padding:3px 10px;text-align:right;font-size:0.78rem;color:#a89d8e;">${fmtPctPub(cnt,total)}</td>
+      <tr style="background:#f9f8ff;">
+        <td style="padding:3px 10px 3px 28px;font-size:0.78rem;color:#7c6ba8;">⌙ ${prov}</td>
+        <td style="padding:3px 10px;text-align:right;font-size:0.78rem;color:#7c6ba8;">${cnt.toLocaleString()}</td>
+        <td style="padding:3px 10px;text-align:right;font-size:0.78rem;color:#9491c0;">${fmtPctPub(cnt,total)}</td>
       </tr>`).join('');
     return`<tr style="cursor:pointer;border-bottom:1px solid #e2e8f0;" onclick="toggleZonePub('${pid}',this.querySelector('.zarr'))">
       <td style="padding:5px 10px;">
@@ -416,11 +416,11 @@ function renderStats() {
   document.getElementById('goalBar').style.width = goalPct + '%';
   document.getElementById('goalBar').style.background = overGoal
     ? 'linear-gradient(90deg,#16a34a,#4ade80)'
-    : 'linear-gradient(90deg,#0ABAB5,#5ddbd8)';
+    : 'linear-gradient(90deg,#7c3aed,#a855f7)';
   document.getElementById('goalPct').textContent = overGoal
     ? `${goalPct}% — เกินเป้า +${(goalVal-GOAL).toLocaleString()} คน 🎉`
     : `${goalPct}%`;
-  document.getElementById('goalPct').style.color = overGoal ? '#16a34a' : '#b8912a';
+  document.getElementById('goalPct').style.color = overGoal ? '#16a34a' : '#7c3aed';
   document.getElementById('goalExtra').textContent = `เป้าหมาย 1,800 คน`;
 
   // Dept card subtitles
@@ -445,7 +445,7 @@ function renderStats() {
     .filter(d => d.count > 0)
     .sort((a,b) => b.count - a.count);
   const maxDept = sorted.length > 0 ? sorted[0].count : 1;
-  renderDeptTable(sorted, maxDept, 'deptBody', 'var(--blue-mid)');
+  renderDeptTable(sorted, maxDept, 'deptBody', '#6d28d9');
 
   // External dept table
   const extDeptCount = {};
