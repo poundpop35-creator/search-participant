@@ -100,10 +100,14 @@
     .total-card .big-sub{color:var(--big-sub-c);font-size:0.85rem;}
 
     .progress-card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:20px 24px;box-shadow:var(--shadow);margin-bottom:20px;}
-    @keyframes run-bob{0%,100%{transform:translateY(0);}50%{transform:translateY(-3px);}}
-    .goal-bar-wrap{position:relative;padding-top:28px;margin-bottom:4px;}
-    .runner-wrap{position:absolute;top:0;font-size:1.5rem;line-height:1;transition:left 1s ease;animation:run-bob 0.35s infinite;}
-    #goalRunner{display:inline-block;}
+    .goal-bar-wrap{margin-bottom:4px;}
+    #goalBar{
+      background-image:repeating-linear-gradient(
+        90deg,
+        transparent 0px, transparent 13px,
+        rgba(255,255,255,0.45) 13px, rgba(255,255,255,0.45) 15px
+      ) !important;
+    }
     .progress-title{font-size:0.9rem;font-weight:700;color:var(--navy);margin-bottom:16px;}
     .progress-row{margin-bottom:14px;}
     .progress-row-top{display:flex;justify-content:space-between;font-size:0.85rem;margin-bottom:6px;}
@@ -197,9 +201,8 @@
         <div style="font-size:0.82rem;color:var(--big-sub-c);"><span id="goalCurrent" style="font-weight:700;color:var(--navy);">-</span> / <span style="font-weight:600;">1,800 คน</span></div>
       </div>
       <div class="goal-bar-wrap">
-        <span class="runner-wrap" id="goalRunnerWrap" style="left:0%;"><span id="goalRunner" style="display:inline-block;">🏁</span></span>
-        <div class="progress-bar" style="height:18px;border-radius:9px;">
-          <div id="goalBar" class="progress-fill" style="width:0%;border-radius:9px;transition:width 1s ease;"></div>
+        <div class="progress-bar" style="height:20px;border-radius:6px;">
+          <div id="goalBar" class="progress-fill" style="width:0%;border-radius:6px;transition:width 1s ease;"></div>
         </div>
       </div>
       <div style="display:flex;justify-content:space-between;margin-top:8px;">
@@ -459,21 +462,13 @@ function renderStats() {
     : `เป้าหมายผู้เข้าร่วม — ${dayNames[activeDay]}`;
   document.getElementById('goalCurrent').textContent = goalVal.toLocaleString();
   document.getElementById('goalBar').style.width = goalPct + '%';
-  const _runnerPct = Math.min(goalVal / GOAL * 100, 100);
-  const _runner = document.getElementById('goalRunner');
-  const _runnerWrap = document.getElementById('goalRunnerWrap');
-  _runner.textContent = overGoal ? '🎉' : '🏁';
-  _runner.style.transform = 'none';
-  _runnerWrap.style.left = `calc(${_runnerPct}% - 12px)`;
   const _goalColor = goalVal < 300 ? '#ef4444'
     : goalVal < 600  ? '#eab308'
     : goalVal < 900  ? '#f97316'
     : goalVal < 1200 ? '#86efac'
     : goalVal < 1500 ? '#16a34a'
     : '#3b82f6';
-  document.getElementById('goalBar').style.background = overGoal
-    ? 'linear-gradient(90deg,#2563eb,#60a5fa)'
-    : _goalColor;
+  document.getElementById('goalBar').style.backgroundColor = overGoal ? '#2563eb' : _goalColor;
   document.getElementById('goalPct').textContent = overGoal
     ? `${goalPct}% — เกินเป้า +${(goalVal-GOAL).toLocaleString()} คน 🎉`
     : `${goalPct}%`;
