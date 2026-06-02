@@ -197,7 +197,7 @@
         <div style="font-size:0.82rem;color:var(--big-sub-c);"><span id="goalCurrent" style="font-weight:700;color:var(--navy);">-</span> / <span style="font-weight:600;">1,800 คน</span></div>
       </div>
       <div class="goal-bar-wrap">
-        <span class="runner-wrap" id="goalRunnerWrap" style="left:0%;"><span id="goalRunner" style="display:inline-block;transform:scaleX(-1);">🏃</span></span>
+        <span class="runner-wrap" id="goalRunnerWrap" style="left:0%;"><span id="goalRunner" style="display:inline-block;">🏁</span></span>
         <div class="progress-bar" style="height:18px;border-radius:9px;">
           <div id="goalBar" class="progress-fill" style="width:0%;border-radius:9px;transition:width 1s ease;"></div>
         </div>
@@ -462,8 +462,8 @@ function renderStats() {
   const _runnerPct = Math.min(goalVal / GOAL * 100, 100);
   const _runner = document.getElementById('goalRunner');
   const _runnerWrap = document.getElementById('goalRunnerWrap');
-  _runner.textContent = overGoal ? '🎉' : '🏃';
-  _runner.style.transform = overGoal ? 'none' : 'scaleX(-1)';
+  _runner.textContent = overGoal ? '🎉' : '🏁';
+  _runner.style.transform = 'none';
   _runnerWrap.style.left = `calc(${_runnerPct}% - 12px)`;
   const _goalColor = goalVal < 300 ? '#ef4444'
     : goalVal < 600  ? '#eab308'
