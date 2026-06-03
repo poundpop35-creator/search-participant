@@ -550,7 +550,7 @@ function renderDeptTable(sorted, maxDept, bodyId, fillColor) {
     <td class="rank">${i+1}</td>
     <td class="dept-name">${d.name}</td>
     <td class="count-num">${d.count}</td>
-    <td><div style="display:flex;align-items:center;gap:6px;"><div class="mini-bar" style="flex:1;"><div class="mini-fill" style="width:${Math.round(d.count/maxDept*100)}%;background:${fc}"></div></div><span style="font-size:0.75rem;color:#94a3b8;min-width:32px;text-align:right;">${Math.round(d.count/maxDept*100)}%</span></div></td>
+    <td><div style="position:relative;"><span style="position:absolute;top:-14px;right:0;font-size:0.68rem;color:#94a3b8;">${Math.round(d.count/maxDept*100)}%</span><div class="mini-bar"><div class="mini-fill" style="width:${Math.round(d.count/maxDept*100)}%;background:${fc}"></div></div></div></td>
   </tr>`).join('');
 }
 
