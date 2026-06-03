@@ -496,8 +496,8 @@ function renderStats() {
   const sorted = DEPTS.map(d => ({name:d, count:deptCount[d]}))
     .filter(d => d.count > 0)
     .sort((a,b) => b.count - a.count);
-  const maxDept = sorted.length > 0 ? sorted[0].count : 1;
-  renderDeptTable(sorted, maxDept, 'deptBody', getComputedStyle(document.documentElement).getPropertyValue('--dept-fill').trim());
+  const totalInternal = sorted.reduce((s,d) => s+d.count, 0);
+  renderDeptTable(sorted, totalInternal || 1, 'deptBody', getComputedStyle(document.documentElement).getPropertyValue('--dept-fill').trim());
 
   // External dept table
   const extDeptCount = {};
@@ -510,8 +510,8 @@ function renderStats() {
   });
   const extSorted = Object.entries(extDeptCount).map(([name, count]) => ({name, count}))
     .sort((a,b) => b.count - a.count);
-  const maxExt = extSorted.length > 0 ? extSorted[0].count : 1;
-  renderDeptTable(extSorted, maxExt, 'extDeptBody', '#ea580c');
+  const totalExternal = extSorted.reduce((s,d) => s+d.count, 0);
+  renderDeptTable(extSorted, totalExternal || 1, 'extDeptBody', '#7c3aed');
 
   // Zone chart (check-in data)
   renderZoneChartPub(filtered);
@@ -550,7 +550,7 @@ function renderDeptTable(sorted, maxDept, bodyId, fillColor) {
     <td class="rank">${i+1}</td>
     <td class="dept-name">${d.name}</td>
     <td class="count-num">${d.count}</td>
-    <td><div class="mini-bar"><div class="mini-fill" style="width:${Math.round(d.count/maxDept*100)}%;background:${fc}"></div></div></td>
+    <td><div style="display:flex;align-items:center;gap:6px;"><div class="mini-bar" style="flex:1;"><div class="mini-fill" style="width:${Math.round(d.count/maxDept*100)}%;background:${fc}"></div></div><span style="font-size:0.75rem;color:#94a3b8;min-width:32px;text-align:right;">${Math.round(d.count/maxDept*100)}%</span></div></td>
   </tr>`).join('');
 }
 
