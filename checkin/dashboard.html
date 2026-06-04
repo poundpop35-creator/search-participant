@@ -32,6 +32,29 @@
     .clear-cancel{flex:1;padding:12px;border-radius:10px;border:2px solid #e2e8f0;background:white;font-family:'Sarabun',sans-serif;font-size:0.95rem;cursor:pointer;color:#64748b;}
     .clear-confirm{flex:1;padding:12px;border-radius:10px;border:none;background:#dc2626;color:white;font-family:'Sarabun',sans-serif;font-size:0.95rem;font-weight:700;cursor:pointer;}
     .clear-confirm:disabled{opacity:0.5;cursor:not-allowed;}
+    /* Help modal */
+    .help-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.55);display:flex;align-items:center;justify-content:center;z-index:9998;padding:16px;}
+    .help-overlay.hidden{display:none;}
+    .help-modal{background:#fff;border-radius:20px;width:100%;max-width:560px;max-height:88vh;overflow-y:auto;box-shadow:0 12px 48px rgba(0,0,0,0.25);}
+    .help-header{position:sticky;top:0;background:#fff;padding:20px 24px 14px;border-bottom:1px solid #e2e8f0;display:flex;justify-content:space-between;align-items:center;border-radius:20px 20px 0 0;}
+    .help-header h2{font-size:1.05rem;font-weight:700;color:#0d2b6b;}
+    .help-close{width:32px;height:32px;border-radius:50%;border:none;background:#f1f5f9;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;}
+    .help-body{padding:20px 24px 28px;}
+    .help-page{margin-bottom:20px;border:1px solid #e2e8f0;border-radius:14px;overflow:hidden;}
+    .help-page-header{padding:12px 16px;background:#f8fafc;display:flex;align-items:center;gap:10px;}
+    .help-page-icon{font-size:1.2rem;}
+    .help-page-title{font-weight:700;font-size:0.95rem;color:#0d2b6b;}
+    .help-page-url{font-size:0.72rem;color:#94a3b8;margin-left:auto;}
+    .help-page-body{padding:12px 16px;}
+    .help-page-body p{font-size:0.85rem;color:#475569;line-height:1.7;margin-bottom:6px;}
+    .help-page-body p:last-child{margin-bottom:0;}
+    .help-tag{display:inline-block;padding:2px 8px;border-radius:6px;font-size:0.72rem;font-weight:700;margin-right:4px;}
+    .tag-admin{background:#fef3c7;color:#92400e;}
+    .tag-staff{background:#ede9fe;color:#4c1d95;}
+    .tag-all{background:#dcfce7;color:#166534;}
+    .help-table{width:100%;border-collapse:collapse;margin-top:6px;font-size:0.82rem;}
+    .help-table th{background:#f1f5f9;color:#64748b;padding:6px 10px;text-align:left;font-weight:600;}
+    .help-table td{padding:6px 10px;border-top:1px solid #f1f5f9;color:#334155;}
     .main{padding:20px;max-width:1200px;margin:0 auto;}
     /* Stats */
     .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:20px;}
@@ -174,6 +197,102 @@ document.addEventListener('DOMContentLoaded',()=>{
     <a href="public.html" class="refresh-btn" style="text-decoration:none;">Live Dashboard</a>
     <div id="activeSessions" style="font-size:0.78rem;color:#16a34a;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:5px 10px;display:none;">🟢 <span id="activeList"></span></div>
     <button class="refresh-btn" onclick="doLogout()" style="background:#dc2626;color:white;border-color:#dc2626;font-weight:600;">ออกจากระบบ</button>
+    <button class="refresh-btn" onclick="document.getElementById('helpOverlay').classList.remove('hidden')" style="font-weight:700;">❓ คู่มือ</button>
+  </div>
+</div>
+
+<!-- Help Modal -->
+<div class="help-overlay hidden" id="helpOverlay" onclick="if(event.target===this)this.classList.add('hidden')">
+  <div class="help-modal">
+    <div class="help-header">
+      <h2>📘 คู่มือการใช้งานระบบ</h2>
+      <button class="help-close" onclick="document.getElementById('helpOverlay').classList.add('hidden')">✕</button>
+    </div>
+    <div class="help-body">
+
+      <div class="help-page">
+        <div class="help-page-header">
+          <span class="help-page-icon">🔐</span>
+          <span class="help-page-title">หน้า Login</span>
+          <span class="help-page-url">login.html</span>
+        </div>
+        <div class="help-page-body">
+          <p>หน้าเข้าสู่ระบบสำหรับเจ้าหน้าที่และ Admin เท่านั้น</p>
+          <table class="help-table">
+            <tr><th>บัญชี</th><th>รหัสผ่าน</th><th>สิทธิ์</th></tr>
+            <tr><td><strong>adminpound</strong></td><td>P@und0258</td><td><span class="help-tag tag-admin">Admin</span> login ซ้ำได้ทุกเวลา</td></tr>
+            <tr><td>staff01–staff10</td><td>Dmsc@2569</td><td><span class="help-tag tag-staff">Staff</span> ล็อกซ้ำไม่ได้ใน 10 นาที</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <div class="help-page">
+        <div class="help-page-header">
+          <span class="help-page-icon">🎛️</span>
+          <span class="help-page-title">Admin Dashboard (หน้านี้)</span>
+          <span class="help-page-url">dashboard.html</span>
+        </div>
+        <div class="help-page-body">
+          <p><span class="help-tag tag-admin">Admin</span> ใช้งานได้เต็มรูปแบบ <span class="help-tag tag-staff">Staff</span> ดูได้แต่ไม่สามารถล้างข้อมูลได้</p>
+          <p>📊 ดูสถิติการเช็คอินแบบละเอียด กรองตามวัน / ประเภท / หน่วยงาน</p>
+          <p>🎨 เปลี่ยนธีมสี — กดปุ่ม 🎨 มุมขวาล่าง เลือกได้ 5 โทนสี (ทุก device เห็นพร้อมกัน)</p>
+          <p>📤 ส่งออกข้อมูลเป็น Excel หรือ CSV ได้จากตารางแต่ละตัว</p>
+          <p>🗑️ ล้างข้อมูล — ต้องใส่รหัสยืนยัน (เฉพาะ Admin)</p>
+        </div>
+      </div>
+
+      <div class="help-page">
+        <div class="help-page-header">
+          <span class="help-page-icon">🌐</span>
+          <span class="help-page-title">Live Dashboard สาธารณะ</span>
+          <span class="help-page-url">public.html</span>
+        </div>
+        <div class="help-page-body">
+          <p><span class="help-tag tag-all">ทุกคน</span> เปิดได้โดยไม่ต้อง login</p>
+          <p>📡 อัปเดตอัตโนมัติทุก 60 วินาที แสดงตัวเลขผู้เข้าร่วม (สะสม) แบบ real-time</p>
+          <p>📅 กรองดูตามวัน — 24 / 25 / 26 มิ.ย. หรือดูรวม</p>
+          <p>🎯 แถบเป้าหมาย 1,800 คน — สีเปลี่ยนตามจำนวน (🔴→🟡→🟠→🟢→🔵)</p>
+          <p>📊 สัดส่วน ภายใน / ภายนอก / Walk-in และตารางหน่วยงาน + สถิติเขตสุขภาพ</p>
+        </div>
+      </div>
+
+      <div class="help-page">
+        <div class="help-page-header">
+          <span class="help-page-icon">👔</span>
+          <span class="help-page-title">Executive Dashboard</span>
+          <span class="help-page-url">executive.html</span>
+        </div>
+        <div class="help-page-body">
+          <p><span class="help-tag tag-all">ผู้บริหาร</span> ดูสรุปภาพรวมแบบกระชับ เหมาะสำหรับนำเสนอ</p>
+          <p>📈 แสดงกราฟและสถิติสำคัญ ไม่มีรายละเอียดปลีกย่อย</p>
+        </div>
+      </div>
+
+      <div class="help-page">
+        <div class="help-page-header">
+          <span class="help-page-icon">👜</span>
+          <span class="help-page-title">จำนวนผู้มารับกระเป๋า</span>
+          <span class="help-page-url">bag-dashboard.html</span>
+        </div>
+        <div class="help-page-body">
+          <p><span class="help-tag tag-staff">Staff</span> ใช้ติดตามจำนวนผู้มารับกระเป๋าก่อนวันงาน</p>
+          <p>🔢 นับจำนวนและดูรายชื่อผู้ที่มารับกระเป๋าแล้ว</p>
+        </div>
+      </div>
+
+      <div class="help-page">
+        <div class="help-page-header">
+          <span class="help-page-icon">🎤</span>
+          <span class="help-page-title">Dashboard ผู้ส่งผลงาน</span>
+          <span class="help-page-url">presenter-dashboard.html</span>
+        </div>
+        <div class="help-page-body">
+          <p><span class="help-tag tag-staff">Staff</span> ดูสรุปและสถิติผู้ที่ลงทะเบียนนำเสนอผลงาน</p>
+          <p>📋 แยกตามประเภทการนำเสนอ ดูรายชื่อและสถานะเช็คอิน</p>
+        </div>
+      </div>
+
+    </div>
   </div>
 </div>
 
