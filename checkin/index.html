@@ -348,21 +348,27 @@
     showModal('loading','กำลังดำเนินการ','กำลังบันทึกข้อมูล','',null);
     try{
       const keyword=decodedText.trim();
-      const searchRes=await sbFetch(`/rest/v1/participants?or=(id_card.eq.${encodeURIComponent(keyword)},passport.eq.${encodeURIComponent(keyword)})&select=id,prefix,first_name,last_name,tag,items,is_walkin,bag_received,bag_received_date`,'GET');
+      const searchRes=await sbFetch(`/rest/v1/participants?or=(id_card.eq.${encodeURIComponent(keyword)},passport.eq.${encodeURIComponent(keyword)})&select=id,prefix,first_name,last_name,tag,items,is_walkin,internal_external,bag_received,bag_received_date`,'GET');
       if(!searchRes.ok){showModal('error','ข้อผิดพลาด','ไม่สามารถค้นหาข้อมูลได้','',null);return;}
       const participants=await searchRes.json();
       if(!participants||participants.length===0){
-        showModal('error','ไม่พบข้อมูล','ไม่พบข้อมูลในระบบ','',null);
+        if(day==='bag'){
+          showModal('error','ไม่มีสิทธิ์','ท่านไม่มีสิทธิ์รับกระเป๋าก่อนวันงาน','',null);
+        } else {
+          showModal('error','ไม่พบข้อมูล','ไม่พบข้อมูลในระบบ','',null);
+        }
         return;
       }
       const p=participants[0];
       const fullName=`${(p.prefix||'').replace(/\s*\([^)]*\)/g,'').trim()} ${p.first_name||''} ${p.last_name||''}`.trim().replace(/\s+/g,' ');
       const isWalkin=p.is_walkin===true;
+      const pType=isWalkin?'Walk-in':(p.internal_external||'').includes('ภายนอก')?'บุคคลภายนอก':(p.internal_external||'').includes('ภายใน')?'บุคลากรภายใน':'ไม่ระบุ';
 
       // โหมดรับกระเป๋า
       if(day==='bag'){
         if(p.bag_received===true){
           showModal('warning','รับกระเป๋าแล้ว','บุคคลนี้รับกระเป๋าไปแล้ว',fullName,[
+            {label:'ประเภท',val:pType,style:'normal'},
             {label:'วันที่รับ',val:p.bag_received_date||'-',style:'normal'},
             {label:'สถานะ',val:'รับกระเป๋าไปแล้ว ✓',style:'warn'}
           ]);
@@ -374,6 +380,7 @@
           todayCount++;
           document.getElementById('count').textContent=todayCount.toLocaleString();
           showModal('success','รับกระเป๋าสำเร็จ','บันทึกการรับกระเป๋าเรียบร้อย',fullName,[
+            {label:'ประเภท',val:pType,style:'normal'},
             {label:'วันที่รับ',val:today,style:'normal'},
             {label:'สถานะกระเป๋า',val:'รับได้เลย ✓',style:'ok'}
           ]);
