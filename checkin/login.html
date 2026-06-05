@@ -170,7 +170,7 @@
 </div>
 <script>
 const SB_URL  = "https://gvxytnjfyepqhbkmcjms.supabase.co";
-const SB_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2eHl0bmpmeWVwcWhia21cam1zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0MzE2NDAsImV4cCI6MjA5NTAwNzY0MH0.RAr_ehb4cxfNliDR0h5XcihUaP-0ltZTTGIAv2Fw1kk";
+const SB_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2eHl0bmpmeWVwcWhia21jam1zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0MzE2NDAsImV4cCI6MjA5NTAwNzY0MH0.RAr_ehb4cxfNliDR0h5XcihUaP-0ltZTTGIAv2Fw1kk";
 const SB_KEY  = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2eHl0bmpmeWVwcWhia21jam1zIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3OTQzMTY0MCwiZXhwIjoyMDk1MDA3NjQwfQ.Hrfc0erkIatyVbmsOW2SU7piH3L65qbS2kdi2eYzbQk";
 const USERS = {
   'adminpound':'P@und0258',
@@ -181,7 +181,7 @@ const USERS = {
 const _next = new URLSearchParams(window.location.search).get('next') || 'index.html';
 if(sessionStorage.getItem('dmsc_auth')==='ok') window.location.href = _next;
 (function(){const c=localStorage.getItem('pageBgUrl');if(c)document.body.style.backgroundImage=`linear-gradient(rgba(232,240,254,0.55),rgba(232,240,254,0.55)),url('${c}')`;})();
-async function _loadPageBg(){try{const r=await fetch(SB_URL+'/rest/v1/app_settings?key=eq.page_bg&select=value',{headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON}});const d=await r.json();if(Array.isArray(d)&&d.length){const v=d[0].value||'';localStorage.setItem('pageBgUrl',v);document.body.style.backgroundImage=v?`linear-gradient(rgba(232,240,254,0.55),rgba(232,240,254,0.55)),url('${v}')`:'';}}catch(e){}}
+async function _loadPageBg(){try{const r=await fetch(SB_URL+'/rest/v1/app_settings?key=eq.page_bg&select=value',{headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON}});const d=await r.json();const v=(Array.isArray(d)&&d.length)?(d[0].value||''):'';localStorage.setItem('pageBgUrl',v);document.body.style.backgroundImage=v?`linear-gradient(rgba(232,240,254,0.55),rgba(232,240,254,0.55)),url('${v}')`:'';}}catch(e){}}
 _loadPageBg();setInterval(_loadPageBg,30000);
 
 async function doLogin(){
