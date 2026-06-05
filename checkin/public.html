@@ -653,14 +653,25 @@ applyTheme(parseInt(localStorage.getItem('pubTheme')||'3'), false);
 // Load bg from cache instantly
 (function(){
   const c=localStorage.getItem('heroImgUrl');
-  if(c){
-    const u=`url('${c}')`;
-    document.body.style.backgroundImage=`linear-gradient(rgba(232,240,254,0.60),rgba(232,240,254,0.60)),${u}`;
-    const h=document.querySelector('.hero');if(h)h.style.backgroundImage=u;
-  }
+  if(c) _applyBg(c);
 })();
 loadThemeFromSupabase();
 loadBgFromSupabase();
+
+function _applyBg(v){
+  if(v){
+    document.body.style.backgroundImage=`linear-gradient(rgba(232,240,254,0.60),rgba(232,240,254,0.60)),url('${v}')`;
+    document.body.style.backgroundSize='cover';
+    document.body.style.backgroundAttachment='fixed';
+    document.body.style.backgroundPosition='center';
+    const h=document.querySelector('.hero');
+    if(h){h.style.backgroundImage='none';h.style.backgroundColor='transparent';}
+  } else {
+    ['backgroundImage','backgroundSize','backgroundAttachment','backgroundPosition'].forEach(p=>document.body.style[p]='');
+    const h=document.querySelector('.hero');
+    if(h){h.style.backgroundImage='';h.style.backgroundColor='';}
+  }
+}
 loadData();
 setInterval(loadData, 60000);
 setInterval(loadThemeFromSupabase, 30000);
@@ -674,11 +685,7 @@ async function loadBgFromSupabase() {
     if(Array.isArray(d) && d.length) {
       const v = d[0].value || '';
       localStorage.setItem('heroImgUrl', v);
-      if(v){
-        const u=`url('${v}')`;
-        document.body.style.backgroundImage=`linear-gradient(rgba(232,240,254,0.60),rgba(232,240,254,0.60)),${u}`;
-        const h=document.querySelector('.hero');if(h)h.style.backgroundImage=u;
-      }
+      _applyBg(v);
     }
   } catch(e) {}
 }
