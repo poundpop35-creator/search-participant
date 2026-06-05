@@ -44,10 +44,10 @@
     .s-d3 .stat-num{color:#6A8694;}
 
     .dept-card{background:var(--white);border-radius:18px;box-shadow:var(--shadow);overflow:hidden;margin-bottom:24px;border:1px solid #C8DDE8;}
-    .dept-card-header{padding:18px 24px;border-bottom:1px solid #C8DDE8;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}
+    .dept-card-header{padding:18px 24px;border-bottom:1px solid #C8DDE8;}
     .dept-card-title{font-size:1rem;font-weight:700;color:#1F3540;}
     .dept-card-sub{font-size:0.8rem;color:#7a9aae;margin-top:2px;}
-    .share-btn{flex-shrink:0;display:inline-flex;align-items:center;gap:6px;font-size:0.8rem;font-weight:600;color:#1F3540;background:#e8f4f8;border:1.5px solid #C8DDE8;border-radius:10px;padding:7px 14px;cursor:pointer;white-space:nowrap;transition:background 0.15s;}
+    .share-btn{display:inline-flex;align-items:center;gap:6px;font-size:0.8rem;font-weight:600;color:#1F3540;background:#e8f4f8;border:1.5px solid #C8DDE8;border-radius:10px;padding:7px 16px;cursor:pointer;white-space:nowrap;transition:background 0.15s;margin-top:12px;}
     .share-btn:hover{background:#C8DDE8;}
 
     .scroll-wrap{overflow-x:auto;}
@@ -119,13 +119,11 @@
 
     <div class="dept-card" id="deptShareCard">
       <div class="dept-card-header">
-        <div>
-          <div class="dept-card-title">จำนวนผู้เข้าร่วมแยกตามหน่วยงานภายใน (กรมวิทยาศาสตร์การแพทย์)</div>
-          <div class="dept-card-sub">ข้อมูลจากการเช็คอินจริง — อัปเดตอัตโนมัติทุก 1 นาที</div>
-        </div>
+        <div class="dept-card-title">จำนวนผู้เข้าร่วมแยกตามหน่วยงานภายใน (กรมวิทยาศาสตร์การแพทย์)</div>
+        <div class="dept-card-sub">ข้อมูลจากการเช็คอินจริง — อัปเดตอัตโนมัติทุก 1 นาที</div>
         <button class="share-btn" onclick="shareDeptTable()">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          บันทึกเป็นรูปภาพ
+          บันทึกเป็นรูปภาพ (A4)
         </button>
       </div>
       <div class="scroll-wrap">
@@ -258,28 +256,77 @@ setInterval(loadData, 60000);
 
 async function shareDeptTable() {
   const btn = document.querySelector('.share-btn');
-  const card = document.getElementById('deptShareCard');
-  btn.textContent = '⏳ กำลังสร้างรูป...';
   btn.disabled = true;
+  btn.innerHTML = '⏳ กำลังสร้างรูป...';
   try {
-    const canvas = await html2canvas(card, {
+    const a4 = document.getElementById('a4Export');
+    document.getElementById('a4ExportTime').textContent =
+      new Date().toLocaleString('th-TH', {timeZone:'Asia/Bangkok', dateStyle:'medium', timeStyle:'short'});
+
+    // Build table with full inline styles (html2canvas-safe)
+    const rows = Array.from(document.querySelectorAll('#execDeptBody tr'));
+    const tbodyHtml = rows.map((tr, i) => {
+      const bg = i % 2 === 0 ? '#ffffff' : '#eef5fa';
+      const cells = Array.from(tr.querySelectorAll('td')).map((td, ci) => {
+        const isNum = ci >= 2;
+        const numStyle = isNum ? 'text-align:right;font-weight:700;' : '';
+        const colorStyle = ci === 0 ? 'color:#7a9aae;' : 'color:#1F3540;';
+        return `<td style="padding:9px 12px;font-size:12.5px;border-bottom:1px solid #ddeaf2;background:${bg};${colorStyle}${numStyle}">${td.innerHTML}</td>`;
+      }).join('');
+      return `<tr>${cells}</tr>`;
+    }).join('');
+
+    document.getElementById('a4TableSlot').innerHTML = `
+      <table style="width:100%;border-collapse:collapse;font-family:'Sarabun',sans-serif;">
+        <thead>
+          <tr>
+            <th style="background:#1F3540;padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:#fff;border:none;width:36px;">#</th>
+            <th style="background:#1F3540;padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:#fff;border:none;">หน่วยงาน</th>
+            <th style="background:#1F3540;padding:10px 12px;text-align:right;font-size:11px;font-weight:700;color:#93c5fd;border:none;min-width:65px;">24 มิ.ย.</th>
+            <th style="background:#1F3540;padding:10px 12px;text-align:right;font-size:11px;font-weight:700;color:#c4b5fd;border:none;min-width:65px;">25 มิ.ย.</th>
+            <th style="background:#1F3540;padding:10px 12px;text-align:right;font-size:11px;font-weight:700;color:#67e8f9;border:none;min-width:65px;">26 มิ.ย.</th>
+            <th style="background:#1F3540;padding:10px 12px;text-align:right;font-size:11px;font-weight:700;color:#fff;border:none;min-width:65px;">รวม</th>
+          </tr>
+        </thead>
+        <tbody>${tbodyHtml}</tbody>
+      </table>`;
+
+    const canvas = await html2canvas(a4, {
       scale: 2,
       useCORS: true,
       backgroundColor: '#ffffff',
-      scrollX: 0,
-      scrollY: -window.scrollY
+      logging: false,
+      windowWidth: 794
     });
+
     const link = document.createElement('a');
-    link.download = 'dept-table.png';
+    link.download = 'dept-summary-' + new Date().toISOString().slice(0,10) + '.png';
     link.href = canvas.toDataURL('image/png');
     link.click();
   } catch(e) {
     alert('ไม่สามารถสร้างรูปภาพได้: ' + e.message);
   } finally {
-    btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> บันทึกเป็นรูปภาพ';
+    btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> บันทึกเป็นรูปภาพ (A4)';
     btn.disabled = false;
   }
 }
 </script>
+
+<!-- A4 export container — off-screen, always rendered so html2canvas can capture it -->
+<div id="a4Export" style="position:fixed;left:-9999px;top:0;width:794px;background:#fff;padding:44px 52px;font-family:'Sarabun',sans-serif;line-height:1.6;">
+  <div style="border-bottom:3px solid #1F3540;padding-bottom:14px;margin-bottom:22px;display:flex;justify-content:space-between;align-items:flex-end;gap:16px;">
+    <div>
+      <div style="font-size:16px;font-weight:800;color:#1F3540;line-height:1.4;">จำนวนผู้เข้าร่วมแยกตามหน่วยงานภายใน</div>
+      <div style="font-size:14px;font-weight:700;color:#2C4B5D;margin-top:2px;">(กรมวิทยาศาสตร์การแพทย์)</div>
+      <div style="font-size:11px;color:#7a9aae;margin-top:4px;">ข้อมูลจากการเช็คอินจริง — อัปเดตอัตโนมัติทุก 1 นาที</div>
+    </div>
+    <div style="text-align:right;flex-shrink:0;">
+      <div style="font-size:11px;font-weight:700;color:#1F3540;">ประชุมวิชาการวิทยาศาสตร์การแพทย์ ครั้งที่ 34</div>
+      <div style="font-size:10.5px;color:#7a9aae;margin-top:3px;" id="a4ExportTime"></div>
+    </div>
+  </div>
+  <div id="a4TableSlot"></div>
+  <div style="margin-top:18px;font-size:10px;color:#b0c4ce;text-align:center;letter-spacing:0.04em;">กรมวิทยาศาสตร์การแพทย์ · Department of Medical Sciences</div>
+</div>
 </body>
 </html>
