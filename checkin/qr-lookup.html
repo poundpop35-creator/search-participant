@@ -134,7 +134,7 @@ async function doSearch() {
   try {
     const enc = encodeURIComponent(q);
     const res = await fetch(
-      `${SB_URL}/rest/v1/participants?or=(first_name.ilike.*${enc}*,last_name.ilike.*${enc}*)&select=id,prefix,first_name,last_name,dept,ext_dept,internal_external,participation_type,id_card,passport&order=last_name.asc&limit=30`,
+      `${SB_URL}/rest/v1/participants?or=(first_name.ilike.*${enc}*,last_name.ilike.*${enc}*)&select=id,prefix,first_name,last_name,dept,ext_dept,internal_external,participation_type,id_card,passport,qr_idcard,qr_passport&order=last_name.asc&limit=30`,
       { headers: { 'apikey': SB_ANON, 'Authorization': 'Bearer ' + SB_ANON } }
     );
     if (!res.ok) throw new Error();
@@ -204,18 +204,29 @@ function checkPin() {
 function showQR() {
   const p = selectedP;
   const name = `${(p.prefix||'').replace(/\s*\([^)]*\)/g,'').trim()} ${p.first_name||''} ${p.last_name||''}`.trim().replace(/\s+/g,' ');
-  const qrData = p.id_card || p.passport;
   document.getElementById('qrTitle').textContent = name;
   document.getElementById('qrOverlay').classList.remove('hidden');
   const container = document.getElementById('qrContainer');
   container.innerHTML = '';
+  const qrImgUrl = p.qr_idcard || p.qr_passport || '';
+  if (qrImgUrl) {
+    // ใช้รูป QR จาก JotForm โดยตรง
+    const img = document.createElement('img');
+    img.src = qrImgUrl;
+    img.style.cssText = 'width:220px;height:220px;object-fit:contain;display:block;';
+    img.onerror = () => generateQR(container, p);
+    container.appendChild(img);
+  } else {
+    generateQR(container, p);
+  }
+}
+
+function generateQR(container, p) {
+  const qrData = p.id_card || p.passport;
   setTimeout(() => {
     new QRCode(container, {
-      text: qrData,
-      width: 220,
-      height: 220,
-      colorDark: '#0d2b6b',
-      colorLight: '#ffffff',
+      text: qrData, width: 220, height: 220,
+      colorDark: '#0d2b6b', colorLight: '#ffffff',
       correctLevel: QRCode.CorrectLevel.M
     });
   }, 50);
@@ -233,8 +244,14 @@ function downloadQR() {
   const name = `${p.first_name||''}${p.last_name||''}`.replace(/\s+/g,'_');
   const link = document.createElement('a');
   link.download = `QRCode_${name}.png`;
-  link.href = canvas ? canvas.toDataURL('image/png') : container.querySelector('img').src;
-  link.click();
+  if (canvas) {
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  } else {
+    // รูปจาก JotForm URL — เปิดในแท็บใหม่ให้ save เอง
+    const imgSrc = container.querySelector('img')?.src || '';
+    if (imgSrc) window.open(imgSrc, '_blank');
+  }
 }
 </script>
 </body>
