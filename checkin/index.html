@@ -480,10 +480,10 @@
     document.getElementById('modalStatus').className='modal-status '+type;
     document.getElementById('modalTitle').textContent=title;
     const nameEl=document.getElementById('modalName');
-    if(name){nameEl.style.display='';nameEl.innerHTML='<span style="font-size:0.75rem;font-weight:400;color:#94a3b8;">ชื่อ </span>'+name;}
+    if(name){nameEl.style.display='';nameEl.textContent=name;}
     else{nameEl.style.display='none';}
     const deptEl=document.getElementById('modalDept');
-    if(dept){deptEl.style.display='';deptEl.innerHTML='<span style="font-size:0.75rem;font-weight:400;color:#94a3b8;">หน่วยงาน </span>'+dept;}
+    if(dept){deptEl.style.display='';deptEl.textContent=dept;}
     else{deptEl.style.display='none';}
     document.getElementById('btnOk').className='btn-ok '+type;
     document.getElementById('btnOk').style.display=type==='loading'?'none':'block';

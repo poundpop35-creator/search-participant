@@ -76,20 +76,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
 </head>
 <body>
-<!-- Dashboard gate for staff -->
-<div class="clear-overlay hidden" id="dashGateOverlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.65);display:flex;align-items:center;justify-content:center;z-index:99999;padding:24px;">
-  <div class="clear-modal">
-    <div class="clear-icon">🔐</div>
-    <h3>ยืนยันการเข้าถึง Dashboard</h3>
-    <p>กรุณาใส่รหัสผ่านสำหรับเข้าหน้านี้</p>
-    <input class="clear-pw-input" type="password" id="dashGateInput" placeholder="รหัสผ่าน Dashboard" onkeydown="if(event.key==='Enter')checkDashGate()">
-    <div id="dashGateErr" style="color:#dc2626;font-size:0.82rem;min-height:18px;margin-top:6px;"></div>
-    <div style="display:flex;gap:10px;margin-top:14px;">
-      <button class="clear-cancel" onclick="window.location.href='index.html'" style="flex:1;">ยกเลิก</button>
-      <button class="clear-confirm" onclick="checkDashGate()" style="flex:1;">เข้าสู่ Dashboard</button>
-    </div>
-  </div>
-</div>
 
 <div class="topbar">
   <div style="display:flex;align-items:center;gap:10px;">
@@ -221,11 +207,6 @@ const DEPTS = ['อธิบดีกรมวิทยาศาสตร์ก�
 // Auth check
 if(sessionStorage.getItem('dmsc_auth')!=='ok') window.location.href='login.html';
 document.getElementById('userDisplay').textContent = sessionStorage.getItem('dmsc_user')||'';
-// Staff dashboard gate — admin users (by role OR username) bypass automatically
-if(sessionStorage.getItem('dmsc_role')!=='admin' && sessionStorage.getItem('dmsc_user')!=='adminpound' && sessionStorage.getItem('dmsc_dash_ok')!=='1'){
-  document.getElementById('dashGateOverlay').classList.remove('hidden');
-  setTimeout(()=>document.getElementById('dashGateInput').focus(),100);
-}
 
 (function(){
   const _u=sessionStorage.getItem('dmsc_user');
@@ -388,23 +369,11 @@ function getRows(){
 async function doLogout(){
   const _u=sessionStorage.getItem('dmsc_user');
   if(_u) await fetch(`${SB_URL}/rest/v1/staff_sessions?username=eq.${encodeURIComponent(_u)}`,{method:'DELETE',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}}).catch(()=>{});
-  sessionStorage.removeItem('dmsc_auth');sessionStorage.removeItem('dmsc_user');sessionStorage.removeItem('dmsc_role');sessionStorage.removeItem('dmsc_dash_ok');
+  sessionStorage.removeItem('dmsc_auth');sessionStorage.removeItem('dmsc_user');sessionStorage.removeItem('dmsc_role');
   window.location.href='login.html';
 }
 
 const CLEAR_PASS='P@und3142';
-const DASH_PASS='P@und3142';
-function checkDashGate(){
-  const v=document.getElementById('dashGateInput').value;
-  if(v===DASH_PASS){
-    sessionStorage.setItem('dmsc_dash_ok','1');
-    document.getElementById('dashGateOverlay').classList.add('hidden');
-  } else {
-    document.getElementById('dashGateErr').textContent='รหัสผ่านไม่ถูกต้อง';
-    document.getElementById('dashGateInput').value='';
-    document.getElementById('dashGateInput').focus();
-  }
-}
 
 function openClearModal(){
   document.getElementById('clearPwInput').value='';
