@@ -648,12 +648,33 @@ async function loadThemeFromSupabase() {
   } catch(e) {}
 }
 
-// Apply cached theme instantly, then sync from Supabase
+// Apply cached theme + hero bg instantly, then sync from Supabase
 applyTheme(parseInt(localStorage.getItem('pubTheme')||'3'), false);
+(function(){
+  const cached = localStorage.getItem('heroImgUrl');
+  if(cached) document.querySelector('.hero').style.backgroundImage = "url('" + cached + "')";
+})();
+
+async function loadHeroBgFromSupabase() {
+  try {
+    const r = await fetch(SUPABASE_URL + "/rest/v1/app_settings?key=eq.bg_url&select=value", {
+      headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}
+    });
+    const d = await r.json();
+    if(Array.isArray(d) && d.length) {
+      const v = d[0].value || '';
+      localStorage.setItem('heroImgUrl', v);
+      document.querySelector('.hero').style.backgroundImage = v ? "url('" + v + "')" : '';
+    }
+  } catch(e) {}
+}
+
 loadThemeFromSupabase();
+loadHeroBgFromSupabase();
 loadData();
 setInterval(loadData, 60000);
 setInterval(loadThemeFromSupabase, 30000);
+setInterval(loadHeroBgFromSupabase, 30000);
 
 </script>
 </body>

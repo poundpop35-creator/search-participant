@@ -1687,15 +1687,15 @@ async function pickTheme(id) {
   const tip = panel.querySelector('.theme-tip');
   if(tip) { tip.textContent = '⏳ กำลังบันทึก...'; tip.style.color = '#64748b'; }
   try {
-    const r = await fetch(SB_URL + "/rest/v1/app_settings?key=eq.theme", {
-      method:'PATCH',
+    const r = await fetch(SB_URL + '/rest/v1/app_settings', {
+      method:'POST',
       headers:{
-        'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON,
-        'Content-Type':'application/json','Prefer':'return=minimal'
+        'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,
+        'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'
       },
-      body: JSON.stringify({value: String(id)})
+      body: JSON.stringify({key:'theme', value: String(id)})
     });
-    if(tip) { tip.textContent = r.ok ? '✅ บันทึกแล้ว — ทุก device จะเห็นธีมนี้' : '⚠️ บันทึกไม่สำเร็จ'; tip.style.color = r.ok ? '#16a34a' : '#dc2626'; }
+    if(tip) { tip.textContent = (r.ok||r.status===204) ? '✅ บันทึกแล้ว — ทุก device จะเห็นธีมนี้' : '⚠️ บันทึกไม่สำเร็จ'; tip.style.color = (r.ok||r.status===204) ? '#16a34a' : '#dc2626'; }
   } catch(e) {
     if(tip) { tip.textContent = '⚠️ บันทึกไม่สำเร็จ (ออฟไลน์)'; tip.style.color = '#dc2626'; }
   }
