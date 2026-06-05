@@ -4,102 +4,145 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>จำนวนผู้เข้าร่วมงาน ประชุมวิชาการวิทยาศาสตร์การแพทย์ ครั้งที่ 34</title>
-  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@100;300;400;600;700;800&family=Bebas+Neue&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
   <style>
-    :root{--blue:#0d2b6b;--blue-mid:#1a4eb8;--blue-light:#e8f0fe;--green:#16a34a;--white:#fff;--shadow:0 2px 16px rgba(13,43,107,0.10);}
+    :root{
+      --gold:#9C7564;--gold-light:#F7DFCB;--navy:#3d2416;
+      --accent:#e07a5f;
+      --card:#ffffff;--border:#D6BDAB;--shadow:0 2px 16px rgba(0,0,0,0.08);
+      --surface:#FDF8F4;
+      --hero-hue:#1e0d08;--hero-veil:rgba(156,117,100,0.50);
+      --badge-bg:rgba(247,223,203,0.20);--badge-bdr:rgba(247,223,203,0.50);--badge-clr:#F7DFCB;
+      --hero-p:#D9BAA4;--day-clr:#F7DFCB;
+      --day-active:#9C7564;--day-active-bdr:#D9BAA4;--day-shadow:rgba(156,117,100,0.55);
+      --big-lbl:#a8907e;--big-sub-c:#b8a090;
+      --d1:#9C7564;--d2:#7a5040;--d3:#c49a82;--dw:#b87a5e;
+      --total-grad:linear-gradient(135deg,#7a5040,#c49a82);
+      --total-bdr:#9C7564;--total-lbl:#F7DFCB;--total-sub-c:#D9BAA4;--total-shad:rgba(156,117,100,0.28);
+      --th-bg:#F7DFCB;--th-color:#9C7564;
+      --td-even:#fdf8f4;--td-line:#e8d8cc;--rank-clr:#b8a090;
+      --track:#D6BDAB;
+      --goal-c:#9C7564;--goal-grad:linear-gradient(90deg,#9C7564,#D9BAA4);--dept-fill:#9C7564;
+      --prov-bg:#fdf8f4;--prov-c:#a8907e;--prov-c2:#b8a090;
+      --zone-th-c:#9C7564;--zone-th-bdr:#D6BDAB;
+      --foot-c:#b8a090;
+    }
     *{box-sizing:border-box;margin:0;padding:0;}
-    body{background:#f0f4ff;font-family:'Sarabun',sans-serif;min-height:100vh;}
+    body{background:var(--surface);font-family:'Sarabun',sans-serif;min-height:100vh;}
 
     .hero{
       position:relative;
-      background-color:#e8f0fe;
-      background-image:url('https://raw.githubusercontent.com/poundpop35-creator/search-participant/main/DNA.png');
+      background-color:var(--hero-hue);
+      background-image:url('https://raw.githubusercontent.com/poundpop35-creator/search-participant/main/IMG_7352.webp');
       background-size:cover;
-      background-position:center right;
-      color:#0d2b6b;
+      background-position:center;
+      color:#f8f6f0;
       padding:36px 24px 32px;
       text-align:center;
       overflow:hidden;
     }
-    .hero::before{content:'';position:absolute;inset:0;background:rgba(232,240,254,0.60);z-index:0;}
+    .hero::before{content:'';position:absolute;inset:0;background:var(--hero-veil);z-index:0;}
     .hero > *{position:relative;z-index:1;}
 
-    .hero-badge{display:inline-block;background:rgba(13,43,107,0.08);border:1px solid rgba(13,43,107,0.2);border-radius:20px;padding:4px 16px;font-size:0.8rem;margin-bottom:14px;color:#1a4eb8;}
-    .hero h1{font-size:1.4rem;font-weight:800;line-height:1.5;margin-bottom:6px;color:#0d2b6b;}
-    .hero p{font-size:0.85rem;color:#1a4eb8;opacity:0.85;}
+    .hero-badge{display:inline-block;background:var(--badge-bg);border:1px solid var(--badge-bdr);border-radius:20px;padding:4px 16px;font-size:0.8rem;margin-bottom:14px;color:var(--badge-clr);}
+    .hero h1{font-size:clamp(1rem,4vw,1.4rem);font-weight:800;line-height:1.5;margin-bottom:6px;color:#ffffff;text-shadow:0 2px 14px rgba(0,0,0,0.95),0 0 32px rgba(0,0,0,0.7);}
+    .hero p{font-size:0.85rem;color:rgba(255,255,255,0.88);text-shadow:0 1px 8px rgba(0,0,0,0.95);}
 
     .hero-date{display:flex;justify-content:center;gap:10px;margin-top:20px;flex-wrap:wrap;}
     .day-btn{
-      background:rgba(13,43,107,0.08);
-      border:2px solid rgba(13,43,107,0.18);
+      background:rgba(8,20,32,0.82);
+      border:1.5px solid rgba(255,255,255,0.25);
       border-radius:12px;
       padding:10px 20px;
       font-size:0.85rem;
       font-weight:700;
-      color:#0d2b6b;
+      color:#ffffff;
       cursor:pointer;
       font-family:'Sarabun',sans-serif;
       transition:all 0.18s;
+      text-shadow:0 1px 4px rgba(0,0,0,0.6);
     }
-    .day-btn:hover:not(.active){background:rgba(13,43,107,0.15);border-color:rgba(13,43,107,0.35);}
-    .day-btn.active{background:#0d2b6b;border-color:#0d2b6b;color:#fff;box-shadow:0 4px 14px rgba(13,43,107,0.35);}
+    .day-btn:hover:not(.active){background:rgba(8,20,32,1);border-color:rgba(255,255,255,0.45);}
+    .day-btn.active{background:var(--day-active);border-color:var(--day-active-bdr);color:#fff;box-shadow:0 4px 14px var(--day-shadow);text-shadow:none;}
 
-    .hero-staff-btn{display:inline-block;margin-top:20px;padding:10px 24px;border-radius:20px;background:#0d2b6b;border:1.5px solid #0d2b6b;color:white;font-family:'Sarabun',sans-serif;font-size:0.88rem;font-weight:600;text-decoration:none;cursor:pointer;transition:opacity .15s;}
-    .hero-staff-btn:hover{opacity:0.85;}
+    .hero-staff-btn{display:inline-block;margin-top:20px;padding:10px 24px;border-radius:20px;background:rgba(8,20,32,0.82);border:1.5px solid rgba(255,255,255,0.25);color:#ffffff;font-family:'Sarabun',sans-serif;font-size:0.88rem;font-weight:600;text-decoration:none;cursor:pointer;transition:all .15s;}
+    .hero-staff-btn:hover{background:rgba(8,20,32,1);border-color:rgba(255,255,255,0.45);}
 
     .main{padding:24px 16px;max-width:900px;margin:0 auto;}
 
     .big-stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:14px;}
-    .big-card{background:var(--white);border-radius:18px;padding:20px 16px;box-shadow:var(--shadow);text-align:center;transition:opacity 0.3s,transform 0.2s;}
+    .big-card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:20px 16px;box-shadow:var(--shadow);text-align:center;transition:opacity 0.3s,transform 0.2s;}
     .big-card.dimmed{opacity:0.35;transform:scale(0.97);}
-    .big-label{font-size:0.75rem;color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;}
+    .big-label{font-size:0.75rem;color:var(--big-lbl);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;}
     .big-num{font-size:2.4rem;font-weight:800;line-height:1;}
-    .big-sub{font-size:0.78rem;color:#94a3b8;margin-top:6px;}
-    .big-card.total .big-num{color:#0d2b6b;}
-    .big-card.internal .big-num{color:#16a34a;}
-    .big-card.external .big-num{color:#ea580c;}
-    .big-card.d1 .big-num{color:#2563eb;}
-    .big-card.d2 .big-num{color:#7c3aed;}
-    .big-card.walkin .big-num{color:#d97706;}
-    .big-card.d3 .big-num{color:#0891b2;}
-    .big-stats-row-4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;}
-    @media(max-width:600px){.big-stats-row-4{grid-template-columns:repeat(2,1fr);}}
+    .big-sub{font-size:0.78rem;color:var(--big-sub-c);margin-top:6px;}
+    .big-card.d1 .big-num{color:var(--d1);}
+    .big-card.d2 .big-num{color:var(--d2);}
+    .big-card.d3 .big-num{color:var(--d3);}
+    .big-card.walkin .big-num{color:var(--dw);}
+    .total-card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:28px 20px;box-shadow:var(--shadow);margin-bottom:14px;text-align:center;}
+    .total-card .big-label{color:var(--gold);letter-spacing:0.1em;}
+    .total-card .big-num{font-size:4rem;color:var(--navy);}
+    .total-card #pTotal{
+      font-family:'Sarabun',sans-serif;
+      font-weight:100;
+      font-size:7.5rem;
+      line-height:1;
+      letter-spacing:0.04em;
+      display:block;
+      text-align:center;
+      color:transparent;
+      -webkit-text-stroke:2px var(--accent);
+      text-shadow:0 0 20px color-mix(in srgb,var(--accent) 55%,transparent),
+                  0 0 50px color-mix(in srgb,var(--accent) 25%,transparent);
+    }
+    .total-card .big-sub{color:var(--big-sub-c);font-size:0.85rem;}
 
-    .progress-card{background:var(--white);border-radius:18px;padding:20px 24px;box-shadow:var(--shadow);margin-bottom:20px;}
-    .progress-title{font-size:0.9rem;font-weight:700;color:var(--blue);margin-bottom:16px;}
+    .progress-card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:20px 24px;box-shadow:var(--shadow);margin-bottom:20px;}
+    .goal-bar-wrap{margin-bottom:4px;}
+    #goalBar{
+      background-image:repeating-linear-gradient(
+        90deg,
+        transparent 0px, transparent 13px,
+        rgba(255,255,255,0.45) 13px, rgba(255,255,255,0.45) 15px
+      ) !important;
+    }
+    .progress-title{font-size:0.9rem;font-weight:700;color:var(--navy);margin-bottom:16px;}
     .progress-row{margin-bottom:14px;}
     .progress-row-top{display:flex;justify-content:space-between;font-size:0.85rem;margin-bottom:6px;}
-    .progress-label{font-weight:600;color:#1e293b;}
-    .progress-pct{font-weight:700;color:var(--blue);}
-    .progress-bar{height:10px;background:#e2e8f0;border-radius:5px;overflow:hidden;}
+    .progress-label{font-weight:600;color:var(--navy);}
+    .progress-pct{font-weight:700;color:var(--gold);}
+    .progress-bar{height:10px;background:var(--track);border-radius:5px;overflow:hidden;}
     .progress-fill{height:100%;border-radius:5px;transition:width .8s ease,background .3s ease;}
 
-    .dept-card{background:var(--white);border-radius:18px;box-shadow:var(--shadow);overflow:hidden;margin-bottom:24px;}
-    .dept-card-header{padding:18px 24px;border-bottom:1px solid #e2e8f0;}
-    .dept-card-title{font-size:1rem;font-weight:700;color:var(--blue);}
-    .dept-card-sub{font-size:0.8rem;color:#94a3b8;margin-top:2px;}
+    .dept-card{background:var(--card);border:1px solid var(--border);border-radius:18px;box-shadow:var(--shadow);overflow:hidden;margin-bottom:24px;}
+    .dept-card-header{padding:18px 24px;border-bottom:1px solid var(--border);}
+    .dept-card-title{font-size:1rem;font-weight:700;color:var(--navy);}
+    .dept-card-sub{font-size:0.8rem;color:var(--big-sub-c);margin-top:2px;}
     table{width:100%;border-collapse:collapse;}
-    th{background:#f8fafc;padding:10px 16px;text-align:left;font-size:0.75rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.04em;border-bottom:2px solid #e2e8f0;}
-    td{padding:10px 16px;font-size:0.88rem;border-bottom:1px solid #f1f5f9;color:#1e293b;}
+    th{background:var(--th-bg);padding:10px 16px;text-align:left;font-size:0.75rem;font-weight:700;color:var(--th-color);text-transform:uppercase;letter-spacing:0.04em;border-bottom:2px solid var(--border);}
+    td{padding:10px 16px;font-size:0.88rem;border-bottom:1px solid var(--td-line);color:var(--navy);}
     tr:last-child td{border-bottom:none;}
-    tr:nth-child(even) td{background:#fafafa;}
-    .rank{font-weight:700;color:#94a3b8;width:36px;}
-    .dept-name{font-weight:600;}
-    .count-num{font-weight:700;color:var(--blue);text-align:right;width:70px;}
-    .mini-bar{height:6px;background:#e2e8f0;border-radius:3px;overflow:hidden;min-width:80px;}
-    .mini-fill{height:100%;background:var(--blue-mid);border-radius:3px;transition:width .6s ease;}
+    tr:nth-child(even) td{background:var(--td-even);}
+    .rank{font-weight:700;color:var(--rank-clr);width:36px;}
+    .dept-name{font-weight:600;color:var(--navy);}
+    .count-num{font-weight:700;color:var(--gold);text-align:right;width:70px;}
+    .mini-bar{height:6px;background:var(--track);border-radius:3px;overflow:hidden;min-width:80px;}
+    .mini-fill{height:100%;background:var(--gold);border-radius:3px;transition:width .6s ease;}
 
-    .collapse-row td{padding:12px 16px;text-align:center;background:#f8fafc;border-top:1px solid #e2e8f0;}
-    .collapse-btn{padding:8px 20px;border-radius:20px;border:2px solid #c7d7f5;background:white;font-family:'Sarabun',sans-serif;font-size:0.85rem;font-weight:600;color:var(--blue);cursor:pointer;}
-    .collapse-btn:hover{background:var(--blue-light);}
+    .collapse-row td{padding:12px 16px;text-align:center;background:var(--th-bg);border-top:1px solid var(--border);}
+    .collapse-btn{padding:8px 20px;border-radius:20px;border:2px solid var(--border);background:white;font-family:'Sarabun',sans-serif;font-size:0.85rem;font-weight:600;color:var(--navy);cursor:pointer;}
+    .collapse-btn:hover{background:var(--gold-light);}
     .hidden-row{display:none;}
 
-    .footer{text-align:center;padding:20px;font-size:0.78rem;color:#94a3b8;}
+    .footer{text-align:center;padding:20px;font-size:0.78rem;color:var(--foot-c);}
     .update-info{display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:8px;}
     .dot-live{width:8px;height:8px;border-radius:50%;background:#16a34a;animation:pulse 2s infinite;}
     @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
-    .loading{text-align:center;padding:60px;color:#94a3b8;font-size:1rem;}
+    .loading{text-align:center;padding:60px;color:var(--big-sub-c);font-size:1rem;}
   </style>
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
 </head>
 <body>
 
@@ -108,8 +151,12 @@
     <img src="https://raw.githubusercontent.com/poundpop35-creator/search-participant/main/logo-%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B8%8A%E0%B8%B8%E0%B8%A1%E0%B8%A7%E0%B8%B4%E0%B8%8A%E0%B8%B2%E0%B8%81%E0%B8%B2%E0%B8%A3-34-Final_0.png" style="height:60px;object-fit:contain;" alt="34th Conference">
     <img src="https://raw.githubusercontent.com/poundpop35-creator/search-participant/main/logo-DMSc-MOPH%20(1)%20(2)_0.png" style="height:60px;object-fit:contain;" alt="DMSc">
   </div>
-  <div class="hero-badge">Live Dashboard</div>
-  <h1>ประชุมวิชาการวิทยาศาสตร์การแพทย์<br>ครั้งที่ 34</h1>
+  <div style="display:inline-flex;align-items:center;gap:6px;background:#ef4444;border-radius:20px;padding:4px 14px;margin-bottom:14px;box-shadow:0 3px 12px rgba(239,68,68,0.35);">
+    <span style="width:7px;height:7px;border-radius:50%;background:white;animation:pulse 1.5s infinite;flex-shrink:0;"></span>
+    <span style="font-weight:800;letter-spacing:0.1em;color:white;font-size:0.75rem;">LIVE</span>
+    <span style="font-weight:500;color:rgba(255,255,255,0.85);font-size:0.7rem;">Dashboard</span>
+  </div>
+  <h1>งานประชุมวิชาการวิทยาศาสตร์การแพทย์<br>ครั้งที่ 34</h1>
   <p>กรมวิทยาศาสตร์การแพทย์ กระทรวงสาธารณสุข</p>
   <div class="hero-date">
     <button class="day-btn active" data-day="all" onclick="setFilter('all')">รวม</button>
@@ -118,66 +165,97 @@
     <button class="day-btn" data-day="3" onclick="setFilter(3)">26 มิถุนายน 2569</button>
   </div>
   <br>
-  <a class="hero-staff-btn" href="login.html">เข้าสู่ระบบเจ้าหน้าที่</a>
+  <a class="hero-staff-btn" href="executive.html">Dashboard ผู้บริหาร</a>
+  <a class="hero-staff-btn" href="login.html">สำหรับเจ้าหน้าที่</a>
+  <a class="hero-staff-btn" href="qr-lookup.html">🔍 ค้นหา QR Code ของคุณ</a>
 </div>
 
 <div class="main">
   <div id="loadingArea" class="loading">กำลังโหลดข้อมูล...</div>
   <div id="contentArea" style="display:none;">
 
+    <div class="total-card">
+      <div class="big-label">ผู้เข้าร่วม (สะสม)</div>
+      <div class="big-num" id="pTotal"></div>
+      <div class="big-sub" id="pTotalS">ราย (เช็คอินแล้ว)</div>
+    </div>
     <div class="big-stats-row" style="margin-bottom:14px;">
       <div class="big-card d1" id="card-d1">
-        <div class="big-label">วันที่ 1 — 24 มิ.ย.</div>
+        <div class="big-label">วันที่ 1<br>24 มิ.ย. 69</div>
         <div class="big-num" id="pD1">-</div>
         <div class="big-sub" id="pD1s">ราย</div>
       </div>
       <div class="big-card d2" id="card-d2">
-        <div class="big-label">วันที่ 2 — 25 มิ.ย.</div>
+        <div class="big-label">วันที่ 2<br>25 มิ.ย. 69</div>
         <div class="big-num" id="pD2">-</div>
         <div class="big-sub" id="pD2s">ราย</div>
       </div>
       <div class="big-card d3" id="card-d3">
-        <div class="big-label">วันที่ 3 — 26 มิ.ย.</div>
+        <div class="big-label">วันที่ 3<br>26 มิ.ย. 69</div>
         <div class="big-num" id="pD3">-</div>
         <div class="big-sub" id="pD3s">ราย</div>
       </div>
     </div>
-    <div class="big-stats-row-4">
-      <div class="big-card total">
-        <div class="big-label">ผู้เข้าร่วมทั้งหมด</div>
-        <div class="big-num" id="pTotal">-</div>
-        <div class="big-sub" id="pTotalS">ราย (เช็คอินแล้ว)</div>
+    <div class="progress-card">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;">
+        <div class="progress-title" style="margin-bottom:0;" id="goalTitle">เป้าหมายผู้เข้าร่วม (3 วันรวม)</div>
+        <div style="font-size:0.82rem;color:var(--big-sub-c);"><span id="goalCurrent" style="font-weight:700;color:var(--navy);">-</span> / <span style="font-weight:600;">1,800 คน</span></div>
       </div>
-      <div class="big-card internal">
-        <div class="big-label">บุคลากรภายใน</div>
-        <div class="big-num" id="pInternal">-</div>
-        <div class="big-sub" id="pInternalS">ราย</div>
+      <div class="goal-bar-wrap">
+        <div class="progress-bar" style="height:20px;border-radius:6px;">
+          <div id="goalBar" class="progress-fill" style="width:0%;border-radius:6px;transition:width 1s ease;"></div>
+        </div>
       </div>
-      <div class="big-card external">
-        <div class="big-label">บุคคลภายนอก</div>
-        <div class="big-num" id="pExternal">-</div>
-        <div class="big-sub" id="pExternalS">ราย</div>
-      </div>
-      <div class="big-card walkin">
-        <div class="big-label">Walk-in</div>
-        <div class="big-num" id="pWalkin">-</div>
-        <div class="big-sub" id="pWalkinS">ราย</div>
+      <div style="display:flex;justify-content:space-between;margin-top:8px;">
+        <div style="font-size:0.8rem;font-weight:700;" id="goalPct">0%</div>
+        <div style="font-size:0.8rem;color:#94a3b8;" id="goalExtra"></div>
       </div>
     </div>
 
-    <div class="progress-card">
-      <div class="progress-title" id="progressTitle">สัดส่วนผู้เข้าร่วมแต่ละวัน</div>
-      <div class="progress-row" id="pr1">
-        <div class="progress-row-top"><span class="progress-label" id="pl1">วันที่ 1 — 24 มิ.ย.</span><span class="progress-pct" id="pg1">-</span></div>
-        <div class="progress-bar"><div class="progress-fill" id="pf1" style="width:0%;background:#2563eb;"></div></div>
+    <div class="progress-card" style="margin-bottom:14px;">
+      <div class="progress-title" style="margin-bottom:14px;">สัดส่วนผู้เข้าร่วม</div>
+      <div class="progress-row">
+        <div class="progress-row-top">
+          <span class="progress-label" style="color:#0891b2;">บุคลากรภายใน <span id="pInternal" style="font-weight:700;">-</span> คน</span>
+          <span id="pInternalS" style="font-size:0.82rem;color:#94a3b8;">0%</span>
+        </div>
+        <div class="progress-bar"><div id="pBarInternal" class="progress-fill" style="width:0%;background:#0891b2;"></div></div>
       </div>
-      <div class="progress-row" id="pr2">
-        <div class="progress-row-top"><span class="progress-label" id="pl2">วันที่ 2 — 25 มิ.ย.</span><span class="progress-pct" id="pg2">-</span></div>
-        <div class="progress-bar"><div class="progress-fill" id="pf2" style="width:0%;background:#7c3aed;"></div></div>
+      <div class="progress-row">
+        <div class="progress-row-top">
+          <span class="progress-label" style="color:#7c3aed;">บุคคลภายนอก <span id="pExternal" style="font-weight:700;">-</span> คน</span>
+          <span id="pExternalS" style="font-size:0.82rem;color:#94a3b8;">0%</span>
+        </div>
+        <div class="progress-bar"><div id="pBarExternal" class="progress-fill" style="width:0%;background:#7c3aed;"></div></div>
       </div>
-      <div class="progress-row" id="pr3">
-        <div class="progress-row-top"><span class="progress-label" id="pl3">วันที่ 3 — 26 มิ.ย.</span><span class="progress-pct" id="pg3">-</span></div>
-        <div class="progress-bar"><div class="progress-fill" id="pf3" style="width:0%;background:#0891b2;"></div></div>
+      <div class="progress-row" style="margin-bottom:0;">
+        <div class="progress-row-top">
+          <span class="progress-label" style="color:#db2777;">Walk-in <span id="pWalkin" style="font-weight:700;">-</span> คน</span>
+          <span id="pWalkinS" style="font-size:0.82rem;color:#94a3b8;">0%</span>
+        </div>
+        <div class="progress-bar"><div id="pBarWalkin" class="progress-fill" style="width:0%;background:#db2777;"></div></div>
+      </div>
+    </div>
+    </div>
+
+    <!-- Zone chart (check-in data) -->
+    <div class="dept-card">
+      <div class="dept-card-header">
+        <div class="dept-card-title">สถิติเขตสุขภาพ <span id="zoneChartCountPub" style="font-weight:400;font-size:0.8rem;color:#94a3b8;"></span></div>
+        <div class="dept-card-sub">จากผู้ที่เช็คอินแล้ว</div>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:12px;padding:16px;align-items:flex-start;">
+        <div style="flex:0 0 180px;max-width:220px;margin:0 auto;"><canvas id="zoneChartPub"></canvas></div>
+        <div style="flex:1;min-width:200px;overflow-x:auto;">
+          <table style="width:100%;border-collapse:collapse;font-size:0.83rem;">
+            <thead><tr>
+              <th style="padding:6px 10px;text-align:left;font-size:0.72rem;font-weight:700;color:var(--zone-th-c);border-bottom:2px solid var(--zone-th-bdr);">เขตสุขภาพ</th>
+              <th style="padding:6px 10px;text-align:right;font-size:0.72rem;font-weight:700;color:var(--zone-th-c);border-bottom:2px solid var(--zone-th-bdr);">คน</th>
+              <th style="padding:6px 10px;text-align:right;font-size:0.72rem;font-weight:700;color:var(--zone-th-c);border-bottom:2px solid var(--zone-th-bdr);">%</th>
+            </tr></thead>
+            <tbody id="zoneBodyPub"></tbody>
+          </table>
+        </div>
       </div>
     </div>
 
@@ -186,9 +264,9 @@
         <div class="dept-card-title" id="deptTitle">จำนวนผู้เข้าร่วมแยกตามหน่วยงานภายใน</div>
         <div class="dept-card-sub" id="deptSub">เรียงตามจำนวนผู้เข้าร่วมสูงสุด</div>
       </div>
-      <div style="overflow-x:auto;">
+      <div style="overflow-x:auto;max-height:320px;overflow-y:auto;">
         <table>
-          <thead>
+          <thead style="position:sticky;top:0;z-index:1;">
             <tr>
               <th style="width:40px;">#</th>
               <th>หน่วยงาน</th>
@@ -206,9 +284,9 @@
         <div class="dept-card-title" id="extDeptTitle">จำนวนผู้เข้าร่วมแยกตามหน่วยงานภายนอก</div>
         <div class="dept-card-sub" id="extDeptSub">เรียงตามจำนวนผู้เข้าร่วมสูงสุด</div>
       </div>
-      <div style="overflow-x:auto;">
+      <div style="overflow-x:auto;max-height:320px;overflow-y:auto;">
         <table>
-          <thead>
+          <thead style="position:sticky;top:0;z-index:1;">
             <tr>
               <th style="width:40px;">#</th>
               <th>หน่วยงาน</th>
@@ -229,12 +307,86 @@
     <div class="dot-live"></div>
     <span>อัปเดตอัตโนมัติทุก 1 นาที — ล่าสุด: <span id="lastUpdate">-</span></span>
   </div>
-  <div>ประชุมวิชาการวิทยาศาสตร์การแพทย์ ครั้งที่ 34 | กรมวิทยาศาสตร์การแพทย์</div>
+  <div>© 2026 Built by <span style="font-family:'Dancing Script',cursive;font-weight:700;font-size:1.25em;color:#0ABAB5;letter-spacing:0.01em;">Saharat Phetrnitchakun</span> · <span style="font-weight:800;letter-spacing:0.04em;font-size:1.05em;"><span style="color:#2563eb;">D</span><span style="color:#f59e0b;">P</span><span style="color:#16a34a;">T</span><span style="color:#dc2626;">C</span></span> · DMSc</div>
 </div>
 
 <script>
 const SUPABASE_URL  = "https://gvxytnjfyepqhbkmcjms.supabase.co";
 const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2eHl0bmpmeWVwcWhia21jam1zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0MzE2NDAsImV4cCI6MjA5NTAwNzY0MH0.RAr_ehb4cxfNliDR0h5XcihUaP-0ltZTTGIAv2Fw1kk";
+
+const HEALTH_ZONE={
+  'เชียงราย':1,'น่าน':1,'พะเยา':1,'แพร่':1,'เชียงใหม่':1,'แม่ฮ่องสอน':1,'ลำปาง':1,'ลำพูน':1,
+  'ตาก':2,'พิษณุโลก':2,'เพชรบูรณ์':2,'สุโขทัย':2,'อุตรดิตถ์':2,
+  'กำแพงเพชร':3,'พิจิตร':3,'นครสวรรค์':3,'อุทัยธานี':3,
+  'นนทบุรี':4,'ปทุมธานี':4,'พระนครศรีอยุธยา':4,'สระบุรี':4,'ลพบุรี':4,'สิงห์บุรี':4,'อ่างทอง':4,'ชัยนาท':4,
+  'กาญจนบุรี':5,'นครปฐม':5,'ราชบุรี':5,'สุพรรณบุรี':5,'ประจวบคีรีขันธ์':5,'เพชรบุรี':5,'สมุทรสงคราม':5,'สมุทรสาคร':5,
+  'ฉะเชิงเทรา':6,'ปราจีนบุรี':6,'สระแก้ว':6,'สมุทรปราการ':6,'จันทบุรี':6,'ชลบุรี':6,'ตราด':6,'ระยอง':6,'นครนายก':6,
+  'กาฬสินธุ์':7,'ขอนแก่น':7,'มหาสารคาม':7,'ร้อยเอ็ด':7,
+  'บึงกาฬ':8,'เลย':8,'หนองคาย':8,'หนองบัวลำภู':8,'อุดรธานี':8,'นครพนม':8,'สกลนคร':8,'มุกดาหาร':8,
+  'ชัยภูมิ':9,'นครราชสีมา':9,'บุรีรัมย์':9,'สุรินทร์':9,
+  'ยโสธร':10,'ศรีสะเกษ':10,'อุบลราชธานี':10,'อำนาจเจริญ':10,
+  'ชุมพร':11,'นครศรีธรรมราช':11,'สุราษฎร์ธานี':11,'กระบี่':11,'พังงา':11,'ภูเก็ต':11,'ระนอง':11,'พัทลุง':11,'ตรัง':11,
+  'นราธิวาส':12,'ปัตตานี':12,'ยะลา':12,'สงขลา':12,'สตูล':12,
+  'กรุงเทพมหานคร':13,'กรมวิทยาศาสตร์การแพทย์':13
+};
+const ZONE_NAMES_PUB={0:'ไม่ระบุ',1:'เขต 1',2:'เขต 2',3:'เขต 3',4:'เขต 4',5:'เขต 5',6:'เขต 6',7:'เขต 7',8:'เขต 8',9:'เขต 9',10:'เขต 10',11:'เขต 11',12:'เขต 12',13:'เขต 13 (กทม.)'};
+const ZONE_COLORS_PUB=['#94a3b8','#3b82f6','#10b981','#f59e0b','#ef4444','#8b5cf6','#06b6d4','#84cc16','#f97316','#ec4899','#14b8a6','#a855f7','#64748b','#0ea5e9'];
+function getZonePub(prov){if(!prov)return null;if(HEALTH_ZONE[prov])return HEALTH_ZONE[prov];if(prov.includes('กรมวิทยาศาสตร์'))return 13;return null;}
+function fmtPctPub(cnt,total){if(!total||!cnt)return'0%';const v=cnt/total*100;return v<1?v.toFixed(1)+'%':Math.round(v)+'%';}
+
+let zoneChartPubInst=null;
+function toggleZonePub(id,arrow){
+  const row=document.getElementById(id);
+  if(!row) return;
+  const open=row.style.display!=='none';
+  row.style.display=open?'none':'';
+  if(arrow) arrow.textContent=open?'▶':'▼';
+}
+function renderZoneChartPub(filtered){
+  const total=filtered.length;
+  if(!total){
+    document.getElementById('zoneBodyPub').innerHTML='<tr><td colspan="3" style="text-align:center;padding:16px;color:#94a3b8;">ยังไม่มีข้อมูล</td></tr>';
+    document.getElementById('zoneChartCountPub').textContent='';
+    return;
+  }
+  document.getElementById('zoneChartCountPub').textContent=`(${total.toLocaleString()} คน)`;
+  const counts={}, provByZone={};
+  filtered.forEach(r=>{
+    const prov=(r.participants?.province||'').trim()||'(ว่าง)';
+    const z=getZonePub(prov==='(ว่าง)'?'':prov)||13;
+    counts[z]=(counts[z]||0)+1;
+    if(!provByZone[z]) provByZone[z]={};
+    provByZone[z][prov]=(provByZone[z][prov]||0)+1;
+  });
+  const entries=Object.entries(counts).map(([z,n])=>({z:Number(z),n})).sort((a,b)=>a.z-b.z);
+  const labels=entries.map(e=>ZONE_NAMES_PUB[e.z]||'เขต '+e.z);
+  const data=entries.map(e=>e.n);
+  const bgColors=entries.map(e=>ZONE_COLORS_PUB[e.z%ZONE_COLORS_PUB.length]);
+  if(zoneChartPubInst) zoneChartPubInst.destroy();
+  const ctx=document.getElementById('zoneChartPub').getContext('2d');
+  zoneChartPubInst=new Chart(ctx,{
+    type:'doughnut',
+    data:{labels,datasets:[{data,backgroundColor:bgColors,borderWidth:2,borderColor:'#fff',hoverOffset:6}]},
+    options:{responsive:true,cutout:'58%',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.label}: ${c.raw.toLocaleString()} คน (${Math.round(c.raw/total*100)}%)`}}}}
+  });
+  document.getElementById('zoneBodyPub').innerHTML=entries.map((e,idx)=>{
+    const pid=`zpub-${e.z}`;
+    const provRows=Object.entries(provByZone[e.z]||{}).sort((a,b)=>b[1]-a[1]).map(([prov,cnt])=>`
+      <tr style="background:var(--prov-bg);">
+        <td style="padding:3px 10px 3px 28px;font-size:0.78rem;color:var(--prov-c);">⌙ ${prov}</td>
+        <td style="padding:3px 10px;text-align:right;font-size:0.78rem;color:var(--prov-c);">${cnt.toLocaleString()}</td>
+        <td style="padding:3px 10px;text-align:right;font-size:0.78rem;color:var(--prov-c2);">${fmtPctPub(cnt,total)}</td>
+      </tr>`).join('');
+    return`<tr style="cursor:pointer;border-bottom:1px solid #e2e8f0;" onclick="toggleZonePub('${pid}',this.querySelector('.zarr'))">
+      <td style="padding:5px 10px;">
+        <span class="zarr" style="display:inline-block;width:12px;font-size:0.65rem;color:#94a3b8;">▶</span>
+        <span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:${bgColors[idx]};margin:0 4px 0 2px;vertical-align:middle;"></span>${ZONE_NAMES_PUB[e.z]||'เขต '+e.z}</td>
+      <td style="padding:5px 10px;text-align:right;font-weight:700;">${e.n.toLocaleString()}</td>
+      <td style="padding:5px 10px;text-align:right;color:#94a3b8;">${fmtPctPub(e.n,total)}</td>
+    </tr>
+    <tr id="${pid}" style="display:none;"><td colspan="3" style="padding:0;border-bottom:1px solid #e2e8f0;"><table style="width:100%;border-collapse:collapse;">${provRows}</table></td></tr>`;
+  }).join('');
+}
 
 const DEPTS = [
   'สำนักผู้ทรงคุณวุฒิกรมวิทยาศาสตร์การแพทย์','กองแผนงานและวิชาการ','กองทดสอบความชำนาญ',
@@ -255,9 +407,6 @@ const DEPTS = [
   'ศูนย์วิทยาศาสตร์การแพทย์ที่ 11/1 ภูเก็ต','ศูนย์วิทยาศาสตร์การแพทย์ที่ 12 สงขลา',
   'ศูนย์วิทยาศาสตร์การแพทย์ที่ 12/1 ตรัง'
 ];
-const SHOW_FIRST = 5;
-let isExpandedInt = false;
-let isExpandedExt = false;
 let allCheckins = [];
 let activeDay = 'all';
 
@@ -276,58 +425,56 @@ function renderStats() {
   const internal = filtered.filter(r => r.participants && !r.participants.is_walkin && (r.participants.internal_external||'').includes('ภายใน')).length;
   const external = filtered.filter(r => r.participants && !r.participants.is_walkin && (r.participants.internal_external||'').includes('ภายนอก')).length;
 
-  document.getElementById('pTotal').textContent = total.toLocaleString();
+  const _ptEl = document.getElementById('pTotal');
+  _ptEl.textContent = total.toLocaleString();
+  const _digits = String(total).length;
+  _ptEl.style.fontSize = _digits <= 2 ? '7.5rem' : _digits === 3 ? '6rem' : _digits === 4 ? '5rem' : '4rem';
   document.getElementById('pInternal').textContent = internal.toLocaleString();
   document.getElementById('pExternal').textContent = external.toLocaleString();
   document.getElementById('pWalkin').textContent = walkin.toLocaleString();
-  document.getElementById('pInternalS').textContent = `${total ? Math.round(internal/total*100) : 0}% ของทั้งหมด`;
-  document.getElementById('pExternalS').textContent = `${total ? Math.round(external/total*100) : 0}% ของทั้งหมด`;
-  document.getElementById('pWalkinS').textContent = `${total ? Math.round(walkin/total*100) : 0}% ของทั้งหมด`;
+  const intPct = total ? Math.round(internal/total*100) : 0;
+  const extPct = total ? Math.round(external/total*100) : 0;
+  const wkPct  = total ? Math.round(walkin/total*100)  : 0;
+  document.getElementById('pInternalS').textContent = `${intPct}%`;
+  document.getElementById('pExternalS').textContent = `${extPct}%`;
+  document.getElementById('pWalkinS').textContent   = `${wkPct}%`;
+  document.getElementById('pBarInternal').style.width = intPct + '%';
+  document.getElementById('pBarExternal').style.width = extPct + '%';
+  document.getElementById('pBarWalkin').style.width   = wkPct  + '%';
 
   // Day cards: always show all-days counts, dim non-selected
   const dTotal = allCheckins.length;
   [1,2,3].forEach(d => {
     const cnt = allCheckins.filter(r => r.day === d).length;
     document.getElementById(`pD${d}`).textContent = cnt.toLocaleString();
-    document.getElementById(`pD${d}s`).textContent = `${dTotal ? Math.round(cnt/dTotal*100) : 0}% ของผู้เข้าร่วมทั้งหมด`;
+    document.getElementById(`pD${d}s`).textContent = 'ราย';
     const card = document.getElementById(`card-d${d}`);
     if(card) card.classList.toggle('dimmed', activeDay !== 'all' && activeDay !== d);
   });
 
-  // Progress card
-  if(activeDay === 'all') {
-    document.getElementById('progressTitle').textContent = 'สัดส่วนผู้เข้าร่วมแต่ละวัน';
-    document.getElementById('pr3').style.display = '';
-    const labels = ['วันที่ 1 — 24 มิ.ย.','วันที่ 2 — 25 มิ.ย.','วันที่ 3 — 26 มิ.ย.'];
-    const colors = ['#2563eb','#7c3aed','#0891b2'];
-    [1,2,3].forEach((d,i) => {
-      const cnt = allCheckins.filter(r => r.day === d).length;
-      const pct = dTotal ? Math.round(cnt/dTotal*100) : 0;
-      document.getElementById(`pl${d}`).textContent = labels[i];
-      document.getElementById(`pg${d}`).textContent = `${pct}%`;
-      document.getElementById(`pf${d}`).style.width = pct + '%';
-      document.getElementById(`pf${d}`).style.background = colors[i];
-    });
-  } else {
-    const dayName = activeDay === 1 ? '24 มิ.ย.' : activeDay === 2 ? '25 มิ.ย.' : '26 มิ.ย.';
-    document.getElementById('progressTitle').textContent = `สัดส่วนผู้เข้าร่วม — ${dayName}`;
-    document.getElementById('pr3').style.display = '';
-    const intPct  = total ? Math.round(internal/total*100) : 0;
-    const extPct  = total ? Math.round(external/total*100) : 0;
-    const wkPct   = total ? Math.round(walkin/total*100)   : 0;
-    document.getElementById('pl1').textContent = 'บุคลากรภายใน';
-    document.getElementById('pg1').textContent = `${intPct}%`;
-    document.getElementById('pf1').style.width = intPct + '%';
-    document.getElementById('pf1').style.background = '#16a34a';
-    document.getElementById('pl2').textContent = 'บุคคลภายนอก';
-    document.getElementById('pg2').textContent = `${extPct}%`;
-    document.getElementById('pf2').style.width = extPct + '%';
-    document.getElementById('pf2').style.background = '#ea580c';
-    document.getElementById('pl3').textContent = 'Walk-in';
-    document.getElementById('pg3').textContent = `${wkPct}%`;
-    document.getElementById('pf3').style.width = wkPct + '%';
-    document.getElementById('pf3').style.background = '#d97706';
-  }
+  // Goal progress bar — uses filtered total (responds to day filter)
+  const GOAL = 1800;
+  const goalVal = total;
+  const goalPct = Math.min(Math.round(goalVal / GOAL * 100), 100);
+  const overGoal = goalVal >= GOAL;
+  const dayNames = {1:'วันที่ 1',2:'วันที่ 2',3:'วันที่ 3'};
+  document.getElementById('goalTitle').textContent = activeDay === 'all'
+    ? 'เป้าหมายผู้เข้าร่วม (3 วันรวม)'
+    : `เป้าหมายผู้เข้าร่วม — ${dayNames[activeDay]}`;
+  document.getElementById('goalCurrent').textContent = goalVal.toLocaleString();
+  document.getElementById('goalBar').style.width = goalPct + '%';
+  const _goalColor = goalVal < 300 ? '#ef4444'
+    : goalVal < 600  ? '#eab308'
+    : goalVal < 900  ? '#f97316'
+    : goalVal < 1200 ? '#86efac'
+    : goalVal < 1500 ? '#16a34a'
+    : '#3b82f6';
+  document.getElementById('goalBar').style.backgroundColor = overGoal ? '#2563eb' : _goalColor;
+  document.getElementById('goalPct').textContent = overGoal
+    ? `${goalPct}% — เกินเป้า +${(goalVal-GOAL).toLocaleString()} คน 🎉`
+    : `${goalPct}%`;
+  document.getElementById('goalPct').style.color = overGoal ? '#2563eb' : _goalColor;
+  document.getElementById('goalExtra').textContent = `เป้าหมาย 1,800 คน`;
 
   // Dept card subtitles
   const daySubText = activeDay === 'all' ? 'เรียงตามจำนวนผู้เข้าร่วมสูงสุด'
@@ -350,24 +497,25 @@ function renderStats() {
   const sorted = DEPTS.map(d => ({name:d, count:deptCount[d]}))
     .filter(d => d.count > 0)
     .sort((a,b) => b.count - a.count);
-  const maxDept = sorted.length > 0 ? sorted[0].count : 1;
-  isExpandedInt = false;
-  renderDeptTable(sorted, maxDept, 'deptBody', false, 'toggleExpandInt', 'var(--blue-mid)');
+  const totalInternal = sorted.reduce((s,d) => s+d.count, 0);
+  renderDeptTable(sorted, totalInternal || 1, 'deptBody', getComputedStyle(document.documentElement).getPropertyValue('--dept-fill').trim());
 
   // External dept table
   const extDeptCount = {};
   filtered.forEach(r => {
     const p = r.participants;
-    if(p && !p.is_walkin && (p.internal_external||'').includes('ภายนอก')) {
+    if(p && (p.internal_external||'').includes('ภายนอก')) {
       const dname = p.ext_dept || p.dept || '(ไม่ระบุ)';
       extDeptCount[dname] = (extDeptCount[dname] || 0) + 1;
     }
   });
   const extSorted = Object.entries(extDeptCount).map(([name, count]) => ({name, count}))
     .sort((a,b) => b.count - a.count);
-  const maxExt = extSorted.length > 0 ? extSorted[0].count : 1;
-  isExpandedExt = false;
-  renderDeptTable(extSorted, maxExt, 'extDeptBody', false, 'toggleExpandExt', '#ea580c');
+  const totalExternal = extSorted.reduce((s,d) => s+d.count, 0);
+  renderDeptTable(extSorted, totalExternal || 1, 'extDeptBody', '#7c3aed');
+
+  // Zone chart (check-in data)
+  renderZoneChartPub(filtered);
 }
 
 async function fetchAll(path) {
@@ -383,7 +531,7 @@ async function fetchAll(path) {
 
 async function loadData() {
   try {
-    allCheckins = await fetchAll('/rest/v1/checkins?select=day,participants(dept,ext_dept,internal_external,is_walkin)&order=checkin_time.desc');
+    allCheckins = await fetchAll('/rest/v1/checkins?select=day,participants(dept,ext_dept,internal_external,is_walkin,province)&order=checkin_time.desc');
     renderStats();
     document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString('th-TH',{timeZone:'Asia/Bangkok'});
     document.getElementById('loadingArea').style.display = 'none';
@@ -393,48 +541,144 @@ async function loadData() {
   }
 }
 
-function renderDeptTable(sorted, maxDept, bodyId, isExp, toggleFnName, fillColor) {
+function renderDeptTable(sorted, maxDept, bodyId, fillColor) {
   const fc = fillColor || 'var(--blue-mid)';
   if(sorted.length===0){
     document.getElementById(bodyId).innerHTML='<tr><td colspan="4" style="text-align:center;padding:30px;color:#94a3b8;">ยังไม่มีข้อมูล</td></tr>';
     return;
   }
-  const rows=sorted.map((d,i)=>{
-    const isHidden=i>=SHOW_FIRST&&!isExp;
-    return`<tr class="${isHidden?'hidden-row':''}" data-idx="${i}">
-      <td class="rank">${i+1}</td>
-      <td class="dept-name">${d.name}</td>
-      <td class="count-num">${d.count}</td>
-      <td><div class="mini-bar"><div class="mini-fill" style="width:${Math.round(d.count/maxDept*100)}%;background:${fc}"></div></div></td>
-    </tr>`;
-  }).join('');
-  const collapseBtn=sorted.length>SHOW_FIRST
-    ?`<tr class="collapse-row"><td colspan="4"><button class="collapse-btn" onclick="${toggleFnName}()">${isExp?'แสดงน้อยลง':`แสดงทั้งหมด ${sorted.length} หน่วยงาน`}</button></td></tr>`:'';
-  document.getElementById(bodyId).innerHTML=rows+collapseBtn;
+  document.getElementById(bodyId).innerHTML=sorted.map((d,i)=>`<tr>
+    <td class="rank">${i+1}</td>
+    <td class="dept-name">${d.name}</td>
+    <td class="count-num">${d.count}</td>
+    <td><div style="position:relative;"><span style="position:absolute;top:-14px;right:0;font-size:0.68rem;color:#94a3b8;">${Math.round(d.count/maxDept*100)}%</span><div class="mini-bar"><div class="mini-fill" style="width:${Math.round(d.count/maxDept*100)}%;background:${fc}"></div></div></div></td>
+  </tr>`).join('');
 }
 
-function toggleExpandInt(){
-  isExpandedInt=!isExpandedInt;
-  document.querySelectorAll('#deptBody tr[data-idx]').forEach(tr=>{
-    const idx=parseInt(tr.getAttribute('data-idx'));
-    tr.classList.toggle('hidden-row',idx>=SHOW_FIRST&&!isExpandedInt);
-  });
-  const btn=document.querySelector('#deptBody tr.collapse-row .collapse-btn');
-  if(btn) btn.textContent=isExpandedInt?'แสดงน้อยลง':'แสดงทั้งหมด';
+const THEMES = {
+  1: { name:'โทนสีชมพู', sw:'#D9BAA4', vars:{
+    '--gold':'#9C7564','--gold-light':'#F7DFCB','--navy':'#3d2416','--border':'#D6BDAB',
+    '--surface':'#FDF8F4','--hero-hue':'#1e0d08','--hero-veil':'rgba(156,117,100,0.50)',
+    '--badge-bg':'rgba(247,223,203,0.20)','--badge-bdr':'rgba(247,223,203,0.50)','--badge-clr':'#F7DFCB',
+    '--hero-p':'#D9BAA4','--day-clr':'#F7DFCB','--day-active':'#9C7564','--day-active-bdr':'#D9BAA4','--day-shadow':'rgba(156,117,100,0.55)',
+    '--big-lbl':'#a8907e','--big-sub-c':'#b8a090',
+    '--d1':'#9C7564','--d2':'#7a5040','--d3':'#c49a82','--dw':'#b87a5e',
+    '--total-grad':'linear-gradient(135deg,#7a5040,#c49a82)','--total-bdr':'#9C7564','--total-lbl':'#F7DFCB','--total-sub-c':'#D9BAA4','--total-shad':'rgba(156,117,100,0.28)',
+    '--th-bg':'#F7DFCB','--th-color':'#9C7564','--td-even':'#fdf8f4','--td-line':'#e8d8cc','--rank-clr':'#b8a090','--track':'#D6BDAB',
+    '--goal-c':'#9C7564','--goal-grad':'linear-gradient(90deg,#9C7564,#D9BAA4)','--dept-fill':'#9C7564',
+    '--prov-bg':'#fdf8f4','--prov-c':'#a8907e','--prov-c2':'#b8a090',
+    '--zone-th-c':'#9C7564','--zone-th-bdr':'#D6BDAB','--foot-c':'#b8a090',
+    '--accent':'#e07a5f',
+  }},
+  2: { name:'โทนสีเขียว', sw:'#97A397', vars:{
+    '--gold':'#937A52','--gold-light':'#E0EBD8','--navy':'#2D3B2E','--border':'#B4C8B4',
+    '--surface':'#F2F6F2','--hero-hue':'#0d1a0e','--hero-veil':'rgba(45,59,46,0.52)',
+    '--badge-bg':'rgba(200,225,195,0.20)','--badge-bdr':'rgba(200,225,195,0.50)','--badge-clr':'#C8E4C0',
+    '--hero-p':'#97A397','--day-clr':'#C8E4C0','--day-active':'#937A52','--day-active-bdr':'#B8A070','--day-shadow':'rgba(147,122,82,0.55)',
+    '--big-lbl':'#6a8270','--big-sub-c':'#849a84',
+    '--d1':'#2D3B2E','--d2':'#937A52','--d3':'#97A397','--dw':'#6a8270',
+    '--total-grad':'linear-gradient(135deg,#2D3B2E,#97A397)','--total-bdr':'#97A397','--total-lbl':'#D4F0C8','--total-sub-c':'#B0CAB0','--total-shad':'rgba(45,59,46,0.28)',
+    '--th-bg':'#DCE8D8','--th-color':'#2D3B2E','--td-even':'#f4f8f4','--td-line':'#c8d8c8','--rank-clr':'#849a84','--track':'#B4C8B4',
+    '--goal-c':'#2D3B2E','--goal-grad':'linear-gradient(90deg,#2D3B2E,#97A397)','--dept-fill':'#937A52',
+    '--prov-bg':'#f4f8f4','--prov-c':'#6a8270','--prov-c2':'#849a84',
+    '--zone-th-c':'#2D3B2E','--zone-th-bdr':'#B4C8B4','--foot-c':'#849a84',
+    '--accent':'#22c55e',
+  }},
+  3: { name:'โทนสีน้ำเงิน', sw:'#6A8694', vars:{
+    '--gold':'#6A8694','--gold-light':'#D0E4EE','--navy':'#1F3540','--border':'#ACC4D0',
+    '--surface':'#EDF3F8','--hero-hue':'#060f1a','--hero-veil':'rgba(31,53,64,0.75)',
+    '--badge-bg':'rgba(168,210,232,0.20)','--badge-bdr':'rgba(168,210,232,0.50)','--badge-clr':'#B8D8EE',
+    '--hero-p':'#A1AFBA','--day-clr':'#B8D8EE','--day-active':'#2C4B5D','--day-active-bdr':'#6A8694','--day-shadow':'rgba(44,75,93,0.55)',
+    '--big-lbl':'#5a7a8e','--big-sub-c':'#7a9aae',
+    '--d1':'#1F3540','--d2':'#2C4B5D','--d3':'#6A8694','--dw':'#A1AFBA',
+    '--total-grad':'linear-gradient(135deg,#1F3540,#6A8694)','--total-bdr':'#6A8694','--total-lbl':'#B8E2F8','--total-sub-c':'#A1AFBA','--total-shad':'rgba(31,53,64,0.28)',
+    '--th-bg':'#C8DDE8','--th-color':'#1F3540','--td-even':'#eef5fa','--td-line':'#b8ceda','--rank-clr':'#7a9aae','--track':'#ACC4D0',
+    '--goal-c':'#2C4B5D','--goal-grad':'linear-gradient(90deg,#2C4B5D,#6A8694)','--dept-fill':'#6A8694',
+    '--prov-bg':'#eef5fa','--prov-c':'#5a7a8e','--prov-c2':'#7a9aae',
+    '--zone-th-c':'#1F3540','--zone-th-bdr':'#ACC4D0','--foot-c':'#7a9aae',
+    '--accent':'#38bdf8',
+  }},
+  4: { name:'โทนสีม่วง', sw:'#A0808B', vars:{
+    '--gold':'#A0808B','--gold-light':'#EAD8DC','--navy':'#4D4A5B','--border':'#C0B0BC',
+    '--surface':'#F6F3F5','--hero-hue':'#100d14','--hero-veil':'rgba(77,74,91,0.52)',
+    '--badge-bg':'rgba(200,183,200,0.20)','--badge-bdr':'rgba(200,183,200,0.50)','--badge-clr':'#DCC8D4',
+    '--hero-p':'#C8B7AF','--day-clr':'#DCC8D4','--day-active':'#A0808B','--day-active-bdr':'#C0B0BC','--day-shadow':'rgba(160,128,139,0.55)',
+    '--big-lbl':'#7a6878','--big-sub-c':'#9a909a',
+    '--d1':'#4D4A5B','--d2':'#A0808B','--d3':'#C8B7AF','--dw':'#7a6878',
+    '--total-grad':'linear-gradient(135deg,#4D4A5B,#A0808B)','--total-bdr':'#A0808B','--total-lbl':'#F0DCE8','--total-sub-c':'#C8B7AF','--total-shad':'rgba(77,74,91,0.28)',
+    '--th-bg':'#EAD8DC','--th-color':'#4D4A5B','--td-even':'#faf6f8','--td-line':'#d8c8cc','--rank-clr':'#9a909a','--track':'#C0B0BC',
+    '--goal-c':'#4D4A5B','--goal-grad':'linear-gradient(90deg,#4D4A5B,#A0808B)','--dept-fill':'#A0808B',
+    '--prov-bg':'#faf6f8','--prov-c':'#7a6878','--prov-c2':'#9a909a',
+    '--zone-th-c':'#4D4A5B','--zone-th-bdr':'#C0B0BC','--foot-c':'#9a909a',
+    '--accent':'#c084fc',
+  }},
+  5: { name:'โทนสีน้ำตาล', sw:'#BE7E4E', vars:{
+    '--gold':'#BE7E4E','--gold-light':'#F5EAD4','--navy':'#4B1B0D','--border':'#DCC090',
+    '--surface':'#FBF6EE','--hero-hue':'#180c04','--hero-veil':'rgba(121,62,33,0.52)',
+    '--badge-bg':'rgba(249,220,180,0.20)','--badge-bdr':'rgba(249,220,180,0.50)','--badge-clr':'#F9DCB4',
+    '--hero-p':'#F9DCB4','--day-clr':'#F5E8C8','--day-active':'#BE7E4E','--day-active-bdr':'#DCC090','--day-shadow':'rgba(190,126,78,0.55)',
+    '--big-lbl':'#8a5e38','--big-sub-c':'#a8805a',
+    '--d1':'#793E21','--d2':'#BE7E4E','--d3':'#DBA870','--dw':'#8a5e38',
+    '--total-grad':'linear-gradient(135deg,#4B1B0D,#BE7E4E)','--total-bdr':'#BE7E4E','--total-lbl':'#F9DCB4','--total-sub-c':'#DCC090','--total-shad':'rgba(75,27,13,0.28)',
+    '--th-bg':'#F0E0C0','--th-color':'#793E21','--td-even':'#fdf8f0','--td-line':'#e8d4b8','--rank-clr':'#a8805a','--track':'#DCC090',
+    '--goal-c':'#793E21','--goal-grad':'linear-gradient(90deg,#793E21,#BE7E4E)','--dept-fill':'#BE7E4E',
+    '--prov-bg':'#fdf8f0','--prov-c':'#8a5e38','--prov-c2':'#a8805a',
+    '--zone-th-c':'#793E21','--zone-th-bdr':'#DCC090','--foot-c':'#a8805a',
+    '--accent':'#fb923c',
+  }},
+};
+
+function applyTheme(id, save=true) {
+  const t = THEMES[id] || THEMES[1];
+  const root = document.documentElement;
+  Object.entries(t.vars).forEach(([k,v]) => root.style.setProperty(k, v));
+  if(save) localStorage.setItem('pubTheme', String(id));
 }
 
-function toggleExpandExt(){
-  isExpandedExt=!isExpandedExt;
-  document.querySelectorAll('#extDeptBody tr[data-idx]').forEach(tr=>{
-    const idx=parseInt(tr.getAttribute('data-idx'));
-    tr.classList.toggle('hidden-row',idx>=SHOW_FIRST&&!isExpandedExt);
-  });
-  const btn=document.querySelector('#extDeptBody tr.collapse-row .collapse-btn');
-  if(btn) btn.textContent=isExpandedExt?'แสดงน้อยลง':'แสดงทั้งหมด';
+async function loadThemeFromSupabase() {
+  try {
+    const r = await fetch(SUPABASE_URL + "/rest/v1/app_settings?key=eq.theme&select=value", {
+      headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}
+    });
+    const d = await r.json();
+    if(Array.isArray(d) && d.length > 0) {
+      const id = parseInt(d[0].value) || 1;
+      applyTheme(id, true);
+    }
+  } catch(e) {}
 }
 
+// Apply cached theme + hero bg instantly, then sync from Supabase
+applyTheme(parseInt(localStorage.getItem('pubTheme')||'3'), false);
+(function(){
+  const cached = localStorage.getItem('heroImgUrl');
+  if(cached) document.querySelector('.hero').style.backgroundImage = "url('" + cached + "')";
+})();
+
+async function loadHeroBgFromSupabase() {
+  try {
+    const r = await fetch(SUPABASE_URL + "/rest/v1/app_settings?key=eq.bg_url&select=value", {
+      headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}
+    });
+    const d = await r.json();
+    if(Array.isArray(d) && d.length) {
+      const v = d[0].value || '';
+      localStorage.setItem('heroImgUrl', v);
+      document.querySelector('.hero').style.backgroundImage = v ? "url('" + v + "')" : '';
+    }
+  } catch(e) {}
+}
+
+loadThemeFromSupabase();
+loadHeroBgFromSupabase();
 loadData();
-setInterval(loadData,60000);
+setInterval(loadData, 60000);
+setInterval(loadThemeFromSupabase, 30000);
+setInterval(loadHeroBgFromSupabase, 30000);
+(function(){const c=localStorage.getItem('publicBgUrl');if(c)document.body.style.backgroundImage=`linear-gradient(rgba(232,240,254,0.55),rgba(232,240,254,0.55)),url('${c}')`;})();
+async function _loadPageBg(){try{const r=await fetch(SUPABASE_URL+'/rest/v1/app_settings?key=eq.public_bg&select=value',{headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}});const d=await r.json();if(Array.isArray(d)&&d.length){const v=d[0].value||'';localStorage.setItem('publicBgUrl',v);document.body.style.backgroundImage=v?`linear-gradient(rgba(232,240,254,0.55),rgba(232,240,254,0.55)),url('${v}')`:'';}}}catch(e){}}
+_loadPageBg();setInterval(_loadPageBg,30000);
+
 </script>
 </body>
 </html>

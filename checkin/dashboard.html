@@ -32,6 +32,29 @@
     .clear-cancel{flex:1;padding:12px;border-radius:10px;border:2px solid #e2e8f0;background:white;font-family:'Sarabun',sans-serif;font-size:0.95rem;cursor:pointer;color:#64748b;}
     .clear-confirm{flex:1;padding:12px;border-radius:10px;border:none;background:#dc2626;color:white;font-family:'Sarabun',sans-serif;font-size:0.95rem;font-weight:700;cursor:pointer;}
     .clear-confirm:disabled{opacity:0.5;cursor:not-allowed;}
+    /* Help modal */
+    .help-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.55);display:flex;align-items:center;justify-content:center;z-index:9998;padding:16px;}
+    .help-overlay.hidden{display:none;}
+    .help-modal{background:#fff;border-radius:20px;width:100%;max-width:560px;max-height:88vh;overflow-y:auto;box-shadow:0 12px 48px rgba(0,0,0,0.25);}
+    .help-header{position:sticky;top:0;background:#fff;padding:20px 24px 14px;border-bottom:1px solid #e2e8f0;display:flex;justify-content:space-between;align-items:center;border-radius:20px 20px 0 0;}
+    .help-header h2{font-size:1.05rem;font-weight:700;color:#0d2b6b;}
+    .help-close{width:32px;height:32px;border-radius:50%;border:none;background:#f1f5f9;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;}
+    .help-body{padding:20px 24px 28px;}
+    .help-page{margin-bottom:20px;border:1px solid #e2e8f0;border-radius:14px;overflow:hidden;}
+    .help-page-header{padding:12px 16px;background:#f8fafc;display:flex;align-items:center;gap:10px;}
+    .help-page-icon{font-size:1.2rem;}
+    .help-page-title{font-weight:700;font-size:0.95rem;color:#0d2b6b;}
+    .help-page-url{font-size:0.72rem;color:#94a3b8;margin-left:auto;}
+    .help-page-body{padding:12px 16px;}
+    .help-page-body p{font-size:0.85rem;color:#475569;line-height:1.7;margin-bottom:6px;}
+    .help-page-body p:last-child{margin-bottom:0;}
+    .help-tag{display:inline-block;padding:2px 8px;border-radius:6px;font-size:0.72rem;font-weight:700;margin-right:4px;}
+    .tag-admin{background:#fef3c7;color:#92400e;}
+    .tag-staff{background:#ede9fe;color:#4c1d95;}
+    .tag-all{background:#dcfce7;color:#166534;}
+    .help-table{width:100%;border-collapse:collapse;margin-top:6px;font-size:0.82rem;}
+    .help-table th{background:#f1f5f9;color:#64748b;padding:6px 10px;text-align:left;font-weight:600;}
+    .help-table td{padding:6px 10px;border-top:1px solid #f1f5f9;color:#334155;}
     .main{padding:20px;max-width:1200px;margin:0 auto;}
     /* Stats */
     .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:20px;}
@@ -110,7 +133,19 @@
     .dtable tr:last-child td{border-bottom:none;}
     .dtable tr:nth-child(even) td{background:#fafafa;}
     .dsearch{padding:7px 12px;border-radius:8px;border:1.5px solid var(--border);font-family:'Sarabun',sans-serif;font-size:0.85rem;width:200px;outline:none;}
+    .zone-badge{display:inline-block;padding:2px 7px;border-radius:12px;font-size:0.7rem;font-weight:700;background:#e0e7ff;color:#3730a3;white-space:nowrap;}
+    /* Participant filters */
+    .p-filter-bar{padding:10px 20px;background:#f8fafc;border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end;}
+    .p-filter-select{padding:6px 10px;border-radius:8px;border:1.5px solid var(--border);font-family:'Sarabun',sans-serif;font-size:0.84rem;color:#1e293b;cursor:pointer;outline:none;max-width:180px;}
+    .p-filter-select:focus{border-color:var(--blue-mid);}
+    .p-filter-label{font-size:0.69rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:2px;}
+    .p-filter-group{display:flex;flex-direction:column;}
+    .p-reset-btn{padding:6px 12px;border-radius:8px;border:1.5px solid var(--border);background:white;font-family:'Sarabun',sans-serif;font-size:0.82rem;cursor:pointer;color:#64748b;align-self:flex-end;}
+    .p-reset-btn:hover{background:#f1f5f9;}
+    .checkin-progress-grid{display:grid;grid-template-columns:1fr 2fr;gap:12px;margin-bottom:10px;}
+    @media(max-width:640px){.checkin-progress-grid{grid-template-columns:1fr;}}
   </style>
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
 </head>
 <body>
 
@@ -119,9 +154,9 @@
 if (sessionStorage.getItem('dmsc_auth') !== 'ok') {
   window.location.href = 'login.html';
 }
-document.addEventListener('DOMContentLoaded',()=>{
-  const el=document.getElementById('userDisplay');
-  if(el) el.textContent=sessionStorage.getItem('dmsc_user')||'';
+document.addEventListener('DOMContentLoaded', function() {
+  var el = document.getElementById('userDisplay');
+  if (el) el.textContent = sessionStorage.getItem('dmsc_user') || '';
 });
 </script>
 
@@ -162,97 +197,156 @@ document.addEventListener('DOMContentLoaded',()=>{
     <a href="public.html" class="refresh-btn" style="text-decoration:none;">Live Dashboard</a>
     <div id="activeSessions" style="font-size:0.78rem;color:#16a34a;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:5px 10px;display:none;">🟢 <span id="activeList"></span></div>
     <button class="refresh-btn" onclick="doLogout()" style="background:#dc2626;color:white;border-color:#dc2626;font-weight:600;">ออกจากระบบ</button>
+    <button class="refresh-btn" onclick="document.getElementById('helpOverlay').classList.remove('hidden')" style="font-weight:700;">❓ คู่มือ</button>
+  </div>
+</div>
+
+<!-- Help Modal -->
+<div class="help-overlay hidden" id="helpOverlay" onclick="if(event.target===this)this.classList.add('hidden')">
+  <div class="help-modal">
+    <div class="help-header">
+      <h2>📘 คู่มือการใช้งานระบบ</h2>
+      <button class="help-close" onclick="document.getElementById('helpOverlay').classList.add('hidden')">✕</button>
+    </div>
+    <div class="help-body">
+
+      <div class="help-page">
+        <div class="help-page-header">
+          <span class="help-page-icon">🔐</span>
+          <span class="help-page-title">หน้า Login</span>
+          <span class="help-page-url">login.html</span>
+        </div>
+        <div class="help-page-body">
+          <p>หน้าเข้าสู่ระบบสำหรับเจ้าหน้าที่และ Admin เท่านั้น</p>
+          <table class="help-table">
+            <tr><th>บัญชี</th><th>รหัสผ่าน</th><th>สิทธิ์</th></tr>
+            <tr><td><strong>adminpound</strong></td><td>••••••••</td><td><span class="help-tag tag-admin">Admin</span> login ซ้ำได้ทุกเวลา</td></tr>
+            <tr><td>staff01–staff10</td><td>••••••••</td><td><span class="help-tag tag-staff">Staff</span> ล็อกซ้ำไม่ได้ใน 10 นาที</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <div class="help-page">
+        <div class="help-page-header">
+          <span class="help-page-icon">🎛️</span>
+          <span class="help-page-title">Admin Dashboard (หน้านี้)</span>
+          <span class="help-page-url">dashboard.html</span>
+        </div>
+        <div class="help-page-body">
+          <p><span class="help-tag tag-admin">Admin</span> ใช้งานได้เต็มรูปแบบ <span class="help-tag tag-staff">Staff</span> ดูได้แต่ไม่สามารถล้างข้อมูลได้</p>
+          <p>📊 ดูสถิติการเช็คอินแบบละเอียด กรองตามวัน / ประเภท / หน่วยงาน</p>
+          <p>🎨 เปลี่ยนธีมสี — กดปุ่ม 🎨 มุมขวาล่าง เลือกได้ 5 โทนสี (ทุก device เห็นพร้อมกัน)</p>
+          <p>📤 ส่งออกข้อมูลเป็น Excel หรือ CSV ได้จากตารางแต่ละตัว</p>
+          <p>🗑️ ล้างข้อมูล — ต้องใส่รหัสยืนยัน (เฉพาะ Admin)</p>
+        </div>
+      </div>
+
+      <div class="help-page">
+        <div class="help-page-header">
+          <span class="help-page-icon">🌐</span>
+          <span class="help-page-title">Live Dashboard สาธารณะ</span>
+          <span class="help-page-url">public.html</span>
+        </div>
+        <div class="help-page-body">
+          <p><span class="help-tag tag-all">ทุกคน</span> เปิดได้โดยไม่ต้อง login</p>
+          <p>📡 อัปเดตอัตโนมัติทุก 60 วินาที แสดงตัวเลขผู้เข้าร่วม (สะสม) แบบ real-time</p>
+          <p>📅 กรองดูตามวัน — 24 / 25 / 26 มิ.ย. หรือดูรวม</p>
+          <p>🎯 แถบเป้าหมาย 1,800 คน — สีเปลี่ยนตามจำนวน (🔴→🟡→🟠→🟢→🔵)</p>
+          <p>📊 สัดส่วน ภายใน / ภายนอก / Walk-in และตารางหน่วยงาน + สถิติเขตสุขภาพ</p>
+        </div>
+      </div>
+
+      <div class="help-page">
+        <div class="help-page-header">
+          <span class="help-page-icon">👔</span>
+          <span class="help-page-title">Executive Dashboard</span>
+          <span class="help-page-url">executive.html</span>
+        </div>
+        <div class="help-page-body">
+          <p><span class="help-tag tag-all">ผู้บริหาร</span> ดูสรุปภาพรวมแบบกระชับ เหมาะสำหรับนำเสนอ</p>
+          <p>📈 แสดงกราฟและสถิติสำคัญ ไม่มีรายละเอียดปลีกย่อย</p>
+        </div>
+      </div>
+
+      <div class="help-page">
+        <div class="help-page-header">
+          <span class="help-page-icon">👜</span>
+          <span class="help-page-title">จำนวนผู้มารับกระเป๋า</span>
+          <span class="help-page-url">bag-dashboard.html</span>
+        </div>
+        <div class="help-page-body">
+          <p><span class="help-tag tag-staff">Staff</span> ใช้ติดตามจำนวนผู้มารับกระเป๋าก่อนวันงาน</p>
+          <p>🔢 นับจำนวนและดูรายชื่อผู้ที่มารับกระเป๋าแล้ว</p>
+        </div>
+      </div>
+
+      <div class="help-page">
+        <div class="help-page-header">
+          <span class="help-page-icon">🎤</span>
+          <span class="help-page-title">Dashboard ผู้ส่งผลงาน <span style="font-size:0.75em;font-weight:400;color:#94a3b8;">(Demo ยังไม่ได้ใช้งานระบบ)</span></span>
+          <span class="help-page-url">presenter-dashboard.html</span>
+        </div>
+        <div class="help-page-body">
+          <p><span class="help-tag tag-staff">Staff</span> ดูสรุปและสถิติผู้ที่ลงทะเบียนนำเสนอผลงาน</p>
+          <p>📋 แยกตามประเภทการนำเสนอ ดูรายชื่อและสถานะเช็คอิน</p>
+        </div>
+      </div>
+
+    </div>
   </div>
 </div>
 
 <div class="main">
 
   <!-- STATS -->
-  <!-- แถวที่ 1: รวมทั้งหมด -->
-  <div class="stats-grid" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr));margin-bottom:10px;">
+  <!-- แถวที่ 1: ทั้งหมด + progress -->
+  <div class="checkin-progress-grid">
     <div class="stat-card" style="border-left:4px solid #0891b2;">
       <div class="stat-label">ทั้งหมด</div>
       <div class="stat-num" id="sTotal" style="color:#0891b2;">-</div>
       <div class="stat-sub">ราย (ลงทะเบียนล่วงหน้า + Walk-in)</div>
     </div>
     <div class="stat-card" style="border-left:4px solid #16a34a;">
-      <div class="stat-label">จำนวนที่สแกน (ลงทะเบียนล่วงหน้า)</div>
-      <div class="stat-num" id="sPreReg" style="color:#16a34a;">-</div>
-      <div class="stat-sub">ราย (เช็คอินแล้ว)</div>
-    </div>
-    <div class="stat-card" style="border-left:4px solid #7c3aed;">
-      <div class="stat-label">จำนวนที่สแกน (Walk-in)</div>
-      <div class="stat-num" id="sWalkin" style="color:#7c3aed;">-</div>
-      <div class="stat-sub" id="sWalkinSub">ราย (เช็คอินแล้ว)</div>
-    </div>
-    <div class="stat-card" style="border-left:4px solid #ef4444;">
-      <div class="stat-label">ยังไม่ได้เช็คอิน (ลงทะเบียนล่วงหน้า)</div>
-      <div class="stat-num" id="sNotChecked" style="color:#ef4444;">-</div>
-      <div class="stat-sub">ราย</div>
-    </div>
-  </div>
-  <!-- แถวที่ 2: บุคลากรภายใน / ภายนอก / Walk-in -->
-  <div class="stats-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:10px;">
-    <div class="stat-card internal"><div class="stat-label">บุคลากรภายใน</div><div class="stat-num" id="sInternal">-</div><div class="stat-sub" id="sInternalS">ราย</div></div>
-    <div class="stat-card external"><div class="stat-label">บุคคลภายนอก</div><div class="stat-num" id="sExternal">-</div><div class="stat-sub" id="sExternalS">ราย</div></div>
-    <div class="stat-card walkin"><div class="stat-label">Walk-in</div><div class="stat-num" id="sWalkin2">-</div><div class="stat-sub" id="sWalkin2S">ราย</div></div>
-  </div>
-  <!-- แถวที่ 3: แยกวัน -->
-  <div class="stats-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:20px;">
-    <div class="stat-card day1"><div class="stat-label">วันที่ 1 — 24 มิ.ย.</div><div class="stat-num" id="sD1">-</div><div class="stat-sub" id="sD1p">-</div></div>
-    <div class="stat-card day2"><div class="stat-label">วันที่ 2 — 25 มิ.ย.</div><div class="stat-num" id="sD2">-</div><div class="stat-sub" id="sD2p">-</div></div>
-    <div class="stat-card day3"><div class="stat-label">วันที่ 3 — 26 มิ.ย.</div><div class="stat-num" id="sD3">-</div><div class="stat-sub" id="sD3p">-</div></div>
-  </div>
-
-  <!-- FILTER BAR -->
-  <div class="filter-bar">
-    <div class="filter-group">
-      <div class="filter-label">ประเภทบุคคล</div>
-      <select class="filter-select" id="fIntExt" onchange="applyFilters()">
-        <option value="">ทั้งหมด</option>
-        <option value="internal">บุคลากรภายใน</option>
-        <option value="external">บุคคลภายนอก</option>
-      </select>
-    </div>
-    <div class="filter-group">
-      <div class="filter-label">ประเภทการเข้าร่วม</div>
-      <div class="multi-wrap">
-        <button class="multi-btn" id="ptBtn" onclick="toggleDD('ptDD')">ทั้งหมด</button>
-        <div class="multi-dd" id="ptDD">
-          <label class="all-label"><input type="checkbox" id="ptAll" checked onchange="toggleAll()"> เลือกทั้งหมด</label>
-        </div>
+      <div class="stat-label" style="margin-bottom:12px;">ความคืบหน้าการเช็คอิน <span style="font-weight:400;color:#94a3b8;">(ผู้ลงทะเบียนล่วงหน้า)</span></div>
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px;">
+        <span style="font-size:0.8rem;color:#64748b;">เช็คอินแล้ว <b id="sPreReg" style="color:#16a34a;">-</b> ราย</span>
+        <span style="font-size:0.75rem;color:#94a3b8;">จาก <span id="sTotalPreRegDisp">-</span> ราย (<span id="sPreRegPct" style="color:#16a34a;font-weight:700;">0%</span>)</span>
       </div>
-    </div>
-    <div class="filter-group">
-      <div class="filter-label">หน่วยงาน</div>
-      <div class="multi-wrap">
-        <button class="multi-btn" id="fDeptBtn" onclick="toggleDD('fDeptDD')">ทั้งหมด</button>
-        <div class="multi-dd" id="fDeptDD" style="min-width:300px;max-height:300px;">
-          <label class="all-label"><input type="checkbox" id="fDeptAll" checked onchange="toggleFDeptAll()"> เลือกทั้งหมด</label>
-          <div style="padding:6px 14px;font-size:0.75rem;font-weight:700;color:#0d2b6b;background:#f0f4ff;border-bottom:1px solid #e2e8f0;">— หน่วยงานภายใน —</div>
-          <div id="fDeptInternal"></div>
-          <div style="padding:6px 14px;font-size:0.75rem;font-weight:700;color:#d97706;background:#fffbeb;border-bottom:1px solid #e2e8f0;">— หน่วยงานภายนอก —</div>
-          <div id="fDeptExternal"></div>
-        </div>
+      <div style="height:10px;background:#e2e8f0;border-radius:5px;margin-bottom:16px;overflow:hidden;">
+        <div id="barPreReg" style="height:100%;border-radius:5px;background:#16a34a;width:0%;transition:width 0.6s ease;"></div>
       </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding-top:10px;border-top:1px solid #e2e8f0;">
+        <span style="font-size:0.78rem;color:#64748b;">ยังไม่ได้เช็คอิน</span>
+        <b id="sNotChecked" style="font-size:1.1rem;color:#ef4444;">-</b>
+      </div>
+      <span id="sWalkin" style="display:none;"></span>
+      <div id="barWalkinCheckin" style="display:none;"></div>
     </div>
-    <div class="filter-group">
-      <div class="filter-label">TAG</div>
-      <select class="filter-select" id="fTag" onchange="applyFilters()">
-        <option value="">ทั้งหมด</option>
-        <option value="participant">participant</option>
-        <option value="Staff">Staff</option>
-      </select>
+  </div>
+  <!-- แถวที่ 2: บุคลากรภายใน / ภายนอก / Walk-in (progress bars) -->
+  <div class="stat-card" style="border-left:4px solid #0891b2;padding:16px 18px;margin-bottom:10px;">
+    <div class="stat-label" style="margin-bottom:12px;">สัดส่วนผู้เข้าร่วม</div>
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px;">
+      <span style="font-size:0.82rem;color:#64748b;">บุคลากรภายใน <b id="sInternal" style="color:#16a34a;">-</b> คน</span>
+      <span id="sInternalS" style="font-size:0.78rem;color:#94a3b8;">0%</span>
     </div>
-    <div class="filter-group">
-      <div class="filter-label">ประเภท</div>
-      <select class="filter-select" id="fWalkin" onchange="applyFilters()">
-        <option value="">ทั้งหมด</option>
-        <option value="preReg">ลงทะเบียนล่วงหน้า</option>
-        <option value="walkin">Walk-in</option>
-      </select>
+    <div style="height:12px;background:#e2e8f0;border-radius:6px;margin-bottom:12px;overflow:hidden;">
+      <div id="barInternal" style="height:100%;border-radius:6px;background:#16a34a;width:0%;transition:width 0.6s ease;"></div>
     </div>
-    <button class="btn-reset" onclick="resetFilters()">✕ ล้าง filter</button>
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px;">
+      <span style="font-size:0.82rem;color:#64748b;">บุคคลภายนอก <b id="sExternal" style="color:#ea580c;">-</b> คน</span>
+      <span id="sExternalS" style="font-size:0.78rem;color:#94a3b8;">0%</span>
+    </div>
+    <div style="height:12px;background:#e2e8f0;border-radius:6px;margin-bottom:12px;overflow:hidden;">
+      <div id="barExternal" style="height:100%;border-radius:6px;background:#ea580c;width:0%;transition:width 0.6s ease;"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px;">
+      <span style="font-size:0.82rem;color:#64748b;">Walk-in <b id="sWalkin2" style="color:#d97706;">-</b> คน</span>
+      <span id="sWalkin2S" style="font-size:0.78rem;color:#94a3b8;">0%</span>
+    </div>
+    <div style="height:12px;background:#e2e8f0;border-radius:6px;overflow:hidden;">
+      <div id="barWalkin2" style="height:100%;border-radius:6px;background:#d97706;width:0%;transition:width 0.6s ease;"></div>
+    </div>
   </div>
 
   <!-- TABS -->
@@ -278,6 +372,56 @@ document.addEventListener('DOMContentLoaded',()=>{
         </div>
       </div>
     </div>
+    <!-- Filter bar inside table card -->
+    <div class="filter-bar" style="border-radius:0;box-shadow:none;border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:#f8fafc;margin:0;">
+      <div class="filter-group">
+        <div class="filter-label">ประเภทบุคคล</div>
+        <select class="filter-select" id="fIntExt" onchange="applyFilters()">
+          <option value="">ทั้งหมด</option>
+          <option value="internal">บุคลากรภายใน</option>
+          <option value="external">บุคคลภายนอก</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <div class="filter-label">ประเภทการเข้าร่วม</div>
+        <div class="multi-wrap">
+          <button class="multi-btn" id="ptBtn" onclick="toggleDD('ptDD')">ทั้งหมด</button>
+          <div class="multi-dd" id="ptDD">
+            <label class="all-label"><input type="checkbox" id="ptAll" checked onchange="toggleAll()"> เลือกทั้งหมด</label>
+          </div>
+        </div>
+      </div>
+      <div class="filter-group">
+        <div class="filter-label">หน่วยงาน</div>
+        <div class="multi-wrap">
+          <button class="multi-btn" id="fDeptBtn" onclick="toggleDD('fDeptDD')">ทั้งหมด</button>
+          <div class="multi-dd" id="fDeptDD" style="min-width:300px;max-height:300px;">
+            <label class="all-label"><input type="checkbox" id="fDeptAll" checked onchange="toggleFDeptAll()"> เลือกทั้งหมด</label>
+            <div style="padding:6px 14px;font-size:0.75rem;font-weight:700;color:#0d2b6b;background:#f0f4ff;border-bottom:1px solid #e2e8f0;">— หน่วยงานภายใน —</div>
+            <div id="fDeptInternal"></div>
+            <div style="padding:6px 14px;font-size:0.75rem;font-weight:700;color:#d97706;background:#fffbeb;border-bottom:1px solid #e2e8f0;">— หน่วยงานภายนอก —</div>
+            <div id="fDeptExternal"></div>
+          </div>
+        </div>
+      </div>
+      <div class="filter-group">
+        <div class="filter-label">TAG</div>
+        <select class="filter-select" id="fTag" onchange="applyFilters()">
+          <option value="">ทั้งหมด</option>
+          <option value="participant">participant</option>
+          <option value="Staff">Staff</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <div class="filter-label">ประเภท</div>
+        <select class="filter-select" id="fWalkin" onchange="applyFilters()">
+          <option value="">ทั้งหมด</option>
+          <option value="preReg">ลงทะเบียนล่วงหน้า</option>
+          <option value="walkin">Walk-in</option>
+        </select>
+      </div>
+      <button class="btn-reset" onclick="resetFilters()">✕ ล้าง filter</button>
+    </div>
     <div style="overflow-x:auto;">
       <table>
         <thead>
@@ -300,38 +444,175 @@ document.addEventListener('DOMContentLoaded',()=>{
   </div>
 
   <!-- ALL PARTICIPANTS SECTION -->
-  <div class="tcard" style="margin-bottom:24px;">
+  <div class="tcard" style="margin-bottom:24px;overflow:visible;">
     <div class="thead-row" style="cursor:pointer;" onclick="toggleParticipants()">
       <div>
         <span class="ttitle">รายชื่อผู้ลงทะเบียนทั้งหมด</span>
         <span class="tcount" id="pRegCount"></span>
       </div>
-      <button class="btn-xl" id="pToggleBtn" style="background:var(--blue);color:white;pointer-events:none;">▼ ดูรายชื่อ</button>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button class="btn-xl green" onclick="event.stopPropagation();exportParticipantsExcel()" style="font-size:0.78rem;">⬇ Excel</button>
+        <button class="btn-xl" id="pToggleBtn" style="background:var(--blue);color:white;pointer-events:none;">▼ ดูรายชื่อ</button>
+      </div>
     </div>
     <div id="pRegSection" style="display:none;">
-      <div style="display:flex;border-bottom:2px solid var(--border);padding:0 8px;">
-        <button class="ptab active" id="ptab0" onclick="event.stopPropagation();switchPTab(0)">ลงทะเบียนล่วงหน้า <span id="pPreCount"></span></button>
-        <button class="ptab" id="ptab1" onclick="event.stopPropagation();switchPTab(1)">Walk-in <span id="pWiCount"></span></button>
+      <!-- View toggle -->
+      <div style="padding:8px 16px;border-bottom:1px solid var(--border);display:flex;gap:6px;align-items:center;">
+        <button class="vbtn active" id="pVListBtn" onclick="setPRegView('list')">📋 รายชื่อ</button>
+        <button class="vbtn" id="pVZoneBtn" onclick="setPRegView('zone')">📊 สถิติเขตสุขภาพ <span id="zoneChartCount" style="font-weight:400;font-size:0.78rem;color:#94a3b8;"></span></button>
       </div>
-      <div style="padding:12px 20px;border-bottom:1px solid var(--border);">
-        <input class="sbox" id="pSearch" placeholder="🔍 ค้นหาชื่อ / หน่วยงาน" oninput="renderParticipants()">
+      <!-- LIST VIEW -->
+      <div id="pListView">
+        <div style="display:flex;border-bottom:2px solid var(--border);padding:0 8px;">
+          <button class="ptab active" id="ptab0" onclick="event.stopPropagation();switchPTab(0)">ลงทะเบียนล่วงหน้า <span id="pPreCount"></span></button>
+          <button class="ptab" id="ptab1" onclick="event.stopPropagation();switchPTab(1)">Walk-in <span id="pWiCount"></span></button>
+        </div>
+        <div style="padding:12px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+          <input class="sbox" id="pSearch" placeholder="🔍 ค้นหาชื่อ / หน่วยงาน" oninput="renderParticipants()" style="flex:1;min-width:160px;">
+          <span id="pCountBar" style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:20px;padding:3px 12px;font-size:0.8rem;color:#1e40af;white-space:nowrap;flex-shrink:0;">พบ <b id="pCountFiltered">-</b> ราย <span id="pCountBreakdown" style="color:#94a3b8;font-size:0.75rem;"></span></span>
+        </div>
+        <div class="p-filter-bar">
+          <div class="p-filter-group">
+            <div class="p-filter-label">ประเภทการเข้าร่วม</div>
+            <div class="multi-wrap">
+              <button class="multi-btn" id="pFIntExtBtn" onclick="toggleDD('pFIntExtDD')">ทั้งหมด</button>
+              <div class="multi-dd" id="pFIntExtDD">
+                <label class="all-label"><input type="checkbox" id="pFIntExtAll" checked onchange="onPFIntExtAll()"> เลือกทั้งหมด</label>
+                <label><input type="checkbox" class="pFIntExtCb" value="ภายใน" checked onchange="onPFIntExtChange()"> ภายใน</label>
+                <label><input type="checkbox" class="pFIntExtCb" value="ภายนอก" checked onchange="onPFIntExtChange()"> ภายนอก</label>
+              </div>
+            </div>
+          </div>
+          <div class="p-filter-group">
+            <div class="p-filter-label">หน่วยงาน</div>
+            <div class="multi-wrap">
+              <button class="multi-btn" id="pFDeptBtn" onclick="toggleDD('pFDeptDD')">ทั้งหมด</button>
+              <div class="multi-dd" id="pFDeptDD" style="min-width:220px;">
+                <label class="all-label"><input type="checkbox" id="pFDeptAll" checked onchange="onPFDeptAll()"> เลือกทั้งหมด</label>
+              </div>
+            </div>
+          </div>
+          <div class="p-filter-group">
+            <div class="p-filter-label">TAG</div>
+            <div class="multi-wrap">
+              <button class="multi-btn" id="pFTagBtn" onclick="toggleDD('pFTagDD')">ทั้งหมด</button>
+              <div class="multi-dd" id="pFTagDD">
+                <label class="all-label"><input type="checkbox" id="pFTagAll" checked onchange="onPFTagAll()"> เลือกทั้งหมด</label>
+              </div>
+            </div>
+          </div>
+          <div class="p-filter-group">
+            <div class="p-filter-label">ประเภท</div>
+            <div class="multi-wrap">
+              <button class="multi-btn" id="pFPTypeBtn" onclick="toggleDD('pFPTypeDD')">ทั้งหมด</button>
+              <div class="multi-dd" id="pFPTypeDD" style="min-width:220px;">
+                <label class="all-label"><input type="checkbox" id="pFPTypeAll" checked onchange="onPFPTypeAll()"> เลือกทั้งหมด</label>
+              </div>
+            </div>
+          </div>
+          <div class="p-filter-group">
+            <div class="p-filter-label">เขตสุขภาพ</div>
+            <div class="multi-wrap">
+              <button class="multi-btn" id="pFZoneBtn" onclick="toggleDD('pFZoneDD')">ทั้งหมด</button>
+              <div class="multi-dd" id="pFZoneDD" style="min-width:200px;">
+                <label class="all-label"><input type="checkbox" id="pFZoneAll" checked onchange="onPFZoneAll()"> เลือกทั้งหมด</label>
+                <label><input type="checkbox" class="pFZoneCb" value="1" checked onchange="onPFZoneChange()"> เขตสุขภาพที่ 1</label>
+                <label><input type="checkbox" class="pFZoneCb" value="2" checked onchange="onPFZoneChange()"> เขตสุขภาพที่ 2</label>
+                <label><input type="checkbox" class="pFZoneCb" value="3" checked onchange="onPFZoneChange()"> เขตสุขภาพที่ 3</label>
+                <label><input type="checkbox" class="pFZoneCb" value="4" checked onchange="onPFZoneChange()"> เขตสุขภาพที่ 4</label>
+                <label><input type="checkbox" class="pFZoneCb" value="5" checked onchange="onPFZoneChange()"> เขตสุขภาพที่ 5</label>
+                <label><input type="checkbox" class="pFZoneCb" value="6" checked onchange="onPFZoneChange()"> เขตสุขภาพที่ 6</label>
+                <label><input type="checkbox" class="pFZoneCb" value="7" checked onchange="onPFZoneChange()"> เขตสุขภาพที่ 7</label>
+                <label><input type="checkbox" class="pFZoneCb" value="8" checked onchange="onPFZoneChange()"> เขตสุขภาพที่ 8</label>
+                <label><input type="checkbox" class="pFZoneCb" value="9" checked onchange="onPFZoneChange()"> เขตสุขภาพที่ 9</label>
+                <label><input type="checkbox" class="pFZoneCb" value="10" checked onchange="onPFZoneChange()"> เขตสุขภาพที่ 10</label>
+                <label><input type="checkbox" class="pFZoneCb" value="11" checked onchange="onPFZoneChange()"> เขตสุขภาพที่ 11</label>
+                <label><input type="checkbox" class="pFZoneCb" value="12" checked onchange="onPFZoneChange()"> เขตสุขภาพที่ 12</label>
+                <label><input type="checkbox" class="pFZoneCb" value="13" checked onchange="onPFZoneChange()"> เขตสุขภาพที่ 13</label>
+              </div>
+            </div>
+          </div>
+          <div class="p-filter-group">
+            <div class="p-filter-label">จังหวัด</div>
+            <div class="multi-wrap">
+              <button class="multi-btn" id="pFProvBtn" onclick="toggleDD('pFProvDD')">ทั้งหมด</button>
+              <div class="multi-dd" id="pFProvDD" style="min-width:180px;">
+                <label class="all-label"><input type="checkbox" id="pFProvAll" checked onchange="onPFProvAll()"> เลือกทั้งหมด</label>
+              </div>
+            </div>
+          </div>
+          <button class="p-reset-btn" onclick="resetPFilters()">↺ รีเซ็ต</button>
+        </div>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th><th>ชื่อ-นามสกุล</th><th>หน่วยงาน</th>
+                <th>จังหวัด</th><th>เขตสุขภาพ</th>
+                <th>ประเภทการเข้าร่วม</th><th>TAG</th>
+              </tr>
+            </thead>
+            <tbody id="pBody"><tr><td colspan="7" class="loading-td">กำลังโหลด...</td></tr></tbody>
+          </table>
+        </div>
+        <div class="pager">
+          <span id="pRegInfo">-</span>
+          <div style="display:flex;gap:6px;">
+            <button class="pbtn" id="pPrev" onclick="changePPage(-1)">← ก่อนหน้า</button>
+            <button class="pbtn" id="pNext" onclick="changePPage(1)">ถัดไป →</button>
+          </div>
+        </div>
       </div>
-      <div style="overflow-x:auto;">
-        <table>
-          <thead>
-            <tr>
-              <th>#</th><th>ชื่อ-นามสกุล</th><th>หน่วยงาน</th>
-              <th>ประเภทการเข้าร่วม</th><th>TAG</th>
-            </tr>
-          </thead>
-          <tbody id="pBody"><tr><td colspan="5" class="loading-td">กำลังโหลด...</td></tr></tbody>
-        </table>
-      </div>
-      <div class="pager">
-        <span id="pRegInfo">-</span>
-        <div style="display:flex;gap:6px;">
-          <button class="pbtn" id="pPrev" onclick="changePPage(-1)">← ก่อนหน้า</button>
-          <button class="pbtn" id="pNext" onclick="changePPage(1)">ถัดไป →</button>
+      <!-- ZONE CHART VIEW -->
+      <div id="pZoneView" style="display:none;">
+        <!-- Zone filters -->
+        <div style="padding:10px 16px;background:#f8fafc;border-bottom:1px solid var(--border);display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;">
+          <div class="p-filter-group">
+            <div class="p-filter-label">ประเภทการเข้าร่วม</div>
+            <select class="p-filter-select" id="zFIntExt" onchange="renderZoneChart()">
+              <option value="">ทั้งหมด</option>
+              <option value="ภายใน">ภายใน</option>
+              <option value="ภายนอก">ภายนอก</option>
+            </select>
+          </div>
+          <div class="p-filter-group">
+            <div class="p-filter-label">TAG</div>
+            <select class="p-filter-select" id="zFTag" onchange="renderZoneChart()">
+              <option value="">ทั้งหมด</option>
+            </select>
+          </div>
+          <div class="p-filter-group">
+            <div class="p-filter-label">ประเภท</div>
+            <select class="p-filter-select" id="zFPType" onchange="renderZoneChart()">
+              <option value="">ทั้งหมด</option>
+            </select>
+          </div>
+          <button class="p-reset-btn" onclick="resetZoneFilters()">↺ รีเซ็ต</button>
+        </div>
+        <!-- Zone sub-tabs -->
+        <div style="display:flex;border-bottom:2px solid var(--border);padding:0 8px;">
+          <button class="ptab active" id="zoneTabPre" onclick="setZoneTab('pre')">ลงทะเบียนล่วงหน้า <span id="zonePreCount" style="font-size:0.8rem;color:#64748b;font-weight:400;"></span></button>
+          <button class="ptab" id="zoneTabWi" onclick="setZoneTab('wi')">Walk-in <span id="zoneWiCount" style="font-size:0.8rem;color:#64748b;font-weight:400;"></span></button>
+        </div>
+        <!-- Pre panel -->
+        <div id="zonePanelPre" style="padding:20px;">
+          <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap;">
+            <div style="flex:0 0 220px;max-width:240px;"><canvas id="zoneChartPre"></canvas></div>
+            <div style="flex:1;min-width:240px;overflow-x:auto;">
+              <table class="dtable"><thead><tr><th>เขตสุขภาพ</th><th style="text-align:right;">คน</th><th style="text-align:right;">%</th></tr></thead>
+                <tbody id="zoneBodyPre"></tbody></table>
+            </div>
+          </div>
+        </div>
+        <!-- Walk-in panel -->
+        <div id="zonePanelWi" style="padding:20px;display:none;">
+          <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap;">
+            <div style="flex:0 0 220px;max-width:240px;"><canvas id="zoneChartWi"></canvas></div>
+            <div style="flex:1;min-width:240px;overflow-x:auto;">
+              <table class="dtable"><thead><tr><th>เขตสุขภาพ</th><th style="text-align:right;">คน</th><th style="text-align:right;">%</th></tr></thead>
+                <tbody id="zoneBodyWi"></tbody></table>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -415,9 +696,10 @@ const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 const SB_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2eHl0bmpmeWVwcWhia21jam1zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0MzE2NDAsImV4cCI6MjA5NTAwNzY0MH0.RAr_ehb4cxfNliDR0h5XcihUaP-0ltZTTGIAv2Fw1kk";
 (function(){
   const _u=sessionStorage.getItem('dmsc_user');
-  function _hb(){if(!_u)return;fetch(`${SB_URL}/rest/v1/staff_sessions?username=eq.${encodeURIComponent(_u)}`,{method:'PATCH',headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON,'Content-Type':'application/json'},body:JSON.stringify({last_active:new Date().toISOString()})}).catch(()=>{});}
-  function _del(){if(!_u)return;fetch(`${SB_URL}/rest/v1/staff_sessions?username=eq.${encodeURIComponent(_u)}`,{method:'DELETE',headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON},keepalive:true}).catch(()=>{});}
+  function _hb(){if(!_u)return;fetch(`${SB_URL}/rest/v1/staff_sessions?username=eq.${encodeURIComponent(_u)}`,{method:'PATCH',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'},body:JSON.stringify({last_active:new Date().toISOString()})}).catch(()=>{});}
+  function _del(){if(!_u)return;fetch(`${SB_URL}/rest/v1/staff_sessions?username=eq.${encodeURIComponent(_u)}`,{method:'DELETE',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY},keepalive:true}).catch(()=>{});}
   setInterval(_hb,60000);
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible') _hb();});
   window.addEventListener('beforeunload',_del);
   if(sessionStorage.getItem('dmsc_role')!=='admin')
     document.querySelectorAll('.clear-btn').forEach(el=>el.style.display='none');
@@ -430,8 +712,63 @@ let allData=[], filtered=[], curTab=0, curPage=1;
 let selPT=new Set(), selDPT=new Set(), selDDept=new Set(), selFDept=new Set();
 let deptRaw=[], dView='table', dChart=null;
 let totalPreReg=0, totalAll=0;
-let allParticipants=[], curPTab=0, curPPage=1;
+let allParticipants=[], curPTab=0, curPPage=1, zoneChartPreInst=null, zoneChartWiInst=null;
 const P_PAGE=20;
+const HEALTH_ZONE={
+  'เชียงราย':1,'น่าน':1,'พะเยา':1,'แพร่':1,'เชียงใหม่':1,'แม่ฮ่องสอน':1,'ลำปาง':1,'ลำพูน':1,
+  'ตาก':2,'พิษณุโลก':2,'เพชรบูรณ์':2,'สุโขทัย':2,'อุตรดิตถ์':2,
+  'กำแพงเพชร':3,'พิจิตร':3,'นครสวรรค์':3,'อุทัยธานี':3,
+  'นนทบุรี':4,'ปทุมธานี':4,'พระนครศรีอยุธยา':4,'สระบุรี':4,'ลพบุรี':4,'สิงห์บุรี':4,'อ่างทอง':4,'ชัยนาท':4,
+  'กาญจนบุรี':5,'นครปฐม':5,'ราชบุรี':5,'สุพรรณบุรี':5,'ประจวบคีรีขันธ์':5,'เพชรบุรี':5,'สมุทรสงคราม':5,'สมุทรสาคร':5,
+  'ฉะเชิงเทรา':6,'ปราจีนบุรี':6,'สระแก้ว':6,'สมุทรปราการ':6,'จันทบุรี':6,'ชลบุรี':6,'ตราด':6,'ระยอง':6,'นครนายก':6,
+  'กาฬสินธุ์':7,'ขอนแก่น':7,'มหาสารคาม':7,'ร้อยเอ็ด':7,
+  'บึงกาฬ':8,'เลย':8,'หนองคาย':8,'หนองบัวลำภู':8,'อุดรธานี':8,'นครพนม':8,'สกลนคร':8,'มุกดาหาร':8,
+  'ชัยภูมิ':9,'นครราชสีมา':9,'บุรีรัมย์':9,'สุรินทร์':9,
+  'ยโสธร':10,'ศรีสะเกษ':10,'อุบลราชธานี':10,'อำนาจเจริญ':10,
+  'ชุมพร':11,'นครศรีธรรมราช':11,'สุราษฎร์ธานี':11,'กระบี่':11,'พังงา':11,'ภูเก็ต':11,'ระนอง':11,'พัทลุง':11,'ตรัง':11,
+  'นราธิวาส':12,'ปัตตานี':12,'ยะลา':12,'สงขลา':12,'สตูล':12,
+  'กรุงเทพมหานคร':13,'กรมวิทยาศาสตร์การแพทย์':13
+};
+function fmtPct(cnt,total){
+  if(!total||!cnt) return '0%';
+  const v=cnt/total*100;
+  return v<1?v.toFixed(1)+'%':Math.round(v)+'%';
+}
+function buildName(p){
+  const pfx=(p.prefix||'').replace(/\s*\([^)]*\)/g,'').trim();
+  return `${pfx} ${p.first_name||''} ${p.last_name||''}`.trim().replace(/\s+/g,' ');
+}
+function getZone(prov){
+  if(!prov) return null;
+  if(HEALTH_ZONE[prov]) return HEALTH_ZONE[prov];
+  if(prov.includes('กรมวิทยาศาสตร์')) return 13;
+  return null;
+}
+// Participant filter state (empty Set = no filter = show all)
+let pFSelIntExt=new Set(),pFSelDept=new Set(),pFSelTag=new Set(),
+    pFSelPType=new Set(),pFSelZone=new Set(),pFSelProv=new Set();
+function pFGetChecked(cbClass){
+  const all=[...document.querySelectorAll('.'+cbClass)];
+  if(!all.length||all.every(c=>c.checked)) return new Set();
+  const s=new Set();all.filter(c=>c.checked).forEach(c=>s.add(c.value));return s;
+}
+function pFUpdateBtn(btnId,sel){
+  const b=document.getElementById(btnId);if(!b)return;
+  if(sel.size===0){b.textContent='ทั้งหมด';b.classList.remove('on');}
+  else{b.textContent=`เลือก ${sel.size}`;b.classList.add('on');}
+}
+function onPFIntExtChange(){const cbs=[...document.querySelectorAll('.pFIntExtCb')];document.getElementById('pFIntExtAll').checked=cbs.every(c=>c.checked);pFSelIntExt=pFGetChecked('pFIntExtCb');pFUpdateBtn('pFIntExtBtn',pFSelIntExt);curPPage=1;renderParticipants();}
+function onPFIntExtAll(){const c=document.getElementById('pFIntExtAll').checked;document.querySelectorAll('.pFIntExtCb').forEach(cb=>cb.checked=c);pFSelIntExt=new Set();pFUpdateBtn('pFIntExtBtn',pFSelIntExt);curPPage=1;renderParticipants();}
+function onPFDeptChange(){const cbs=[...document.querySelectorAll('.pFDeptCb')];document.getElementById('pFDeptAll').checked=cbs.every(c=>c.checked);pFSelDept=pFGetChecked('pFDeptCb');pFUpdateBtn('pFDeptBtn',pFSelDept);curPPage=1;renderParticipants();}
+function onPFDeptAll(){const c=document.getElementById('pFDeptAll').checked;document.querySelectorAll('.pFDeptCb').forEach(cb=>cb.checked=c);pFSelDept=new Set();pFUpdateBtn('pFDeptBtn',pFSelDept);curPPage=1;renderParticipants();}
+function onPFTagChange(){const cbs=[...document.querySelectorAll('.pFTagCb')];document.getElementById('pFTagAll').checked=cbs.every(c=>c.checked);pFSelTag=pFGetChecked('pFTagCb');pFUpdateBtn('pFTagBtn',pFSelTag);curPPage=1;renderParticipants();}
+function onPFTagAll(){const c=document.getElementById('pFTagAll').checked;document.querySelectorAll('.pFTagCb').forEach(cb=>cb.checked=c);pFSelTag=new Set();pFUpdateBtn('pFTagBtn',pFSelTag);curPPage=1;renderParticipants();}
+function onPFPTypeChange(){const cbs=[...document.querySelectorAll('.pFPTypeCb')];document.getElementById('pFPTypeAll').checked=cbs.every(c=>c.checked);pFSelPType=pFGetChecked('pFPTypeCb');pFUpdateBtn('pFPTypeBtn',pFSelPType);curPPage=1;renderParticipants();}
+function onPFPTypeAll(){const c=document.getElementById('pFPTypeAll').checked;document.querySelectorAll('.pFPTypeCb').forEach(cb=>cb.checked=c);pFSelPType=new Set();pFUpdateBtn('pFPTypeBtn',pFSelPType);curPPage=1;renderParticipants();}
+function onPFZoneChange(){const cbs=[...document.querySelectorAll('.pFZoneCb')];document.getElementById('pFZoneAll').checked=cbs.every(c=>c.checked);pFSelZone=pFGetChecked('pFZoneCb');pFUpdateBtn('pFZoneBtn',pFSelZone);curPPage=1;renderParticipants();}
+function onPFZoneAll(){const c=document.getElementById('pFZoneAll').checked;document.querySelectorAll('.pFZoneCb').forEach(cb=>cb.checked=c);pFSelZone=new Set();pFUpdateBtn('pFZoneBtn',pFSelZone);curPPage=1;renderParticipants();}
+function onPFProvChange(){const cbs=[...document.querySelectorAll('.pFProvCb')];document.getElementById('pFProvAll').checked=cbs.every(c=>c.checked);pFSelProv=pFGetChecked('pFProvCb');pFUpdateBtn('pFProvBtn',pFSelProv);curPPage=1;renderParticipants();}
+function onPFProvAll(){const c=document.getElementById('pFProvAll').checked;document.querySelectorAll('.pFProvCb').forEach(cb=>cb.checked=c);pFSelProv=new Set();pFUpdateBtn('pFProvBtn',pFSelProv);curPPage=1;renderParticipants();}
 
 async function fetchAll(path,ps=1000){
   let res=[],from=0;
@@ -465,7 +802,7 @@ async function loadAll(){
     const isIn=(p.internal_external||'').includes('ภายใน');
     const dept=isIn?(p.dept||'-'):(p.ext_dept||p.dept||'-');
     return{id:r.id,participantId:r.participant_id,day:r.day,time:r.checkin_time,scannedBy:r.scanned_by||'-',
-      name:`${p.prefix||''} ${p.first_name||''} ${p.last_name||''}`.trim(),
+      name:buildName(p),
       dept,isIn,tag:p.tag||'-',items:p.items||'-',
       pt:p.participation_type||'-',isWalkin:p.is_walkin===true};
   });
@@ -526,12 +863,67 @@ async function loadAll(){
 }
 
 async function loadParticipants(){
-  allParticipants=await fetchAll('/rest/v1/participants?select=id,prefix,first_name,last_name,dept,ext_dept,internal_external,participation_type,tag,is_walkin&order=last_name.asc');
+  allParticipants=await fetchAll('/rest/v1/participants?select=id,prefix,first_name,last_name,dept,ext_dept,internal_external,participation_type,tag,province,is_walkin&order=last_name.asc');
   const preC=allParticipants.filter(p=>!p.is_walkin).length;
   const wiC=allParticipants.filter(p=>p.is_walkin===true).length;
   document.getElementById('pRegCount').textContent=`(ล่วงหน้า ${preC.toLocaleString()} | Walk-in ${wiC.toLocaleString()})`;
   document.getElementById('pPreCount').textContent=`(${preC.toLocaleString()})`;
   document.getElementById('pWiCount').textContent=`(${wiC.toLocaleString()})`;
+  // Build dynamic filter checkboxes
+  const depts=[...new Set(allParticipants.map(p=>{
+    const isIn=(p.internal_external||'').includes('ภายใน');
+    return (isIn?(p.dept||''):(p.ext_dept||p.dept||'')).trim();
+  }).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'th'));
+  const tags=[...new Set(allParticipants.map(p=>(p.tag||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'th'));
+  const ptypes=[...new Set(allParticipants.map(p=>(p.participation_type||'').replace(/\s+/g,' ').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'th'));
+  function buildPFCB(ddId,allId,cbClass,onAllFn,onChangeFn,vals){
+    const dd=document.getElementById(ddId);
+    const allLbl=dd.querySelector('.all-label');
+    dd.innerHTML='';dd.appendChild(allLbl);
+    document.getElementById(allId).onchange=onAllFn;
+    vals.forEach(v=>{
+      const lbl=document.createElement('label');
+      lbl.innerHTML=`<input type="checkbox" class="${cbClass}" value="${v.replace(/"/g,'&quot;')}" checked> ${v}`;
+      lbl.querySelector('input').onchange=onChangeFn;
+      dd.appendChild(lbl);
+    });
+  }
+  buildPFCB('pFDeptDD','pFDeptAll','pFDeptCb',onPFDeptAll,onPFDeptChange,depts);
+  buildPFCB('pFTagDD','pFTagAll','pFTagCb',onPFTagAll,onPFTagChange,tags);
+  buildPFCB('pFPTypeDD','pFPTypeAll','pFPTypeCb',onPFPTypeAll,onPFPTypeChange,ptypes);
+  // Province dropdown grouped by health zone
+  const dd=document.getElementById('pFProvDD');
+  const allLbl=dd.querySelector('.all-label');
+  dd.innerHTML='';dd.appendChild(allLbl);
+  document.getElementById('pFProvAll').onchange=onPFProvAll;
+  const zoneGroups={};
+  allParticipants.forEach(p=>{
+    const prov=(p.province||'').trim();if(!prov) return;
+    const z=getZone(prov)||0;
+    if(!zoneGroups[z]) zoneGroups[z]=new Set();
+    zoneGroups[z].add(prov);
+  });
+  const zLabels={1:'เขต 1 เหนือ',2:'เขต 2 เหนือล่าง',3:'เขต 3 กลางบน',4:'เขต 4 กลาง',5:'เขต 5 ตะวันตก',6:'เขต 6 ตะวันออก',7:'เขต 7 อีสานกลาง',8:'เขต 8 อีสานบน',9:'เขต 9 อีสานล่าง',10:'เขต 10 อีสานใต้',11:'เขต 11 ใต้บน',12:'เขต 12 ใต้ล่าง',13:'เขต 13 กทม./กรมวิทย์',0:'ไม่ระบุ'};
+  Object.keys(zoneGroups).map(Number).sort((a,b)=>a-b).forEach(z=>{
+    const hdr=document.createElement('div');
+    hdr.style='padding:3px 14px;font-size:0.69rem;font-weight:700;color:#6366f1;background:#f5f3ff;border-top:1px solid #e2e8f0;pointer-events:none;';
+    hdr.textContent='── '+(zLabels[z]||`เขต ${z}`)+' ──';
+    dd.appendChild(hdr);
+    [...zoneGroups[z]].sort((a,b)=>a.localeCompare(b,'th')).forEach(prov=>{
+      const lbl=document.createElement('label');
+      lbl.innerHTML=`<input type="checkbox" class="pFProvCb" value="${prov}" checked> ${prov}`;
+      lbl.querySelector('input').onchange=onPFProvChange;
+      dd.appendChild(lbl);
+    });
+  });
+  // Populate zone chart filter dropdowns
+  const fillZSel=(id,opts)=>{
+    const sel=document.getElementById(id);
+    opts.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;sel.appendChild(o);});
+  };
+  fillZSel('zFTag',tags);
+  fillZSel('zFPType',ptypes);
+  renderZoneChart();
 }
 
 function toggleParticipants(){
@@ -553,16 +945,58 @@ function switchPTab(t){
   renderParticipants();
 }
 
+function resetPFilters(){
+  document.getElementById('pSearch').value='';
+  [['pFIntExtAll','.pFIntExtCb','pFIntExtBtn'],
+   ['pFDeptAll','.pFDeptCb','pFDeptBtn'],
+   ['pFTagAll','.pFTagCb','pFTagBtn'],
+   ['pFPTypeAll','.pFPTypeCb','pFPTypeBtn'],
+   ['pFZoneAll','.pFZoneCb','pFZoneBtn'],
+   ['pFProvAll','.pFProvCb','pFProvBtn']].forEach(([allId,cbSel,btnId])=>{
+    document.getElementById(allId).checked=true;
+    document.querySelectorAll(cbSel).forEach(cb=>cb.checked=true);
+    const b=document.getElementById(btnId);if(b){b.textContent='ทั้งหมด';b.classList.remove('on');}
+  });
+  pFSelIntExt=new Set();pFSelDept=new Set();pFSelTag=new Set();
+  pFSelPType=new Set();pFSelZone=new Set();pFSelProv=new Set();
+  curPPage=1;renderParticipants();
+}
+
+function pMatchRow(p,q){
+  const isIn=(p.internal_external||'').includes('ภายใน');
+  const dept=(isIn?(p.dept||''):(p.ext_dept||p.dept||'')).trim()||'-';
+  const prov=(p.province||'').trim();
+  const ptNorm=(p.participation_type||'').replace(/\s+/g,' ').trim();
+  const name=buildName(p);
+  const matchQ=!q||name.toLowerCase().includes(q)||dept.toLowerCase().includes(q)||(prov&&prov.toLowerCase().includes(q));
+  const intExtVal=isIn?'ภายใน':'ภายนอก';
+  const matchIntExt=pFSelIntExt.size===0||pFSelIntExt.has(intExtVal);
+  const matchDept=pFSelDept.size===0||pFSelDept.has(dept);
+  const matchTag=pFSelTag.size===0||pFSelTag.has((p.tag||'').trim());
+  const matchPType=pFSelPType.size===0||pFSelPType.has(ptNorm);
+  const zone=getZone(prov);
+  const matchZone=pFSelZone.size===0||pFSelZone.has(String(zone));
+  const matchProv=pFSelProv.size===0||pFSelProv.has(prov);
+  return matchQ&&matchIntExt&&matchDept&&matchTag&&matchPType&&matchZone&&matchProv;
+}
 function renderParticipants(){
   const q=(document.getElementById('pSearch').value||'').toLowerCase();
-  const data=allParticipants.filter(p=>{
+  const allFiltered=allParticipants.filter(p=>pMatchRow(p,q));
+  const preFiltered=allFiltered.filter(p=>!p.is_walkin).length;
+  const wiFiltered=allFiltered.filter(p=>p.is_walkin===true).length;
+  document.getElementById('pCountFiltered').textContent=allFiltered.length.toLocaleString();
+  document.getElementById('pCountBreakdown').textContent=`(ล่วงหน้า ${preFiltered.toLocaleString()} | Walk-in ${wiFiltered.toLocaleString()})`;
+  const data=allFiltered.filter(p=>{
     const isWI=p.is_walkin===true;
-    const matchTab=curPTab===0?!isWI:isWI;
-    const name=`${p.prefix||''} ${p.first_name||''} ${p.last_name||''}`.trim();
-    const isIn=(p.internal_external||'').includes('ภายใน');
-    const dept=isIn?(p.dept||'-'):(p.ext_dept||p.dept||'-');
-    const matchQ=!q||name.toLowerCase().includes(q)||dept.toLowerCase().includes(q);
-    return matchTab&&matchQ;
+    return curPTab===0?!isWI:isWI;
+  });
+  data.sort((a,b)=>{
+    const dA=(((a.internal_external||'').includes('ภายใน'))?(a.dept||''):(a.ext_dept||a.dept||'')).trim();
+    const dB=(((b.internal_external||'').includes('ภายใน'))?(b.dept||''):(b.ext_dept||b.dept||'')).trim();
+    const iA=DEPTS.indexOf(dA), iB=DEPTS.indexOf(dB);
+    const oA=iA>=0?iA:DEPTS.length, oB=iB>=0?iB:DEPTS.length;
+    if(oA!==oB) return oA-oB;
+    return buildName(a).localeCompare(buildName(b),'th');
   });
   const tot=data.length;
   const totPages=Math.ceil(tot/P_PAGE)||1;
@@ -572,22 +1006,145 @@ function renderParticipants(){
   document.getElementById('pRegInfo').textContent=`แสดง ${tot===0?0:start+1}–${Math.min(start+P_PAGE,tot)} จาก ${tot.toLocaleString()} รายการ`;
   document.getElementById('pPrev').disabled=curPPage<=1;
   document.getElementById('pNext').disabled=curPPage>=totPages;
-  if(!page.length){document.getElementById('pBody').innerHTML='<tr><td colspan="5" class="loading-td">ไม่พบข้อมูล</td></tr>';return;}
+  if(!page.length){document.getElementById('pBody').innerHTML='<tr><td colspan="7" class="loading-td">ไม่พบข้อมูล</td></tr>';return;}
   document.getElementById('pBody').innerHTML=page.map((p,i)=>{
-    const name=`${p.prefix||''} ${p.first_name||''} ${p.last_name||''}`.trim();
+    const name=buildName(p);
     const isIn=(p.internal_external||'').includes('ภายใน');
     const dept=isIn?(p.dept||'-'):(p.ext_dept||p.dept||'-');
+    const prov=(p.province||'').trim()||'-';
+    const zone=prov!=='-'?getZone(prov):null;
+    const zoneBadge=zone?`<span class="zone-badge">เขต ${zone}</span>`:'-';
+    const ptNorm=(p.participation_type||'').replace(/\s+/g,' ').trim()||'-';
     return`<tr>
       <td>${start+i+1}</td>
       <td>${name}</td>
-      <td style="max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${dept}">${dept}</td>
-      <td>${p.participation_type||'-'}</td>
+      <td style="max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${dept}">${dept}</td>
+      <td>${prov}</td>
+      <td>${zoneBadge}</td>
+      <td>${ptNorm}</td>
       <td>${p.tag||'-'}</td>
     </tr>`;
   }).join('');
 }
 
 function changePPage(d){curPPage+=d;renderParticipants();window.scrollTo({top:0,behavior:'smooth'});}
+
+const ZONE_COLORS=['#3b82f6','#8b5cf6','#06b6d4','#10b981','#f59e0b','#ef4444','#f97316','#84cc16','#ec4899','#6366f1','#14b8a6','#a78bfa','#0ea5e9','#94a3b8'];
+const ZONE_NAMES={1:'เขตสุขภาพที่ 1',2:'เขตสุขภาพที่ 2',3:'เขตสุขภาพที่ 3',4:'เขตสุขภาพที่ 4',5:'เขตสุขภาพที่ 5',6:'เขตสุขภาพที่ 6',7:'เขตสุขภาพที่ 7',8:'เขตสุขภาพที่ 8',9:'เขตสุขภาพที่ 9',10:'เขตสุขภาพที่ 10',11:'เขตสุขภาพที่ 11',12:'เขตสุขภาพที่ 12',13:'เขตสุขภาพที่ 13',0:'ไม่ระบุ'};
+let pRegViewMode='list';
+function setPRegView(v){
+  pRegViewMode=v;
+  document.getElementById('pListView').style.display=v==='list'?'':'none';
+  document.getElementById('pZoneView').style.display=v==='zone'?'':'none';
+  document.getElementById('pVListBtn').classList.toggle('active',v==='list');
+  document.getElementById('pVZoneBtn').classList.toggle('active',v==='zone');
+}
+function setZoneTab(t){
+  document.getElementById('zonePanelPre').style.display=t==='pre'?'':'none';
+  document.getElementById('zonePanelWi').style.display=t==='wi'?'':'none';
+  document.getElementById('zoneTabPre').classList.toggle('active',t==='pre');
+  document.getElementById('zoneTabWi').classList.toggle('active',t==='wi');
+}
+function toggleProvRow(pid, tr){
+  const row=document.getElementById(pid);
+  if(!row) return;
+  const open=row.style.display!=='none';
+  row.style.display=open?'none':'';
+  const arrow=tr.querySelector('.zProvArrow');
+  if(arrow) arrow.textContent=open?'▶':'▼';
+}
+function toggleZoneRow(type,zone){
+  const row=document.getElementById(`zDetail-${type}-${zone}`);
+  const arrow=document.getElementById(`zArrow-${type}-${zone}`);
+  if(!row) return;
+  const open=row.style.display!=='none';
+  row.style.display=open?'none':'';
+  if(arrow) arrow.textContent=open?'▶':'▼';
+}
+function buildZoneChart(participants, canvasId, bodyId, countId, instKey){
+  const counts={}, provByZone={}, namesByZoneProv={};
+  participants.forEach(p=>{
+    const prov=(p.province||'').trim();
+    const z=getZone(prov)||0;
+    counts[z]=(counts[z]||0)+1;
+    if(!provByZone[z]) provByZone[z]={};
+    const k=prov||'(ว่าง)';
+    provByZone[z][k]=(provByZone[z][k]||0)+1;
+    if(!namesByZoneProv[z]) namesByZoneProv[z]={};
+    if(!namesByZoneProv[z][k]) namesByZoneProv[z][k]=[];
+    const isIn=(p.internal_external||'').includes('ภายใน');
+    const dept=(isIn?(p.dept||''):(p.ext_dept||p.dept||'')).trim()||'-';
+    const name=buildName(p)||'(ไม่มีชื่อ)';
+    namesByZoneProv[z][k].push({name,dept});
+  });
+  const entries=Object.entries(counts).map(([z,n])=>({z:Number(z),n})).sort((a,b)=>a.z-b.z);
+  const total=participants.length;
+  document.getElementById(countId).textContent=`(${total.toLocaleString()} คน)`;
+  if(!total){document.getElementById(bodyId).innerHTML='<tr><td colspan="3" style="text-align:center;padding:16px;color:#94a3b8;">ไม่มีข้อมูล</td></tr>';return null;}
+  const labels=entries.map(e=>ZONE_NAMES[e.z]||`เขตสุขภาพที่ ${e.z}`);
+  const data=entries.map(e=>e.n);
+  const bgColors=entries.map(e=>ZONE_COLORS[e.z%ZONE_COLORS.length]);
+  const prev=instKey==='pre'?zoneChartPreInst:zoneChartWiInst;
+  if(prev) prev.destroy();
+  const ctx=document.getElementById(canvasId).getContext('2d');
+  const inst=new Chart(ctx,{
+    type:'doughnut',
+    data:{labels,datasets:[{data,backgroundColor:bgColors,borderWidth:2,borderColor:'#fff',hoverOffset:6}]},
+    options:{responsive:true,cutout:'58%',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.label}: ${c.raw.toLocaleString()} คน (${Math.round(c.raw/total*100)}%)`}}}}
+  });
+  if(instKey==='pre') zoneChartPreInst=inst; else zoneChartWiInst=inst;
+  document.getElementById(bodyId).innerHTML=entries.map((e,i)=>{
+    const provEntries=Object.entries(provByZone[e.z]||{}).sort((a,b)=>b[1]-a[1]);
+    const detailRows=provEntries.map(([prov,cnt],pi)=>{
+      const pid=`zProv-${instKey}-${e.z}-${pi}`;
+      const nameRows=(namesByZoneProv[e.z]?.[prov]||[]).map(({name,dept})=>`
+        <tr style="background:#f0f9ff;">
+          <td style="padding:3px 12px 3px 52px;font-size:0.77rem;color:#0369a1;">⌙ ${name}</td>
+          <td colspan="2" style="padding:3px 12px;font-size:0.72rem;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px;">${dept}</td>
+        </tr>`).join('');
+      const bg=e.z===0?'#fff7ed':'#f8fafc';
+      const tc=e.z===0?'#92400e':'#475569';
+      return `
+        <tr style="background:${bg};cursor:pointer;" onclick="toggleProvRow('${pid}',this)">
+          <td style="padding:3px 12px 3px 32px;font-size:0.79rem;color:${tc};">
+            <span class="zProvArrow" style="display:inline-block;width:12px;font-size:0.65rem;color:#94a3b8;">▶</span> ${prov}</td>
+          <td style="text-align:right;font-size:0.79rem;color:${tc};padding-right:12px;">${cnt.toLocaleString()}</td>
+          <td style="text-align:right;font-size:0.79rem;color:#94a3b8;padding-right:12px;">${fmtPct(cnt,total)}</td>
+        </tr>
+        <tr id="${pid}" style="display:none;"><td colspan="3" style="padding:0;"><table style="width:100%;border-collapse:collapse;">${nameRows}</table></td></tr>`;
+    }).join('');
+    return`<tr style="cursor:pointer;" onclick="toggleZoneRow('${instKey}',${e.z})">
+      <td><span id="zArrow-${instKey}-${e.z}" style="display:inline-block;width:14px;font-size:0.7rem;color:#94a3b8;">▶</span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:${bgColors[i]};margin-right:5px;vertical-align:middle;"></span>${ZONE_NAMES[e.z]||'เขตสุขภาพที่ '+e.z}</td>
+      <td style="text-align:right;font-weight:700;">${e.n.toLocaleString()}</td>
+      <td style="text-align:right;color:#64748b;">${fmtPct(e.n,total)}</td>
+    </tr>
+    <tr id="zDetail-${instKey}-${e.z}" style="display:none;"><td colspan="3" style="padding:0;border-bottom:2px solid var(--border);"><table style="width:100%;border-collapse:collapse;">${detailRows}</table></td></tr>`;
+  }).join('');
+  return inst;
+}
+function renderZoneChart(){
+  const fIntExt=document.getElementById('zFIntExt').value;
+  const fTag=(document.getElementById('zFTag').value||'').replace(/\s+/g,' ').trim();
+  const fPType=(document.getElementById('zFPType').value||'').replace(/\s+/g,' ').trim();
+  const base=allParticipants.filter(p=>{
+    const isIn=(p.internal_external||'').includes('ภายใน');
+    const matchIE=!fIntExt||(isIn?fIntExt==='ภายใน':fIntExt==='ภายนอก');
+    const matchTag=!fTag||(p.tag||'').trim()===fTag;
+    const matchPType=!fPType||(p.participation_type||'').replace(/\s+/g,' ').trim()===fPType;
+    return matchIE&&matchTag&&matchPType;
+  });
+  const pre=base.filter(p=>!p.is_walkin);
+  const wi=base.filter(p=>p.is_walkin===true);
+  document.getElementById('zoneChartCount').textContent=`(${base.length.toLocaleString()} คน)`;
+  buildZoneChart(pre,'zoneChartPre','zoneBodyPre','zonePreCount','pre');
+  buildZoneChart(wi,'zoneChartWi','zoneBodyWi','zoneWiCount','wi');
+}
+function resetZoneFilters(){
+  document.getElementById('zFIntExt').value='';
+  document.getElementById('zFTag').value='';
+  document.getElementById('zFPType').value='';
+  renderZoneChart();
+}
 
 function toggleFDeptAll(){
   const checked=document.getElementById('fDeptAll').checked;
@@ -712,25 +1269,30 @@ function applyFilters(){
   const filtWalkin=filtered.filter(r=>r.isWalkin).length;
   const filtPreReg=filtered.filter(r=>!r.isWalkin).length;
   document.getElementById('sTotal').textContent=tot>0?tot.toLocaleString():'-';
+  // Progress card — row 1
   document.getElementById('sPreReg').textContent=filtPreReg.toLocaleString();
-  document.getElementById('sWalkin').textContent=filtWalkin.toLocaleString();
+  document.getElementById('sTotalPreRegDisp').textContent=totalPreReg>0?totalPreReg.toLocaleString():'-';
+  const preRegRaw=totalPreReg>0?filtPreReg/totalPreReg*100:0;
+  const preRegPctText=preRegRaw===0?'0%':preRegRaw<1?(preRegRaw.toFixed(1)+'%'):(Math.round(preRegRaw)+'%');
+  document.getElementById('sPreRegPct').textContent=preRegPctText;
+  document.getElementById('barPreReg').style.width=Math.min(preRegRaw,100)+'%';
   document.getElementById('sNotChecked').textContent=typeof notCheckedIn==='number'?notCheckedIn.toLocaleString():'-';
-  // Row 2: internal/external/walk-in filtered by current day/filter selection
+  // Row 2: internal/external/walk-in progress bars
   const internalCount=filtered.filter(r=>!r.isWalkin&&r.isIn).length;
   const externalCount=filtered.filter(r=>!r.isWalkin&&!r.isIn).length;
   const walkin2Count=filtered.filter(r=>r.isWalkin).length;
-  const sub=tot?'% ของที่กรอง':'';
+  const intPct=tot?Math.round(internalCount/tot*100):0;
+  const extPct=tot?Math.round(externalCount/tot*100):0;
+  const wi2Pct=tot?Math.round(walkin2Count/tot*100):0;
   document.getElementById('sInternal').textContent=internalCount.toLocaleString();
   document.getElementById('sExternal').textContent=externalCount.toLocaleString();
   document.getElementById('sWalkin2').textContent=walkin2Count.toLocaleString();
-  document.getElementById('sInternalS').textContent=tot?`${Math.round(internalCount/tot*100)}${sub}`:'0 ราย';
-  document.getElementById('sExternalS').textContent=tot?`${Math.round(externalCount/tot*100)}${sub}`:'0 ราย';
-  document.getElementById('sWalkin2S').textContent=tot?`${Math.round(walkin2Count/tot*100)}${sub}`:'0 ราย';
-  [1,2,3].forEach(d=>{
-    const c=filtered.filter(r=>r.day===d).length;
-    document.getElementById(`sD${d}`).textContent=c.toLocaleString();
-    document.getElementById(`sD${d}p`).textContent=tot?`${Math.round(c/tot*100)}% ของ filter`:'-';
-  });
+  document.getElementById('sInternalS').textContent=intPct+'% ของผู้เช็คอิน';
+  document.getElementById('sExternalS').textContent=extPct+'% ของผู้เช็คอิน';
+  document.getElementById('sWalkin2S').textContent=wi2Pct+'% ของผู้เช็คอิน';
+  document.getElementById('barInternal').style.width=intPct+'%';
+  document.getElementById('barExternal').style.width=extPct+'%';
+  document.getElementById('barWalkin2').style.width=wi2Pct+'%';
   document.getElementById('tCount').textContent=`(${tot.toLocaleString()} รายการ)`;
   renderTable();
 }
@@ -885,6 +1447,25 @@ function renderDeptChart(depts,stats,dayF){
   });
 }
 
+function exportParticipantsExcel(){
+  const q=(document.getElementById('pSearch').value||'').toLowerCase();
+  const rows=allParticipants.filter(p=>pMatchRow(p,q)).map((p,i)=>{
+    const isIn=(p.internal_external||'').includes('ภายใน');
+    const dept=(isIn?(p.dept||''):(p.ext_dept||p.dept||'')).trim()||'-';
+    const name=buildName(p);
+    const prov=(p.province||'').trim()||'-';
+    return {'ลำดับ':i+1,'ชื่อ-นามสกุล':name,'หน่วยงาน':dept,
+      'จังหวัด':prov,'เขตสุขภาพ':getZone(prov)||'ไม่ระบุ',
+      'ประเภทบุคคล':isIn?'บุคลากรภายใน':'บุคคลภายนอก',
+      'ประเภทการเข้าร่วม':(p.participation_type||'').trim(),
+      'TAG':(p.tag||'').trim(),
+      'ประเภท':p.is_walkin?'Walk-in':'ลงทะเบียนล่วงหน้า'};
+  });
+  if(!rows.length){alert('ไม่มีข้อมูล');return;}
+  const ws=XLSX.utils.json_to_sheet(rows);
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Participants');
+  XLSX.writeFile(wb,`participants_dmsc_${new Date().toISOString().slice(0,10)}.xlsx`);
+}
 function exportExcel(){
   const ws=XLSX.utils.json_to_sheet(getRows());
   const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'CheckIn');
@@ -935,6 +1516,7 @@ function setAutoRefresh() {
   if (sec > 0) _refreshTimer = setInterval(loadAll, sec * 1000);
 }
 setAutoRefresh(); // เริ่มทันที (default 1 นาที)
+loadBgUrl();
 
 async function doLogout() {
   const _u=sessionStorage.getItem('dmsc_user');
@@ -943,7 +1525,8 @@ async function doLogout() {
   sessionStorage.removeItem('dmsc_user');
   sessionStorage.removeItem('dmsc_role');
   window.location.href = 'login.html';
-}const CLEAR_PASS = "P@und3142";
+}
+const CLEAR_PASS = "P@und3142";
 
 function openClearModal() {
   document.getElementById('clearPwInput').value = '';
@@ -1008,6 +1591,348 @@ async function confirmClear() {
 document.getElementById('clearOverlay').addEventListener('click', function(e) {
   if (e.target === this) closeClearModal();
 });
+</script>
+<div style="text-align:center;padding:16px 20px;font-size:0.75rem;color:#0d2b6b;">© 2026 Built by <span style="font-family:'Dancing Script',cursive;font-weight:700;font-size:1.25em;color:#0ABAB5;letter-spacing:0.01em;">Saharat Phetrnitchakun</span> · <span style="font-weight:800;letter-spacing:0.04em;font-size:1.05em;"><span style="color:#2563eb;">D</span><span style="color:#f59e0b;">P</span><span style="color:#16a34a;">T</span><span style="color:#dc2626;">C</span></span> · DMSc</div>
+
+<!-- Floating Theme Picker -->
+<div id="themeFab" onclick="toggleThemePanel()" style="position:fixed;bottom:28px;right:24px;z-index:9000;width:52px;height:52px;border-radius:50%;background:#fff;box-shadow:0 4px 20px rgba(0,0,0,0.18);display:flex;align-items:center;justify-content:center;cursor:pointer;border:2px solid #e2e8f0;transition:transform 0.15s;" onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'">
+  <span style="font-size:1.4rem;">🎨</span>
+</div>
+
+<div id="themePanel" style="display:none;position:fixed;bottom:92px;right:24px;z-index:9000;background:#fff;border-radius:18px;padding:18px 20px;box-shadow:0 8px 32px rgba(0,0,0,0.18);min-width:230px;border:1px solid #e2e8f0;">
+  <div style="font-size:0.8rem;font-weight:700;color:#1e293b;margin-bottom:14px;letter-spacing:0.04em;">🎨 ธีมสี Dashboard สาธารณะ</div>
+  <div style="display:flex;flex-direction:column;gap:10px;" id="themeList"></div>
+  <!-- BG Picker section -->
+  <div style="margin-top:14px;padding-top:12px;border-top:1px solid #f0f0f0;">
+    <div style="font-size:0.8rem;font-weight:700;color:#1e293b;margin-bottom:10px;">🖼️ ภาพพื้นหลัง (Live Dashboard)</div>
+    <div style="display:flex;gap:6px;margin-bottom:10px;" id="bgPresetRow">
+      <div onclick="selectBgPreset('none')" id="bgp-none" title="ไม่มีรูป" style="width:44px;height:44px;border-radius:8px;cursor:pointer;border:2px solid #e2e8f0;background:#e8f0fe;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;">⬜</div>
+      <div onclick="selectBgPreset('dna')" id="bgp-dna" title="DNA" style="width:44px;height:44px;border-radius:8px;cursor:pointer;border:2px solid #e2e8f0;overflow:hidden;flex-shrink:0;">
+        <img src="https://raw.githubusercontent.com/poundpop35-creator/search-participant/main/DNA.png" style="width:100%;height:100%;object-fit:cover;" loading="lazy">
+      </div>
+      <div onclick="selectBgPreset('conf')" id="bgp-conf" title="ภาพงานประชุม" style="width:44px;height:44px;border-radius:8px;cursor:pointer;border:2px solid #e2e8f0;overflow:hidden;flex-shrink:0;">
+        <img src="https://raw.githubusercontent.com/poundpop35-creator/search-participant/main/IMG_7352.webp" style="width:100%;height:100%;object-fit:cover;" loading="lazy">
+      </div>
+    </div>
+    <div style="display:flex;gap:6px;align-items:center;">
+      <input type="text" id="bgCustomInput" placeholder="วาง URL รูปภาพ..." style="flex:1;border:1.5px solid #e2e8f0;border-radius:8px;padding:7px 10px;font-size:0.78rem;font-family:'Sarabun',sans-serif;outline:none;min-width:0;">
+      <button onclick="saveBgUrl()" style="padding:7px 12px;border-radius:8px;border:none;background:#0d2b6b;color:white;font-family:'Sarabun',sans-serif;font-size:0.78rem;font-weight:700;cursor:pointer;flex-shrink:0;">บันทึก</button>
+    </div>
+    <label for="bgFileInput" style="display:flex;align-items:center;justify-content:center;gap:5px;margin-top:7px;padding:7px;border:1.5px dashed #cbd5e1;border-radius:8px;cursor:pointer;font-size:0.76rem;color:#64748b;transition:border-color .15s;" onmouseover="this.style.borderColor='#3b82f6'" onmouseout="this.style.borderColor='#cbd5e1'">
+      📁 อัปโหลดรูปจากเครื่อง
+    </label>
+    <input type="file" id="bgFileInput" accept="image/*" style="display:none;" onchange="if(this.files[0])uploadHeroImage(this.files[0])">
+    <div id="bgTip" style="font-size:0.73rem;color:#94a3b8;text-align:center;margin-top:8px;">ภาพพื้นหลัง Live Dashboard จะเปลี่ยนทุก deviceทุก device</div>
+  </div>
+  <!-- Public body BG section -->
+  <div style="margin-top:14px;padding-top:12px;border-top:1px solid #f0f0f0;">
+    <div style="font-size:0.8rem;font-weight:700;color:#1e293b;margin-bottom:10px;">🌅 พื้นหลัง Live Dashboard</div>
+    <div style="display:flex;gap:6px;margin-bottom:10px;">
+      <div onclick="selectPublicBgPreset('none')" id="pubBgp-none" title="ไม่มีรูป" style="width:44px;height:44px;border-radius:8px;cursor:pointer;border:2px solid #e2e8f0;background:#e8f0fe;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;">⬜</div>
+      <div onclick="selectPublicBgPreset('dna')" id="pubBgp-dna" title="DNA" style="width:44px;height:44px;border-radius:8px;cursor:pointer;border:2px solid #e2e8f0;overflow:hidden;flex-shrink:0;">
+        <img src="https://raw.githubusercontent.com/poundpop35-creator/search-participant/main/DNA.png" style="width:100%;height:100%;object-fit:cover;" loading="lazy">
+      </div>
+      <div onclick="selectPublicBgPreset('conf')" id="pubBgp-conf" title="ภาพงานประชุม" style="width:44px;height:44px;border-radius:8px;cursor:pointer;border:2px solid #e2e8f0;overflow:hidden;flex-shrink:0;">
+        <img src="https://raw.githubusercontent.com/poundpop35-creator/search-participant/main/IMG_7352.webp" style="width:100%;height:100%;object-fit:cover;" loading="lazy">
+      </div>
+    </div>
+    <div style="display:flex;gap:6px;align-items:center;">
+      <input type="text" id="publicBgInput" placeholder="วาง URL รูปภาพ..." style="flex:1;border:1.5px solid #e2e8f0;border-radius:8px;padding:7px 10px;font-size:0.78rem;font-family:'Sarabun',sans-serif;outline:none;min-width:0;">
+      <button onclick="savePublicBg()" style="padding:7px 12px;border-radius:8px;border:none;background:#0d2b6b;color:white;font-family:'Sarabun',sans-serif;font-size:0.78rem;font-weight:700;cursor:pointer;flex-shrink:0;">บันทึก</button>
+    </div>
+    <label for="publicBgFileInput" style="display:flex;align-items:center;justify-content:center;gap:5px;margin-top:7px;padding:7px;border:1.5px dashed #cbd5e1;border-radius:8px;cursor:pointer;font-size:0.76rem;color:#64748b;transition:border-color .15s;" onmouseover="this.style.borderColor='#3b82f6'" onmouseout="this.style.borderColor='#cbd5e1'">
+      📁 อัปโหลดรูปจากเครื่อง
+    </label>
+    <input type="file" id="publicBgFileInput" accept="image/*" style="display:none;" onchange="if(this.files[0])uploadPublicBgImage(this.files[0])">
+    <div id="publicBgTip" style="font-size:0.73rem;color:#94a3b8;text-align:center;margin-top:8px;">พื้นหลัง Live Dashboard เฉพาะหน้านั้น</div>
+  </div>
+  <!-- Page BG Picker section -->
+  <div style="margin-top:14px;padding-top:12px;border-top:1px solid #f0f0f0;">
+    <div style="font-size:0.8rem;font-weight:700;color:#1e293b;margin-bottom:10px;">🌄 ภาพพื้นหลัง (หน้าอื่นๆ)</div>
+    <div style="display:flex;gap:6px;margin-bottom:10px;">
+      <div onclick="selectPageBgPreset('none')" id="pbgp-none" title="ไม่มีรูป" style="width:44px;height:44px;border-radius:8px;cursor:pointer;border:2px solid #e2e8f0;background:#e8f0fe;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;">⬜</div>
+      <div onclick="selectPageBgPreset('dna')" id="pbgp-dna" title="DNA" style="width:44px;height:44px;border-radius:8px;cursor:pointer;border:2px solid #e2e8f0;overflow:hidden;flex-shrink:0;">
+        <img src="https://raw.githubusercontent.com/poundpop35-creator/search-participant/main/DNA.png" style="width:100%;height:100%;object-fit:cover;" loading="lazy">
+      </div>
+      <div onclick="selectPageBgPreset('conf')" id="pbgp-conf" title="ภาพงานประชุม" style="width:44px;height:44px;border-radius:8px;cursor:pointer;border:2px solid #e2e8f0;overflow:hidden;flex-shrink:0;">
+        <img src="https://raw.githubusercontent.com/poundpop35-creator/search-participant/main/IMG_7352.webp" style="width:100%;height:100%;object-fit:cover;" loading="lazy">
+      </div>
+    </div>
+    <div style="display:flex;gap:6px;align-items:center;">
+      <input type="text" id="pageBgInput" placeholder="วาง URL รูปภาพ..." style="flex:1;border:1.5px solid #e2e8f0;border-radius:8px;padding:7px 10px;font-size:0.78rem;font-family:'Sarabun',sans-serif;outline:none;min-width:0;">
+      <button onclick="savePageBg()" style="padding:7px 12px;border-radius:8px;border:none;background:#0d2b6b;color:white;font-family:'Sarabun',sans-serif;font-size:0.78rem;font-weight:700;cursor:pointer;flex-shrink:0;">บันทึก</button>
+    </div>
+    <label for="pageBgFileInput" style="display:flex;align-items:center;justify-content:center;gap:5px;margin-top:7px;padding:7px;border:1.5px dashed #cbd5e1;border-radius:8px;cursor:pointer;font-size:0.76rem;color:#64748b;transition:border-color .15s;" onmouseover="this.style.borderColor='#3b82f6'" onmouseout="this.style.borderColor='#cbd5e1'">
+      📁 อัปโหลดรูปจากเครื่อง
+    </label>
+    <input type="file" id="pageBgFileInput" accept="image/*" style="display:none;" onchange="if(this.files[0])uploadPageBgImage(this.files[0])">
+    <div id="pageBgTip" style="font-size:0.73rem;color:#94a3b8;text-align:center;margin-top:8px;">ภาพพื้นหลังจะเปลี่ยนทุกหน้า ทุก device</div>
+  </div>
+  <div class="theme-tip" style="margin-top:14px;padding-top:12px;border-top:1px solid #f0f0f0;font-size:0.73rem;color:#94a3b8;text-align:center;">ธีมจะแสดงบน Public Dashboard ทุก device</div>
+</div>
+
+<script>
+const DASH_THEMES = [
+  { id:1, name:'โทนสีชมพู',  sw:['#9C7564','#D9BAA4','#D6BDAB','#F7DFCB','#F3ECE0'] },
+  { id:2, name:'โทนสีเขียว', sw:['#2D3B2E','#97A397','#937A52','#E5E4E2','#F2F6F2'] },
+  { id:3, name:'โทนสีน้ำเงิน',sw:['#1F3540','#2C4B5D','#6A8694','#A1AFBA','#EDF3F8'] },
+  { id:4, name:'โทนสีม่วง',  sw:['#4D4A5B','#6E6576','#A0808B','#C8B7AF','#F6F3F5'] },
+  { id:5, name:'โทนสีน้ำตาล',sw:['#4B1B0D','#793E21','#BE7E4E','#F9DCB4','#FBF6EE'] },
+];
+
+function buildThemeList() {
+  const cur = parseInt(localStorage.getItem('pubTheme')||'1');
+  document.getElementById('themeList').innerHTML = DASH_THEMES.map(t=>`
+    <div onclick="pickTheme(${t.id})" style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:8px 10px;border-radius:10px;background:${cur===t.id?'#f1f5f9':'transparent'};border:2px solid ${cur===t.id?'#cbd5e1':'transparent'};transition:all 0.15s;" id="trow-${t.id}">
+      <div style="display:flex;gap:3px;flex-shrink:0;">
+        ${t.sw.map(c=>`<div style="width:16px;height:16px;border-radius:50%;background:${c};"></div>`).join('')}
+      </div>
+      <span style="font-size:0.82rem;font-weight:600;color:#1e293b;">${t.name}</span>
+      ${cur===t.id?'<span style="margin-left:auto;font-size:0.7rem;background:#16a34a;color:white;padding:2px 7px;border-radius:8px;font-weight:700;">ใช้งาน</span>':''}
+    </div>`).join('');
+}
+
+async function pickTheme(id) {
+  localStorage.setItem('pubTheme', String(id));
+  buildThemeList();
+  // Show saving indicator
+  const panel = document.getElementById('themePanel');
+  const tip = panel.querySelector('.theme-tip');
+  if(tip) { tip.textContent = '⏳ กำลังบันทึก...'; tip.style.color = '#64748b'; }
+  try {
+    const r = await fetch(SB_URL + '/rest/v1/app_settings', {
+      method:'POST',
+      headers:{
+        'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,
+        'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'
+      },
+      body: JSON.stringify({key:'theme', value: String(id)})
+    });
+    if(tip) { tip.textContent = (r.ok||r.status===204) ? '✅ บันทึกแล้ว — ทุก device จะเห็นธีมนี้' : '⚠️ บันทึกไม่สำเร็จ'; tip.style.color = (r.ok||r.status===204) ? '#16a34a' : '#dc2626'; }
+  } catch(e) {
+    if(tip) { tip.textContent = '⚠️ บันทึกไม่สำเร็จ (ออฟไลน์)'; tip.style.color = '#dc2626'; }
+  }
+}
+
+function toggleThemePanel() {
+  const p = document.getElementById('themePanel');
+  const open = p.style.display !== 'none';
+  if(!open) { buildThemeList(); loadBgUrl(); loadPublicBgUrl(); loadPageBgUrl(); }
+  p.style.display = open ? 'none' : 'block';
+}
+
+const BG_PRESETS = {
+  'none': '',
+  'dna':  'https://raw.githubusercontent.com/poundpop35-creator/search-participant/main/DNA.png',
+  'conf': 'https://raw.githubusercontent.com/poundpop35-creator/search-participant/main/IMG_7352.webp',
+};
+
+function selectBgPreset(key) {
+  document.getElementById('bgCustomInput').value = BG_PRESETS[key] || '';
+  ['none','dna','conf'].forEach(k => {
+    const el = document.getElementById('bgp-'+k);
+    if(el) el.style.borderColor = (k===key) ? '#3b82f6' : '#e2e8f0';
+  });
+}
+
+async function saveBgUrl(url) {
+  if(url === undefined) url = document.getElementById('bgCustomInput').value.trim();
+  const tip = document.getElementById('bgTip');
+  tip.textContent = '⏳ กำลังบันทึก...'; tip.style.color = '#64748b';
+  try {
+    const r = await fetch(SB_URL + '/rest/v1/app_settings', {
+      method:'POST',
+      headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'},
+      body: JSON.stringify({key:'bg_url', value: url})
+    });
+    if(r.ok || r.status === 204) {
+      localStorage.setItem('heroImgUrl', url);
+      document.getElementById('bgCustomInput').value = url;
+      tip.textContent = '✅ บันทึกแล้ว — ภาพพื้นหลัง Live Dashboard จะเปลี่ยนทุก device';
+      tip.style.color = '#16a34a';
+    } else {
+      tip.textContent = '⚠️ บันทึกไม่สำเร็จ (HTTP ' + r.status + ')'; tip.style.color = '#dc2626';
+    }
+  } catch(e) {
+    tip.textContent = '⚠️ บันทึกไม่สำเร็จ'; tip.style.color = '#dc2626';
+  }
+}
+
+async function uploadHeroImage(file) {
+  const tip = document.getElementById('bgTip');
+  tip.textContent = '⏳ กำลังอัปโหลด...'; tip.style.color = '#64748b';
+  document.getElementById('bgFileInput').value = '';
+  try {
+    // สร้าง bucket ถ้ายังไม่มี (ignore error ถ้ามีแล้ว)
+    await fetch(SB_URL + '/storage/v1/bucket', {
+      method:'POST',
+      headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'},
+      body: JSON.stringify({id:'hero-images',name:'hero-images',public:true})
+    }).catch(()=>{});
+    // อัปโหลดไฟล์ (x-upsert ทับของเดิม)
+    const ext = file.name.split('.').pop().toLowerCase() || 'jpg';
+    const path = `hero-bg.${ext}`;
+    const upRes = await fetch(`${SB_URL}/storage/v1/object/hero-images/${path}`, {
+      method:'POST',
+      headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':file.type,'x-upsert':'true'},
+      body: file
+    });
+    if(!upRes.ok) { const t=await upRes.text(); throw new Error(t); }
+    const publicUrl = `${SB_URL}/storage/v1/object/public/hero-images/${path}`;
+    await saveBgUrl(publicUrl);
+  } catch(e) {
+    tip.textContent = '⚠️ อัปโหลดไม่สำเร็จ: ' + String(e).slice(0,60); tip.style.color = '#dc2626';
+  }
+}
+
+async function loadBgUrl() {
+  try {
+    const r = await fetch(SB_URL+'/rest/v1/app_settings?key=eq.bg_url&select=value',
+      {headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}});
+    const d = await r.json();
+    if(Array.isArray(d) && d.length) {
+      const v = d[0].value || '';
+      localStorage.setItem('heroImgUrl', v);
+      document.getElementById('bgCustomInput').value = v;
+    }
+  } catch(e) {}
+}
+
+function selectPublicBgPreset(key) {
+  document.getElementById('publicBgInput').value = BG_PRESETS[key] || '';
+  ['none','dna','conf'].forEach(k => {
+    const el = document.getElementById('pubBgp-'+k);
+    if(el) el.style.borderColor = (k===key) ? '#3b82f6' : '#e2e8f0';
+  });
+}
+
+async function savePublicBg(url) {
+  if(url === undefined) url = document.getElementById('publicBgInput').value.trim();
+  const tip = document.getElementById('publicBgTip');
+  tip.textContent = '⏳ กำลังบันทึก...'; tip.style.color = '#64748b';
+  try {
+    const r = await fetch(SB_URL + '/rest/v1/app_settings', {
+      method:'POST',
+      headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'},
+      body: JSON.stringify({key:'public_bg', value: url})
+    });
+    if(r.ok || r.status === 204) {
+      localStorage.setItem('publicBgUrl', url);
+      document.getElementById('publicBgInput').value = url;
+      tip.textContent = '✅ บันทึกแล้ว — พื้นหลัง Live Dashboard จะเปลี่ยน';
+      tip.style.color = '#16a34a';
+    } else {
+      tip.textContent = '⚠️ บันทึกไม่สำเร็จ (HTTP ' + r.status + ')'; tip.style.color = '#dc2626';
+    }
+  } catch(e) { tip.textContent = '⚠️ บันทึกไม่สำเร็จ'; tip.style.color = '#dc2626'; }
+}
+
+async function uploadPublicBgImage(file) {
+  const tip = document.getElementById('publicBgTip');
+  tip.textContent = '⏳ กำลังอัปโหลด...'; tip.style.color = '#64748b';
+  document.getElementById('publicBgFileInput').value = '';
+  try {
+    await fetch(SB_URL + '/storage/v1/bucket', {
+      method:'POST',
+      headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'},
+      body: JSON.stringify({id:'hero-images',name:'hero-images',public:true})
+    }).catch(()=>{});
+    const ext = file.name.split('.').pop().toLowerCase() || 'jpg';
+    const path = `public-bg.${ext}`;
+    const upRes = await fetch(`${SB_URL}/storage/v1/object/hero-images/${path}`, {
+      method:'POST',
+      headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':file.type,'x-upsert':'true'},
+      body: file
+    });
+    if(!upRes.ok) { const t=await upRes.text(); throw new Error(t); }
+    await savePublicBg(`${SB_URL}/storage/v1/object/public/hero-images/${path}`);
+  } catch(e) { tip.textContent = '⚠️ อัปโหลดไม่สำเร็จ: ' + String(e).slice(0,60); tip.style.color = '#dc2626'; }
+}
+
+async function loadPublicBgUrl() {
+  try {
+    const r = await fetch(SB_URL+'/rest/v1/app_settings?key=eq.public_bg&select=value',
+      {headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}});
+    const d = await r.json();
+    if(Array.isArray(d) && d.length) {
+      const v = d[0].value || '';
+      localStorage.setItem('publicBgUrl', v);
+      document.getElementById('publicBgInput').value = v;
+    }
+  } catch(e) {}
+}
+
+function selectPageBgPreset(key) {
+  document.getElementById('pageBgInput').value = BG_PRESETS[key] || '';
+  ['none','dna','conf'].forEach(k => {
+    const el = document.getElementById('pbgp-'+k);
+    if(el) el.style.borderColor = (k===key) ? '#3b82f6' : '#e2e8f0';
+  });
+}
+
+async function savePageBg(url) {
+  if(url === undefined) url = document.getElementById('pageBgInput').value.trim();
+  const tip = document.getElementById('pageBgTip');
+  tip.textContent = '⏳ กำลังบันทึก...'; tip.style.color = '#64748b';
+  try {
+    const r = await fetch(SB_URL + '/rest/v1/app_settings', {
+      method:'POST',
+      headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'},
+      body: JSON.stringify({key:'page_bg', value: url})
+    });
+    if(r.ok || r.status === 204) {
+      localStorage.setItem('pageBgUrl', url);
+      document.getElementById('pageBgInput').value = url;
+      tip.textContent = '✅ บันทึกแล้ว — พื้นหลังจะเปลี่ยนทุกหน้า ทุก device';
+      tip.style.color = '#16a34a';
+    } else {
+      tip.textContent = '⚠️ บันทึกไม่สำเร็จ (HTTP ' + r.status + ')'; tip.style.color = '#dc2626';
+    }
+  } catch(e) { tip.textContent = '⚠️ บันทึกไม่สำเร็จ'; tip.style.color = '#dc2626'; }
+}
+
+async function uploadPageBgImage(file) {
+  const tip = document.getElementById('pageBgTip');
+  tip.textContent = '⏳ กำลังอัปโหลด...'; tip.style.color = '#64748b';
+  document.getElementById('pageBgFileInput').value = '';
+  try {
+    await fetch(SB_URL + '/storage/v1/bucket', {
+      method:'POST',
+      headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'},
+      body: JSON.stringify({id:'hero-images',name:'hero-images',public:true})
+    }).catch(()=>{});
+    const ext = file.name.split('.').pop().toLowerCase() || 'jpg';
+    const path = `page-bg.${ext}`;
+    const upRes = await fetch(`${SB_URL}/storage/v1/object/hero-images/${path}`, {
+      method:'POST',
+      headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':file.type,'x-upsert':'true'},
+      body: file
+    });
+    if(!upRes.ok) { const t=await upRes.text(); throw new Error(t); }
+    await savePageBg(`${SB_URL}/storage/v1/object/public/hero-images/${path}`);
+  } catch(e) { tip.textContent = '⚠️ อัปโหลดไม่สำเร็จ: ' + String(e).slice(0,60); tip.style.color = '#dc2626'; }
+}
+
+async function loadPageBgUrl() {
+  try {
+    const r = await fetch(SB_URL+'/rest/v1/app_settings?key=eq.page_bg&select=value',
+      {headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}});
+    const d = await r.json();
+    if(Array.isArray(d) && d.length) {
+      const v = d[0].value || '';
+      localStorage.setItem('pageBgUrl', v);
+      document.getElementById('pageBgInput').value = v;
+    }
+  } catch(e) {}
+}
+
+document.addEventListener('click', e => {
+  if(!document.getElementById('themePanel').contains(e.target) && !document.getElementById('themeFab').contains(e.target))
+    document.getElementById('themePanel').style.display = 'none';
+});
+(function(){const c=localStorage.getItem('pageBgUrl');if(c)document.body.style.backgroundImage=`linear-gradient(rgba(232,240,254,0.55),rgba(232,240,254,0.55)),url('${c}')`;})();
+async function _loadPageBg(){try{const r=await fetch(SB_URL+'/rest/v1/app_settings?key=eq.page_bg&select=value',{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}});const d=await r.json();if(Array.isArray(d)&&d.length){const v=d[0].value||'';localStorage.setItem('pageBgUrl',v);document.body.style.backgroundImage=v?`linear-gradient(rgba(232,240,254,0.55),rgba(232,240,254,0.55)),url('${v}')`:'';}}}catch(e){}}
+_loadPageBg();setInterval(_loadPageBg,30000);
 </script>
 </body>
 </html>

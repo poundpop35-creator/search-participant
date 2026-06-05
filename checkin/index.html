@@ -53,12 +53,13 @@
     .modal-status.error{color:var(--red);}
     .modal-status.loading{color:#64748b;}
     .modal-title{font-size:1.15rem;font-weight:700;color:#1e293b;margin-bottom:4px;}
-    .modal-name{font-size:1rem;font-weight:600;color:var(--blue);margin-bottom:14px;}
+    .modal-name{font-size:1rem;font-weight:600;color:var(--blue);margin-bottom:2px;}
+    .modal-dept{font-size:0.88rem;font-weight:600;color:#1e293b;margin-bottom:14px;}
     .modal-detail{background:#f8fafc;border-radius:12px;padding:12px 14px;margin-bottom:16px;text-align:left;border:1px solid #e2e8f0;}
-    .detail-row{display:flex;align-items:baseline;padding:4px 0;border-bottom:1px solid #f1f5f9;font-size:0.88rem;}
+    .detail-row{display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #f1f5f9;font-size:0.88rem;}
     .detail-row:last-child{border-bottom:none;}
-    .detail-label{color:#64748b;min-width:110px;flex-shrink:0;}
-    .detail-val{color:#1e293b;font-weight:600;}
+    .detail-label{color:#64748b;word-break:break-word;}
+    .detail-val{color:#1e293b;font-weight:600;text-align:right;}
     .detail-val.done{color:var(--red);}
     .detail-val.ok{color:var(--green);}
     .detail-val.warn{color:var(--yellow);}
@@ -67,7 +68,19 @@
     .btn-ok.warning{background:var(--yellow);color:white;}
     .btn-ok.error{background:var(--red);color:white;}
     .btn-ok.loading{background:#94a3b8;color:white;pointer-events:none;}
+    .help-btn{position:absolute;top:16px;right:16px;width:32px;height:32px;border-radius:50%;border:2px solid #c7d7f5;background:white;font-family:'Sarabun',sans-serif;font-size:1rem;font-weight:700;color:var(--blue);cursor:pointer;display:flex;align-items:center;justify-content:center;}
+    .help-btn:hover{background:var(--blue-light);}
+    .help-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.55);display:flex;align-items:center;justify-content:center;z-index:1000;padding:20px;}
+    .help-overlay.hidden{display:none;}
+    .help-modal{background:white;border-radius:20px;padding:24px 22px 20px;width:100%;max-width:400px;max-height:85vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,0.25);}
+    .help-title{font-size:1.1rem;font-weight:700;color:var(--blue);margin-bottom:16px;text-align:center;}
+    .help-section{margin-bottom:14px;}
+    .help-section-title{font-size:0.82rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px;}
+    .help-text{font-size:0.9rem;color:#1e293b;line-height:1.7;}
+    .help-text li{margin-left:16px;margin-bottom:2px;}
+    .help-close{width:100%;padding:12px;border-radius:12px;border:none;background:var(--blue);color:white;font-family:'Sarabun',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;margin-top:16px;}
   </style>
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
 </head>
 <body>
 
@@ -76,12 +89,48 @@
     <div class="modal-status" id="modalStatus"></div>
     <div class="modal-title"  id="modalTitle"></div>
     <div class="modal-name"   id="modalName"></div>
+    <div class="modal-dept"   id="modalDept"   style="display:none"></div>
     <div class="modal-detail" id="modalDetail" style="display:none"></div>
     <button class="btn-ok" id="btnOk" onclick="closeModal()">ตกลง</button>
   </div>
 </div>
 
-<div class="card">
+<div class="help-overlay hidden" id="helpOverlay" onclick="if(event.target===this)closeHelp()">
+  <div class="help-modal">
+    <div class="help-title">คู่มือการใช้งานระบบเช็คอิน</div>
+    <div class="help-section">
+      <div class="help-section-title">1. เลือกวันที่</div>
+      <div class="help-text">ระบบจะเลือกวันให้อัตโนมัติและล็อกตามวันงานจริง ไม่ต้องทำอะไร</div>
+    </div>
+    <div class="help-section">
+      <div class="help-section-title">2. เลือกวิธีสแกน</div>
+      <div class="help-text"><ul>
+        <li><b>เครื่องยิงบาร์โค้ด</b> — ยิง QR Code บนบัตรผู้เข้าร่วม หรือพิมพ์เลขบัตรประชาชน/Passport ในช่องด้านล่างแล้วกดค้นหา</li>
+        <li><b>กล้องมือถือ</b> — กดปุ่มแล้วส่องกล้องที่ QR Code</li>
+      </ul></div>
+    </div>
+    <div class="help-section">
+      <div class="help-section-title">3. ผลลัพธ์ที่จะขึ้น</div>
+      <div class="help-text"><ul>
+        <li>✅ <b>เช็คอินสำเร็จ</b> — แจ้งสิทธิ์คูปองอาหาร กระเป๋า และของที่ระลึก</li>
+        <li>⚠️ <b>เช็คอินซ้ำ</b> — คนนี้เช็คอินวันนี้ไปแล้ว ไม่ต้องทำอะไร</li>
+        <li>❌ <b>ไม่พบข้อมูล</b> — ยังไม่มีในระบบ ให้รอผู้เข้าร่วมกรอกแบบฟอร์ม Walk-in แล้วลองสแกนใหม่ใน 1 นาที</li>
+      </ul></div>
+    </div>
+    <div class="help-section">
+      <div class="help-section-title">4. Walk-in</div>
+      <div class="help-text">ผู้เข้าร่วมที่ไม่ได้ลงทะเบียนล่วงหน้า กรอกแบบฟอร์ม Walk-in เอง ข้อมูลจะเข้าระบบอัตโนมัติผ่าน Sheet ภายใน ~1 นาที จากนั้น staff สแกนได้เลย</div>
+    </div>
+    <div class="help-section">
+      <div class="help-section-title">5. โหมดรับกระเป๋า (ก่อนวันงาน)</div>
+      <div class="help-text">เลือก "รับกระเป๋า" ที่ dropdown → สแกน QR → ระบบบันทึกว่ารับแล้ว (บันทึกได้ครั้งเดียว)</div>
+    </div>
+    <button class="help-close" onclick="closeHelp()">ปิด</button>
+  </div>
+</div>
+
+<div class="card" style="position:relative;">
+  <button class="help-btn" onclick="openHelp()" title="คู่มือการใช้งาน">?</button>
   <div style="text-align:center;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #f1f5f9;">
     <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:10px;">
       <img src="https://raw.githubusercontent.com/poundpop35-creator/search-participant/main/logo-%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B8%8A%E0%B8%B8%E0%B8%A1%E0%B8%A7%E0%B8%B4%E0%B8%8A%E0%B8%B2%E0%B8%81%E0%B8%B2%E0%B8%A3-34-Final_0.png" style="height:48px;object-fit:contain;" alt="conference">
@@ -130,10 +179,16 @@
     <span>ราย</span>
   </div>
   <div class="counter-sub" id="counterSub">กำลังโหลด...</div>
+  <div class="counter" id="staffCounterBox" style="margin-top:8px;background:#f0fdf4;color:#15803d;">
+    <span id="staffCounterLabel">สแกนโดย <b id="staffCounterName">—</b></span>
+    <strong id="staffCount">—</strong>
+    <span>ราย</span>
+  </div>
 
   <a class="btn-nav primary" href="dashboard.html">ไปหน้า Dashboard</a>
-  <a class="btn-nav secondary" href="bag-dashboard.html">จำนวนผู้มารับกระเป๋า</a>
+  <a class="btn-nav secondary" href="bag-dashboard.html">จำนวนผู้มารับกระเป๋า (ก่อนวันงาน)</a>
   <a class="btn-nav secondary" href="public.html">ดู Live Dashboard (สาธารณะ)</a>
+  <a class="btn-nav secondary" href="qr-lookup.html">🔍 ค้นหา QR Code ของคุณ</a>
   <button class="btn-nav secondary" onclick="doLogout()">ออกจากระบบ</button>
 
   <div class="status-bar">
@@ -158,7 +213,7 @@
     window.addEventListener('beforeunload',_del);
   })();
 
-  let isProcessing=false, todayCount=0, qrCode=null;
+  let isProcessing=false, todayCount=0, staffCount=0, qrCode=null;
   let currentMode='scanner', scanBuffer='', scanTimer=null;
 
   window.addEventListener('load',()=>{ initDaySelect(); setMode('scanner'); loadTodayCount(); });
@@ -195,6 +250,9 @@
     const day=document.getElementById('day').value;
     document.getElementById('count').textContent='—';
     document.getElementById('counterSub').textContent='กำลังโหลด...';
+    const user=sessionStorage.getItem('dmsc_user')||'';
+    document.getElementById('staffCounterName').textContent=user||'—';
+    document.getElementById('staffCounterBox').style.display=day==='bag'?'none':'flex';
     if(day==='bag'){
       document.getElementById('counterLabel').textContent='รับกระเป๋าแล้ว';
       try{
@@ -213,14 +271,25 @@
     } else {
       document.getElementById('counterLabel').textContent='เช็คอินสำเร็จวันนี้';
       try{
-        const res=await fetch(`${SB_URL}/rest/v1/checkins?day=eq.${day}&select=id`,
-          {headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON,'Prefer':'count=exact','Range':'0-0'}});
-        const range=res.headers.get('Content-Range');
+        const [totalRes,staffRes]=await Promise.all([
+          fetch(`${SB_URL}/rest/v1/checkins?day=eq.${day}&select=id`,
+            {headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON,'Prefer':'count=exact','Range':'0-0'}}),
+          user?fetch(`${SB_URL}/rest/v1/checkins?day=eq.${day}&scanned_by=eq.${encodeURIComponent(user)}&select=id`,
+            {headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON,'Prefer':'count=exact','Range':'0-0'}}):null
+        ]);
+        const range=totalRes.headers.get('Content-Range');
         let count=0;
         if(range){const m=range.match(/\/(\d+)/);if(m)count=parseInt(m[1]);}
         todayCount=count;
         document.getElementById('count').textContent=count.toLocaleString();
         document.getElementById('counterSub').textContent='วันที่ '+DAY_TH[parseInt(day)];
+        if(staffRes){
+          const sr=staffRes.headers.get('Content-Range');
+          let sc=0;
+          if(sr){const m=sr.match(/\/(\d+)/);if(m)sc=parseInt(m[1]);}
+          staffCount=sc;
+          document.getElementById('staffCount').textContent=sc.toLocaleString();
+        }
       }catch(e){
         document.getElementById('count').textContent='?';
         document.getElementById('counterSub').textContent='โหลดไม่สำเร็จ';
@@ -282,21 +351,35 @@
     showModal('loading','กำลังดำเนินการ','กำลังบันทึกข้อมูล','',null);
     try{
       const keyword=decodedText.trim();
-      const searchRes=await sbFetch(`/rest/v1/participants?or=(id_card.eq.${encodeURIComponent(keyword)},passport.eq.${encodeURIComponent(keyword)})&select=id,prefix,first_name,last_name,tag,items,is_walkin,bag_received,bag_received_date`,'GET');
+      const searchRes=await sbFetch(`/rest/v1/participants?or=(id_card.eq.${encodeURIComponent(keyword)},passport.eq.${encodeURIComponent(keyword)})&select=id,prefix,first_name,last_name,tag,items,is_walkin,internal_external,participation_type,bag_received,bag_received_date,dept`,'GET');
       if(!searchRes.ok){showModal('error','ข้อผิดพลาด','ไม่สามารถค้นหาข้อมูลได้','',null);return;}
       const participants=await searchRes.json();
       if(!participants||participants.length===0){
-        showModal('error','ไม่พบข้อมูล','ไม่พบข้อมูลในระบบ','',null);
+        if(day==='bag'){
+          showModal('error','ไม่มีสิทธิ์','ท่านไม่มีสิทธิ์รับกระเป๋าก่อนวันงาน','',null);
+        } else {
+          showModal('error','ไม่พบข้อมูล','ไม่พบข้อมูลในระบบ','',null);
+        }
         return;
       }
       const p=participants[0];
-      const fullName=`${p.prefix||''} ${p.first_name||''} ${p.last_name||''}`.trim();
+      const fullName=`${(p.prefix||'').replace(/\s*\([^)]*\)/g,'').trim()} ${p.first_name||''} ${p.last_name||''}`.trim().replace(/\s+/g,' ');
       const isWalkin=p.is_walkin===true;
+      const pType=isWalkin?'Walk-in':(p.internal_external||'').includes('ภายนอก')?'บุคคลภายนอก':(p.internal_external||'').includes('ภายใน')?'บุคลากรภายใน':'ไม่ระบุ';
 
       // โหมดรับกระเป๋า
       if(day==='bag'){
+        const pt=(p.participation_type||'');
+        const isBagEligible=(p.internal_external||'').includes('ภายใน')&&(pt.includes('ผู้เข้าร่วมงาน')||pt.includes('ผู้บริหาร')||pt==='ผู้ส่งผลงาน');
+        if(!isBagEligible){
+          showModal('error','ไม่มีสิทธิ์','ท่านไม่มีสิทธิ์รับกระเป๋าก่อนวันงาน',fullName,[
+            {label:'ประเภท',val:pType,style:'normal'}
+          ]);
+          return;
+        }
         if(p.bag_received===true){
           showModal('warning','รับกระเป๋าแล้ว','บุคคลนี้รับกระเป๋าไปแล้ว',fullName,[
+            {label:'ประเภท',val:pType,style:'normal'},
             {label:'วันที่รับ',val:p.bag_received_date||'-',style:'normal'},
             {label:'สถานะ',val:'รับกระเป๋าไปแล้ว ✓',style:'warn'}
           ]);
@@ -308,6 +391,7 @@
           todayCount++;
           document.getElementById('count').textContent=todayCount.toLocaleString();
           showModal('success','รับกระเป๋าสำเร็จ','บันทึกการรับกระเป๋าเรียบร้อย',fullName,[
+            {label:'ประเภท',val:pType,style:'normal'},
             {label:'วันที่รับ',val:today,style:'normal'},
             {label:'สถานะกระเป๋า',val:'รับได้เลย ✓',style:'ok'}
           ]);
@@ -323,7 +407,7 @@
       const existingToday=await checkTodayRes.json();
       if(existingToday&&existingToday.length>0){
         const t=new Date(existingToday[0].checkin_time).toLocaleTimeString('th-TH',{timeZone:'Asia/Bangkok'});
-        showModal('warning','เคยเช็คอินแล้ว',`เช็คอินวันที่ ${day} ไปแล้ว`,fullName,buildWarningRows(t,p,isWalkin));
+        showModal('warning','เคยเช็คอินแล้ว',`เช็คอินวันที่ ${day} ไปแล้ว`,fullName,buildWarningRows(t,p,isWalkin),p.dept||'');
         return;
       }
 
@@ -340,14 +424,16 @@
       if(insertRes.ok||insertRes.status===201){
         todayCount++;
         document.getElementById('count').textContent=todayCount.toLocaleString();
+        staffCount++;
+        document.getElementById('staffCount').textContent=staffCount.toLocaleString();
         const timeNow=new Date().toLocaleTimeString('th-TH',{timeZone:'Asia/Bangkok'});
-        showModal('success','เช็คอินสำเร็จ',`วันที่ ${day} — ${DAY_TH[parseInt(day)]}`,fullName,buildSuccessRows(timeNow,p,isFirst,isWalkin));
+        showModal('success','เช็คอินสำเร็จ',`วันที่ ${day} — ${DAY_TH[parseInt(day)]}`,fullName,buildSuccessRows(timeNow,p,isFirst,isWalkin),p.dept||'');
         setStatus('เช็คอินสำเร็จ');
       } else {
         const err=await insertRes.json().catch(()=>({}));
         if(err.code==='23505'){
           const t=new Date().toLocaleTimeString('th-TH',{timeZone:'Asia/Bangkok'});
-          showModal('warning','เคยเช็คอินแล้ว',`เช็คอินวันที่ ${day} ไปแล้ว`,fullName,buildWarningRows(t,p,isWalkin));
+          showModal('warning','เคยเช็คอินแล้ว',`เช็คอินวันที่ ${day} ไปแล้ว`,fullName,buildWarningRows(t,p,isWalkin),p.dept||'');
         } else showModal('error','เกิดข้อผิดพลาด','ไม่สามารถบันทึกได้','',null);
       }
     }catch(err){
@@ -361,55 +447,50 @@
     const items=p.items||'';
     const hasBag=items.includes('กระเป๋า');
     const otherItems=items.replace('กระเป๋า','').replace(/\+\+/g,'+').replace(/^\+|\+$/g,'').trim();
-    const rows=[{label:'เวลา',val:time,style:'normal'}];
-    if(isWalkin){
-      rows.push({label:'ประเภท',val:'Walk-in',style:'normal'});
-    } else {
-      rows.push({label:'คูปองอาหาร',val:'รับได้เลย',style:'ok'});
-      if(isFirst){
-        if(hasBag) rows.push({label:'กระเป๋า',val:bagDone?'รับไปแล้ว':'รับได้เลย',style:bagDone?'done':'ok'});
-        if(otherItems) rows.push({label:'ของที่ระลึกอื่น',val:otherItems,style:'ok'});
-        if(!hasBag&&!otherItems) rows.push({label:'ของที่ระลึก',val:items||'(ไม่มี)',style:'ok'});
-      } else {
-        if(hasBag) rows.push({label:'กระเป๋า',val:'รับไปแล้ว',style:'done'});
-        if(otherItems) rows.push({label:'ของที่ระลึกอื่น',val:'รับไปแล้ว',style:'done'});
-        if(!hasBag&&!otherItems) rows.push({label:'ของที่ระลึก',val:'รับไปแล้ว',style:'done'});
-      }
-      rows.push({label:'ประเภท',val:p.tag||'-',style:'normal'});
+    const rows=[
+      {label:'เวลา',val:time,style:'normal'},
+      {label:'คูปองอาหาร',val:'รับได้',style:'ok'},
+    ];
+    if(!isWalkin){
+      if(hasBag) rows.push({labelHtml:'ของที่ระลึก (1) <span style="color:#2563eb;font-weight:700">กระเป๋า</span>',label:'ของที่ระลึก (1) กระเป๋า',val:bagDone?'รับไปแล้ว':'รับได้',style:bagDone?'done':'ok'});
+      if(otherItems) rows.push({labelHtml:`ของที่ระลึก (2) <span style="color:#2563eb;font-weight:700">${otherItems}</span>`,label:`ของที่ระลึก (2) ${otherItems}`,val:isFirst?'รับได้':'รับไปแล้ว',style:isFirst?'ok':'done'});
     }
+    rows.push({label:'ประเภท',val:isWalkin?'Walk-in':(p.tag||'-'),style:'normal'});
     return rows;
   }
 
   function buildWarningRows(time,p,isWalkin){
-    if(isWalkin) return[
-      {label:'เวลาที่เช็คอิน',val:time,style:'normal'},
-      {label:'ประเภท',val:'Walk-in',style:'normal'}
-    ];
     const items=p.items||'';
     const hasBag=items.includes('กระเป๋า');
     const otherItems=items.replace('กระเป๋า','').replace(/\+\+/g,'+').replace(/^\+|\+$/g,'').trim();
     const rows=[
       {label:'เวลาที่เช็คอิน',val:time,style:'normal'},
-      {label:'คูปองอาหาร',val:'รับไปแล้ว ✓',style:'done'}
+      {label:'คูปองอาหาร',val:'รับไปแล้ว',style:'done'},
     ];
-    if(hasBag) rows.push({label:'กระเป๋า',val:'รับไปแล้ว ✓',style:'done'});
-    if(otherItems) rows.push({label:'ของที่ระลึกอื่น',val:'รับไปแล้ว ✓',style:'done'});
-    if(!hasBag&&!otherItems) rows.push({label:'ของที่ระลึก',val:'รับไปแล้ว ✓',style:'done'});
-    rows.push({label:'ประเภท',val:p.tag||'-',style:'normal'});
+    if(!isWalkin){
+      if(hasBag) rows.push({labelHtml:'ของที่ระลึก (1) <span style="color:#2563eb;font-weight:700">กระเป๋า</span>',label:'ของที่ระลึก (1) กระเป๋า',val:'รับไปแล้ว',style:'done'});
+      if(otherItems) rows.push({labelHtml:`ของที่ระลึก (2) <span style="color:#2563eb;font-weight:700">${otherItems}</span>`,label:`ของที่ระลึก (2) ${otherItems}`,val:'รับไปแล้ว',style:'done'});
+    }
+    rows.push({label:'ประเภท',val:isWalkin?'Walk-in':(p.tag||'-'),style:'normal'});
     return rows;
   }
 
-  function showModal(type,status,title,name,rows){
+  function showModal(type,status,title,name,rows,dept){
     document.getElementById('modalStatus').textContent=status;
     document.getElementById('modalStatus').className='modal-status '+type;
     document.getElementById('modalTitle').textContent=title;
-    document.getElementById('modalName').textContent=name||'';
+    const nameEl=document.getElementById('modalName');
+    if(name){nameEl.style.display='';nameEl.textContent=name;}
+    else{nameEl.style.display='none';}
+    const deptEl=document.getElementById('modalDept');
+    if(dept){deptEl.style.display='';deptEl.textContent=dept;}
+    else{deptEl.style.display='none';}
     document.getElementById('btnOk').className='btn-ok '+type;
     document.getElementById('btnOk').style.display=type==='loading'?'none':'block';
     const det=document.getElementById('modalDetail');
     if(rows&&rows.length>0){
       det.style.display='block';
-      det.innerHTML=rows.map(r=>`<div class="detail-row"><span class="detail-label">${r.label}</span><span class="detail-val ${r.style==='done'?'done':r.style==='ok'?'ok':r.style==='warn'?'warn':''}">${r.val}</span></div>`).join('');
+      det.innerHTML=rows.map(r=>`<div class="detail-row"><span class="detail-label">${r.labelHtml||r.label}</span><span class="detail-val ${r.style==='done'?'done':r.style==='ok'?'ok':r.style==='warn'?'warn':''}">${r.val}</span></div>`).join('');
     } else det.style.display='none';
     document.getElementById('modalOverlay').classList.remove('hidden');
   }
@@ -430,13 +511,19 @@
     return fetch(SB_URL+path,opts);
   }
 
+  function openHelp(){document.getElementById('helpOverlay').classList.remove('hidden');}
+  function closeHelp(){document.getElementById('helpOverlay').classList.add('hidden');}
   function setStatus(t){document.getElementById('statusText').textContent=t;}
   async function doLogout(){
     const _u=sessionStorage.getItem('dmsc_user');
     if(_u) await fetch(`${SB_URL}/rest/v1/staff_sessions?username=eq.${encodeURIComponent(_u)}`,{method:'DELETE',headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON}}).catch(()=>{});
-    sessionStorage.removeItem('dmsc_auth');sessionStorage.removeItem('dmsc_user');sessionStorage.removeItem('dmsc_role');
+    sessionStorage.removeItem('dmsc_auth');sessionStorage.removeItem('dmsc_user');sessionStorage.removeItem('dmsc_role');sessionStorage.removeItem('dmsc_dash_ok');
     window.location.href='login.html';
   }
+(function(){const c=localStorage.getItem('pageBgUrl');if(c)document.body.style.backgroundImage=`linear-gradient(rgba(232,240,254,0.55),rgba(232,240,254,0.55)),url('${c}')`;})();
+async function _loadPageBg(){try{const r=await fetch(SB_URL+'/rest/v1/app_settings?key=eq.page_bg&select=value',{headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON}});const d=await r.json();if(Array.isArray(d)&&d.length){const v=d[0].value||'';localStorage.setItem('pageBgUrl',v);document.body.style.backgroundImage=v?`linear-gradient(rgba(232,240,254,0.55),rgba(232,240,254,0.55)),url('${v}')`:'';}}}catch(e){}}
+_loadPageBg();setInterval(_loadPageBg,30000);
 </script>
+<div style="text-align:center;padding:16px 20px;font-size:0.75rem;color:#0d2b6b;">© 2026 Built by <span style="font-family:'Dancing Script',cursive;font-weight:700;font-size:1.25em;color:#0ABAB5;letter-spacing:0.01em;">Saharat Phetrnitchakun</span> · <span style="font-weight:800;letter-spacing:0.04em;font-size:1.05em;"><span style="color:#2563eb;">D</span><span style="color:#f59e0b;">P</span><span style="color:#16a34a;">T</span><span style="color:#dc2626;">C</span></span> · DMSc</div>
 </body>
 </html>

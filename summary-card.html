@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:#f0f4ff;font-family:'Sarabun',sans-serif;display:flex;justify-content:center;padding:32px 16px;}
+    .card{background:white;border-radius:24px;padding:32px 28px;width:100%;max-width:480px;box-shadow:0 8px 40px rgba(13,43,107,0.15);}
+    .top{text-align:center;margin-bottom:24px;padding-bottom:20px;border-bottom:2px solid #e8f0fe;}
+    .top-logos{display:flex;justify-content:center;align-items:center;gap:12px;margin-bottom:14px;}
+    .top-logos img{height:52px;object-fit:contain;}
+    .top h1{font-size:1rem;font-weight:800;color:#0d2b6b;line-height:1.6;}
+    .top p{font-size:0.8rem;color:#94a3b8;margin-top:4px;}
+    .section{margin-bottom:20px;}
+    .section-header{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+    .section-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+    .section-dot.blue{background:#0d2b6b;}
+    .section-dot.yellow{background:#d97706;}
+    .section-dot.green{background:#16a34a;}
+    .section-dot.gray{background:#64748b;}
+    .section-title{font-size:0.95rem;font-weight:700;color:#0d2b6b;}
+    .url-box{background:#f0f4ff;border-radius:10px;padding:8px 12px;font-size:0.78rem;color:#1a4eb8;font-weight:600;margin-bottom:8px;word-break:break-all;}
+    .items{display:flex;flex-direction:column;gap:5px;}
+    .item{display:flex;align-items:flex-start;gap:8px;font-size:0.88rem;color:#334155;line-height:1.5;}
+    .item-icon{flex-shrink:0;margin-top:1px;}
+    .divider{height:1px;background:#e8f0fe;margin:18px 0;}
+    .account-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;}
+    .account-box{background:#f8fafc;border-radius:10px;padding:10px 12px;border:1px solid #e2e8f0;}
+    .account-label{font-size:0.72rem;color:#94a3b8;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;}
+    .account-val{font-size:0.9rem;font-weight:700;color:#0d2b6b;margin-top:2px;}
+    .account-pass{font-size:0.78rem;color:#64748b;margin-top:1px;}
+    .footer{text-align:center;font-size:0.72rem;color:#94a3b8;margin-top:20px;padding-top:16px;border-top:1px solid #e8f0fe;}
+  </style>
+</head>
+<body>
+<div class="card">
+  <div class="top">
+    <div class="top-logos">
+      <img src="https://raw.githubusercontent.com/poundpop35-creator/search-participant/main/logo-%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B8%8A%E0%B8%B8%E0%B8%A1%E0%B8%A7%E0%B8%B4%E0%B8%8A%E0%B8%B2%E0%B8%81%E0%B8%B2%E0%B8%A3-34-Final_0.png" alt="conf">
+      <img src="https://raw.githubusercontent.com/poundpop35-creator/search-participant/main/logo-DMSc-MOPH%20(1)%20(2)_0.png" alt="dmsc">
+    </div>
+    <h1>สรุประบบเช็คอินหน้างาน<br>ประชุมวิชาการวิทยาศาสตร์การแพทย์ ครั้งที่ 34</h1>
+    <p>กรมวิทยาศาสตร์การแพทย์ กระทรวงสาธารณสุข</p>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <div class="section-dot blue"></div>
+      <div class="section-title">ระบบเช็คอินผู้เข้าร่วม</div>
+    </div>
+    <div class="url-box">🔗 search-participant.netlify.app/checkin/login.html</div>
+    <div class="items">
+      <div class="item"><span class="item-icon">📷</span><span><b>หน้าสแกน</b> — ยิงบาร์โค้ด / สแกน QR / พิมพ์เลขบัตร กดปุ่ม ? เพื่อดูคู่มือ</span></div>
+      <div class="item"><span class="item-icon">📊</span><span><b>Dashboard เจ้าหน้าที่</b> — สถิติและรายชื่อผู้เช็คอิน แยกตามวัน/ประเภท</span></div>
+      <div class="item"><span class="item-icon">🖥️</span><span><b>Live Dashboard</b> — แสดงสถิติ real-time อัปเดตทุก 1 นาที</span></div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="section">
+    <div class="section-header">
+      <div class="section-dot yellow"></div>
+      <div class="section-title">ระบบรับกระเป๋า (ก่อนวันงาน)</div>
+    </div>
+    <div class="url-box">🔗 bag-checkin.netlify.app/bag/login.html</div>
+    <div class="items">
+      <div class="item"><span class="item-icon">👜</span><span>บันทึกการรับกระเป๋าของแต่ละคน (บันทึกได้ครั้งเดียว)</span></div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="section">
+    <div class="section-header">
+      <div class="section-dot green"></div>
+      <div class="section-title">Live Dashboard สาธารณะ (ไม่ต้องล็อกอิน)</div>
+    </div>
+    <div class="url-box">🔗 search-participant.netlify.app/checkin/public.html</div>
+    <div class="items">
+      <div class="item"><span class="item-icon">📺</span><span>เปิดแสดงบนจอได้เลย ดูยอดรวม/แยกวัน/แยกหน่วยงาน</span></div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="section">
+    <div class="section-header">
+      <div class="section-dot gray"></div>
+      <div class="section-title">รหัสผู้ใช้งาน</div>
+    </div>
+    <div class="account-grid">
+      <div class="account-box">
+        <div class="account-label">เจ้าหน้าที่</div>
+        <div class="account-val">staff01–10</div>
+        <div class="account-pass">รหัสผ่าน: Dmsc@2569</div>
+      </div>
+      <div class="account-box">
+        <div class="account-label">ผู้ดูแลระบบ</div>
+        <div class="account-val">adminpound</div>
+        <div class="account-pass">เข้าได้ทุกฟังก์ชัน</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">ระบบนี้ใช้งานได้บนมือถือและคอมพิวเตอร์ทุกรุ่น</div>
+</div>
+</body>
+</html>

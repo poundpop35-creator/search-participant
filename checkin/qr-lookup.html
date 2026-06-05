@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>ค้นหา QR Code — กรมวิทยาศาสตร์การแพทย์</title>
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+  <style>
+    :root{--blue:#0d2b6b;--blue-light:#e8f0fe;--green:#16a34a;--red:#dc2626;--white:#fff;--shadow:0 4px 24px rgba(13,43,107,0.13);--border:#e2e8f0;}
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:linear-gradient(rgba(232,240,254,0.60),rgba(232,240,254,0.60)),url('https://raw.githubusercontent.com/poundpop35-creator/search-participant/main/DNA.png') center/cover fixed;font-family:'Sarabun',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:32px 16px 48px;}
+    .card{background:var(--white);border-radius:20px;box-shadow:var(--shadow);padding:24px 20px;width:100%;max-width:440px;}
+    /* Header */
+    .header{text-align:center;margin-bottom:24px;}
+    .logos{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:12px;}
+    .logos img{height:44px;object-fit:contain;}
+    .title{font-size:1.1rem;font-weight:700;color:var(--blue);line-height:1.5;}
+    .subtitle{font-size:0.8rem;color:#94a3b8;margin-top:4px;}
+    /* Search */
+    .search-label{font-size:0.8rem;font-weight:700;color:var(--blue);margin-bottom:6px;}
+    .search-row{display:flex;gap:8px;}
+    .search-input{flex:1;border:1.5px solid var(--border);border-radius:10px;padding:11px 14px;font-family:'Sarabun',sans-serif;font-size:0.95rem;outline:none;transition:border-color .2s;}
+    .search-input:focus{border-color:#3b82f6;}
+    .search-btn{background:var(--blue);color:white;border:none;border-radius:10px;padding:11px 18px;font-family:'Sarabun',sans-serif;font-size:0.9rem;font-weight:700;cursor:pointer;}
+    .search-btn:active{opacity:.85;}
+    .search-hint{font-size:0.75rem;color:#94a3b8;margin-top:6px;}
+    /* Results */
+    .results-wrap{margin-top:18px;}
+    .result-item{border:1.5px solid var(--border);border-radius:12px;padding:12px 16px;margin-bottom:8px;cursor:pointer;transition:all .15s;background:var(--white);}
+    .result-item:hover{border-color:#3b82f6;background:#f0f7ff;}
+    .result-name{font-size:0.95rem;font-weight:700;color:#1e293b;}
+    .result-dept{font-size:0.78rem;color:#64748b;margin-top:2px;}
+    .result-type{display:inline-block;font-size:0.68rem;font-weight:700;padding:2px 8px;border-radius:99px;margin-top:4px;}
+    .type-in{background:#dbeafe;color:#1d4ed8;}
+    .type-out{background:#dcfce7;color:#15803d;}
+    .no-result{text-align:center;color:#94a3b8;padding:24px 0;font-size:0.9rem;}
+    .loading-msg{text-align:center;color:#94a3b8;padding:16px 0;font-size:0.9rem;}
+    /* Overlay */
+    .overlay{position:fixed;inset:0;background:rgba(0,0,0,0.65);display:flex;align-items:center;justify-content:center;z-index:999;padding:24px;}
+    .overlay.hidden{display:none;}
+    .modal{background:white;border-radius:20px;padding:28px 24px 22px;width:100%;max-width:360px;box-shadow:0 8px 40px rgba(0,0,0,0.25);text-align:center;}
+    .modal-icon{font-size:2.2rem;margin-bottom:10px;}
+    .modal h3{font-size:1.05rem;font-weight:700;color:var(--blue);margin-bottom:6px;}
+    .modal p{font-size:0.85rem;color:#64748b;margin-bottom:16px;line-height:1.6;}
+    .modal-name{font-size:1rem;font-weight:700;color:#1e293b;margin-bottom:14px;}
+    .pin-input{width:100%;border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;font-family:'Sarabun',sans-serif;font-size:1.3rem;letter-spacing:.3em;text-align:center;outline:none;transition:border-color .2s;}
+    .pin-input:focus{border-color:#3b82f6;}
+    .pin-err{color:var(--red);font-size:0.82rem;min-height:20px;margin-top:6px;}
+    .btn-row{display:flex;gap:10px;margin-top:14px;}
+    .btn-cancel{flex:1;padding:11px;border-radius:10px;border:1.5px solid var(--border);background:white;font-family:'Sarabun',sans-serif;font-size:0.9rem;cursor:pointer;}
+    .btn-confirm{flex:1;padding:11px;border-radius:10px;border:none;background:var(--blue);color:white;font-family:'Sarabun',sans-serif;font-size:0.9rem;font-weight:700;cursor:pointer;}
+    .btn-confirm:active{opacity:.85;}
+    /* QR modal */
+    .qr-wrap{background:#f8fafc;border-radius:14px;padding:20px;margin:14px 0;display:inline-block;}
+    .qr-note{font-size:0.78rem;color:#64748b;margin-bottom:14px;line-height:1.6;}
+    .btn-download{width:100%;padding:12px;border-radius:10px;border:none;background:#16a34a;color:white;font-family:'Sarabun',sans-serif;font-size:0.95rem;font-weight:700;cursor:pointer;margin-bottom:8px;}
+    .btn-close{width:100%;padding:11px;border-radius:10px;border:1.5px solid var(--border);background:white;font-family:'Sarabun',sans-serif;font-size:0.9rem;cursor:pointer;}
+    .footer{margin-top:28px;font-size:0.75rem;color:#0d2b6b;text-align:center;}
+  </style>
+</head>
+<body>
+
+<!-- PIN modal -->
+<div class="overlay hidden" id="pinOverlay">
+  <div class="modal">
+    <div class="modal-icon">🔐</div>
+    <h3>ยืนยันตัวตน</h3>
+    <div class="modal-name" id="pinName"></div>
+    <p>ใส่เลข <strong>5 ตัวท้าย</strong> ของบัตรประชาชน</p>
+    <input class="pin-input" type="password" inputmode="numeric" maxlength="5" id="pinInput"
+      placeholder="_ _ _ _ _" onkeydown="if(event.key==='Enter')checkPin()">
+    <div class="pin-err" id="pinErr"></div>
+    <div class="btn-row">
+      <button class="btn-cancel" onclick="closePin()">ยกเลิก</button>
+      <button class="btn-confirm" onclick="checkPin()">ยืนยัน</button>
+    </div>
+  </div>
+</div>
+
+<!-- QR modal -->
+<div class="overlay hidden" id="qrOverlay">
+  <div class="modal">
+    <div class="modal-icon">✅</div>
+    <h3 id="qrTitle"></h3>
+    <div class="qr-note">แสดง QR Code นี้ให้เจ้าหน้าที่สแกนเพื่อเช็คอิน</div>
+    <div class="qr-wrap">
+      <div id="qrContainer"></div>
+    </div>
+    <button class="btn-download" onclick="downloadQR()">💾 บันทึกรูป QR Code</button>
+    <button class="btn-close" onclick="closeQR()">ปิด</button>
+  </div>
+</div>
+
+<!-- Main card -->
+<div class="card">
+  <div style="margin-bottom:16px;">
+    <a href="public.html" style="display:inline-flex;align-items:center;gap:6px;font-size:0.82rem;color:#0d2b6b;text-decoration:none;font-weight:600;padding:7px 14px;border-radius:10px;background:#e8f0fe;border:1.5px solid #c7d7fc;">
+      ← กลับ Live Dashboard
+    </a>
+  </div>
+  <div class="header">
+    <div class="logos">
+      <img src="https://raw.githubusercontent.com/poundpop35-creator/search-participant/main/logo-%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B8%8A%E0%B8%B8%E0%B8%A1%E0%B8%A7%E0%B8%B4%E0%B8%8A%E0%B8%B2%E0%B8%81%E0%B8%B2%E0%B8%A3-34-Final_0.png" alt="conference">
+      <img src="https://raw.githubusercontent.com/poundpop35-creator/search-participant/main/logo-DMSc-MOPH%20(1)%20(2)_0.png" alt="dmsc">
+    </div>
+    <div class="title">ค้นหา QR Code ของคุณ</div>
+    <div class="subtitle">งานประชุมวิชาการวิทยาศาสตร์การแพทย์ ครั้งที่ 34</div>
+  </div>
+
+  <div class="search-label">ค้นหาด้วยชื่อ หรือ นามสกุล</div>
+  <div class="search-row">
+    <input class="search-input" type="text" id="searchInput" placeholder="เช่น สมชาย, วรรณภา..."
+      onkeydown="if(event.key==='Enter')doSearch()" autocomplete="off">
+    <button class="search-btn" onclick="doSearch()">ค้นหา</button>
+  </div>
+  <div class="search-hint">กรอกชื่อหรือนามสกุลอย่างน้อย 2 ตัวอักษร</div>
+
+  <div class="results-wrap" id="resultsWrap"></div>
+</div>
+
+<div class="footer">© 2026 Built by <span style="font-family:'Dancing Script',cursive;font-weight:700;font-size:1.3em;color:#0ABAB5;">Saharat Phetrnitchakun</span> · <span style="font-weight:800;letter-spacing:0.04em;font-size:1.05em;"><span style="color:#2563eb;">D</span><span style="color:#f59e0b;">P</span><span style="color:#16a34a;">T</span><span style="color:#dc2626;">C</span></span> · DMSc</div>
+
+<script>
+const SB_URL  = "https://gvxytnjfyepqhbkmcjms.supabase.co";
+const SB_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2eHl0bmpmeWVwcWhia21jam1zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0MzE2NDAsImV4cCI6MjA5NTAwNzY0MH0.RAr_ehb4cxfNliDR0h5XcihUaP-0ltZTTGIAv2Fw1kk";
+const SB_KEY  = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2eHl0bmpmeWVwcWhia21jam1zIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3OTQzMTY0MCwiZXhwIjoyMDk1MDA3NjQwfQ.Hrfc0erkIatyVbmsOW2SU7piH3L65qbS2kdi2eYzbQk";
+(function(){const c=localStorage.getItem('pageBgUrl');if(c)document.body.style.backgroundImage=`linear-gradient(rgba(232,240,254,0.55),rgba(232,240,254,0.55)),url('${c}')`;})();
+async function _loadPageBg(){try{const r=await fetch(SB_URL+'/rest/v1/app_settings?key=eq.page_bg&select=value',{headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON}});const d=await r.json();if(Array.isArray(d)&&d.length){const v=d[0].value||'';localStorage.setItem('pageBgUrl',v);document.body.style.backgroundImage=v?`linear-gradient(rgba(232,240,254,0.55),rgba(232,240,254,0.55)),url('${v}')`:'';}}}catch(e){}}
+_loadPageBg();setInterval(_loadPageBg,30000);
+
+let results = [];
+let selectedP = null;
+let allNames = null; // null = not loaded yet, [] = loaded but empty
+
+async function ensureNames() {
+  if (allNames !== null) return;
+  const headers = { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY };
+  let data = [], offset = 0;
+  while(true) {
+    const r = await fetch(
+      `${SB_URL}/rest/v1/participants?select=id,prefix,first_name,last_name,dept,ext_dept,internal_external&limit=1000&offset=${offset}&order=last_name.asc`,
+      { headers }
+    );
+    if (!r.ok) {
+      const txt = await r.text().catch(()=>'');
+      throw new Error('HTTP ' + r.status + ': ' + txt.slice(0,120));
+    }
+    const d = await r.json();
+    if (!Array.isArray(d) || !d.length) break;
+    data = data.concat(d);
+    if (d.length < 1000) break;
+    offset += 1000;
+  }
+  allNames = data;
+}
+
+async function doSearch() {
+  const q = document.getElementById('searchInput').value.trim();
+  document.getElementById('resultsWrap').innerHTML = '<div class="loading-msg">กำลังโหลดข้อมูล...</div>';
+  try {
+    await ensureNames();
+    const total = allNames.length;
+    if (q.length < 1) {
+      // show first 30 to confirm data loaded
+      results = allNames.slice(0, 30);
+      const wrap = document.getElementById('resultsWrap');
+      if (!results.length) { wrap.innerHTML = '<div class="no-result">โหลดข้อมูลแล้ว แต่ไม่มีรายการ (0 คน)</div>'; return; }
+      wrap.innerHTML = `<div class="search-hint" style="margin-bottom:8px;">โหลดข้อมูลสำเร็จ ${total} คน — แสดง 30 รายการแรก</div>`;
+      wrap.innerHTML += results.map((p, i) => {
+        const name = `${(p.prefix||'').replace(/\s*\([^)]*\)/g,'').trim()} ${p.first_name||''} ${p.last_name||''}`.trim().replace(/\s+/g,' ');
+        return `<div class="result-item" onclick="selectPerson(${i})"><div class="result-name">${name}</div></div>`;
+      }).join('');
+      return;
+    }
+    results = allNames.filter(p =>
+      (p.first_name||'').includes(q) || (p.last_name||'').includes(q)
+    ).slice(0, 30);
+    renderResults();
+  } catch(e) {
+    document.getElementById('resultsWrap').innerHTML = `<div class="no-result" style="color:#dc2626;font-size:0.78rem;word-break:break-all;">❌ ${e.message}</div>`;
+  }
+}
+
+function renderResults() {
+  const wrap = document.getElementById('resultsWrap');
+  if (!results.length) {
+    wrap.innerHTML = '<div class="no-result">ไม่พบข้อมูล ลองตรวจสอบการสะกดชื่ออีกครั้ง</div>';
+    return;
+  }
+  wrap.innerHTML = results.map((p, i) => {
+    const name = `${(p.prefix||'').replace(/\s*\([^)]*\)/g,'').trim()} ${p.first_name||''} ${p.last_name||''}`.trim().replace(/\s+/g,' ');
+    const isIn = (p.internal_external||'').includes('ภายใน');
+    const isOut = (p.internal_external||'').includes('ภายนอก');
+    const dept = isIn ? (p.dept||'-') : (p.ext_dept||p.dept||'-');
+    const typeLabel = isIn ? 'บุคลากรภายใน' : isOut ? 'บุคคลภายนอก' : '';
+    const typeClass = isIn ? 'type-in' : isOut ? 'type-out' : '';
+    return `<div class="result-item" onclick="selectPerson(${i})">
+      <div class="result-name">${name}</div>
+      <div class="result-dept">${dept}</div>
+      ${typeLabel ? `<span class="result-type ${typeClass}">${typeLabel}</span>` : ''}
+    </div>`;
+  }).join('');
+}
+
+async function selectPerson(i) {
+  const base = results[i];
+  const name = `${(base.prefix||'').replace(/\s*\([^)]*\)/g,'').trim()} ${base.first_name||''} ${base.last_name||''}`.trim().replace(/\s+/g,' ');
+  document.getElementById('pinName').textContent = name;
+  document.getElementById('pinInput').value = '';
+  document.getElementById('pinErr').textContent = '';
+  document.getElementById('pinOverlay').classList.remove('hidden');
+  setTimeout(() => document.getElementById('pinInput').focus(), 150);
+  // fetch full record (id_card, qr urls) lazily
+  const HDR = { headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY } };
+  fetch(`${SB_URL}/rest/v1/participants?id=eq.${base.id}&select=id,prefix,first_name,last_name,id_card,passport,qr_idcard,qr_passport`, HDR)
+    .then(r => r.json()).then(d => { if(d && d.length) selectedP = d[0]; })
+    .catch(() => {});
+  selectedP = base; // use base until full record arrives
+}
+
+function closePin() {
+  document.getElementById('pinOverlay').classList.add('hidden');
+  selectedP = null;
+}
+
+function checkPin() {
+  const entered = document.getElementById('pinInput').value.trim();
+  if (entered.length !== 5) {
+    document.getElementById('pinErr').textContent = 'กรุณาใส่ครบ 5 ตัว';
+    return;
+  }
+  const idNum = selectedP.id_card || selectedP.passport || '';
+  const correct = idNum.replace(/\D/g, '').slice(-5);
+  if (entered === correct) {
+    document.getElementById('pinOverlay').classList.add('hidden');
+    showQR();
+  } else {
+    document.getElementById('pinErr').textContent = 'รหัสไม่ถูกต้อง กรุณาลองใหม่';
+    document.getElementById('pinInput').value = '';
+    document.getElementById('pinInput').focus();
+  }
+}
+
+function showQR() {
+  const p = selectedP;
+  const name = `${(p.prefix||'').replace(/\s*\([^)]*\)/g,'').trim()} ${p.first_name||''} ${p.last_name||''}`.trim().replace(/\s+/g,' ');
+  document.getElementById('qrTitle').textContent = name;
+  document.getElementById('qrOverlay').classList.remove('hidden');
+  const container = document.getElementById('qrContainer');
+  container.innerHTML = '';
+  const qrImgUrl = p.qr_idcard || p.qr_passport || '';
+  if (qrImgUrl) {
+    // ใช้รูป QR จาก JotForm โดยตรง
+    const img = document.createElement('img');
+    img.src = qrImgUrl;
+    img.style.cssText = 'width:220px;height:220px;object-fit:contain;display:block;';
+    img.onerror = () => generateQR(container, p);
+    container.appendChild(img);
+  } else {
+    generateQR(container, p);
+  }
+}
+
+function generateQR(container, p) {
+  const qrData = p.id_card || p.passport;
+  setTimeout(() => {
+    new QRCode(container, {
+      text: qrData, width: 220, height: 220,
+      colorDark: '#0d2b6b', colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.M
+    });
+  }, 50);
+}
+
+function closeQR() {
+  document.getElementById('qrOverlay').classList.add('hidden');
+  selectedP = null;
+}
+
+function downloadQR() {
+  const container = document.getElementById('qrContainer');
+  const canvas = container.querySelector('canvas');
+  const p = selectedP;
+  const name = `${p.first_name||''}${p.last_name||''}`.replace(/\s+/g,'_');
+  const link = document.createElement('a');
+  link.download = `QRCode_${name}.png`;
+  if (canvas) {
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  } else {
+    // รูปจาก JotForm URL — เปิดในแท็บใหม่ให้ save เอง
+    const imgSrc = container.querySelector('img')?.src || '';
+    if (imgSrc) window.open(imgSrc, '_blank');
+  }
+}
+</script>
+</body>
+</html>

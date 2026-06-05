@@ -69,6 +69,7 @@
     .btn-ok.warning{background:var(--yellow);color:white;}
     .btn-ok.error{background:var(--red);color:white;}
   </style>
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
 </head>
 <body>
 
@@ -229,7 +230,7 @@
       if(!participants||participants.length===0){showModal('error','ไม่พบข้อมูล','ไม่พบข้อมูลในระบบ','',null);return;}
 
       const p=participants[0];
-      const fullName=`${p.prefix||''} ${p.first_name||''} ${p.last_name||''}`.trim();
+      const fullName=`${(p.prefix||'').replace(/\s*\([^)]*\)/g,'').trim()} ${p.first_name||''} ${p.last_name||''}`.trim().replace(/\s+/g,' ');
 
       if(!(p.participation_type||'').includes('ผู้ส่งผลงาน')){
         showModal('error','ไม่มีสิทธิ์','บุคคลนี้ไม่ใช่ผู้ส่งผลงาน',fullName,[
@@ -312,5 +313,6 @@
     window.location.href='login.html';
   }
 </script>
+<div style="text-align:center;padding:16px 20px;font-size:0.75rem;color:#0d2b6b;">© 2026 Built by <span style="font-family:'Dancing Script',cursive;font-weight:700;font-size:1.25em;color:#0ABAB5;letter-spacing:0.01em;">Saharat Phetrnitchakun</span> · <span style="font-weight:800;letter-spacing:0.04em;font-size:1.05em;"><span style="color:#2563eb;">D</span><span style="color:#f59e0b;">P</span><span style="color:#16a34a;">T</span><span style="color:#dc2626;">C</span></span> · DMSc</div>
 </body>
 </html>
