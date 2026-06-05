@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
   <title>ค้นหา QR Code — กรมวิทยาศาสตร์การแพทย์</title>
-  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700;800&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
   <style>
@@ -86,7 +86,7 @@
     <h3 id="qrTitle"></h3>
     <div class="qr-note">แสดง QR Code นี้ให้เจ้าหน้าที่สแกนเพื่อเช็คอิน</div>
     <div class="qr-wrap">
-      <canvas id="qrCanvas"></canvas>
+      <div id="qrContainer"></div>
     </div>
     <button class="btn-download" onclick="downloadQR()">💾 บันทึกรูป QR Code</button>
     <button class="btn-close" onclick="closeQR()">ปิด</button>
@@ -207,8 +207,18 @@ function showQR() {
   const qrData = p.id_card || p.passport;
   document.getElementById('qrTitle').textContent = name;
   document.getElementById('qrOverlay').classList.remove('hidden');
-  const canvas = document.getElementById('qrCanvas');
-  QRCode.toCanvas(canvas, qrData, { width: 220, margin: 2, color: { dark: '#0d2b6b', light: '#ffffff' } });
+  const container = document.getElementById('qrContainer');
+  container.innerHTML = '';
+  setTimeout(() => {
+    new QRCode(container, {
+      text: qrData,
+      width: 220,
+      height: 220,
+      colorDark: '#0d2b6b',
+      colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.M
+    });
+  }, 50);
 }
 
 function closeQR() {
@@ -217,12 +227,13 @@ function closeQR() {
 }
 
 function downloadQR() {
-  const canvas = document.getElementById('qrCanvas');
+  const container = document.getElementById('qrContainer');
+  const canvas = container.querySelector('canvas');
   const p = selectedP;
   const name = `${p.first_name||''}${p.last_name||''}`.replace(/\s+/g,'_');
   const link = document.createElement('a');
   link.download = `QRCode_${name}.png`;
-  link.href = canvas.toDataURL('image/png');
+  link.href = canvas ? canvas.toDataURL('image/png') : container.querySelector('img').src;
   link.click();
 }
 </script>
