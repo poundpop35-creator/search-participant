@@ -388,7 +388,7 @@ function getRows(){
 async function doLogout(){
   const _u=sessionStorage.getItem('dmsc_user');
   if(_u) await fetch(`${SB_URL}/rest/v1/staff_sessions?username=eq.${encodeURIComponent(_u)}`,{method:'DELETE',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}}).catch(()=>{});
-  sessionStorage.removeItem('dmsc_auth');sessionStorage.removeItem('dmsc_user');sessionStorage.removeItem('dmsc_role');
+  sessionStorage.removeItem('dmsc_auth');sessionStorage.removeItem('dmsc_user');sessionStorage.removeItem('dmsc_role');sessionStorage.removeItem('dmsc_dash_ok');
   window.location.href='login.html';
 }
 

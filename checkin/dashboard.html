@@ -157,8 +157,8 @@ if (sessionStorage.getItem('dmsc_auth') !== 'ok') {
 document.addEventListener('DOMContentLoaded',()=>{
   const el=document.getElementById('userDisplay');
   if(el) el.textContent=sessionStorage.getItem('dmsc_user')||'';
-  // Staff dashboard gate
-  if(sessionStorage.getItem('dmsc_role')!=='admin' && sessionStorage.getItem('dmsc_dash_ok')!=='1'){
+  // Staff dashboard gate — admin or adminpound bypass automatically
+  if(sessionStorage.getItem('dmsc_role')!=='admin' && sessionStorage.getItem('dmsc_user')!=='adminpound' && sessionStorage.getItem('dmsc_dash_ok')!=='1'){
     document.getElementById('dashGateOverlay').classList.remove('hidden');
     setTimeout(()=>document.getElementById('dashGateInput').focus(),100);
   }
@@ -1544,6 +1544,7 @@ async function doLogout() {
   sessionStorage.removeItem('dmsc_auth');
   sessionStorage.removeItem('dmsc_user');
   sessionStorage.removeItem('dmsc_role');
+  sessionStorage.removeItem('dmsc_dash_ok');
   window.location.href = 'login.html';
 }const CLEAR_PASS = "P@und3142";
 const DASH_PASS = "P@und3142";
