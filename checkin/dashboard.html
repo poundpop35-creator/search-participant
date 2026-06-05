@@ -696,8 +696,8 @@ const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 const SB_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2eHl0bmpmeWVwcWhia21jam1zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0MzE2NDAsImV4cCI6MjA5NTAwNzY0MH0.RAr_ehb4cxfNliDR0h5XcihUaP-0ltZTTGIAv2Fw1kk";
 (function(){
   const _u=sessionStorage.getItem('dmsc_user');
-  function _hb(){if(!_u)return;fetch(`${SB_URL}/rest/v1/staff_sessions?username=eq.${encodeURIComponent(_u)}`,{method:'PATCH',headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON,'Content-Type':'application/json'},body:JSON.stringify({last_active:new Date().toISOString()})}).catch(()=>{});}
-  function _del(){if(!_u)return;fetch(`${SB_URL}/rest/v1/staff_sessions?username=eq.${encodeURIComponent(_u)}`,{method:'DELETE',headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON},keepalive:true}).catch(()=>{});}
+  function _hb(){if(!_u)return;fetch(`${SB_URL}/rest/v1/staff_sessions?username=eq.${encodeURIComponent(_u)}`,{method:'PATCH',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'},body:JSON.stringify({last_active:new Date().toISOString()})}).catch(()=>{});}
+  function _del(){if(!_u)return;fetch(`${SB_URL}/rest/v1/staff_sessions?username=eq.${encodeURIComponent(_u)}`,{method:'DELETE',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY},keepalive:true}).catch(()=>{});}
   setInterval(_hb,60000);
   document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible') _hb();});
   window.addEventListener('beforeunload',_del);
@@ -1931,7 +1931,7 @@ document.addEventListener('click', e => {
     document.getElementById('themePanel').style.display = 'none';
 });
 (function(){const c=localStorage.getItem('pageBgUrl');if(c)document.body.style.backgroundImage=`linear-gradient(rgba(232,240,254,0.55),rgba(232,240,254,0.55)),url('${c}')`;})();
-async function _loadPageBg(){try{const r=await fetch(SB_URL+'/rest/v1/app_settings?key=eq.page_bg&select=value',{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}});const d=await r.json();const v=(Array.isArray(d)&&d.length)?(d[0].value||''):'';localStorage.setItem('pageBgUrl',v);document.body.style.backgroundImage=v?`linear-gradient(rgba(232,240,254,0.55),rgba(232,240,254,0.55)),url('${v}')`:'';}}catch(e){}}
+async function _loadPageBg(){try{const r=await fetch(SB_URL+'/rest/v1/app_settings?key=eq.page_bg&select=value',{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}});const d=await r.json();if(Array.isArray(d)&&d.length){const v=d[0].value||'';localStorage.setItem('pageBgUrl',v);document.body.style.backgroundImage=v?`linear-gradient(rgba(232,240,254,0.55),rgba(232,240,254,0.55)),url('${v}')`:'';}}}catch(e){}}
 _loadPageBg();setInterval(_loadPageBg,30000);
 </script>
 </body>
