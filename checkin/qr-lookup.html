@@ -136,24 +136,18 @@ const SB_KEY  = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsIn
 
 let results = [];
 let selectedP = null;
-let allNames = null; // cache: id, prefix, first_name, last_name, dept, internal_external only
+let allNames = null; // null = not loaded yet, [] = loaded but empty
 
 async function ensureNames() {
-  if (allNames) return;
-  const HDR = { headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY } };
-  let data = [], from = 0;
-  while(true) {
-    const r = await fetch(
-      `${SB_URL}/rest/v1/participants?select=id,prefix,first_name,last_name,dept,ext_dept,internal_external&order=last_name.asc`,
-      { ...HDR, headers: { ...HDR.headers, 'Range': `${from}-${from+999}`, 'Range-Unit': 'items' } }
-    );
-    const d = await r.json();
-    if (!Array.isArray(d) || !d.length) break;
-    data = data.concat(d);
-    if (d.length < 1000) break;
-    from += 1000;
-  }
-  allNames = data;
+  if (allNames !== null) return;
+  const r = await fetch(
+    `${SB_URL}/rest/v1/participants?select=id,prefix,first_name,last_name,dept,ext_dept,internal_external&limit=5000&order=last_name.asc`,
+    { headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY } }
+  );
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  const d = await r.json();
+  if (!Array.isArray(d)) throw new Error('bad response');
+  allNames = d;
 }
 
 async function doSearch() {
