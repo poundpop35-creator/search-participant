@@ -120,6 +120,7 @@
 <script>
 const SB_URL  = "https://gvxytnjfyepqhbkmcjms.supabase.co";
 const SB_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2eHl0bmpmeWVwcWhia21cam1zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0MzE2NDAsImV4cCI6MjA5NTAwNzY0MH0.RAr_ehb4cxfNliDR0h5XcihUaP-0ltZTTGIAv2Fw1kk";
+const SB_KEY  = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2eHl0bmpmeWVwcWhia21cam1zIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3OTQzMTY0MCwiZXhwIjoyMDk1MDA3NjQwfQ.Hrfc0erkIatyVbmsOW2SU7piH3L65qbS2kdi2eYzbQk";
 (function(){
   const _cached=localStorage.getItem('bgUrl');
   if(_cached!==null&&_cached!=='') _applyBg(_cached);
@@ -146,7 +147,7 @@ async function doSearch() {
   try {
     const enc = encodeURIComponent(q);
     const SEL = 'select=id,prefix,first_name,last_name,dept,ext_dept,internal_external,participation_type,id_card,passport,qr_idcard,qr_passport';
-    const HDR = { headers: { 'apikey': SB_ANON, 'Authorization': 'Bearer ' + SB_ANON } };
+    const HDR = { headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY } };
     const [r1, r2] = await Promise.all([
       fetch(`${SB_URL}/rest/v1/participants?first_name=ilike.*${enc}*&${SEL}&order=last_name.asc&limit=30`, HDR),
       fetch(`${SB_URL}/rest/v1/participants?last_name=ilike.*${enc}*&${SEL}&order=last_name.asc&limit=30`, HDR)
