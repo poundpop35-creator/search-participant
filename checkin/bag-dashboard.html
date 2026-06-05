@@ -221,8 +221,8 @@ const DEPTS = ['อธิบดีกรมวิทยาศาสตร์ก�
 // Auth check
 if(sessionStorage.getItem('dmsc_auth')!=='ok') window.location.href='login.html';
 document.getElementById('userDisplay').textContent = sessionStorage.getItem('dmsc_user')||'';
-// Staff dashboard gate
-if(sessionStorage.getItem('dmsc_role')!=='admin' && sessionStorage.getItem('dmsc_dash_ok')!=='1'){
+// Staff dashboard gate — admin users (by role OR username) bypass automatically
+if(sessionStorage.getItem('dmsc_role')!=='admin' && sessionStorage.getItem('dmsc_user')!=='adminpound' && sessionStorage.getItem('dmsc_dash_ok')!=='1'){
   document.getElementById('dashGateOverlay').classList.remove('hidden');
   setTimeout(()=>document.getElementById('dashGateInput').focus(),100);
 }
