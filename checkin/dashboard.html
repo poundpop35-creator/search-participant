@@ -154,13 +154,35 @@
 if (sessionStorage.getItem('dmsc_auth') !== 'ok') {
   window.location.href = 'login.html';
 }
-document.addEventListener('DOMContentLoaded',()=>{
-  const el=document.getElementById('userDisplay');
-  if(el) el.textContent=sessionStorage.getItem('dmsc_user')||'';
+var _DASH_PASS = "P@und3142";
+function checkDashGate() {
+  var inp = document.getElementById('dashGateInput');
+  var err = document.getElementById('dashGateErr');
+  if (!inp) return;
+  var v = inp.value;
+  if (v === _DASH_PASS) {
+    sessionStorage.setItem('dmsc_dash_ok', '1');
+    var ov = document.getElementById('dashGateOverlay');
+    if (ov) ov.classList.add('hidden');
+  } else {
+    if (err) err.textContent = 'รหัสผ่านไม่ถูกต้อง';
+    inp.value = '';
+    inp.focus();
+  }
+}
+document.addEventListener('DOMContentLoaded', function() {
+  var el = document.getElementById('userDisplay');
+  if (el) el.textContent = sessionStorage.getItem('dmsc_user') || '';
   // Staff dashboard gate — admin or adminpound bypass automatically
-  if(sessionStorage.getItem('dmsc_role')!=='admin' && sessionStorage.getItem('dmsc_user')!=='adminpound' && sessionStorage.getItem('dmsc_dash_ok')!=='1'){
-    document.getElementById('dashGateOverlay').classList.remove('hidden');
-    setTimeout(()=>document.getElementById('dashGateInput').focus(),100);
+  if (sessionStorage.getItem('dmsc_role') !== 'admin' && sessionStorage.getItem('dmsc_user') !== 'adminpound' && sessionStorage.getItem('dmsc_dash_ok') !== '1') {
+    var ov = document.getElementById('dashGateOverlay');
+    if (ov) ov.classList.remove('hidden');
+    var inp = document.getElementById('dashGateInput');
+    setTimeout(function() { if (inp) inp.focus(); }, 100);
+    // Attach button listener as backup to onclick attribute
+    var btn = document.getElementById('dashGateBtn');
+    if (btn) btn.addEventListener('click', checkDashGate);
+    if (inp) inp.addEventListener('keydown', function(e) { if (e.key === 'Enter') checkDashGate(); });
   }
 });
 </script>
@@ -175,7 +197,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     <div id="dashGateErr" style="color:#dc2626;font-size:0.82rem;min-height:18px;margin-top:6px;"></div>
     <div style="display:flex;gap:10px;margin-top:14px;">
       <button class="clear-cancel" onclick="window.location.href='index.html'" style="flex:1;">ยกเลิก</button>
-      <button class="clear-confirm" onclick="checkDashGate()" style="flex:1;">เข้าสู่ Dashboard</button>
+      <button class="clear-confirm" id="dashGateBtn" onclick="checkDashGate()" style="flex:1;">เข้าสู่ Dashboard</button>
     </div>
   </div>
 </div>
