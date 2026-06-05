@@ -179,6 +179,9 @@ const USERS = {
 };
 const _next = new URLSearchParams(window.location.search).get('next') || 'index.html';
 if(sessionStorage.getItem('dmsc_auth')==='ok') window.location.href = _next;
+(function(){const c=localStorage.getItem('pageBgUrl');if(c)document.body.style.backgroundImage=`linear-gradient(rgba(232,240,254,0.55),rgba(232,240,254,0.55)),url('${c}')`;})();
+async function _loadPageBg(){try{const r=await fetch(SB_URL+'/rest/v1/app_settings?key=eq.page_bg&select=value',{headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON}});const d=await r.json();if(Array.isArray(d)&&d.length){const v=d[0].value||'';localStorage.setItem('pageBgUrl',v);document.body.style.backgroundImage=v?`linear-gradient(rgba(232,240,254,0.55),rgba(232,240,254,0.55)),url('${v}')`:'';}}catch(e){}}
+_loadPageBg();setInterval(_loadPageBg,30000);
 
 async function doLogin(){
   const u   = document.getElementById('username').value.trim().toLowerCase();

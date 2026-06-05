@@ -523,6 +523,9 @@
     sessionStorage.removeItem('dmsc_auth');sessionStorage.removeItem('dmsc_user');sessionStorage.removeItem('dmsc_role');
     window.location.href='login.html';
   }
+(function(){const c=localStorage.getItem('pageBgUrl');if(c)document.body.style.backgroundImage=`linear-gradient(rgba(232,240,254,0.55),rgba(232,240,254,0.55)),url('${c}')`;})();
+async function _loadPageBg(){try{const r=await fetch(SB_URL+'/rest/v1/app_settings?key=eq.page_bg&select=value',{headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON}});const d=await r.json();if(Array.isArray(d)&&d.length){const v=d[0].value||'';localStorage.setItem('pageBgUrl',v);document.body.style.backgroundImage=v?`linear-gradient(rgba(232,240,254,0.55),rgba(232,240,254,0.55)),url('${v}')`:'';}}catch(e){}}
+_loadPageBg();setInterval(_loadPageBg,30000);
 </script>
 <div style="text-align:center;padding:16px 20px;font-size:0.75rem;color:#0d2b6b;">© 2026 Built by <span style="font-family:'Dancing Script',cursive;font-weight:700;font-size:1.25em;color:#0ABAB5;letter-spacing:0.01em;">Saharat Phetrnitchakun</span> · <span style="font-weight:800;letter-spacing:0.04em;font-size:1.05em;"><span style="color:#2563eb;">D</span><span style="color:#f59e0b;">P</span><span style="color:#16a34a;">T</span><span style="color:#dc2626;">C</span></span> · DMSc</div>
 </body>
