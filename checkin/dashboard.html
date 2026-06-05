@@ -1655,9 +1655,31 @@ document.getElementById('clearOverlay').addEventListener('click', function(e) {
     <input type="file" id="bgFileInput" accept="image/*" style="display:none;" onchange="if(this.files[0])uploadHeroImage(this.files[0])">
     <div id="bgTip" style="font-size:0.73rem;color:#94a3b8;text-align:center;margin-top:8px;">ภาพพื้นหลัง Live Dashboard จะเปลี่ยนทุก deviceทุก device</div>
   </div>
+  <!-- Public body BG section -->
+  <div style="margin-top:14px;padding-top:12px;border-top:1px solid #f0f0f0;">
+    <div style="font-size:0.8rem;font-weight:700;color:#1e293b;margin-bottom:10px;">🌅 พื้นหลัง Live Dashboard</div>
+    <div style="display:flex;gap:6px;margin-bottom:10px;">
+      <div onclick="selectPublicBgPreset('none')" id="pubBgp-none" title="ไม่มีรูป" style="width:44px;height:44px;border-radius:8px;cursor:pointer;border:2px solid #e2e8f0;background:#e8f0fe;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;">⬜</div>
+      <div onclick="selectPublicBgPreset('dna')" id="pubBgp-dna" title="DNA" style="width:44px;height:44px;border-radius:8px;cursor:pointer;border:2px solid #e2e8f0;overflow:hidden;flex-shrink:0;">
+        <img src="https://raw.githubusercontent.com/poundpop35-creator/search-participant/main/DNA.png" style="width:100%;height:100%;object-fit:cover;" loading="lazy">
+      </div>
+      <div onclick="selectPublicBgPreset('conf')" id="pubBgp-conf" title="ภาพงานประชุม" style="width:44px;height:44px;border-radius:8px;cursor:pointer;border:2px solid #e2e8f0;overflow:hidden;flex-shrink:0;">
+        <img src="https://raw.githubusercontent.com/poundpop35-creator/search-participant/main/IMG_7352.webp" style="width:100%;height:100%;object-fit:cover;" loading="lazy">
+      </div>
+    </div>
+    <div style="display:flex;gap:6px;align-items:center;">
+      <input type="text" id="publicBgInput" placeholder="วาง URL รูปภาพ..." style="flex:1;border:1.5px solid #e2e8f0;border-radius:8px;padding:7px 10px;font-size:0.78rem;font-family:'Sarabun',sans-serif;outline:none;min-width:0;">
+      <button onclick="savePublicBg()" style="padding:7px 12px;border-radius:8px;border:none;background:#0d2b6b;color:white;font-family:'Sarabun',sans-serif;font-size:0.78rem;font-weight:700;cursor:pointer;flex-shrink:0;">บันทึก</button>
+    </div>
+    <label for="publicBgFileInput" style="display:flex;align-items:center;justify-content:center;gap:5px;margin-top:7px;padding:7px;border:1.5px dashed #cbd5e1;border-radius:8px;cursor:pointer;font-size:0.76rem;color:#64748b;transition:border-color .15s;" onmouseover="this.style.borderColor='#3b82f6'" onmouseout="this.style.borderColor='#cbd5e1'">
+      📁 อัปโหลดรูปจากเครื่อง
+    </label>
+    <input type="file" id="publicBgFileInput" accept="image/*" style="display:none;" onchange="if(this.files[0])uploadPublicBgImage(this.files[0])">
+    <div id="publicBgTip" style="font-size:0.73rem;color:#94a3b8;text-align:center;margin-top:8px;">พื้นหลัง Live Dashboard เฉพาะหน้านั้น</div>
+  </div>
   <!-- Page BG Picker section -->
   <div style="margin-top:14px;padding-top:12px;border-top:1px solid #f0f0f0;">
-    <div style="font-size:0.8rem;font-weight:700;color:#1e293b;margin-bottom:10px;">🌄 ภาพพื้นหลัง (ทุกหน้า)</div>
+    <div style="font-size:0.8rem;font-weight:700;color:#1e293b;margin-bottom:10px;">🌄 ภาพพื้นหลัง (หน้าอื่นๆ)</div>
     <div style="display:flex;gap:6px;margin-bottom:10px;">
       <div onclick="selectPageBgPreset('none')" id="pbgp-none" title="ไม่มีรูป" style="width:44px;height:44px;border-radius:8px;cursor:pointer;border:2px solid #e2e8f0;background:#e8f0fe;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;">⬜</div>
       <div onclick="selectPageBgPreset('dna')" id="pbgp-dna" title="DNA" style="width:44px;height:44px;border-radius:8px;cursor:pointer;border:2px solid #e2e8f0;overflow:hidden;flex-shrink:0;">
@@ -1726,7 +1748,7 @@ async function pickTheme(id) {
 function toggleThemePanel() {
   const p = document.getElementById('themePanel');
   const open = p.style.display !== 'none';
-  if(!open) { buildThemeList(); loadBgUrl(); loadPageBgUrl(); }
+  if(!open) { buildThemeList(); loadBgUrl(); loadPublicBgUrl(); loadPageBgUrl(); }
   p.style.display = open ? 'none' : 'block';
 }
 
@@ -1803,6 +1825,70 @@ async function loadBgUrl() {
       const v = d[0].value || '';
       localStorage.setItem('heroImgUrl', v);
       document.getElementById('bgCustomInput').value = v;
+    }
+  } catch(e) {}
+}
+
+function selectPublicBgPreset(key) {
+  document.getElementById('publicBgInput').value = BG_PRESETS[key] || '';
+  ['none','dna','conf'].forEach(k => {
+    const el = document.getElementById('pubBgp-'+k);
+    if(el) el.style.borderColor = (k===key) ? '#3b82f6' : '#e2e8f0';
+  });
+}
+
+async function savePublicBg(url) {
+  if(url === undefined) url = document.getElementById('publicBgInput').value.trim();
+  const tip = document.getElementById('publicBgTip');
+  tip.textContent = '⏳ กำลังบันทึก...'; tip.style.color = '#64748b';
+  try {
+    const r = await fetch(SB_URL + '/rest/v1/app_settings', {
+      method:'POST',
+      headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'},
+      body: JSON.stringify({key:'public_bg', value: url})
+    });
+    if(r.ok || r.status === 204) {
+      localStorage.setItem('publicBgUrl', url);
+      document.getElementById('publicBgInput').value = url;
+      tip.textContent = '✅ บันทึกแล้ว — พื้นหลัง Live Dashboard จะเปลี่ยน';
+      tip.style.color = '#16a34a';
+    } else {
+      tip.textContent = '⚠️ บันทึกไม่สำเร็จ (HTTP ' + r.status + ')'; tip.style.color = '#dc2626';
+    }
+  } catch(e) { tip.textContent = '⚠️ บันทึกไม่สำเร็จ'; tip.style.color = '#dc2626'; }
+}
+
+async function uploadPublicBgImage(file) {
+  const tip = document.getElementById('publicBgTip');
+  tip.textContent = '⏳ กำลังอัปโหลด...'; tip.style.color = '#64748b';
+  document.getElementById('publicBgFileInput').value = '';
+  try {
+    await fetch(SB_URL + '/storage/v1/bucket', {
+      method:'POST',
+      headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'},
+      body: JSON.stringify({id:'hero-images',name:'hero-images',public:true})
+    }).catch(()=>{});
+    const ext = file.name.split('.').pop().toLowerCase() || 'jpg';
+    const path = `public-bg.${ext}`;
+    const upRes = await fetch(`${SB_URL}/storage/v1/object/hero-images/${path}`, {
+      method:'POST',
+      headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':file.type,'x-upsert':'true'},
+      body: file
+    });
+    if(!upRes.ok) { const t=await upRes.text(); throw new Error(t); }
+    await savePublicBg(`${SB_URL}/storage/v1/object/public/hero-images/${path}`);
+  } catch(e) { tip.textContent = '⚠️ อัปโหลดไม่สำเร็จ: ' + String(e).slice(0,60); tip.style.color = '#dc2626'; }
+}
+
+async function loadPublicBgUrl() {
+  try {
+    const r = await fetch(SB_URL+'/rest/v1/app_settings?key=eq.public_bg&select=value',
+      {headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}});
+    const d = await r.json();
+    if(Array.isArray(d) && d.length) {
+      const v = d[0].value || '';
+      localStorage.setItem('publicBgUrl', v);
+      document.getElementById('publicBgInput').value = v;
     }
   } catch(e) {}
 }
