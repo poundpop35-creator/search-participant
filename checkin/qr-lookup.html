@@ -140,17 +140,24 @@ let allNames = null; // null = not loaded yet, [] = loaded but empty
 
 async function ensureNames() {
   if (allNames !== null) return;
-  const r = await fetch(
-    `${SB_URL}/rest/v1/participants?select=id,prefix,first_name,last_name,dept,ext_dept,internal_external&limit=5000&order=last_name.asc`,
-    { headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY } }
-  );
-  if (!r.ok) {
-    const txt = await r.text().catch(()=>'');
-    throw new Error('HTTP ' + r.status + ': ' + txt.slice(0,120));
+  const headers = { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY };
+  let data = [], offset = 0;
+  while(true) {
+    const r = await fetch(
+      `${SB_URL}/rest/v1/participants?select=id,prefix,first_name,last_name,dept,ext_dept,internal_external&limit=1000&offset=${offset}&order=last_name.asc`,
+      { headers }
+    );
+    if (!r.ok) {
+      const txt = await r.text().catch(()=>'');
+      throw new Error('HTTP ' + r.status + ': ' + txt.slice(0,120));
+    }
+    const d = await r.json();
+    if (!Array.isArray(d) || !d.length) break;
+    data = data.concat(d);
+    if (d.length < 1000) break;
+    offset += 1000;
   }
-  const d = await r.json();
-  if (!Array.isArray(d)) throw new Error('response: ' + JSON.stringify(d).slice(0,120));
-  allNames = d;
+  allNames = data;
 }
 
 async function doSearch() {
