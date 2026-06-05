@@ -136,6 +136,25 @@ const SB_KEY  = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsIn
 
 let results = [];
 let selectedP = null;
+let allNames = null; // cache: id, prefix, first_name, last_name, dept, internal_external only
+
+async function ensureNames() {
+  if (allNames) return;
+  const HDR = { headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY } };
+  let data = [], from = 0;
+  while(true) {
+    const r = await fetch(
+      `${SB_URL}/rest/v1/participants?select=id,prefix,first_name,last_name,dept,ext_dept,internal_external&order=last_name.asc`,
+      { ...HDR, headers: { ...HDR.headers, 'Range': `${from}-${from+999}`, 'Range-Unit': 'items' } }
+    );
+    const d = await r.json();
+    if (!Array.isArray(d) || !d.length) break;
+    data = data.concat(d);
+    if (d.length < 1000) break;
+    from += 1000;
+  }
+  allNames = data;
+}
 
 async function doSearch() {
   const q = document.getElementById('searchInput').value.trim();
@@ -145,21 +164,12 @@ async function doSearch() {
   }
   document.getElementById('resultsWrap').innerHTML = '<div class="loading-msg">กำลังค้นหา...</div>';
   try {
-    const enc = encodeURIComponent(q);
-    const SEL = 'select=id,prefix,first_name,last_name,dept,ext_dept,internal_external,participation_type,id_card,passport,qr_idcard,qr_passport';
-    const HDR = { headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY } };
-    const [r1, r2] = await Promise.all([
-      fetch(`${SB_URL}/rest/v1/participants?first_name=ilike.*${enc}*&${SEL}&order=last_name.asc&limit=30`, HDR),
-      fetch(`${SB_URL}/rest/v1/participants?last_name=ilike.*${enc}*&${SEL}&order=last_name.asc&limit=30`, HDR)
-    ]);
-    const [d1, d2] = await Promise.all([r1.json(), r2.json()]);
-    const seen = new Set();
-    results = [...(Array.isArray(d1)?d1:[]), ...(Array.isArray(d2)?d2:[])].filter(p => {
-      if (seen.has(p.id)) return false;
-      seen.add(p.id); return true;
-    });
+    await ensureNames();
+    results = allNames.filter(p =>
+      (p.first_name||'').includes(q) || (p.last_name||'').includes(q)
+    ).slice(0, 30);
     renderResults();
-  } catch {
+  } catch(e) {
     document.getElementById('resultsWrap').innerHTML = '<div class="no-result">เกิดข้อผิดพลาด กรุณาลองใหม่</div>';
   }
 }
@@ -177,24 +187,28 @@ function renderResults() {
     const dept = isIn ? (p.dept||'-') : (p.ext_dept||p.dept||'-');
     const typeLabel = isIn ? 'บุคลากรภายใน' : isOut ? 'บุคคลภายนอก' : '';
     const typeClass = isIn ? 'type-in' : isOut ? 'type-out' : '';
-    const hasId = !!(p.id_card || p.passport);
-    return `<div class="result-item" onclick="${hasId ? `selectPerson(${i})` : ''}">
+    return `<div class="result-item" onclick="selectPerson(${i})">
       <div class="result-name">${name}</div>
       <div class="result-dept">${dept}</div>
       ${typeLabel ? `<span class="result-type ${typeClass}">${typeLabel}</span>` : ''}
-      ${!hasId ? '<div style="font-size:0.75rem;color:#f59e0b;margin-top:4px;">⚠️ ไม่มีข้อมูล QR</div>' : ''}
     </div>`;
   }).join('');
 }
 
-function selectPerson(i) {
-  selectedP = results[i];
-  const name = `${(selectedP.prefix||'').replace(/\s*\([^)]*\)/g,'').trim()} ${selectedP.first_name||''} ${selectedP.last_name||''}`.trim().replace(/\s+/g,' ');
+async function selectPerson(i) {
+  const base = results[i];
+  const name = `${(base.prefix||'').replace(/\s*\([^)]*\)/g,'').trim()} ${base.first_name||''} ${base.last_name||''}`.trim().replace(/\s+/g,' ');
   document.getElementById('pinName').textContent = name;
   document.getElementById('pinInput').value = '';
   document.getElementById('pinErr').textContent = '';
   document.getElementById('pinOverlay').classList.remove('hidden');
   setTimeout(() => document.getElementById('pinInput').focus(), 150);
+  // fetch full record (id_card, qr urls) lazily
+  const HDR = { headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY } };
+  fetch(`${SB_URL}/rest/v1/participants?id=eq.${base.id}&select=id,prefix,first_name,last_name,id_card,passport,qr_idcard,qr_passport`, HDR)
+    .then(r => r.json()).then(d => { if(d && d.length) selectedP = d[0]; })
+    .catch(() => {});
+  selectedP = base; // use base until full record arrives
 }
 
 function closePin() {
