@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard ผู้บริหาร — ประชุมวิชาการวิทยาศาสตร์การแพทย์ ครั้งที่ 34</title>
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <style>
     :root{--blue:#1F3540;--blue-mid:#2C4B5D;--blue-light:#C8DDE8;--green:#16a34a;--white:#fff;--shadow:0 2px 16px rgba(31,53,64,0.10);}
     *{box-sizing:border-box;margin:0;padding:0;}
@@ -43,9 +44,11 @@
     .s-d3 .stat-num{color:#6A8694;}
 
     .dept-card{background:var(--white);border-radius:18px;box-shadow:var(--shadow);overflow:hidden;margin-bottom:24px;border:1px solid #C8DDE8;}
-    .dept-card-header{padding:18px 24px;border-bottom:1px solid #C8DDE8;}
+    .dept-card-header{padding:18px 24px;border-bottom:1px solid #C8DDE8;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}
     .dept-card-title{font-size:1rem;font-weight:700;color:#1F3540;}
     .dept-card-sub{font-size:0.8rem;color:#7a9aae;margin-top:2px;}
+    .share-btn{flex-shrink:0;display:inline-flex;align-items:center;gap:6px;font-size:0.8rem;font-weight:600;color:#1F3540;background:#e8f4f8;border:1.5px solid #C8DDE8;border-radius:10px;padding:7px 14px;cursor:pointer;white-space:nowrap;transition:background 0.15s;}
+    .share-btn:hover{background:#C8DDE8;}
 
     .scroll-wrap{overflow-x:auto;}
     table{width:100%;border-collapse:collapse;}
@@ -114,10 +117,16 @@
       </div>
     </div>
 
-    <div class="dept-card">
+    <div class="dept-card" id="deptShareCard">
       <div class="dept-card-header">
-        <div class="dept-card-title">จำนวนผู้เข้าร่วมแยกตามหน่วยงานภายใน (กรมวิทยาศาสตร์การแพทย์)</div>
-        <div class="dept-card-sub">ข้อมูลจากการเช็คอินจริง — อัปเดตอัตโนมัติทุก 1 นาที</div>
+        <div>
+          <div class="dept-card-title">จำนวนผู้เข้าร่วมแยกตามหน่วยงานภายใน (กรมวิทยาศาสตร์การแพทย์)</div>
+          <div class="dept-card-sub">ข้อมูลจากการเช็คอินจริง — อัปเดตอัตโนมัติทุก 1 นาที</div>
+        </div>
+        <button class="share-btn" onclick="shareDeptTable()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          บันทึกเป็นรูปภาพ
+        </button>
       </div>
       <div class="scroll-wrap">
         <table>
@@ -244,24 +253,32 @@ async function loadData() {
   }
 }
 
-// Load bg from cache instantly
-(function(){const c=localStorage.getItem('bgUrl');if(c){document.body.style.backgroundImage=`linear-gradient(rgba(232,240,254,0.60),rgba(232,240,254,0.60)),url('${c}')`;}})();
-loadBgFromSupabase();
 loadData();
 setInterval(loadData, 60000);
 
-async function loadBgFromSupabase() {
+async function shareDeptTable() {
+  const btn = document.querySelector('.share-btn');
+  const card = document.getElementById('deptShareCard');
+  btn.textContent = '⏳ กำลังสร้างรูป...';
+  btn.disabled = true;
   try {
-    const r = await fetch(SUPABASE_URL + "/rest/v1/app_settings?key=eq.bg_url&select=value", {
-      headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}
+    const canvas = await html2canvas(card, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: '#ffffff',
+      scrollX: 0,
+      scrollY: -window.scrollY
     });
-    const d = await r.json();
-    if(Array.isArray(d) && d.length) {
-      const v = d[0].value || '';
-      localStorage.setItem('bgUrl', v);
-      if(v) document.body.style.backgroundImage = `linear-gradient(rgba(232,240,254,0.60),rgba(232,240,254,0.60)),url('${v}')`;
-    }
-  } catch(e) {}
+    const link = document.createElement('a');
+    link.download = 'dept-table.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  } catch(e) {
+    alert('ไม่สามารถสร้างรูปภาพได้: ' + e.message);
+  } finally {
+    btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> บันทึกเป็นรูปภาพ';
+    btn.disabled = false;
+  }
 }
 </script>
 </body>
