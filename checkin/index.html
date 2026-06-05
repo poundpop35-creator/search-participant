@@ -198,6 +198,18 @@
 <script>
   const SB_URL  = "https://gvxytnjfyepqhbkmcjms.supabase.co";
   const SB_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2eHl0bmpmeWVwcWhia21jam1zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0MzE2NDAsImV4cCI6MjA5NTAwNzY0MH0.RAr_ehb4cxfNliDR0h5XcihUaP-0ltZTTGIAv2Fw1kk";
+  (function(){
+    const _cached=localStorage.getItem('bgUrl');
+    if(_cached!==null&&_cached!=='') _applyBg(_cached);
+    fetch(SB_URL+'/rest/v1/app_settings?key=eq.bg_url&select=value',
+      {headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON}})
+    .then(r=>r.json()).then(d=>{
+      if(Array.isArray(d)&&d.length){const v=d[0].value||'';localStorage.setItem('bgUrl',v);_applyBg(v);}
+    }).catch(()=>{});
+    function _applyBg(u){
+      document.body.style.backgroundImage=`linear-gradient(rgba(232,240,254,0.60),rgba(232,240,254,0.60)),url('${u}')`;
+    }
+  })();
   const DAY_TH  = {1:'24 มิถุนายน 2569',2:'25 มิถุนายน 2569',3:'26 มิถุนายน 2569'};
 
   if(sessionStorage.getItem('dmsc_auth')!=='ok') window.location.href='login.html';

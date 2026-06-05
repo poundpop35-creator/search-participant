@@ -1536,6 +1536,7 @@ function setAutoRefresh() {
   if (sec > 0) _refreshTimer = setInterval(loadAll, sec * 1000);
 }
 setAutoRefresh(); // เริ่มทันที (default 1 นาที)
+loadBgUrl();
 
 async function doLogout() {
   const _u=sessionStorage.getItem('dmsc_user');
@@ -1632,6 +1633,24 @@ document.getElementById('clearOverlay').addEventListener('click', function(e) {
 <div id="themePanel" style="display:none;position:fixed;bottom:92px;right:24px;z-index:9000;background:#fff;border-radius:18px;padding:18px 20px;box-shadow:0 8px 32px rgba(0,0,0,0.18);min-width:230px;border:1px solid #e2e8f0;">
   <div style="font-size:0.8rem;font-weight:700;color:#1e293b;margin-bottom:14px;letter-spacing:0.04em;">🎨 ธีมสี Dashboard สาธารณะ</div>
   <div style="display:flex;flex-direction:column;gap:10px;" id="themeList"></div>
+  <!-- BG Picker section -->
+  <div style="margin-top:14px;padding-top:12px;border-top:1px solid #f0f0f0;">
+    <div style="font-size:0.8rem;font-weight:700;color:#1e293b;margin-bottom:10px;">🖼️ ภาพพื้นหลัง</div>
+    <div style="display:flex;gap:6px;margin-bottom:10px;" id="bgPresetRow">
+      <div onclick="selectBgPreset('none')" id="bgp-none" title="ไม่มีรูป" style="width:44px;height:44px;border-radius:8px;cursor:pointer;border:2px solid #e2e8f0;background:#e8f0fe;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;">⬜</div>
+      <div onclick="selectBgPreset('dna')" id="bgp-dna" title="DNA" style="width:44px;height:44px;border-radius:8px;cursor:pointer;border:2px solid #e2e8f0;overflow:hidden;flex-shrink:0;">
+        <img src="https://raw.githubusercontent.com/poundpop35-creator/search-participant/main/DNA.png" style="width:100%;height:100%;object-fit:cover;" loading="lazy">
+      </div>
+      <div onclick="selectBgPreset('conf')" id="bgp-conf" title="ภาพงานประชุม" style="width:44px;height:44px;border-radius:8px;cursor:pointer;border:2px solid #e2e8f0;overflow:hidden;flex-shrink:0;">
+        <img src="https://raw.githubusercontent.com/poundpop35-creator/search-participant/main/IMG_7352.webp" style="width:100%;height:100%;object-fit:cover;" loading="lazy">
+      </div>
+    </div>
+    <div style="display:flex;gap:6px;align-items:center;">
+      <input type="text" id="bgCustomInput" placeholder="หรือวาง URL รูปภาพ..." style="flex:1;border:1.5px solid #e2e8f0;border-radius:8px;padding:7px 10px;font-size:0.78rem;font-family:'Sarabun',sans-serif;outline:none;min-width:0;">
+      <button onclick="saveBgUrl()" style="padding:7px 12px;border-radius:8px;border:none;background:#0d2b6b;color:white;font-family:'Sarabun',sans-serif;font-size:0.78rem;font-weight:700;cursor:pointer;flex-shrink:0;">บันทึก</button>
+    </div>
+    <div id="bgTip" style="font-size:0.73rem;color:#94a3b8;text-align:center;margin-top:8px;">พื้นหลังจะแสดงทุกหน้าในระบบ</div>
+  </div>
   <div class="theme-tip" style="margin-top:14px;padding-top:12px;border-top:1px solid #f0f0f0;font-size:0.73rem;color:#94a3b8;text-align:center;">ธีมจะแสดงบน Public Dashboard ทุก device</div>
 </div>
 
@@ -1683,6 +1702,58 @@ function toggleThemePanel() {
   const open = p.style.display !== 'none';
   if(!open) buildThemeList();
   p.style.display = open ? 'none' : 'block';
+}
+
+const BG_PRESETS = {
+  'none': '',
+  'dna':  'https://raw.githubusercontent.com/poundpop35-creator/search-participant/main/DNA.png',
+  'conf': 'https://raw.githubusercontent.com/poundpop35-creator/search-participant/main/IMG_7352.webp',
+};
+
+function selectBgPreset(key) {
+  document.getElementById('bgCustomInput').value = BG_PRESETS[key] || '';
+  ['none','dna','conf'].forEach(k => {
+    const el = document.getElementById('bgp-'+k);
+    if(el) el.style.borderColor = (k===key) ? '#3b82f6' : '#e2e8f0';
+  });
+}
+
+async function saveBgUrl() {
+  const url = document.getElementById('bgCustomInput').value.trim();
+  const tip = document.getElementById('bgTip');
+  tip.textContent = '⏳ กำลังบันทึก...'; tip.style.color = '#64748b';
+  try {
+    await fetch(SB_URL + '/rest/v1/app_settings', {
+      method:'POST',
+      headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'},
+      body: JSON.stringify({key:'bg_url', value: url})
+    });
+    localStorage.setItem('bgUrl', url);
+    _applyBg(url);
+    tip.textContent = '✅ บันทึกแล้ว — ทุกหน้าจะเห็นพื้นหลังนี้'; tip.style.color = '#16a34a';
+  } catch(e) {
+    tip.textContent = '⚠️ บันทึกไม่สำเร็จ'; tip.style.color = '#dc2626';
+  }
+}
+
+async function loadBgUrl() {
+  const cached = localStorage.getItem('bgUrl');
+  if(cached !== null) _applyBg(cached);
+  try {
+    const r = await fetch(SB_URL+'/rest/v1/app_settings?key=eq.bg_url&select=value',
+      {headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON}});
+    const d = await r.json();
+    if(Array.isArray(d) && d.length) {
+      const v = d[0].value || '';
+      localStorage.setItem('bgUrl', v);
+      _applyBg(v);
+    }
+  } catch(e) {}
+}
+
+function _applyBg(url) {
+  const u = url || 'https://raw.githubusercontent.com/poundpop35-creator/search-participant/main/DNA.png';
+  document.body.style.backgroundImage = `linear-gradient(rgba(232,240,254,0.60),rgba(232,240,254,0.60)),url('${u}')`;
 }
 
 document.addEventListener('click', e => {
