@@ -157,8 +157,28 @@ if (sessionStorage.getItem('dmsc_auth') !== 'ok') {
 document.addEventListener('DOMContentLoaded',()=>{
   const el=document.getElementById('userDisplay');
   if(el) el.textContent=sessionStorage.getItem('dmsc_user')||'';
+  // Staff dashboard gate
+  if(sessionStorage.getItem('dmsc_role')!=='admin' && sessionStorage.getItem('dmsc_dash_ok')!=='1'){
+    document.getElementById('dashGateOverlay').classList.remove('hidden');
+    setTimeout(()=>document.getElementById('dashGateInput').focus(),100);
+  }
 });
 </script>
+
+<!-- Dashboard gate for staff -->
+<div class="clear-overlay hidden" id="dashGateOverlay" style="z-index:99999;">
+  <div class="clear-modal">
+    <div class="clear-icon">🔐</div>
+    <h3>ยืนยันการเข้าถึง Dashboard</h3>
+    <p>กรุณาใส่รหัสผ่านสำหรับเข้าหน้า Dashboard</p>
+    <input class="clear-pw-input" type="password" id="dashGateInput" placeholder="รหัสผ่าน Dashboard" onkeydown="if(event.key==='Enter')checkDashGate()">
+    <div id="dashGateErr" style="color:#dc2626;font-size:0.82rem;min-height:18px;margin-top:6px;"></div>
+    <div style="display:flex;gap:10px;margin-top:14px;">
+      <button class="clear-cancel" onclick="window.location.href='index.html'" style="flex:1;">ยกเลิก</button>
+      <button class="clear-confirm" onclick="checkDashGate()" style="flex:1;">เข้าสู่ Dashboard</button>
+    </div>
+  </div>
+</div>
 
 <!-- Clear modal -->
 <div class="clear-overlay hidden" id="clearOverlay">
@@ -220,8 +240,8 @@ document.addEventListener('DOMContentLoaded',()=>{
           <p>หน้าเข้าสู่ระบบสำหรับเจ้าหน้าที่และ Admin เท่านั้น</p>
           <table class="help-table">
             <tr><th>บัญชี</th><th>รหัสผ่าน</th><th>สิทธิ์</th></tr>
-            <tr><td><strong>adminpound</strong></td><td>P@und0258</td><td><span class="help-tag tag-admin">Admin</span> login ซ้ำได้ทุกเวลา</td></tr>
-            <tr><td>staff01–staff10</td><td>Dmsc@2569</td><td><span class="help-tag tag-staff">Staff</span> ล็อกซ้ำไม่ได้ใน 10 นาที</td></tr>
+            <tr><td><strong>adminpound</strong></td><td>••••••••</td><td><span class="help-tag tag-admin">Admin</span> login ซ้ำได้ทุกเวลา</td></tr>
+            <tr><td>staff01–staff10</td><td>••••••••</td><td><span class="help-tag tag-staff">Staff</span> ล็อกซ้ำไม่ได้ใน 10 นาที</td></tr>
           </table>
         </div>
       </div>
@@ -1525,6 +1545,18 @@ async function doLogout() {
   sessionStorage.removeItem('dmsc_role');
   window.location.href = 'login.html';
 }const CLEAR_PASS = "P@und3142";
+const DASH_PASS = "P@und3142";
+function checkDashGate(){
+  const v=document.getElementById('dashGateInput').value;
+  if(v===DASH_PASS){
+    sessionStorage.setItem('dmsc_dash_ok','1');
+    document.getElementById('dashGateOverlay').classList.add('hidden');
+  } else {
+    document.getElementById('dashGateErr').textContent='รหัสผ่านไม่ถูกต้อง';
+    document.getElementById('dashGateInput').value='';
+    document.getElementById('dashGateInput').focus();
+  }
+}
 
 function openClearModal() {
   document.getElementById('clearPwInput').value = '';
