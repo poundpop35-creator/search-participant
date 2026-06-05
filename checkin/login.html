@@ -214,7 +214,7 @@ async function doLogin(){
       }
       if(Array.isArray(sessions) && sessions.length > 0){
         const diff = (Date.now() - new Date(sessions[0].last_active)) / 60000;
-        if(diff < 10){
+        if(diff < 2){
           err.innerHTML = u + ' ถูกใช้งานอยู่แล้ว &nbsp;<a href="#" style="color:#1a4eb8;font-weight:700;white-space:nowrap" onclick="event.preventDefault();doForceLogin(\''+u+'\')">→ ออกจากอุปกรณ์อื่น</a>';
           btn.textContent='เข้าสู่ระบบ'; btn.disabled=false;
           return;
