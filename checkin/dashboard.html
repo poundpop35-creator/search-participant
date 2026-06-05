@@ -1646,9 +1646,13 @@ document.getElementById('clearOverlay').addEventListener('click', function(e) {
       </div>
     </div>
     <div style="display:flex;gap:6px;align-items:center;">
-      <input type="text" id="bgCustomInput" placeholder="หรือวาง URL รูปภาพ..." style="flex:1;border:1.5px solid #e2e8f0;border-radius:8px;padding:7px 10px;font-size:0.78rem;font-family:'Sarabun',sans-serif;outline:none;min-width:0;">
+      <input type="text" id="bgCustomInput" placeholder="วาง URL รูปภาพ..." style="flex:1;border:1.5px solid #e2e8f0;border-radius:8px;padding:7px 10px;font-size:0.78rem;font-family:'Sarabun',sans-serif;outline:none;min-width:0;">
       <button onclick="saveBgUrl()" style="padding:7px 12px;border-radius:8px;border:none;background:#0d2b6b;color:white;font-family:'Sarabun',sans-serif;font-size:0.78rem;font-weight:700;cursor:pointer;flex-shrink:0;">บันทึก</button>
     </div>
+    <label for="bgFileInput" style="display:flex;align-items:center;justify-content:center;gap:5px;margin-top:7px;padding:7px;border:1.5px dashed #cbd5e1;border-radius:8px;cursor:pointer;font-size:0.76rem;color:#64748b;transition:border-color .15s;" onmouseover="this.style.borderColor='#3b82f6'" onmouseout="this.style.borderColor='#cbd5e1'">
+      📁 อัปโหลดรูปจากเครื่อง
+    </label>
+    <input type="file" id="bgFileInput" accept="image/*" style="display:none;" onchange="if(this.files[0])uploadHeroImage(this.files[0])">
     <div id="bgTip" style="font-size:0.73rem;color:#94a3b8;text-align:center;margin-top:8px;">ภาพ Header ใน Live Dashboard จะเปลี่ยนทุก device</div>
   </div>
   <div class="theme-tip" style="margin-top:14px;padding-top:12px;border-top:1px solid #f0f0f0;font-size:0.73rem;color:#94a3b8;text-align:center;">ธีมจะแสดงบน Public Dashboard ทุก device</div>
@@ -1718,28 +1722,60 @@ function selectBgPreset(key) {
   });
 }
 
-async function saveBgUrl() {
-  const url = document.getElementById('bgCustomInput').value.trim();
+async function saveBgUrl(url) {
+  if(url === undefined) url = document.getElementById('bgCustomInput').value.trim();
   const tip = document.getElementById('bgTip');
   tip.textContent = '⏳ กำลังบันทึก...'; tip.style.color = '#64748b';
   try {
     const r = await fetch(SB_URL + '/rest/v1/app_settings', {
       method:'POST',
-      headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'},
+      headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'},
       body: JSON.stringify({key:'bg_url', value: url})
     });
-    localStorage.setItem('heroImgUrl', url);
-    tip.textContent = r.ok ? '✅ บันทึกแล้ว — ภาพ Header ใน Live Dashboard จะเปลี่ยน' : '⚠️ บันทึกไม่สำเร็จ';
-    tip.style.color = r.ok ? '#16a34a' : '#dc2626';
+    if(r.ok || r.status === 204) {
+      localStorage.setItem('heroImgUrl', url);
+      document.getElementById('bgCustomInput').value = url;
+      tip.textContent = '✅ บันทึกแล้ว — ภาพ Header ใน Live Dashboard จะเปลี่ยน';
+      tip.style.color = '#16a34a';
+    } else {
+      tip.textContent = '⚠️ บันทึกไม่สำเร็จ (HTTP ' + r.status + ')'; tip.style.color = '#dc2626';
+    }
   } catch(e) {
     tip.textContent = '⚠️ บันทึกไม่สำเร็จ'; tip.style.color = '#dc2626';
+  }
+}
+
+async function uploadHeroImage(file) {
+  const tip = document.getElementById('bgTip');
+  tip.textContent = '⏳ กำลังอัปโหลด...'; tip.style.color = '#64748b';
+  document.getElementById('bgFileInput').value = '';
+  try {
+    // สร้าง bucket ถ้ายังไม่มี (ignore error ถ้ามีแล้ว)
+    await fetch(SB_URL + '/storage/v1/bucket', {
+      method:'POST',
+      headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'},
+      body: JSON.stringify({id:'hero-images',name:'hero-images',public:true})
+    }).catch(()=>{});
+    // อัปโหลดไฟล์ (x-upsert ทับของเดิม)
+    const ext = file.name.split('.').pop().toLowerCase() || 'jpg';
+    const path = `hero-bg.${ext}`;
+    const upRes = await fetch(`${SB_URL}/storage/v1/object/hero-images/${path}`, {
+      method:'POST',
+      headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':file.type,'x-upsert':'true'},
+      body: file
+    });
+    if(!upRes.ok) { const t=await upRes.text(); throw new Error(t); }
+    const publicUrl = `${SB_URL}/storage/v1/object/public/hero-images/${path}`;
+    await saveBgUrl(publicUrl);
+  } catch(e) {
+    tip.textContent = '⚠️ อัปโหลดไม่สำเร็จ: ' + String(e).slice(0,60); tip.style.color = '#dc2626';
   }
 }
 
 async function loadBgUrl() {
   try {
     const r = await fetch(SB_URL+'/rest/v1/app_settings?key=eq.bg_url&select=value',
-      {headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON}});
+      {headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}});
     const d = await r.json();
     if(Array.isArray(d) && d.length) {
       const v = d[0].value || '';
