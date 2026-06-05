@@ -652,10 +652,27 @@ async function loadThemeFromSupabase() {
 
 // Apply cached theme instantly, then sync from Supabase
 applyTheme(parseInt(localStorage.getItem('pubTheme')||'3'), false);
+// Load bg from cache instantly
+(function(){const c=localStorage.getItem('bgUrl');if(c){document.body.style.backgroundImage=`linear-gradient(rgba(232,240,254,0.60),rgba(232,240,254,0.60)),url('${c}')`;}})();
 loadThemeFromSupabase();
+loadBgFromSupabase();
 loadData();
 setInterval(loadData, 60000);
 setInterval(loadThemeFromSupabase, 30000);
+
+async function loadBgFromSupabase() {
+  try {
+    const r = await fetch(SUPABASE_URL + "/rest/v1/app_settings?key=eq.bg_url&select=value", {
+      headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}
+    });
+    const d = await r.json();
+    if(Array.isArray(d) && d.length) {
+      const v = d[0].value || '';
+      localStorage.setItem('bgUrl', v);
+      if(v) document.body.style.backgroundImage = `linear-gradient(rgba(232,240,254,0.60),rgba(232,240,254,0.60)),url('${v}')`;
+    }
+  } catch(e) {}
+}
 </script>
 </body>
 </html>
