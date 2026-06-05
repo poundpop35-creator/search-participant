@@ -650,8 +650,15 @@ async function loadThemeFromSupabase() {
 
 // Apply cached theme instantly, then sync from Supabase
 applyTheme(parseInt(localStorage.getItem('pubTheme')||'3'), false);
-// Load hero bg from cache instantly
-(function(){const c=localStorage.getItem('heroImgUrl');const h=document.querySelector('.hero');if(c&&h)h.style.backgroundImage=`url('${c}')`;})();
+// Load bg from cache instantly
+(function(){
+  const c=localStorage.getItem('heroImgUrl');
+  if(c){
+    const u=`url('${c}')`;
+    document.body.style.backgroundImage=`linear-gradient(rgba(232,240,254,0.60),rgba(232,240,254,0.60)),${u}`;
+    const h=document.querySelector('.hero');if(h)h.style.backgroundImage=u;
+  }
+})();
 loadThemeFromSupabase();
 loadBgFromSupabase();
 loadData();
@@ -667,8 +674,11 @@ async function loadBgFromSupabase() {
     if(Array.isArray(d) && d.length) {
       const v = d[0].value || '';
       localStorage.setItem('heroImgUrl', v);
-      const hero = document.querySelector('.hero');
-      if(hero) hero.style.backgroundImage = v ? `url('${v}')` : '';
+      if(v){
+        const u=`url('${v}')`;
+        document.body.style.backgroundImage=`linear-gradient(rgba(232,240,254,0.60),rgba(232,240,254,0.60)),${u}`;
+        const h=document.querySelector('.hero');if(h)h.style.backgroundImage=u;
+      }
     }
   } catch(e) {}
 }
