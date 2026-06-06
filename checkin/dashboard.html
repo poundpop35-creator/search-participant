@@ -370,8 +370,10 @@ document.addEventListener('DOMContentLoaded', function() {
           <button class="btn-xl green" onclick="exportExcel()">⬇ Excel</button>
           <button class="btn-xl teal"  onclick="exportCSV()">⬇ CSV</button>
         </div>
+        <button class="btn-xl" id="tToggleBtn" style="background:var(--blue);color:white;" onclick="toggleCheckinTable()">▲ ซ่อนตาราง</button>
       </div>
     </div>
+    <div id="tCheckinSection" style="display:block;">
     <!-- Filter bar inside table card -->
     <div class="filter-bar" style="border-radius:0;box-shadow:none;border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:#f8fafc;margin:0;">
       <div class="filter-group">
@@ -440,6 +442,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <button class="pbtn" id="bPrev" onclick="changePage(-1)">← ก่อนหน้า</button>
         <button class="pbtn" id="bNext" onclick="changePage(1)">ถัดไป →</button>
       </div>
+    </div>
     </div>
   </div>
 
@@ -628,9 +631,11 @@ document.addEventListener('DOMContentLoaded', function() {
           <button class="vbtn active" id="vTable" onclick="setDeptView('table')">ตาราง</button>
           <button class="vbtn" id="vChart" onclick="setDeptView('chart')">แผนภูมิ</button>
         </div>
+        <button class="btn-xl" id="deptToggleBtn" style="background:var(--blue);color:white;" onclick="toggleDeptCard()">▼ แสดงสถิติ</button>
       </div>
     </div>
 
+    <div id="deptCardSection" style="display:none;">
     <!-- Dept filters -->
     <div class="dept-filters">
       <div class="filter-group">
@@ -685,6 +690,7 @@ document.addEventListener('DOMContentLoaded', function() {
       <div style="position:relative;width:100%;" id="dCWrap">
         <canvas id="dChart" role="img" aria-label="แผนภูมิแท่งจำนวนผู้เข้าร่วมแต่ละหน่วยงาน"></canvas>
       </div>
+    </div>
     </div>
   </div>
 
@@ -936,6 +942,30 @@ function toggleParticipants(){
   } else {
     sec.style.display='none';
     btn.textContent='▼ ดูรายชื่อ';
+  }
+}
+
+function toggleCheckinTable(){
+  const sec=document.getElementById('tCheckinSection');
+  const btn=document.getElementById('tToggleBtn');
+  if(sec.style.display==='none'){
+    sec.style.display='block';
+    btn.textContent='▲ ซ่อนตาราง';
+  } else {
+    sec.style.display='none';
+    btn.textContent='▼ แสดงตาราง';
+  }
+}
+
+function toggleDeptCard(){
+  const sec=document.getElementById('deptCardSection');
+  const btn=document.getElementById('deptToggleBtn');
+  if(sec.style.display==='none'){
+    sec.style.display='block';
+    btn.textContent='▲ ซ่อนสถิติ';
+  } else {
+    sec.style.display='none';
+    btn.textContent='▼ แสดงสถิติ';
   }
 }
 
