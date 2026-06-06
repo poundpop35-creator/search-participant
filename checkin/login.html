@@ -102,7 +102,7 @@
           <table class="help-table">
             <tr><th>บัญชี</th><th>รหัสผ่าน</th><th>สิทธิ์</th></tr>
             <tr><td><strong>adminpound</strong></td><td>••••••••</td><td><span class="help-tag tag-admin">Admin</span> login ซ้ำได้ทุกเวลา</td></tr>
-            <tr><td>staff01–staff10</td><td>••••••••</td><td><span class="help-tag tag-staff">Staff</span> ล็อกซ้ำไม่ได้ใน 10 นาที</td></tr>
+            <tr><td>staff01–staff10</td><td>••••••••</td><td><span class="help-tag tag-staff">Staff</span> ล็อกซ้ำไม่ได้ใน 5 นาที</td></tr>
           </table>
         </div>
       </div>
@@ -181,7 +181,7 @@ const USERS = {
 const _next = new URLSearchParams(window.location.search).get('next') || 'index.html';
 if(sessionStorage.getItem('dmsc_auth')==='ok') window.location.href = _next;
 (function(){const c=localStorage.getItem('pageBgUrl');if(c)document.body.style.backgroundImage=`linear-gradient(rgba(232,240,254,0.55),rgba(232,240,254,0.55)),url('${c}')`;})();
-async function _loadPageBg(){try{const r=await fetch(SB_URL+'/rest/v1/app_settings?key=eq.page_bg&select=value',{headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON}});const d=await r.json();if(Array.isArray(d)&&d.length){const v=d[0].value||'';localStorage.setItem('pageBgUrl',v);document.body.style.backgroundImage=v?`linear-gradient(rgba(232,240,254,0.55),rgba(232,240,254,0.55)),url('${v}')`:'';}}}catch(e){}}
+async function _loadPageBg(){try{const r=await fetch(SB_URL+'/rest/v1/app_settings?key=eq.page_bg&select=value',{headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON}});const d=await r.json();if(Array.isArray(d)&&d.length){const v=d[0].value||'';localStorage.setItem('pageBgUrl',v);document.body.style.backgroundImage=v?`linear-gradient(rgba(232,240,254,0.55),rgba(232,240,254,0.55)),url('${v}')`:''}}catch(e){}}
 _loadPageBg();setInterval(_loadPageBg,30000);
 
 async function doLogin(){
@@ -214,8 +214,8 @@ async function doLogin(){
       }
       if(Array.isArray(sessions) && sessions.length > 0){
         const diff = (Date.now() - new Date(sessions[0].last_active)) / 60000;
-        if(diff < 10){
-          err.innerHTML = u + ' ถูกใช้งานอยู่แล้ว &nbsp;<a href="#" style="color:#1a4eb8;font-weight:700;white-space:nowrap" onclick="event.preventDefault();doForceLogin(\''+u+'\')">→ ออกจากอุปกรณ์อื่น</a>';
+        if(diff < 5){
+          err.textContent = u + ' ถูกใช้งานอยู่แล้ว กรุณารอ 5 นาทีหรือใช้รหัสอื่น';
           btn.textContent='เข้าสู่ระบบ'; btn.disabled=false;
           return;
         }
@@ -245,20 +245,7 @@ async function doLogin(){
     btn.textContent='เข้าสู่ระบบ'; btn.disabled=false;
   }
 }
-async function doForceLogin(u){
-  const err=document.getElementById('errMsg');
-  const btn=document.querySelector('.btn-login');
-  btn.textContent='กำลังออก...'; btn.disabled=true; err.textContent='';
-  try{
-    await fetch(`${SB_URL}/rest/v1/staff_sessions?username=eq.${encodeURIComponent(u)}`,{method:'DELETE',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}});
-    const postRes=await fetch(`${SB_URL}/rest/v1/staff_sessions`,{method:'POST',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'},body:JSON.stringify({username:u,logged_in_at:new Date().toISOString(),last_active:new Date().toISOString()})});
-    if(!postRes.ok){const t=await postRes.text();err.textContent='Session error '+postRes.status+': '+t.substring(0,120);btn.textContent='เข้าสู่ระบบ';btn.disabled=false;return;}
-    sessionStorage.setItem('dmsc_auth','ok');
-    sessionStorage.setItem('dmsc_user',u);
-    sessionStorage.setItem('dmsc_role','staff');
-    window.location.href=_next;
-  }catch(e){err.textContent='ไม่สามารถเชื่อมต่อได้';btn.textContent='เข้าสู่ระบบ';btn.disabled=false;}
-}
+
 </script>
 </body>
 </html>
