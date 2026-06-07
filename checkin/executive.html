@@ -245,11 +245,9 @@ function renderExecTable() {
       <th>หน่วยงาน</th>
       <th class="num" style="color:${dc};min-width:80px;">${dl}</th>
     </tr>`;
-    const sorted = DEPTS.map(dept => ({dept, count: execMap[dept][dk]}))
-      .sort((a, b) => b.count - a.count);
     let idx = 0;
-    document.getElementById('execDeptBody').innerHTML = sorted.map(({dept, count}) => {
-      idx++;
+    document.getElementById('execDeptBody').innerHTML = DEPTS.map(dept => {
+      const count = execMap[dept][dk]; idx++;
       return `<tr>
         <td style="font-weight:700;color:#94a3b8;font-size:0.8rem;">${idx}</td>
         <td class="dept-name-cell">${dept}</td>
