@@ -209,53 +209,57 @@
     </div>
 
     <div class="progress-card" style="margin-bottom:14px;">
-      <div class="progress-title" style="margin-bottom:14px;">สัดส่วนผู้เข้าร่วมงาน</div>
-
-      <div class="progress-row">
-        <div class="progress-row-top">
-          <span class="progress-label" style="color:#0891b2;">📋 ลงทะเบียนล่วงหน้า <span id="pPreReg" style="font-weight:700;">-</span> คน</span>
-          <span id="pPreRegS" style="font-size:0.82rem;color:#94a3b8;">0%</span>
-        </div>
-        <div class="progress-bar"><div id="pBarPreReg" class="progress-fill" style="width:0%;background:#0891b2;"></div></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0;">
+        <div class="progress-title" style="margin-bottom:0;">สัดส่วนผู้เข้าร่วมงาน <span style="font-weight:400;color:#94a3b8;font-size:0.78rem;">(เช็คอินแล้ว)</span></div>
+        <button id="ratioToggleBtn" onclick="toggleRatioBars()" class="view-btn">▼ แสดง</button>
       </div>
-      <div style="margin-left:14px;border-left:2px solid #e2e8f0;padding-left:10px;margin-bottom:12px;margin-top:4px;">
+      <div id="ratioSection" style="display:none;margin-top:14px;">
         <div class="progress-row">
           <div class="progress-row-top">
-            <span style="font-size:0.8rem;color:#0891b2;">└ บุคลากรภายใน <span id="pPreRegInt" style="font-weight:700;">-</span> คน</span>
-            <span id="pPreRegIntS" style="font-size:0.78rem;color:#94a3b8;">0%</span>
+            <span class="progress-label" style="color:#0891b2;">📋 ลงทะเบียนล่วงหน้า <span id="pPreReg" style="font-weight:700;">-</span> คน</span>
+            <span id="pPreRegS" style="font-size:0.82rem;color:#94a3b8;">0%</span>
           </div>
-          <div class="progress-bar" style="height:7px;"><div id="pBarPreRegInt" class="progress-fill" style="width:0%;background:#0891b2;"></div></div>
+          <div class="progress-bar"><div id="pBarPreReg" class="progress-fill" style="width:0%;background:#0891b2;"></div></div>
         </div>
-        <div class="progress-row" style="margin-bottom:0;">
-          <div class="progress-row-top">
-            <span style="font-size:0.8rem;color:#7c3aed;">└ บุคคลภายนอก <span id="pPreRegExt" style="font-weight:700;">-</span> คน</span>
-            <span id="pPreRegExtS" style="font-size:0.78rem;color:#94a3b8;">0%</span>
+        <div style="margin-left:14px;border-left:2px solid #e2e8f0;padding-left:10px;margin-bottom:12px;margin-top:4px;">
+          <div class="progress-row">
+            <div class="progress-row-top">
+              <span style="font-size:0.8rem;color:#0891b2;">└ บุคลากรภายใน <span id="pPreRegInt" style="font-weight:700;">-</span> คน</span>
+              <span id="pPreRegIntS" style="font-size:0.78rem;color:#94a3b8;">0%</span>
+            </div>
+            <div class="progress-bar" style="height:7px;"><div id="pBarPreRegInt" class="progress-fill" style="width:0%;background:#0891b2;"></div></div>
           </div>
-          <div class="progress-bar" style="height:7px;"><div id="pBarPreRegExt" class="progress-fill" style="width:0%;background:#7c3aed;"></div></div>
+          <div class="progress-row" style="margin-bottom:0;">
+            <div class="progress-row-top">
+              <span style="font-size:0.8rem;color:#7c3aed;">└ บุคคลภายนอก <span id="pPreRegExt" style="font-weight:700;">-</span> คน</span>
+              <span id="pPreRegExtS" style="font-size:0.78rem;color:#94a3b8;">0%</span>
+            </div>
+            <div class="progress-bar" style="height:7px;"><div id="pBarPreRegExt" class="progress-fill" style="width:0%;background:#7c3aed;"></div></div>
+          </div>
         </div>
-      </div>
 
-      <div class="progress-row">
-        <div class="progress-row-top">
-          <span class="progress-label" style="color:#db2777;">🚶 Walk-in <span id="pWalkin" style="font-weight:700;">-</span> คน</span>
-          <span id="pWalkinS" style="font-size:0.82rem;color:#94a3b8;">0%</span>
-        </div>
-        <div class="progress-bar"><div id="pBarWalkin" class="progress-fill" style="width:0%;background:#db2777;"></div></div>
-      </div>
-      <div style="margin-left:14px;border-left:2px solid #e2e8f0;padding-left:10px;margin-bottom:0;margin-top:4px;">
         <div class="progress-row">
           <div class="progress-row-top">
-            <span style="font-size:0.8rem;color:#0891b2;">└ บุคลากรภายใน <span id="pWalkinInt" style="font-weight:700;">-</span> คน</span>
-            <span id="pWalkinIntS" style="font-size:0.78rem;color:#94a3b8;">0%</span>
+            <span class="progress-label" style="color:#db2777;">🚶 Walk-in <span id="pWalkin" style="font-weight:700;">-</span> คน</span>
+            <span id="pWalkinS" style="font-size:0.82rem;color:#94a3b8;">0%</span>
           </div>
-          <div class="progress-bar" style="height:7px;"><div id="pBarWalkinInt" class="progress-fill" style="width:0%;background:#0891b2;"></div></div>
+          <div class="progress-bar"><div id="pBarWalkin" class="progress-fill" style="width:0%;background:#db2777;"></div></div>
         </div>
-        <div class="progress-row" style="margin-bottom:0;">
-          <div class="progress-row-top">
-            <span style="font-size:0.8rem;color:#7c3aed;">└ บุคคลภายนอก <span id="pWalkinExt" style="font-weight:700;">-</span> คน</span>
-            <span id="pWalkinExtS" style="font-size:0.78rem;color:#94a3b8;">0%</span>
+        <div style="margin-left:14px;border-left:2px solid #e2e8f0;padding-left:10px;margin-bottom:0;margin-top:4px;">
+          <div class="progress-row">
+            <div class="progress-row-top">
+              <span style="font-size:0.8rem;color:#0891b2;">└ บุคลากรภายใน <span id="pWalkinInt" style="font-weight:700;">-</span> คน</span>
+              <span id="pWalkinIntS" style="font-size:0.78rem;color:#94a3b8;">0%</span>
+            </div>
+            <div class="progress-bar" style="height:7px;"><div id="pBarWalkinInt" class="progress-fill" style="width:0%;background:#0891b2;"></div></div>
           </div>
-          <div class="progress-bar" style="height:7px;"><div id="pBarWalkinExt" class="progress-fill" style="width:0%;background:#7c3aed;"></div></div>
+          <div class="progress-row" style="margin-bottom:0;">
+            <div class="progress-row-top">
+              <span style="font-size:0.8rem;color:#7c3aed;">└ บุคคลภายนอก <span id="pWalkinExt" style="font-weight:700;">-</span> คน</span>
+              <span id="pWalkinExtS" style="font-size:0.78rem;color:#94a3b8;">0%</span>
+            </div>
+            <div class="progress-bar" style="height:7px;"><div id="pBarWalkinExt" class="progress-fill" style="width:0%;background:#7c3aed;"></div></div>
+          </div>
         </div>
       </div>
     </div>
@@ -486,6 +490,13 @@ let activeDay = 'all';
 let deptView = 'table', extDeptView = 'table';
 let intChartInst = null, extChartInst = null;
 let lastSorted = [], lastExtSorted = [], lastFillColor = '#9C7564';
+
+function toggleRatioBars(){
+  const sec=document.getElementById('ratioSection');
+  const btn=document.getElementById('ratioToggleBtn');
+  if(sec.style.display==='none'){sec.style.display='block';btn.textContent='▲ ซ่อน';}
+  else{sec.style.display='none';btn.textContent='▼ แสดง';}
+}
 
 function setFilter(day) {
   activeDay = (day === 'all') ? 'all' : Number(day);
