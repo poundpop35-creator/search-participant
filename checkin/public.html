@@ -135,6 +135,8 @@
     .collapse-row td{padding:12px 16px;text-align:center;background:var(--th-bg);border-top:1px solid var(--border);}
     .collapse-btn{padding:8px 20px;border-radius:20px;border:2px solid var(--border);background:white;font-family:'Sarabun',sans-serif;font-size:0.85rem;font-weight:600;color:var(--navy);cursor:pointer;}
     .collapse-btn:hover{background:var(--gold-light);}
+    .view-btn{padding:5px 14px;border-radius:8px;border:1.5px solid var(--border);background:white;font-family:'Sarabun',sans-serif;font-size:0.8rem;cursor:pointer;color:var(--big-sub-c);transition:all .15s;}
+    .view-btn.active{background:var(--gold);border-color:var(--gold);color:white;}
     .hidden-row{display:none;}
 
     .footer{text-align:center;padding:20px;font-size:0.78rem;color:var(--foot-c);}
@@ -254,11 +256,17 @@
     </div>
 
     <div class="dept-card">
-      <div class="dept-card-header">
-        <div class="dept-card-title" id="deptTitle">จำนวนผู้เข้าร่วมงานแยกตามหน่วยงานภายใน</div>
-        <div class="dept-card-sub" id="deptSub">เรียงตามจำนวนผู้เข้าร่วมงานสูงสุด</div>
+      <div class="dept-card-header" style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+        <div>
+          <div class="dept-card-title" id="deptTitle">จำนวนผู้เข้าร่วมงานแยกตามหน่วยงานภายใน</div>
+          <div class="dept-card-sub" id="deptSub">เรียงตามจำนวนผู้เข้าร่วมงานสูงสุด</div>
+        </div>
+        <div style="display:flex;gap:6px;flex-shrink:0;padding-top:2px;">
+          <button class="view-btn active" id="dVTableBtn" onclick="setDeptView('table')">ตาราง</button>
+          <button class="view-btn" id="dVChartBtn" onclick="setDeptView('chart')">แผนภูมิ</button>
+        </div>
       </div>
-      <div style="overflow-x:auto;max-height:320px;overflow-y:auto;">
+      <div id="deptTableWrap" style="overflow-x:auto;max-height:320px;overflow-y:auto;">
         <table>
           <thead style="position:sticky;top:0;z-index:1;">
             <tr>
@@ -271,14 +279,23 @@
           <tbody id="deptBody"></tbody>
         </table>
       </div>
+      <div id="deptChartWrap" style="display:none;padding:16px;">
+        <div style="position:relative;width:100%;height:300px;"><canvas id="deptChart"></canvas></div>
+      </div>
     </div>
 
     <div class="dept-card">
-      <div class="dept-card-header">
-        <div class="dept-card-title" id="extDeptTitle">จำนวนผู้เข้าร่วมงานแยกตามหน่วยงานภายนอก</div>
-        <div class="dept-card-sub" id="extDeptSub">เรียงตามจำนวนผู้เข้าร่วมงานสูงสุด</div>
+      <div class="dept-card-header" style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+        <div>
+          <div class="dept-card-title" id="extDeptTitle">จำนวนผู้เข้าร่วมงานแยกตามหน่วยงานภายนอก</div>
+          <div class="dept-card-sub" id="extDeptSub">เรียงตามจำนวนผู้เข้าร่วมงานสูงสุด</div>
+        </div>
+        <div style="display:flex;gap:6px;flex-shrink:0;padding-top:2px;">
+          <button class="view-btn active" id="eVTableBtn" onclick="setExtDeptView('table')">ตาราง</button>
+          <button class="view-btn" id="eVChartBtn" onclick="setExtDeptView('chart')">แผนภูมิ</button>
+        </div>
       </div>
-      <div style="overflow-x:auto;max-height:320px;overflow-y:auto;">
+      <div id="extDeptTableWrap" style="overflow-x:auto;max-height:320px;overflow-y:auto;">
         <table>
           <thead style="position:sticky;top:0;z-index:1;">
             <tr>
@@ -290,6 +307,9 @@
           </thead>
           <tbody id="extDeptBody"></tbody>
         </table>
+      </div>
+      <div id="extDeptChartWrap" style="display:none;padding:16px;">
+        <div style="position:relative;width:100%;height:300px;"><canvas id="extDeptChart"></canvas></div>
       </div>
     </div>
 
@@ -403,6 +423,9 @@ const DEPTS = [
 ];
 let allCheckins = [];
 let activeDay = 'all';
+let deptView = 'table', extDeptView = 'table';
+let intChartInst = null, extChartInst = null;
+let lastSorted = [], lastExtSorted = [], lastFillColor = '#9C7564';
 
 function setFilter(day) {
   activeDay = (day === 'all') ? 'all' : Number(day);
@@ -493,7 +516,10 @@ function renderStats() {
     .filter(d => d.count > 0)
     .sort((a,b) => b.count - a.count);
   const totalInternal = sorted.reduce((s,d) => s+d.count, 0);
-  renderDeptTable(sorted, totalInternal || 1, 'deptBody', getComputedStyle(document.documentElement).getPropertyValue('--dept-fill').trim());
+  lastFillColor = getComputedStyle(document.documentElement).getPropertyValue('--dept-fill').trim() || '#9C7564';
+  lastSorted = sorted;
+  renderDeptTable(sorted, totalInternal || 1, 'deptBody', lastFillColor);
+  if(deptView === 'chart') renderIntChart(sorted, lastFillColor);
 
   // External dept table
   const extDeptCount = {};
@@ -507,7 +533,9 @@ function renderStats() {
   const extSorted = Object.entries(extDeptCount).map(([name, count]) => ({name, count}))
     .sort((a,b) => b.count - a.count);
   const totalExternal = extSorted.reduce((s,d) => s+d.count, 0);
+  lastExtSorted = extSorted;
   renderDeptTable(extSorted, totalExternal || 1, 'extDeptBody', '#7c3aed');
+  if(extDeptView === 'chart') renderExtChart(extSorted);
 
   // Zone chart (check-in data)
   renderZoneChartPub(filtered);
@@ -548,6 +576,70 @@ function renderDeptTable(sorted, maxDept, bodyId, fillColor) {
     <td class="count-num">${d.count}</td>
     <td><div style="position:relative;"><span style="position:absolute;top:-14px;right:0;font-size:0.68rem;color:#94a3b8;">${Math.round(d.count/maxDept*100)}%</span><div class="mini-bar"><div class="mini-fill" style="width:${Math.round(d.count/maxDept*100)}%;background:${fc}"></div></div></div></td>
   </tr>`).join('');
+}
+
+function setDeptView(v){
+  deptView = v;
+  document.getElementById('deptTableWrap').style.display = v==='table' ? '' : 'none';
+  document.getElementById('deptChartWrap').style.display = v==='chart' ? '' : 'none';
+  document.getElementById('dVTableBtn').classList.toggle('active', v==='table');
+  document.getElementById('dVChartBtn').classList.toggle('active', v==='chart');
+  if(v==='chart') renderIntChart(lastSorted, lastFillColor);
+}
+
+function setExtDeptView(v){
+  extDeptView = v;
+  document.getElementById('extDeptTableWrap').style.display = v==='table' ? '' : 'none';
+  document.getElementById('extDeptChartWrap').style.display = v==='chart' ? '' : 'none';
+  document.getElementById('eVTableBtn').classList.toggle('active', v==='table');
+  document.getElementById('eVChartBtn').classList.toggle('active', v==='chart');
+  if(v==='chart') renderExtChart(lastExtSorted);
+}
+
+function renderIntChart(sorted, fillColor){
+  const canvas = document.getElementById('deptChart');
+  if(intChartInst){ intChartInst.destroy(); intChartInst = null; }
+  if(!sorted.length) return;
+  const h = Math.max(280, sorted.length * 26);
+  canvas.parentElement.style.height = h + 'px';
+  intChartInst = new Chart(canvas, {
+    type: 'bar',
+    data: {
+      labels: sorted.map(d => d.name),
+      datasets: [{ data: sorted.map(d => d.count), backgroundColor: fillColor || '#9C7564', borderRadius: 4 }]
+    },
+    options: {
+      indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+      plugins: { legend:{ display:false }, tooltip:{ callbacks:{ label: ctx => ` ${ctx.raw} คน` } } },
+      scales: {
+        x: { beginAtZero:true, ticks:{ stepSize:1, font:{ family:'Sarabun' } } },
+        y: { ticks:{ font:{ family:'Sarabun', size:11 } } }
+      }
+    }
+  });
+}
+
+function renderExtChart(sorted){
+  const canvas = document.getElementById('extDeptChart');
+  if(extChartInst){ extChartInst.destroy(); extChartInst = null; }
+  if(!sorted.length) return;
+  const h = Math.max(280, sorted.length * 26);
+  canvas.parentElement.style.height = h + 'px';
+  extChartInst = new Chart(canvas, {
+    type: 'bar',
+    data: {
+      labels: sorted.map(d => d.name),
+      datasets: [{ data: sorted.map(d => d.count), backgroundColor: '#7c3aed', borderRadius: 4 }]
+    },
+    options: {
+      indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+      plugins: { legend:{ display:false }, tooltip:{ callbacks:{ label: ctx => ` ${ctx.raw} คน` } } },
+      scales: {
+        x: { beginAtZero:true, ticks:{ stepSize:1, font:{ family:'Sarabun' } } },
+        y: { ticks:{ font:{ family:'Sarabun', size:11 } } }
+      }
+    }
+  });
 }
 
 const THEMES = {
