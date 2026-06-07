@@ -600,20 +600,28 @@ function renderIntChart(sorted, fillColor){
   const canvas = document.getElementById('deptChart');
   if(intChartInst){ intChartInst.destroy(); intChartInst = null; }
   if(!sorted.length) return;
-  const h = Math.max(280, sorted.length * 26);
+  const h = Math.max(280, sorted.length * 30);
   canvas.parentElement.style.height = h + 'px';
+  const shorten = name => name.length > 18 ? name.slice(0,18)+'…' : name;
   intChartInst = new Chart(canvas, {
     type: 'bar',
     data: {
-      labels: sorted.map(d => d.name),
+      labels: sorted.map(d => shorten(d.name)),
       datasets: [{ data: sorted.map(d => d.count), backgroundColor: fillColor || '#9C7564', borderRadius: 4 }]
     },
     options: {
       indexAxis: 'y', responsive: true, maintainAspectRatio: false,
-      plugins: { legend:{ display:false }, tooltip:{ callbacks:{ label: ctx => ` ${ctx.raw} คน` } } },
+      plugins: {
+        legend:{ display:false },
+        tooltip:{ callbacks:{
+          title: items => sorted[items[0].dataIndex].name,
+          label: ctx => ` ${ctx.raw} คน`
+        }}
+      },
       scales: {
         x: { beginAtZero:true, ticks:{ stepSize:1, font:{ family:'Sarabun' } } },
-        y: { ticks:{ font:{ family:'Sarabun', size:11 } } }
+        y: { afterFit: axis => { axis.width = Math.min(160, axis.width+40); },
+             ticks:{ font:{ family:'Sarabun', size:11 } } }
       }
     }
   });
@@ -623,20 +631,28 @@ function renderExtChart(sorted){
   const canvas = document.getElementById('extDeptChart');
   if(extChartInst){ extChartInst.destroy(); extChartInst = null; }
   if(!sorted.length) return;
-  const h = Math.max(280, sorted.length * 26);
+  const h = Math.max(280, sorted.length * 30);
   canvas.parentElement.style.height = h + 'px';
+  const shorten = name => name.length > 18 ? name.slice(0,18)+'…' : name;
   extChartInst = new Chart(canvas, {
     type: 'bar',
     data: {
-      labels: sorted.map(d => d.name),
+      labels: sorted.map(d => shorten(d.name)),
       datasets: [{ data: sorted.map(d => d.count), backgroundColor: '#7c3aed', borderRadius: 4 }]
     },
     options: {
       indexAxis: 'y', responsive: true, maintainAspectRatio: false,
-      plugins: { legend:{ display:false }, tooltip:{ callbacks:{ label: ctx => ` ${ctx.raw} คน` } } },
+      plugins: {
+        legend:{ display:false },
+        tooltip:{ callbacks:{
+          title: items => sorted[items[0].dataIndex].name,
+          label: ctx => ` ${ctx.raw} คน`
+        }}
+      },
       scales: {
         x: { beginAtZero:true, ticks:{ stepSize:1, font:{ family:'Sarabun' } } },
-        y: { ticks:{ font:{ family:'Sarabun', size:11 } } }
+        y: { afterFit: axis => { axis.width = Math.min(160, axis.width+40); },
+             ticks:{ font:{ family:'Sarabun', size:11 } } }
       }
     }
   });
