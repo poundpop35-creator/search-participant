@@ -391,7 +391,16 @@ function renderZoneChartPub(filtered){
   zoneChartPubInst=new Chart(ctx,{
     type:'doughnut',
     data:{labels,datasets:[{data,backgroundColor:bgColors,borderWidth:2,borderColor:'#fff',hoverOffset:6}]},
-    options:{responsive:true,cutout:'58%',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.label}: ${c.raw.toLocaleString()} คน (${Math.round(c.raw/total*100)}%)`}}}}
+    options:{responsive:true,cutout:'58%',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.label}: ${c.raw.toLocaleString()} คน (${Math.round(c.raw/total*100)}%)`}}}},
+    plugins:[{id:'zoneCenterText',afterDraw(chart){
+      const {ctx:c,chartArea:{top,left,right,bottom}}=chart;
+      const cx=(left+right)/2,cy=(top+bottom)/2;
+      c.save();c.textAlign='center';c.textBaseline='middle';
+      c.font='bold 1.6rem Sarabun,sans-serif';c.fillStyle='#1e293b';
+      c.fillText(total.toLocaleString(),cx,cy-8);
+      c.font='0.75rem Sarabun,sans-serif';c.fillStyle='#94a3b8';
+      c.fillText('คน',cx,cy+14);c.restore();
+    }}]
   });
   document.getElementById('zoneBodyPub').innerHTML=entries.map((e,idx)=>{
     const pid=`zpub-${e.z}`;
