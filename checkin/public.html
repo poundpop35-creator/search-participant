@@ -72,8 +72,9 @@
     .main{padding:24px 16px;max-width:900px;margin:0 auto;}
 
     .big-stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:14px;}
-    .big-card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:20px 16px;box-shadow:var(--shadow);text-align:center;transition:opacity 0.3s,transform 0.2s;}
+    .big-card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:20px 16px;box-shadow:var(--shadow);text-align:center;transition:opacity 0.3s,transform 0.2s,border-color 0.2s,box-shadow 0.2s;cursor:pointer;}
     .big-card.dimmed{opacity:0.35;transform:scale(0.97);}
+    .big-card.selected{border-color:var(--gold);box-shadow:0 0 0 2.5px var(--gold);}
     .big-label{font-size:0.75rem;color:var(--big-lbl);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;}
     .big-num{font-size:2.4rem;font-weight:800;line-height:1;}
     .big-sub{font-size:0.78rem;color:var(--big-sub-c);margin-top:6px;}
@@ -81,7 +82,7 @@
     .big-card.d2 .big-num{color:var(--d2);}
     .big-card.d3 .big-num{color:var(--d3);}
     .big-card.walkin .big-num{color:var(--dw);}
-    .total-card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:28px 20px;box-shadow:var(--shadow);margin-bottom:14px;text-align:center;}
+    .total-card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:28px 20px;box-shadow:var(--shadow);margin-bottom:14px;text-align:center;cursor:pointer;}
     .total-card .big-label{color:var(--gold);letter-spacing:0.1em;}
     .total-card .big-num{font-size:4rem;color:var(--navy);}
     .total-card #pTotal{
@@ -158,15 +159,6 @@
   </div>
   <h1>งานประชุมวิชาการวิทยาศาสตร์การแพทย์<br>ครั้งที่ 34</h1>
   <p>กรมวิทยาศาสตร์การแพทย์ กระทรวงสาธารณสุข</p>
-  <div class="hero-date">
-    <button class="day-btn active" data-day="all" onclick="setFilter('all')">รวม</button>
-    <button class="day-btn" data-day="1" onclick="setFilter(1)">24 มิถุนายน 2569</button>
-    <button class="day-btn" data-day="2" onclick="setFilter(2)">25 มิถุนายน 2569</button>
-    <button class="day-btn" data-day="3" onclick="setFilter(3)">26 มิถุนายน 2569</button>
-  </div>
-  <br>
-  <a class="hero-staff-btn" href="executive.html">Dashboard ผู้บริหาร</a>
-  <a class="hero-staff-btn" href="login.html">สำหรับเจ้าหน้าที่</a>
   <a class="hero-staff-btn" href="qr-lookup.html">🔍 ค้นหา QR Code ของคุณ</a>
 </div>
 
@@ -174,23 +166,23 @@
   <div id="loadingArea" class="loading">กำลังโหลดข้อมูล...</div>
   <div id="contentArea" style="display:none;">
 
-    <div class="total-card">
+    <div class="total-card" onclick="setFilter('all')" title="คลิกเพื่อดูรวมทุกวัน">
       <div class="big-label">ผู้เข้าร่วม (สะสม)</div>
       <div class="big-num" id="pTotal"></div>
       <div class="big-sub" id="pTotalS">ราย (เช็คอินแล้ว)</div>
     </div>
     <div class="big-stats-row" style="margin-bottom:14px;">
-      <div class="big-card d1" id="card-d1">
+      <div class="big-card d1" id="card-d1" onclick="setFilter(activeDay===1?'all':1)">
         <div class="big-label">วันที่ 1<br>24 มิ.ย. 69</div>
         <div class="big-num" id="pD1">-</div>
         <div class="big-sub" id="pD1s">ราย</div>
       </div>
-      <div class="big-card d2" id="card-d2">
+      <div class="big-card d2" id="card-d2" onclick="setFilter(activeDay===2?'all':2)">
         <div class="big-label">วันที่ 2<br>25 มิ.ย. 69</div>
         <div class="big-num" id="pD2">-</div>
         <div class="big-sub" id="pD2s">ราย</div>
       </div>
-      <div class="big-card d3" id="card-d3">
+      <div class="big-card d3" id="card-d3" onclick="setFilter(activeDay===3?'all':3)">
         <div class="big-label">วันที่ 3<br>26 มิ.ย. 69</div>
         <div class="big-num" id="pD3">-</div>
         <div class="big-sub" id="pD3s">ราย</div>
@@ -412,8 +404,9 @@ let activeDay = 'all';
 
 function setFilter(day) {
   activeDay = (day === 'all') ? 'all' : Number(day);
-  document.querySelectorAll('.day-btn').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.day === String(day));
+  [1,2,3].forEach(d => {
+    const c = document.getElementById(`card-d${d}`);
+    if(c) c.classList.toggle('selected', activeDay === d);
   });
   renderStats();
 }
