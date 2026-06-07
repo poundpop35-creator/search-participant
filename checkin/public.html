@@ -210,26 +210,53 @@
 
     <div class="progress-card" style="margin-bottom:14px;">
       <div class="progress-title" style="margin-bottom:14px;">สัดส่วนผู้เข้าร่วมงาน</div>
+
       <div class="progress-row">
         <div class="progress-row-top">
-          <span class="progress-label" style="color:#0891b2;">บุคลากรภายใน <span id="pInternal" style="font-weight:700;">-</span> คน</span>
-          <span id="pInternalS" style="font-size:0.82rem;color:#94a3b8;">0%</span>
+          <span class="progress-label" style="color:#0891b2;">📋 ลงทะเบียนล่วงหน้า <span id="pPreReg" style="font-weight:700;">-</span> คน</span>
+          <span id="pPreRegS" style="font-size:0.82rem;color:#94a3b8;">0%</span>
         </div>
-        <div class="progress-bar"><div id="pBarInternal" class="progress-fill" style="width:0%;background:#0891b2;"></div></div>
+        <div class="progress-bar"><div id="pBarPreReg" class="progress-fill" style="width:0%;background:#0891b2;"></div></div>
       </div>
+      <div style="margin-left:14px;border-left:2px solid #e2e8f0;padding-left:10px;margin-bottom:12px;margin-top:4px;">
+        <div class="progress-row">
+          <div class="progress-row-top">
+            <span style="font-size:0.8rem;color:#0891b2;">└ บุคลากรภายใน <span id="pPreRegInt" style="font-weight:700;">-</span> คน</span>
+            <span id="pPreRegIntS" style="font-size:0.78rem;color:#94a3b8;">0%</span>
+          </div>
+          <div class="progress-bar" style="height:7px;"><div id="pBarPreRegInt" class="progress-fill" style="width:0%;background:#0891b2;"></div></div>
+        </div>
+        <div class="progress-row" style="margin-bottom:0;">
+          <div class="progress-row-top">
+            <span style="font-size:0.8rem;color:#7c3aed;">└ บุคคลภายนอก <span id="pPreRegExt" style="font-weight:700;">-</span> คน</span>
+            <span id="pPreRegExtS" style="font-size:0.78rem;color:#94a3b8;">0%</span>
+          </div>
+          <div class="progress-bar" style="height:7px;"><div id="pBarPreRegExt" class="progress-fill" style="width:0%;background:#7c3aed;"></div></div>
+        </div>
+      </div>
+
       <div class="progress-row">
         <div class="progress-row-top">
-          <span class="progress-label" style="color:#7c3aed;">บุคคลภายนอก <span id="pExternal" style="font-weight:700;">-</span> คน</span>
-          <span id="pExternalS" style="font-size:0.82rem;color:#94a3b8;">0%</span>
-        </div>
-        <div class="progress-bar"><div id="pBarExternal" class="progress-fill" style="width:0%;background:#7c3aed;"></div></div>
-      </div>
-      <div class="progress-row" style="margin-bottom:0;">
-        <div class="progress-row-top">
-          <span class="progress-label" style="color:#db2777;">Walk-in <span id="pWalkin" style="font-weight:700;">-</span> คน</span>
+          <span class="progress-label" style="color:#db2777;">🚶 Walk-in <span id="pWalkin" style="font-weight:700;">-</span> คน</span>
           <span id="pWalkinS" style="font-size:0.82rem;color:#94a3b8;">0%</span>
         </div>
         <div class="progress-bar"><div id="pBarWalkin" class="progress-fill" style="width:0%;background:#db2777;"></div></div>
+      </div>
+      <div style="margin-left:14px;border-left:2px solid #e2e8f0;padding-left:10px;margin-bottom:0;margin-top:4px;">
+        <div class="progress-row">
+          <div class="progress-row-top">
+            <span style="font-size:0.8rem;color:#0891b2;">└ บุคลากรภายใน <span id="pWalkinInt" style="font-weight:700;">-</span> คน</span>
+            <span id="pWalkinIntS" style="font-size:0.78rem;color:#94a3b8;">0%</span>
+          </div>
+          <div class="progress-bar" style="height:7px;"><div id="pBarWalkinInt" class="progress-fill" style="width:0%;background:#0891b2;"></div></div>
+        </div>
+        <div class="progress-row" style="margin-bottom:0;">
+          <div class="progress-row-top">
+            <span style="font-size:0.8rem;color:#7c3aed;">└ บุคคลภายนอก <span id="pWalkinExt" style="font-weight:700;">-</span> คน</span>
+            <span id="pWalkinExtS" style="font-size:0.78rem;color:#94a3b8;">0%</span>
+          </div>
+          <div class="progress-bar" style="height:7px;"><div id="pBarWalkinExt" class="progress-fill" style="width:0%;background:#7c3aed;"></div></div>
+        </div>
       </div>
     </div>
     </div>
@@ -472,26 +499,43 @@ function setFilter(day) {
 function renderStats() {
   const filtered = activeDay === 'all' ? allCheckins : allCheckins.filter(r => r.day === activeDay);
   const total = filtered.length;
-  const walkin   = filtered.filter(r => r.participants && r.participants.is_walkin === true).length;
-  const internal = filtered.filter(r => r.participants && !r.participants.is_walkin && (r.participants.internal_external||'').includes('ภายใน')).length;
-  const external = filtered.filter(r => r.participants && !r.participants.is_walkin && (r.participants.internal_external||'').includes('ภายนอก')).length;
+  const walkin         = filtered.filter(r => r.participants?.is_walkin === true).length;
+  const preReg         = total - walkin;
+  const preRegInternal = filtered.filter(r => r.participants && !r.participants.is_walkin && (r.participants.internal_external||'').includes('ภายใน')).length;
+  const preRegExternal = filtered.filter(r => r.participants && !r.participants.is_walkin && (r.participants.internal_external||'').includes('ภายนอก')).length;
+  const walkinInternal = filtered.filter(r => r.participants?.is_walkin === true && (r.participants.internal_external||'').includes('ภายใน')).length;
+  const walkinExternal = filtered.filter(r => r.participants?.is_walkin === true && (r.participants.internal_external||'').includes('ภายนอก')).length;
 
   const _ptEl = document.getElementById('pTotal');
   _ptEl.textContent = total.toLocaleString();
   const _digits = String(total).length;
   _ptEl.style.fontSize = _digits <= 2 ? '7.5rem' : _digits === 3 ? '6rem' : _digits === 4 ? '5rem' : '4rem';
-  document.getElementById('pInternal').textContent = internal.toLocaleString();
-  document.getElementById('pExternal').textContent = external.toLocaleString();
-  document.getElementById('pWalkin').textContent = walkin.toLocaleString();
-  const intPct = total ? Math.round(internal/total*100) : 0;
-  const extPct = total ? Math.round(external/total*100) : 0;
-  const wkPct  = total ? Math.round(walkin/total*100)  : 0;
-  document.getElementById('pInternalS').textContent = `${intPct}%`;
-  document.getElementById('pExternalS').textContent = `${extPct}%`;
-  document.getElementById('pWalkinS').textContent   = `${wkPct}%`;
-  document.getElementById('pBarInternal').style.width = intPct + '%';
-  document.getElementById('pBarExternal').style.width = extPct + '%';
-  document.getElementById('pBarWalkin').style.width   = wkPct  + '%';
+
+  const preRegPct    = total ? Math.round(preReg/total*100) : 0;
+  const preRegIntPct = total ? Math.round(preRegInternal/total*100) : 0;
+  const preRegExtPct = total ? Math.round(preRegExternal/total*100) : 0;
+  const wkPct        = total ? Math.round(walkin/total*100) : 0;
+  const wkIntPct     = total ? Math.round(walkinInternal/total*100) : 0;
+  const wkExtPct     = total ? Math.round(walkinExternal/total*100) : 0;
+
+  document.getElementById('pPreReg').textContent       = preReg.toLocaleString();
+  document.getElementById('pPreRegS').textContent      = `${preRegPct}%`;
+  document.getElementById('pBarPreReg').style.width    = preRegPct + '%';
+  document.getElementById('pPreRegInt').textContent    = preRegInternal.toLocaleString();
+  document.getElementById('pPreRegIntS').textContent   = `${preRegIntPct}%`;
+  document.getElementById('pBarPreRegInt').style.width = preRegIntPct + '%';
+  document.getElementById('pPreRegExt').textContent    = preRegExternal.toLocaleString();
+  document.getElementById('pPreRegExtS').textContent   = `${preRegExtPct}%`;
+  document.getElementById('pBarPreRegExt').style.width = preRegExtPct + '%';
+  document.getElementById('pWalkin').textContent       = walkin.toLocaleString();
+  document.getElementById('pWalkinS').textContent      = `${wkPct}%`;
+  document.getElementById('pBarWalkin').style.width    = wkPct + '%';
+  document.getElementById('pWalkinInt').textContent    = walkinInternal.toLocaleString();
+  document.getElementById('pWalkinIntS').textContent   = `${wkIntPct}%`;
+  document.getElementById('pBarWalkinInt').style.width = wkIntPct + '%';
+  document.getElementById('pWalkinExt').textContent    = walkinExternal.toLocaleString();
+  document.getElementById('pWalkinExtS').textContent   = `${wkExtPct}%`;
+  document.getElementById('pBarWalkinExt').style.width = wkExtPct + '%';
 
   // Day cards: always show all-days counts, dim non-selected
   const dTotal = allCheckins.length;
