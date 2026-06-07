@@ -249,10 +249,10 @@ document.addEventListener('DOMContentLoaded', function() {
         </div>
         <div class="help-page-body">
           <p><span class="help-tag tag-all">ทุกคน</span> เปิดได้โดยไม่ต้อง login</p>
-          <p>📡 อัปเดตอัตโนมัติทุก 60 วินาที แสดงตัวเลขผู้เข้าร่วม (สะสม) แบบ real-time</p>
+          <p>📡 อัปเดตอัตโนมัติทุก 60 วินาที แสดงตัวเลขผู้เข้าร่วมงาน (สะสม) แบบ real-time</p>
           <p>📅 กรองดูตามวัน — 24 / 25 / 26 มิ.ย. หรือดูรวม</p>
           <p>🎯 แถบเป้าหมาย 1,800 คน — สีเปลี่ยนตามจำนวน (🔴→🟡→🟠→🟢→🔵)</p>
-          <p>📊 สัดส่วน ภายใน / ภายนอก / Walk-in และตารางหน่วยงาน + สถิติเขตสุขภาพ</p>
+          <p>📊 สัดส่วน ภายใน / ภายนอก / Walk-in และตารางหน่วยงาน + สถิติผู้เข้าร่วมงานแยกตามเขตสุขภาพ</p>
         </div>
       </div>
 
@@ -325,7 +325,7 @@ document.addEventListener('DOMContentLoaded', function() {
   </div>
   <!-- แถวที่ 2: บุคลากรภายใน / ภายนอก / Walk-in (progress bars) -->
   <div class="stat-card" style="border-left:4px solid #0891b2;padding:16px 18px;margin-bottom:10px;">
-    <div class="stat-label" style="margin-bottom:12px;">สัดส่วนผู้เข้าร่วม</div>
+    <div class="stat-label" style="margin-bottom:12px;">สัดส่วนผู้เข้าร่วมงาน</div>
     <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px;">
       <span style="font-size:0.82rem;color:#64748b;">บุคลากรภายใน <b id="sInternal" style="color:#16a34a;">-</b> คน</span>
       <span id="sInternalS" style="font-size:0.78rem;color:#94a3b8;">0%</span>
@@ -462,7 +462,7 @@ document.addEventListener('DOMContentLoaded', function() {
       <!-- View toggle -->
       <div style="padding:8px 16px;border-bottom:1px solid var(--border);display:flex;gap:6px;align-items:center;">
         <button class="vbtn active" id="pVListBtn" onclick="setPRegView('list')">📋 รายชื่อ</button>
-        <button class="vbtn" id="pVZoneBtn" onclick="setPRegView('zone')">📊 สถิติเขตสุขภาพ <span id="zoneChartCount" style="font-weight:400;font-size:0.78rem;color:#94a3b8;"></span></button>
+        <button class="vbtn" id="pVZoneBtn" onclick="setPRegView('zone')">📊 สถิติผู้เข้าร่วมงานแยกตามเขตสุขภาพ <span id="zoneChartCount" style="font-weight:400;font-size:0.78rem;color:#94a3b8;"></span></button>
       </div>
       <!-- LIST VIEW -->
       <div id="pListView">
@@ -688,7 +688,7 @@ document.addEventListener('DOMContentLoaded', function() {
     <!-- Dept chart -->
     <div id="dChartWrap" style="display:none;padding:16px;">
       <div style="position:relative;width:100%;" id="dCWrap">
-        <canvas id="dChart" role="img" aria-label="แผนภูมิแท่งจำนวนผู้เข้าร่วมแต่ละหน่วยงาน"></canvas>
+        <canvas id="dChart" role="img" aria-label="แผนภูมิแท่งจำนวนผู้เข้าร่วมงานแต่ละหน่วยงาน"></canvas>
       </div>
     </div>
     </div>
