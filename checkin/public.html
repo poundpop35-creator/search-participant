@@ -627,12 +627,27 @@ function _renderDonut(canvasId, legendId, sorted, instRef, setInst){
   const colors = top.map((_,i)=>DEPT_COLORS[i%DEPT_COLORS.length]);
   if(otherTotal>0){ labels.push('อื่นๆ'); data.push(otherTotal); colors.push('#cbd5e1'); }
   const total = data.reduce((s,v)=>s+v,0);
+  const centerTextPlugin = {
+    id:'centerText',
+    afterDraw(chart){
+      const {ctx,chartArea:{top,left,right,bottom}}=chart;
+      const cx=(left+right)/2, cy=(top+bottom)/2;
+      ctx.save();
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.font='bold 1.6rem Sarabun,sans-serif'; ctx.fillStyle='#1e293b';
+      ctx.fillText(total.toLocaleString(), cx, cy-8);
+      ctx.font='0.75rem Sarabun,sans-serif'; ctx.fillStyle='#94a3b8';
+      ctx.fillText('คน', cx, cy+14);
+      ctx.restore();
+    }
+  };
   const inst = new Chart(canvas,{
     type:'doughnut',
     data:{ labels, datasets:[{ data, backgroundColor:colors, borderWidth:2, borderColor:'#fff', hoverOffset:6 }] },
     options:{ responsive:true, maintainAspectRatio:false, cutout:'58%',
       plugins:{ legend:{ display:false },
-        tooltip:{ callbacks:{ label: c=>` ${c.label}: ${c.raw.toLocaleString()} คน (${Math.round(c.raw/total*100)}%)` } } } }
+        tooltip:{ callbacks:{ label: c=>` ${c.label}: ${c.raw.toLocaleString()} คน (${Math.round(c.raw/total*100)}%)` } } } },
+    plugins:[centerTextPlugin]
   });
   setInst(inst);
   const otherId = legendId+'_others';
