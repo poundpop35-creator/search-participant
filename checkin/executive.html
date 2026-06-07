@@ -34,7 +34,9 @@
 
     .stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;}
     @media(max-width:600px){.stat-row{grid-template-columns:repeat(2,1fr);}}
-    .stat-card{background:var(--white);border-radius:16px;padding:16px;box-shadow:var(--shadow);text-align:center;border:1px solid #C8DDE8;}
+    .stat-card{background:var(--white);border-radius:16px;padding:16px;box-shadow:var(--shadow);text-align:center;border:2px solid #C8DDE8;cursor:pointer;transition:border-color 0.15s,box-shadow 0.15s;}
+    .stat-card:hover{border-color:#7a9aae;}
+    .stat-card.selected{border-color:#1F3540;box-shadow:0 0 0 2px rgba(31,53,64,0.18),var(--shadow);}
     .stat-label{font-size:0.72rem;color:#5a7a8e;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;}
     .stat-num{font-size:2rem;font-weight:800;line-height:1;}
     .stat-sub{font-size:0.75rem;color:#7a9aae;margin-top:4px;}
@@ -95,22 +97,22 @@
   <div id="contentArea" style="display:none;">
 
     <div class="stat-row">
-      <div class="stat-card s-total">
+      <div class="stat-card s-total selected" id="cTotal" onclick="setExecDay(null)">
         <div class="stat-label">เช็คอินทั้งหมด</div>
         <div class="stat-num" id="eTotal">-</div>
         <div class="stat-sub">ราย</div>
       </div>
-      <div class="stat-card s-d1">
+      <div class="stat-card s-d1" id="cD1" onclick="setExecDay(1)">
         <div class="stat-label">24 มิ.ย.</div>
         <div class="stat-num" id="eD1">-</div>
         <div class="stat-sub">วันที่ 1</div>
       </div>
-      <div class="stat-card s-d2">
+      <div class="stat-card s-d2" id="cD2" onclick="setExecDay(2)">
         <div class="stat-label">25 มิ.ย.</div>
         <div class="stat-num" id="eD2">-</div>
         <div class="stat-sub">วันที่ 2</div>
       </div>
-      <div class="stat-card s-d3">
+      <div class="stat-card s-d3" id="cD3" onclick="setExecDay(3)">
         <div class="stat-label">26 มิ.ย.</div>
         <div class="stat-num" id="eD3">-</div>
         <div class="stat-sub">วันที่ 3</div>
@@ -128,7 +130,7 @@
       </div>
       <div class="scroll-wrap">
         <table>
-          <thead>
+          <thead id="execTableHead">
             <tr>
               <th style="width:36px;">#</th>
               <th>หน่วยงาน</th>
@@ -198,11 +200,69 @@ function num(v) {
   return v ? `<span class="num-cell">${v.toLocaleString()}</span>` : `<span class="zero">—</span>`;
 }
 
+let execDay = null;
+let execMap = {};
+
+function setExecDay(day) {
+  execDay = (execDay === day && day !== null) ? null : day;
+  ['cTotal','cD1','cD2','cD3'].forEach((id, i) => {
+    const el = document.getElementById(id);
+    el.classList.toggle('selected',
+      (i === 0 && execDay === null) || (i > 0 && execDay === i));
+  });
+  renderExecTable();
+}
+
+function renderExecTable() {
+  if(execDay === null) {
+    document.getElementById('execTableHead').innerHTML = `<tr>
+      <th style="width:36px;">#</th>
+      <th>หน่วยงาน</th>
+      <th class="num" style="color:#2563eb;min-width:70px;">24 มิ.ย.</th>
+      <th class="num" style="color:#7c3aed;min-width:70px;">25 มิ.ย.</th>
+      <th class="num" style="color:#0891b2;min-width:70px;">26 มิ.ย.</th>
+      <th class="num" style="min-width:60px;">รวม</th>
+    </tr>`;
+    let idx = 0;
+    document.getElementById('execDeptBody').innerHTML = DEPTS.map(dept => {
+      const c = execMap[dept]; idx++;
+      const tot = c.d1 + c.d2 + c.d3;
+      return `<tr>
+        <td style="font-weight:700;color:#94a3b8;font-size:0.8rem;">${idx}</td>
+        <td class="dept-name-cell">${dept}</td>
+        <td style="text-align:right;" class="d1-num">${c.d1||'<span class="zero">—</span>'}</td>
+        <td style="text-align:right;" class="d2-num">${c.d2||'<span class="zero">—</span>'}</td>
+        <td style="text-align:right;" class="d3-num">${c.d3||'<span class="zero">—</span>'}</td>
+        <td class="total-cell">${tot>0?tot.toLocaleString():'<span class="zero">0</span>'}</td>
+      </tr>`;
+    }).join('');
+  } else {
+    const dk = `d${execDay}`;
+    const dc = ['','#2563eb','#7c3aed','#0891b2'][execDay];
+    const dl = ['','24 มิ.ย.','25 มิ.ย.','26 มิ.ย.'][execDay];
+    document.getElementById('execTableHead').innerHTML = `<tr>
+      <th style="width:36px;">#</th>
+      <th>หน่วยงาน</th>
+      <th class="num" style="color:${dc};min-width:80px;">${dl}</th>
+    </tr>`;
+    const sorted = DEPTS.map(dept => ({dept, count: execMap[dept][dk]}))
+      .sort((a, b) => b.count - a.count);
+    let idx = 0;
+    document.getElementById('execDeptBody').innerHTML = sorted.map(({dept, count}) => {
+      idx++;
+      return `<tr>
+        <td style="font-weight:700;color:#94a3b8;font-size:0.8rem;">${idx}</td>
+        <td class="dept-name-cell">${dept}</td>
+        <td class="total-cell" style="color:${dc};">${count>0?count.toLocaleString():'<span class="zero">—</span>'}</td>
+      </tr>`;
+    }).join('');
+  }
+}
+
 async function loadData() {
   try {
     const rows = await fetchAll('/rest/v1/checkins?select=day,participants(dept,internal_external,is_walkin)&order=checkin_time.desc');
 
-    // Summary counts
     const total = rows.length;
     const d1 = rows.filter(r => r.day === 1).length;
     const d2 = rows.filter(r => r.day === 2).length;
@@ -213,36 +273,21 @@ async function loadData() {
     document.getElementById('eD2').textContent = d2.toLocaleString();
     document.getElementById('eD3').textContent = d3.toLocaleString();
 
-    // Dept breakdown: only internal participants
     const deptSet = new Set(DEPTS);
-    const map = {};
-    DEPTS.forEach(d => { map[d] = {d1:0, d2:0, d3:0}; });
+    execMap = {};
+    DEPTS.forEach(d => { execMap[d] = {d1:0, d2:0, d3:0}; });
 
     rows.forEach(r => {
       const p = r.participants;
       if(!p || p.is_walkin || !(p.internal_external||'').includes('ภายใน')) return;
       const dept = p.dept || '';
       if(!deptSet.has(dept)) return;
-      if(r.day === 1) map[dept].d1++;
-      else if(r.day === 2) map[dept].d2++;
-      else if(r.day === 3) map[dept].d3++;
+      if(r.day === 1) execMap[dept].d1++;
+      else if(r.day === 2) execMap[dept].d2++;
+      else if(r.day === 3) execMap[dept].d3++;
     });
 
-    let rowIdx = 0;
-    document.getElementById('execDeptBody').innerHTML = DEPTS.map(dept => {
-      const c = map[dept];
-      const total = c.d1 + c.d2 + c.d3;
-      rowIdx++;
-      return `<tr>
-        <td style="font-weight:700;color:#94a3b8;font-size:0.8rem;">${rowIdx}</td>
-        <td class="dept-name-cell">${dept}</td>
-        <td style="text-align:right;" class="d1-num">${c.d1 || '<span class="zero">—</span>'}</td>
-        <td style="text-align:right;" class="d2-num">${c.d2 || '<span class="zero">—</span>'}</td>
-        <td style="text-align:right;" class="d3-num">${c.d3 || '<span class="zero">—</span>'}</td>
-        <td class="total-cell">${total > 0 ? total.toLocaleString() : '<span class="zero">0</span>'}</td>
-      </tr>`;
-    }).join('');
-
+    renderExecTable();
     document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString('th-TH', {timeZone: 'Asia/Bangkok'});
     document.getElementById('loadingArea').style.display = 'none';
     document.getElementById('contentArea').style.display = '';
