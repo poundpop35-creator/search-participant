@@ -798,8 +798,10 @@ async function renderExtPanel(extData){
   try {
     if(!thaiGeoCache) thaiGeoCache=await d3.json('https://raw.githubusercontent.com/apisit/thailand.json/master/thailand.json');
     const savedExtLabel=document.getElementById('zoneMapExt-label');
+    const savedExtClear=document.getElementById('zoneMapExtClear');
     container.innerHTML='';
     if(savedExtLabel) container.appendChild(savedExtLabel);
+    if(savedExtClear) container.appendChild(savedExtClear);
     const w=container.clientWidth||200;
     const h=Math.round(w*1.65);
     container.style.height=h+'px';
