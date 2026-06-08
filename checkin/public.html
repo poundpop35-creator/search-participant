@@ -298,7 +298,9 @@
       <div id="zoneViewExt">
         <div style="display:flex;flex-wrap:wrap;gap:12px;padding:16px;align-items:flex-start;">
           <div style="flex:0 0 200px;max-width:220px;margin-left:auto;margin-right:auto;">
-            <div id="zoneMapExt" style="position:relative;width:100%;"></div>
+            <div id="zoneMapExt" style="position:relative;width:100%;">
+              <div id="zoneMapExt-label" style="display:none;position:absolute;bottom:10px;left:50%;transform:translateX(-50%);background:rgba(15,23,42,0.88);color:#fff;border-radius:8px;padding:6px 12px;font-size:0.78rem;font-family:'Sarabun',sans-serif;white-space:nowrap;z-index:10;pointer-events:none;text-align:center;line-height:1.5;"></div>
+            </div>
           </div>
           <div style="flex:1;min-width:200px;overflow-x:auto;max-height:420px;overflow-y:auto;">
             <table style="width:100%;border-collapse:collapse;font-size:0.83rem;">
@@ -317,7 +319,9 @@
       <div id="zoneViewInt" style="display:none;">
         <div style="display:flex;flex-wrap:wrap;gap:12px;padding:16px;align-items:flex-start;">
           <div style="flex:0 0 200px;max-width:220px;margin-left:auto;margin-right:auto;">
-            <div id="zoneMapInt" style="position:relative;width:100%;"></div>
+            <div id="zoneMapInt" style="position:relative;width:100%;">
+              <div id="zoneMapInt-label" style="display:none;position:absolute;bottom:10px;left:50%;transform:translateX(-50%);background:rgba(15,23,42,0.88);color:#fff;border-radius:8px;padding:6px 12px;font-size:0.78rem;font-family:'Sarabun',sans-serif;white-space:nowrap;z-index:10;pointer-events:none;text-align:center;line-height:1.5;"></div>
+            </div>
           </div>
           <div style="flex:1;min-width:200px;overflow-x:auto;max-height:360px;overflow-y:auto;">
             <table style="width:100%;border-collapse:collapse;font-size:0.83rem;">
@@ -473,7 +477,14 @@ let extProvCounts={};
 let mapGRef=null, mapPathRef=null, mapProjRef=null;
 let mapWRef=0, mapHRef=0, bkkPtRef=null, mapScaleRef=1;
 let intMapGRef=null, intMapPathRef=null, intMapWRef=0, intMapHRef=0, intBkkPtRef=null, intMapScaleRef=1;
-let selectedIntProv=null, intProvCounts={};
+let selectedIntProv=null, intProvCounts={}, selectedProvExt=null;
+
+function showMapLabel(mapId, html){
+  const el=document.getElementById(mapId+'-label');
+  if(!el)return;
+  if(html){el.innerHTML=html;el.style.display='block';}
+  else el.style.display='none';
+}
 
 function toggleZonePub(id,arrow){
   const row=document.getElementById(id);
@@ -664,6 +675,10 @@ function zoomToProvExt(prov){
     d3.select('#zoneMapExt .bkk-marker text').transition().duration(700)
       .attr('font-size',(0.62/s)+'rem').attr('x',bkkPtRef[0]+9/s);
   }
+  selectedProvExt=prov;
+  const z=getZonePub(prov)||13;
+  const cnt=extProvCounts[prov]||0;
+  showMapLabel('zoneMapExt',`<b>${prov}</b> · ${ZONE_NAMES_PUB[z]||'เขต '+z}<br>${cnt.toLocaleString()} คน`);
 }
 
 function highlightZonePub(z){
@@ -700,7 +715,14 @@ function highlightZonePub(z){
     row.style.background=(selectedZonePub!==null&&rz===selectedZonePub)?'rgba(234,88,12,0.09)':'';
     row.style.fontWeight=(selectedZonePub!==null&&rz===selectedZonePub)?'700':'';
   });
+  selectedProvExt=null;
   zoomToZonePub(selectedZonePub);
+  if(selectedZonePub!==null){
+    const zoneCnt=Object.keys(extProvCounts).filter(p=>(getZonePub(p)||13)===selectedZonePub).reduce((s,p)=>s+(extProvCounts[p]||0),0);
+    showMapLabel('zoneMapExt',`<b>${ZONE_NAMES_PUB[selectedZonePub]||'เขต '+selectedZonePub}</b><br>${zoneCnt.toLocaleString()} คน`);
+  } else {
+    showMapLabel('zoneMapExt',null);
+  }
 }
 
 async function renderExtPanel(extData){
@@ -834,31 +856,6 @@ async function renderExtPanel(extData){
       });
     }
 
-    // Store refs for zoom
-    // Zone count labels
-    const _zt={},_zc={};
-    thaiGeoCache.features.forEach(d=>{
-      const th=EN_TO_TH[d.properties.name];if(!th)return;
-      const z=getZonePub(th)||13;
-      _zt[z]=(_zt[z]||0)+(provCounts[th]||0);
-      const c=pathGen.centroid(d);
-      if(!isNaN(c[0])){if(!_zc[z])_zc[z]=[];_zc[z].push(c);}
-    });
-    if(bkkPtRef){if(!_zc[13])_zc[13]=[];_zc[13].push(bkkPtRef);}
-    Object.entries(_zt).forEach(([z,cnt])=>{
-      if(!cnt)return;
-      const cs=_zc[Number(z)]||[];if(!cs.length)return;
-      const x=cs.reduce((s,c)=>s+c[0],0)/cs.length;
-      const y=cs.reduce((s,c)=>s+c[1],0)/cs.length;
-      g.append('text').attr('x',x).attr('y',y)
-        .attr('text-anchor','middle').attr('dominant-baseline','middle')
-        .attr('font-size',10).attr('font-family','Sarabun,sans-serif')
-        .attr('font-weight','700').attr('fill','#fff')
-        .attr('stroke','rgba(30,41,59,0.55)').attr('stroke-width',3)
-        .attr('paint-order','stroke').attr('pointer-events','none')
-        .text(cnt);
-    });
-
     mapGRef=g; mapPathRef=pathGen; mapProjRef=proj; mapWRef=w; mapHRef=h; mapScaleRef=1;
     // Re-apply zone selection if active (persisted across refresh)
     if(selectedZonePub!==null){ const _z=selectedZonePub; selectedZonePub=null; setTimeout(()=>highlightZonePub(_z),30); }
@@ -950,32 +947,7 @@ async function renderIntMap(intData){
         tip.style('left',(event.clientX-r.left+10)+'px').style('top',(event.clientY-r.top-44)+'px');
       }).on('mouseout',function(){tip.style('opacity','0');})
         .on('click',function(){highlightIntProv('กรุงเทพมหานคร');});
-      // Bangkok count label
-      if(bkkCnt>0){
-        g.append('text').attr('x',bkkPt[0]).attr('y',bkkPt[1])
-          .attr('text-anchor','middle').attr('dominant-baseline','middle')
-          .attr('font-size',9).attr('font-family','Sarabun,sans-serif')
-          .attr('font-weight','700').attr('fill','#fff')
-          .attr('stroke','rgba(30,41,59,0.55)').attr('stroke-width',2.5)
-          .attr('paint-order','stroke').attr('pointer-events','none')
-          .text(bkkCnt);
-      }
     }
-    // Province count labels
-    thaiGeoCache.features.forEach(d=>{
-      const th=EN_TO_TH[d.properties.name];
-      const cnt=intProvCounts[th]||0;
-      if(!cnt)return;
-      const c=pathGen.centroid(d);
-      if(!c||isNaN(c[0]))return;
-      g.append('text').attr('x',c[0]).attr('y',c[1])
-        .attr('text-anchor','middle').attr('dominant-baseline','middle')
-        .attr('font-size',9).attr('font-family','Sarabun,sans-serif')
-        .attr('font-weight','700').attr('fill','#fff')
-        .attr('stroke','rgba(30,41,59,0.55)').attr('stroke-width',2.5)
-        .attr('paint-order','stroke').attr('pointer-events','none')
-        .text(cnt);
-    });
   } catch(e){
     container.innerHTML='<div style="padding:20px;text-align:center;font-size:0.82rem;color:#94a3b8;">ไม่สามารถโหลดแผนที่ได้</div>';
   }
@@ -1041,6 +1013,13 @@ function highlightIntProv(dept){
     row.style.fontWeight=sel?'700':'';
   });
   zoomToIntProv(selectedIntProv);
+  if(selectedIntProv!==null){
+    const z=getZonePub(selectedIntProv)||13;
+    const cnt=intProvCounts[selectedIntProv]||0;
+    showMapLabel('zoneMapInt',`<b>${selectedIntProv}</b> · ${ZONE_NAMES_PUB[z]||'เขต '+z}<br>${cnt.toLocaleString()} คน`);
+  } else {
+    showMapLabel('zoneMapInt',null);
+  }
 }
 
 const DEPTS = [
