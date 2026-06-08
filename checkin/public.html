@@ -316,7 +316,9 @@
       <!-- Internal view (hidden by default) -->
       <div id="zoneViewInt" style="display:none;">
         <div style="display:flex;flex-wrap:wrap;gap:12px;padding:16px;align-items:flex-start;">
-          <div style="flex:0 0 160px;max-width:180px;"><canvas id="zoneChartInt"></canvas></div>
+          <div style="flex:0 0 200px;max-width:220px;margin-left:auto;margin-right:auto;">
+            <div id="zoneMapInt" style="position:relative;width:100%;"></div>
+          </div>
           <div style="flex:1;min-width:200px;overflow-x:auto;max-height:360px;overflow-y:auto;">
             <table style="width:100%;border-collapse:collapse;font-size:0.83rem;">
               <thead><tr style="position:sticky;top:0;background:#fff;z-index:1;">
@@ -544,7 +546,6 @@ function switchZoneTab(tab){
     btnInt.style.cssText='flex:1;padding:8px 14px;border-radius:20px;border:1.5px solid #16a34a;background:#16a34a;color:#fff;font-family:Sarabun,sans-serif;font-size:0.82rem;font-weight:700;cursor:pointer;transition:all .15s;display:flex;flex-direction:column;align-items:center;gap:1px;';
     btnExt.style.cssText='flex:1;padding:8px 14px;border-radius:20px;border:1.5px solid #e2e8f0;background:transparent;color:#64748b;font-family:Sarabun,sans-serif;font-size:0.82rem;font-weight:400;cursor:pointer;transition:all .15s;display:flex;flex-direction:column;align-items:center;gap:1px;';
   }
-  if(tab==='int'&&zoneIntInst) setTimeout(()=>zoneIntInst.resize(),20);
 }
 
 function renderZonePanel(data, bodyId, countId){
@@ -552,7 +553,6 @@ function renderZonePanel(data, bodyId, countId){
   document.getElementById(countId).textContent=total?`(${total.toLocaleString()} คน)`:'';
   if(!total){
     document.getElementById(bodyId).innerHTML='<tr><td colspan="4" style="text-align:center;padding:16px;color:#94a3b8;">ยังไม่มีข้อมูล</td></tr>';
-    if(zoneIntInst){zoneIntInst.destroy();zoneIntInst=null;}
     return;
   }
   const deptCounts={};
@@ -568,25 +568,6 @@ function renderZonePanel(data, bodyId, countId){
   });
   const maxN=entries[0]?.[1]||1;
   const TOP=12;
-  const topLabels=entries.slice(0,TOP).map(([d])=>d);
-  const topData=entries.slice(0,TOP).map(([,n])=>n);
-  const otherCnt=entries.slice(TOP).reduce((s,[,n])=>s+n,0);
-  if(otherCnt>0){topLabels.push('อื่นๆ');topData.push(otherCnt);}
-  const chartColors=topLabels.map((_,i)=>DEPT_COLORS[i]||DEPT_COLORS[DEPT_COLORS.length-1]);
-  if(zoneIntInst) zoneIntInst.destroy();
-  const ctx=document.getElementById('zoneChartInt').getContext('2d');
-  zoneIntInst=new Chart(ctx,{
-    type:'doughnut',
-    data:{labels:topLabels,datasets:[{data:topData,backgroundColor:chartColors,borderWidth:2,borderColor:'#fff',hoverOffset:6}]},
-    options:{responsive:true,cutout:'58%',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.label}: ${c.raw.toLocaleString()} คน (${Math.round(c.raw/total*100)}%)`}}}},
-    plugins:[{id:'deptCenter',afterDraw(chart){
-      const {ctx:c,chartArea:{top,left,right,bottom}}=chart;
-      const cx=(left+right)/2,cy=(top+bottom)/2;
-      c.save();c.textAlign='center';c.textBaseline='middle';
-      c.font='bold 1.8rem Sarabun,sans-serif';c.fillStyle='#1e293b';
-      c.fillText(total.toLocaleString(),cx,cy);c.restore();
-    }}]
-  });
   document.getElementById(bodyId).innerHTML=entries.map(([dept,cnt],idx)=>{
     const dc=DEPT_COLORS[idx<TOP?idx:DEPT_COLORS.length-1];
     return`<tr style="border-bottom:1px solid #e2e8f0;">
@@ -821,6 +802,87 @@ async function renderExtPanel(extData){
   }
 }
 
+async function renderIntMap(intData){
+  const container=document.getElementById('zoneMapInt');
+  if(!container) return;
+  try{
+    if(!thaiGeoCache) thaiGeoCache=await d3.json('https://raw.githubusercontent.com/apisit/thailand.json/master/thailand.json');
+    container.innerHTML='';
+    const provCounts={};
+    intData.forEach(r=>{
+      const dept=(r.participants?.dept||'').trim();
+      const prov=DEPT_TO_PROVINCE[dept];
+      if(prov) provCounts[prov]=(provCounts[prov]||0)+1;
+    });
+    const w=container.clientWidth||200;
+    const h=Math.round(w*1.65);
+    container.style.height=h+'px';
+    const proj=d3.geoMercator().fitExtent([[12,12],[w-12,h-12]],thaiGeoCache);
+    const pathGen=d3.geoPath().projection(proj);
+    const svg=d3.select(container).append('svg')
+      .attr('width',w).attr('height',h).style('display','block').style('overflow','hidden');
+    const tip=d3.select(container).append('div')
+      .style('position','absolute').style('background','rgba(15,23,42,0.9)')
+      .style('color','#fff').style('border-radius','6px').style('padding','5px 10px')
+      .style('font-size','0.78rem').style('font-family','Sarabun,sans-serif')
+      .style('pointer-events','none').style('opacity','0').style('white-space','nowrap')
+      .style('z-index','20').style('top','0').style('left','0');
+    const g=svg.append('g');
+    g.selectAll('path')
+      .data(thaiGeoCache.features).join('path')
+      .attr('d',pathGen)
+      .attr('fill',d=>{
+        const th=EN_TO_TH[d.properties.name];
+        if(!th) return '#e8edf2';
+        const z=getZonePub(th)||13;
+        const base=ZONE_COLORS_PUB[z%ZONE_COLORS_PUB.length];
+        const cnt=provCounts[th]||0;
+        if(!cnt){const c=d3.color(base);c.opacity=0.18;return c.toString();}
+        return base;
+      })
+      .attr('stroke','#fff').attr('stroke-width',0.6).attr('stroke-linejoin','round')
+      .on('mouseover',function(event,d){
+        const th=EN_TO_TH[d.properties.name]||d.properties.name;
+        const cnt=provCounts[th]||0;
+        if(!cnt) return;
+        const z=getZonePub(th)||13;
+        tip.style('opacity','1').html(`<b>${th}</b> · ${ZONE_NAMES_PUB[z]||'เขต '+z}<br>${cnt.toLocaleString()} คน`);
+        d3.select(this).attr('stroke','#334155').attr('stroke-width',1.5);
+      })
+      .on('mousemove',function(event){
+        const r=container.getBoundingClientRect();
+        tip.style('left',(event.clientX-r.left+10)+'px').style('top',(event.clientY-r.top-44)+'px');
+      })
+      .on('mouseout',function(){
+        tip.style('opacity','0');
+        d3.select(this).attr('stroke','#fff').attr('stroke-width',0.6);
+      });
+    const bkkColor=ZONE_COLORS_PUB[13%ZONE_COLORS_PUB.length];
+    const bkkCnt=provCounts['กรุงเทพมหานคร']||0;
+    const bkkPt=proj([100.5018,13.7563]);
+    if(bkkPt){
+      const bkkG=g.append('g').style('pointer-events','all');
+      bkkG.append('circle')
+        .attr('cx',bkkPt[0]).attr('cy',bkkPt[1]).attr('r',6)
+        .attr('fill',bkkCnt?bkkColor:(()=>{const c=d3.color(bkkColor);c.opacity=0.18;return c.toString();}))
+        .attr('stroke','#fff').attr('stroke-width',1.2);
+      bkkG.append('text')
+        .attr('x',bkkPt[0]+9).attr('y',bkkPt[1]+4)
+        .attr('font-size','0.62rem').attr('font-family','Sarabun,sans-serif')
+        .attr('fill','#374151').attr('font-weight','600').attr('pointer-events','none')
+        .text('กทม.');
+      bkkG.on('mouseover',function(){
+        tip.style('opacity','1').html(`<b>กรุงเทพมหานคร</b> · เขต 13 (กทม.)<br>${bkkCnt.toLocaleString()} คน`);
+      }).on('mousemove',function(event){
+        const r=container.getBoundingClientRect();
+        tip.style('left',(event.clientX-r.left+10)+'px').style('top',(event.clientY-r.top-44)+'px');
+      }).on('mouseout',function(){tip.style('opacity','0');});
+    }
+  } catch(e){
+    container.innerHTML='<div style="padding:20px;text-align:center;font-size:0.82rem;color:#94a3b8;">ไม่สามารถโหลดแผนที่ได้</div>';
+  }
+}
+
 const DEPTS = [
   'อธิบดีกรมวิทยาศาสตร์การแพทย์','รองอธิบดีกรมวิทยาศาสตร์การแพทย์',
   'สำนักผู้ทรงคุณวุฒิกรมวิทยาศาสตร์การแพทย์','กองแผนงานและวิชาการ','กองทดสอบความชำนาญ',
@@ -841,6 +903,48 @@ const DEPTS = [
   'ศูนย์วิทยาศาสตร์การแพทย์ที่ 11/1 ภูเก็ต','ศูนย์วิทยาศาสตร์การแพทย์ที่ 12 สงขลา',
   'ศูนย์วิทยาศาสตร์การแพทย์ที่ 12/1 ตรัง'
 ];
+const DEPT_TO_PROVINCE={
+  'อธิบดีกรมวิทยาศาสตร์การแพทย์':'กรุงเทพมหานคร',
+  'รองอธิบดีกรมวิทยาศาสตร์การแพทย์':'กรุงเทพมหานคร',
+  'สำนักผู้ทรงคุณวุฒิกรมวิทยาศาสตร์การแพทย์':'กรุงเทพมหานคร',
+  'กองแผนงานและวิชาการ':'กรุงเทพมหานคร',
+  'กองทดสอบความชำนาญ':'กรุงเทพมหานคร',
+  'กลุ่มพัฒนาระบบบริหาร':'กรุงเทพมหานคร',
+  'กลุ่มตรวจสอบภายใน':'กรุงเทพมหานคร',
+  'กลุ่มงานจริยธรรม':'กรุงเทพมหานคร',
+  'สำนักงานเลขานุการกรม':'กรุงเทพมหานคร',
+  'สถาบันชีววัตถุ':'กรุงเทพมหานคร',
+  'สถาบันวิจัยวิทยาศาสตร์สาธารณสุข':'กรุงเทพมหานคร',
+  'สถาบันวิจัยสมุนไพร':'กรุงเทพมหานคร',
+  'สถาบันชีววิทยาศาสตร์ทางการแพทย์':'กรุงเทพมหานคร',
+  'สำนักคุณภาพและความปลอดภัยอาหาร':'กรุงเทพมหานคร',
+  'สำนักเครื่องสำอางและวัตถุอันตราย':'กรุงเทพมหานคร',
+  'สำนักรังสีและเครื่องมือแพทย์':'กรุงเทพมหานคร',
+  'สำนักมาตรฐานห้องปฏิบัติการ':'กรุงเทพมหานคร',
+  'สำนักยาและวัตถุเสพติด':'กรุงเทพมหานคร',
+  'ศูนย์รวมบริการ':'กรุงเทพมหานคร',
+  'ศูนย์เทคโนโลยีสารสนเทศและการสื่อสาร':'กรุงเทพมหานคร',
+  'กองความร่วมมือระหว่างประเทศ':'กรุงเทพมหานคร',
+  'กองบริหารทรัพยากรบุคคล':'กรุงเทพมหานคร',
+  'กองบริหารการคลัง':'กรุงเทพมหานคร',
+  'กองประชาสัมพันธ์และสื่อสารสาธารณะ':'กรุงเทพมหานคร',
+  'ศูนย์ตอบโต้เหตุฉุกเฉินด้านห้องปฏิบัติการและรังสี':'กรุงเทพมหานคร',
+  'ศูนย์วิทยาศาสตร์การแพทย์ที่ 1 เชียงใหม่':'เชียงใหม่',
+  'ศูนย์วิทยาศาสตร์การแพทย์ที่ 1/1 เชียงราย':'เชียงราย',
+  'ศูนย์วิทยาศาสตร์การแพทย์ที่ 2 พิษณุโลก':'พิษณุโลก',
+  'ศูนย์วิทยาศาสตร์การแพทย์ที่ 3 นครสวรรค์':'นครสวรรค์',
+  'ศูนย์วิทยาศาสตร์การแพทย์ที่ 4 สระบุรี':'สระบุรี',
+  'ศูนย์วิทยาศาสตร์การแพทย์ที่ 5 สมุทรสงคราม':'สมุทรสงคราม',
+  'ศูนย์วิทยาศาสตร์การแพทย์ที่ 6 ชลบุรี':'ชลบุรี',
+  'ศูนย์วิทยาศาสตร์การแพทย์ที่ 7 ขอนแก่น':'ขอนแก่น',
+  'ศูนย์วิทยาศาสตร์การแพทย์ที่ 8 อุดรธานี':'อุดรธานี',
+  'ศูนย์วิทยาศาสตร์การแพทย์ที่ 9 นครราชสีมา':'นครราชสีมา',
+  'ศูนย์วิทยาศาสตร์การแพทย์ที่ 10 อุบลราชธานี':'อุบลราชธานี',
+  'ศูนย์วิทยาศาสตร์การแพทย์ที่ 11 สุราษฎร์ธานี':'สุราษฎร์ธานี',
+  'ศูนย์วิทยาศาสตร์การแพทย์ที่ 11/1 ภูเก็ต':'ภูเก็ต',
+  'ศูนย์วิทยาศาสตร์การแพทย์ที่ 12 สงขลา':'สงขลา',
+  'ศูนย์วิทยาศาสตร์การแพทย์ที่ 12/1 ตรัง':'ตรัง',
+};
 let allCheckins = [];
 let activeDay=(()=>{const s=sessionStorage.getItem('pubDay');if(s==='all')return 'all';const n=Number(s);return[1,2,3].includes(n)?n:'all';})();
 let deptView = 'table', extDeptView = 'table';
@@ -992,6 +1096,7 @@ function renderStats() {
   const intData=filtered.filter(r=>(r.participants?.internal_external||'').includes('ภายใน'));
   const extData=filtered.filter(r=>!(r.participants?.internal_external||'').includes('ภายใน'));
   renderZonePanel(intData,'zoneBodyInt','zoneCountInt');
+  renderIntMap(intData);
   renderExtPanel(extData);
   renderTrendChart();
 }
