@@ -1090,7 +1090,7 @@ function changePPage(d){curPPage+=d;renderParticipants();window.scrollTo({top:0,
 function renderZoneRegSummary(){
   const pre=allParticipants.filter(p=>!p.is_walkin);
   const total=pre.length;
-  document.getElementById('zoneSumCount').textContent=`(${total.toLocaleString()} คน)`;
+  const scEl=document.getElementById('zoneSumCount');if(scEl)scEl.textContent=`(${total.toLocaleString()} คน)`;
   const counts={},provByZone={};
   pre.forEach(p=>{
     const prov=(p.province||'').trim();
