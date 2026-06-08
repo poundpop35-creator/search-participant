@@ -584,7 +584,12 @@ function renderZonePanel(data, bodyId, countId){
         </div>
       </td>
     </tr>`;
-  }).join('');
+  }).join('')+`<tr style="border-top:2px solid #cbd5e1;background:#f8fafc;">
+    <td style="padding:6px 10px;"></td>
+    <td style="padding:6px 10px;font-weight:700;font-size:0.82rem;">รวม</td>
+    <td style="padding:6px 10px;text-align:right;font-weight:700;">${total.toLocaleString()}</td>
+    <td style="padding:6px 14px 6px 10px;font-size:0.7rem;color:#64748b;">100%</td>
+  </tr>`;
 }
 
 function zoomToZonePub(z){
@@ -710,7 +715,11 @@ async function renderExtPanel(extData){
         <td style="padding:5px 10px;text-align:right;color:#94a3b8;">${fmtPctPub(e.n,total)}</td>
       </tr>
       <tr id="${pid}" style="display:none;"><td colspan="4" style="padding:0;border-bottom:1px solid #e2e8f0;"><table style="width:100%;border-collapse:collapse;">${provRows}</table></td></tr>`;
-    }).join('');
+    }).join('')+`<tr style="border-top:2px solid #cbd5e1;background:#f8fafc;">
+      <td colspan="2" style="padding:6px 10px;font-weight:700;font-size:0.82rem;">รวม</td>
+      <td style="padding:6px 10px;text-align:right;font-weight:700;">${total.toLocaleString()}</td>
+      <td style="padding:6px 10px;text-align:right;font-size:0.7rem;color:#64748b;">100%</td>
+    </tr>`;
   }
 
   // Thailand choropleth map — zone-based coloring
