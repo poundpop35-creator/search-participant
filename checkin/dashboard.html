@@ -234,7 +234,7 @@ document.addEventListener('DOMContentLoaded', function() {
         </div>
         <div class="help-page-body">
           <p><span class="help-tag tag-admin">Admin</span> ใช้งานได้เต็มรูปแบบ <span class="help-tag tag-staff">Staff</span> ดูได้แต่ไม่สามารถล้างข้อมูลได้</p>
-          <p>📊 ดูสถิติการเช็คอินแบบละเอียด กรองตามวัน / ประเภท / หน่วยงาน</p>
+          <p>ดูสถิติการเช็คอินแบบละเอียด กรองตามวัน / ประเภท / หน่วยงาน</p>
           <p>🎨 เปลี่ยนธีมสี — กดปุ่ม 🎨 มุมขวาล่าง เลือกได้ 5 โทนสี (ทุก device เห็นพร้อมกัน)</p>
           <p>📤 ส่งออกข้อมูลเป็น Excel หรือ CSV ได้จากตารางแต่ละตัว</p>
           <p>🗑️ ล้างข้อมูล — ต้องใส่รหัสยืนยัน (เฉพาะ Admin)</p>
@@ -288,7 +288,7 @@ document.addEventListener('DOMContentLoaded', function() {
         </div>
         <div class="help-page-body">
           <p><span class="help-tag tag-staff">Staff</span> ดูสรุปและสถิติผู้ที่ลงทะเบียนนำเสนอผลงาน</p>
-          <p>📋 แยกตามประเภทการนำเสนอ ดูรายชื่อและสถานะเช็คอิน</p>
+          <p>แยกตามประเภทการนำเสนอ ดูรายชื่อและสถานะเช็คอิน</p>
         </div>
       </div>
 
@@ -365,7 +365,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <span class="tcount" id="tCount"></span>
       </div>
       <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
-        <input class="sbox" id="sBox" placeholder="🔍 ค้นหาชื่อ / หน่วยงาน" oninput="applyFilters()">
+        <input class="sbox" id="sBox" placeholder="ค้นหาชื่อ / หน่วยงาน" oninput="applyFilters()">
         <div class="export-btns">
           <button class="btn-xl green" onclick="exportExcel()">⬇ Excel</button>
           <button class="btn-xl teal"  onclick="exportCSV()">⬇ CSV</button>
@@ -462,8 +462,8 @@ document.addEventListener('DOMContentLoaded', function() {
     <div id="pRegSection" style="display:none;">
       <!-- View toggle -->
       <div style="padding:8px 16px;border-bottom:1px solid var(--border);display:flex;gap:6px;align-items:center;">
-        <button class="vbtn active" id="pVListBtn" onclick="setPRegView('list')">📋 รายชื่อ</button>
-        <button class="vbtn" id="pVZoneBtn" onclick="setPRegView('zone')">📊 สถิติผู้เข้าร่วมงานแยกตามเขตสุขภาพ <span id="zoneChartCount" style="font-weight:400;font-size:0.78rem;color:#94a3b8;"></span></button>
+        <button class="vbtn active" id="pVListBtn" onclick="setPRegView('list')">รายชื่อ</button>
+        <button class="vbtn" id="pVZoneBtn" onclick="setPRegView('zone')">สถิติผู้เข้าร่วมงานแยกตามเขตสุขภาพ <span id="zoneChartCount" style="font-weight:400;font-size:0.78rem;color:#94a3b8;"></span></button>
       </div>
       <!-- LIST VIEW -->
       <div id="pListView">
@@ -472,7 +472,7 @@ document.addEventListener('DOMContentLoaded', function() {
           <button class="ptab" id="ptab1" onclick="event.stopPropagation();switchPTab(1)">Walk-in <span id="pWiCount"></span></button>
         </div>
         <div style="padding:12px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-          <input class="sbox" id="pSearch" placeholder="🔍 ค้นหาชื่อ / หน่วยงาน" oninput="renderParticipants()" style="flex:1;min-width:160px;">
+          <input class="sbox" id="pSearch" placeholder="ค้นหาชื่อ / หน่วยงาน" oninput="renderParticipants()" style="flex:1;min-width:160px;">
           <span id="pCountBar" style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:20px;padding:3px 12px;font-size:0.8rem;color:#1e40af;white-space:nowrap;flex-shrink:0;">พบ <b id="pCountFiltered">-</b> ราย <span id="pCountBreakdown" style="color:#94a3b8;font-size:0.75rem;"></span></span>
         </div>
         <div class="p-filter-bar">
@@ -625,9 +625,9 @@ document.addEventListener('DOMContentLoaded', function() {
   <!-- DEPT CARD -->
   <div class="dept-card">
     <div class="dept-top">
-      <span style="font-weight:700;color:var(--blue);font-size:1rem;">📋 สถิติแยกตามหน่วยงาน</span>
+      <span style="font-weight:700;color:var(--blue);font-size:1rem;">สถิติแยกตามหน่วยงาน</span>
       <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-        <input class="dsearch" id="dSearch" placeholder="🔍 ค้นหาหน่วยงาน..." oninput="renderDept()">
+        <input class="dsearch" id="dSearch" placeholder="ค้นหาหน่วยงาน..." oninput="renderDept()">
         <div class="view-btns">
           <button class="vbtn active" id="vTable" onclick="setDeptView('table')">ตาราง</button>
           <button class="vbtn" id="vChart" onclick="setDeptView('chart')">แผนภูมิ</button>
