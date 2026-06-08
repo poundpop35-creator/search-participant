@@ -423,7 +423,14 @@ function applyFilters(){
     return mQ&&mSt&&mPt&&mTg&&mDp;
   });
   curPage=1;
-  document.getElementById('tCount').textContent=`(${filtered.length.toLocaleString()} รายการ)`;
+  const fTotal=filtered.length, fRec=filtered.filter(r=>r.received).length, fPend=fTotal-fRec;
+  const isFiltered=q||st||pt||tg||dp;
+  document.getElementById('sTotal').textContent=fTotal.toLocaleString();
+  document.getElementById('sReceived').textContent=fRec.toLocaleString();
+  document.getElementById('sPending').textContent=fPend.toLocaleString();
+  document.getElementById('sReceivedPct').textContent=fTotal?`${Math.round(fRec/fTotal*100)}% ${isFiltered?'ของที่แสดง':'ของทั้งหมด'}`:'-';
+  document.getElementById('sPendingPct').textContent=fTotal?`${Math.round(fPend/fTotal*100)}% ${isFiltered?'ของที่แสดง':'ของทั้งหมด'}`:'-';
+  document.getElementById('tCount').textContent=`(${fTotal.toLocaleString()} รายการ)`;
   renderTable();
 }
 
@@ -473,7 +480,14 @@ function applyShirtFilters(){
     return mQ&&mSt&&mSz&&mDp;
   });
   shirtPage=1;
-  document.getElementById('stCount').textContent=`(${shirtFiltered.length.toLocaleString()} รายการ)`;
+  const fTotal=shirtFiltered.length, fRec=shirtFiltered.filter(r=>r.received).length, fPend=fTotal-fRec;
+  const isFiltered=q||st||sz||dp;
+  document.getElementById('ssTotal').textContent=fTotal.toLocaleString();
+  document.getElementById('ssReceived').textContent=fRec.toLocaleString();
+  document.getElementById('ssPending').textContent=fPend.toLocaleString();
+  document.getElementById('ssReceivedPct').textContent=fTotal?`${Math.round(fRec/fTotal*100)}% ${isFiltered?'ของที่แสดง':'ของทั้งหมด'}`:'-';
+  document.getElementById('ssPendingPct').textContent=fTotal?`${Math.round(fPend/fTotal*100)}% ${isFiltered?'ของที่แสดง':'ของทั้งหมด'}`:'-';
+  document.getElementById('stCount').textContent=`(${fTotal.toLocaleString()} รายการ)`;
   renderShirtTable();
 }
 
