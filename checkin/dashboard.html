@@ -375,7 +375,14 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
     <!-- ZONE CHART (checkin data) -->
     <div id="tZoneSection" style="padding:20px;border-bottom:1px solid var(--border);">
-      <div style="font-size:0.82rem;color:#64748b;margin-bottom:12px;">สถิติผู้เช็คอินแยกตามเขตสุขภาพ <span id="tZoneCount" style="font-weight:700;color:#0891b2;"></span></div>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;">
+        <span style="font-size:0.82rem;color:#64748b;">สถิติผู้เช็คอินแยกตามเขตสุขภาพ <span id="tZoneCount" style="font-weight:700;color:#0891b2;"></span></span>
+        <div style="display:flex;gap:4px;margin-left:auto;">
+          <button class="vbtn active zie-ci" data-v="" onclick="setZoneIEFilter('ci','')">ทั้งหมด</button>
+          <button class="vbtn zie-ci" data-v="in" onclick="setZoneIEFilter('ci','in')">ภายใน</button>
+          <button class="vbtn zie-ci" data-v="out" onclick="setZoneIEFilter('ci','out')">ภายนอก</button>
+        </div>
+      </div>
       <div style="display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap;">
         <div style="flex:0 0 180px;max-width:200px;margin:0 auto;"><canvas id="tZoneChart"></canvas></div>
         <div style="flex:1;min-width:200px;overflow-x:auto;">
@@ -483,6 +490,11 @@ document.addEventListener('DOMContentLoaded', function() {
         </div>
         <!-- Zone tab content -->
         <div id="pZoneTabContent" style="display:none;padding:20px;">
+          <div style="display:flex;gap:4px;margin-bottom:12px;">
+            <button class="vbtn active zie-reg" data-v="" onclick="setZoneIEFilter('reg','')">ทั้งหมด</button>
+            <button class="vbtn zie-reg" data-v="in" onclick="setZoneIEFilter('reg','in')">ภายใน</button>
+            <button class="vbtn zie-reg" data-v="out" onclick="setZoneIEFilter('reg','out')">ภายนอก</button>
+          </div>
           <div style="display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap;">
             <div style="flex:0 0 200px;max-width:220px;margin:0 auto;"><canvas id="zoneSumChart"></canvas></div>
             <div style="flex:1;min-width:220px;overflow-x:auto;">
@@ -495,6 +507,11 @@ document.addEventListener('DOMContentLoaded', function() {
         </div>
         <!-- Walk-in zone tab content -->
         <div id="pZoneWiTabContent" style="display:none;padding:20px;">
+          <div style="display:flex;gap:4px;margin-bottom:12px;">
+            <button class="vbtn active zie-wi" data-v="" onclick="setZoneIEFilter('wi','')">ทั้งหมด</button>
+            <button class="vbtn zie-wi" data-v="in" onclick="setZoneIEFilter('wi','in')">ภายใน</button>
+            <button class="vbtn zie-wi" data-v="out" onclick="setZoneIEFilter('wi','out')">ภายนอก</button>
+          </div>
           <div style="display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap;">
             <div style="flex:0 0 200px;max-width:220px;margin:0 auto;"><canvas id="zoneWiChart"></canvas></div>
             <div style="flex:1;min-width:220px;overflow-x:auto;">
@@ -993,8 +1010,17 @@ function toggleParticipants(){
 }
 
 let tZoneInst=null;
+function setZoneIEFilter(group,val){
+  window['zoneIE_'+group]=val;
+  document.querySelectorAll(`.zie-${group}`).forEach(b=>b.classList.toggle('active',b.dataset.v===val));
+  if(group==='ci') renderCheckinZone();
+  else if(group==='reg') renderZoneRegSummary();
+  else if(group==='wi') renderZoneWiSummary();
+}
 function renderCheckinZone(){
-  const data=filtered.length?filtered:allData;
+  const ie=window['zoneIE_ci']||'';
+  const base=filtered.length?filtered:allData;
+  const data=ie?base.filter(r=>ie==='in'?r.isIn:!r.isIn):base;
   const total=data.length;
   document.getElementById('tZoneCount').textContent=`(${total.toLocaleString()} คน)`;
   const counts={},provByZone={};
@@ -1150,7 +1176,8 @@ function renderParticipants(){
 function changePPage(d){curPPage+=d;renderParticipants();window.scrollTo({top:0,behavior:'smooth'});}
 
 function renderZoneRegSummary(){
-  const pre=allParticipants.filter(p=>!p.is_walkin);
+  const ie=window['zoneIE_reg']||'';
+  const pre=allParticipants.filter(p=>!p.is_walkin).filter(p=>!ie||(ie==='in'?(p.internal_external||'').includes('ภายใน'):!(p.internal_external||'').includes('ภายใน')));
   const total=pre.length;
   const scEl=document.getElementById('zoneSumCount');if(scEl)scEl.textContent=`(${total.toLocaleString()} คน)`;
   const counts={},provByZone={};
@@ -1188,7 +1215,8 @@ function renderZoneRegSummary(){
 }
 
 function renderZoneWiSummary(){
-  const wi=allParticipants.filter(p=>p.is_walkin===true);
+  const ie=window['zoneIE_wi']||'';
+  const wi=allParticipants.filter(p=>p.is_walkin===true).filter(p=>!ie||(ie==='in'?(p.internal_external||'').includes('ภายใน'):!(p.internal_external||'').includes('ภายใน')));
   const total=wi.length;
   const counts={},provByZone={};
   wi.forEach(p=>{

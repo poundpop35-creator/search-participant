@@ -282,9 +282,16 @@
 
     <!-- Zone chart (check-in data) -->
     <div class="dept-card">
-      <div class="dept-card-header">
-        <div class="dept-card-title">สถิติผู้เข้าร่วมงานแยกตามเขตสุขภาพ <span id="zoneChartCountPub" style="font-weight:400;font-size:0.8rem;color:#94a3b8;"></span></div>
-        <div class="dept-card-sub">จากผู้ที่เช็คอินแล้ว</div>
+      <div class="dept-card-header" style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+        <div>
+          <div class="dept-card-title">สถิติผู้เข้าร่วมงานแยกตามเขตสุขภาพ <span id="zoneChartCountPub" style="font-weight:400;font-size:0.8rem;color:#94a3b8;"></span></div>
+          <div class="dept-card-sub">จากผู้ที่เช็คอินแล้ว</div>
+        </div>
+        <div style="display:flex;gap:5px;flex-shrink:0;padding-top:2px;">
+          <button class="view-btn active zie-pub" data-v="" onclick="setZonePubIE('')">ทั้งหมด</button>
+          <button class="view-btn zie-pub" data-v="in" onclick="setZonePubIE('in')">ภายใน</button>
+          <button class="view-btn zie-pub" data-v="out" onclick="setZonePubIE('out')">ภายนอก</button>
+        </div>
       </div>
       <div style="display:flex;flex-wrap:wrap;gap:12px;padding:16px;align-items:flex-start;">
         <div style="flex:0 0 180px;max-width:220px;margin:0 auto;"><canvas id="zoneChartPub"></canvas></div>
@@ -405,6 +412,12 @@ function getZonePub(prov){if(!prov)return null;if(HEALTH_ZONE[prov])return HEALT
 function fmtPctPub(cnt,total){if(!total||!cnt)return'0%';const v=cnt/total*100;return v<1?v.toFixed(1)+'%':Math.round(v)+'%';}
 
 let zoneChartPubInst=null, zoneColorsOrig=[], activeZoneIdx=-1;
+let zonePubIE='';
+function setZonePubIE(val){
+  zonePubIE=val;
+  document.querySelectorAll('.zie-pub').forEach(b=>b.classList.toggle('active',b.dataset.v===val));
+  renderStats();
+}
 
 function toggleZonePub(id,arrow){
   const row=document.getElementById(id);
@@ -699,7 +712,8 @@ function renderStats() {
   if(extDeptView === 'chart') renderExtChart(extSorted);
 
   // Zone chart (check-in data)
-  renderZoneChartPub(filtered);
+  const zoneFiltered = zonePubIE ? filtered.filter(r=>zonePubIE==='in'?(r.participants?.internal_external||'').includes('ภายใน'):!(r.participants?.internal_external||'').includes('ภายใน')) : filtered;
+  renderZoneChartPub(zoneFiltered);
   renderTrendChart();
 }
 
