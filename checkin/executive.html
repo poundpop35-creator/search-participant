@@ -43,8 +43,8 @@
     .stat-sub{font-size:0.75rem;color:#7a9aae;margin-top:4px;}
     .s-total .stat-num{color:#1F3540;}
     .s-d1 .stat-num{color:#1F3540;}
-    .s-d2 .stat-num{color:#2C4B5D;}
-    .s-d3 .stat-num{color:#6A8694;}
+    .s-d2 .stat-num{color:#1F3540;}
+    .s-d3 .stat-num{color:#1F3540;}
 
     .dept-card{background:var(--white);border-radius:18px;box-shadow:var(--shadow);overflow:hidden;margin-bottom:24px;border:1px solid #C8DDE8;}
     .dept-card-header{padding:18px 24px;border-bottom:1px solid #C8DDE8;}
@@ -258,6 +258,7 @@ function setExecDay(day) {
 
 function renderExecTable() {
   if(execDay === null) {
+    const maxTot = Math.max(1, ...DEPTS.map(d => { const c=execMap[d]; return c.d1+c.d2+c.d3; }));
     document.getElementById('execTableHead').innerHTML = `<tr>
       <th style="width:36px;">#</th>
       <th>หน่วยงาน</th>
@@ -265,11 +266,15 @@ function renderExecTable() {
       <th class="num" style="color:#7c3aed;min-width:70px;">25 มิ.ย.</th>
       <th class="num" style="color:#0891b2;min-width:70px;">26 มิ.ย.</th>
       <th class="num" style="min-width:60px;">รวม</th>
+      <th style="min-width:100px;"></th>
     </tr>`;
     let idx = 0;
     document.getElementById('execDeptBody').innerHTML = DEPTS.map(dept => {
       const c = execMap[dept]; idx++;
       const tot = c.d1 + c.d2 + c.d3;
+      const pct = Math.round(tot/maxTot*100);
+      const bar = `<div style="height:6px;background:#e2e8f0;border-radius:3px;overflow:hidden;min-width:80px;">
+        <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,#2563eb,#0891b2);border-radius:3px;transition:width .5s;"></div></div>`;
       return `<tr>
         <td style="font-weight:700;color:#94a3b8;font-size:0.8rem;">${idx}</td>
         <td class="dept-name-cell">${dept}</td>
@@ -277,24 +282,31 @@ function renderExecTable() {
         <td style="text-align:right;" class="d2-num">${c.d2||'<span class="zero">—</span>'}</td>
         <td style="text-align:right;" class="d3-num">${c.d3||'<span class="zero">—</span>'}</td>
         <td class="total-cell">${tot>0?tot.toLocaleString():'<span class="zero">0</span>'}</td>
+        <td style="padding:10px 16px 10px 8px;">${tot>0?bar:''}</td>
       </tr>`;
     }).join('');
   } else {
     const dk = `d${execDay}`;
     const dc = ['','#2563eb','#7c3aed','#0891b2'][execDay];
     const dl = ['','24 มิ.ย.','25 มิ.ย.','26 มิ.ย.'][execDay];
+    const maxC = Math.max(1, ...DEPTS.map(d => execMap[d][dk]));
     document.getElementById('execTableHead').innerHTML = `<tr>
       <th style="width:36px;">#</th>
       <th>หน่วยงาน</th>
       <th class="num" style="color:${dc};min-width:80px;">${dl}</th>
+      <th style="min-width:100px;"></th>
     </tr>`;
     let idx = 0;
     document.getElementById('execDeptBody').innerHTML = DEPTS.map(dept => {
       const count = execMap[dept][dk]; idx++;
+      const pct = Math.round(count/maxC*100);
+      const bar = `<div style="height:6px;background:#e2e8f0;border-radius:3px;overflow:hidden;min-width:80px;">
+        <div style="height:100%;width:${pct}%;background:${dc};border-radius:3px;transition:width .5s;"></div></div>`;
       return `<tr>
         <td style="font-weight:700;color:#94a3b8;font-size:0.8rem;">${idx}</td>
         <td class="dept-name-cell">${dept}</td>
         <td class="total-cell" style="color:${dc};">${count>0?count.toLocaleString():'<span class="zero">—</span>'}</td>
+        <td style="padding:10px 16px 10px 8px;">${count>0?bar:''}</td>
       </tr>`;
     }).join('');
   }
