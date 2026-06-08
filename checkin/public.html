@@ -303,7 +303,7 @@
           <div style="flex:1;min-width:200px;overflow-x:auto;max-height:420px;overflow-y:auto;">
             <table style="width:100%;border-collapse:collapse;font-size:0.83rem;">
               <thead><tr style="position:sticky;top:0;background:#fff;z-index:1;">
-                <th style="padding:6px 10px;text-align:left;font-size:0.72rem;font-weight:700;color:var(--zone-th-c);border-bottom:2px solid var(--zone-th-bdr);">เขตสุขภาพ</th>
+                <th colspan="2" style="padding:6px 10px;text-align:left;font-size:0.72rem;font-weight:700;color:var(--zone-th-c);border-bottom:2px solid var(--zone-th-bdr);">เขตสุขภาพ</th>
                 <th style="padding:6px 10px;text-align:right;font-size:0.72rem;font-weight:700;color:var(--zone-th-c);border-bottom:2px solid var(--zone-th-bdr);">คน</th>
                 <th style="padding:6px 10px;text-align:right;font-size:0.72rem;font-weight:700;color:var(--zone-th-c);border-bottom:2px solid var(--zone-th-bdr);">%</th>
               </tr></thead>
@@ -466,7 +466,7 @@ const EN_TO_TH={
   'Uttaradit':'อุตรดิตถ์','Yala':'ยะลา','Yasothon':'ยโสธร'
 };
 let thaiGeoCache=null;
-let selectedZonePub=null;
+let selectedZonePub=(()=>{const s=localStorage.getItem('pubZone');const n=Number(s);return[1,2,3,4,5,6,7,8,9,10,11,12,13].includes(n)?n:null;})();
 let extProvCounts={};
 let mapGRef=null, mapPathRef=null, mapProjRef=null;
 let mapWRef=0, mapHRef=0, bkkPtRef=null, mapScaleRef=1;
@@ -646,6 +646,7 @@ function zoomToZonePub(z){
 
 function highlightZonePub(z){
   selectedZonePub = selectedZonePub===z ? null : z;
+  localStorage.setItem('pubZone', selectedZonePub===null?'':String(selectedZonePub));
   d3.select('#zoneMapExt svg').selectAll('path')
     .attr('fill',d=>{
       const th=EN_TO_TH[d.properties.name];
@@ -681,7 +682,6 @@ function highlightZonePub(z){
 }
 
 async function renderExtPanel(extData){
-  selectedZonePub=null;
   const total=extData.length;
   document.getElementById('zoneCountExt').textContent=total?`(${total.toLocaleString()} คน)`:'';
 
@@ -808,6 +808,8 @@ async function renderExtPanel(extData){
 
     // Store refs for zoom
     mapGRef=g; mapPathRef=pathGen; mapProjRef=proj; mapWRef=w; mapHRef=h; mapScaleRef=1;
+    // Re-apply zone selection if active (persisted across refresh)
+    if(selectedZonePub!==null){ const _z=selectedZonePub; selectedZonePub=null; setTimeout(()=>highlightZonePub(_z),30); }
 
   } catch(e){
     container.innerHTML='<div style="padding:20px;text-align:center;font-size:0.82rem;color:#94a3b8;">ไม่สามารถโหลดแผนที่ได้</div>';
@@ -834,7 +836,7 @@ const DEPTS = [
   'ศูนย์วิทยาศาสตร์การแพทย์ที่ 12/1 ตรัง'
 ];
 let allCheckins = [];
-let activeDay = 'all';
+let activeDay=(()=>{const s=localStorage.getItem('pubDay');if(s==='all')return 'all';const n=Number(s);return[1,2,3].includes(n)?n:'all';})();
 let deptView = 'table', extDeptView = 'table';
 let intChartInst = null, extChartInst = null, trendChartInst = null;
 let lastSorted = [], lastExtSorted = [], lastFillColor = '#9C7564';
@@ -854,6 +856,7 @@ function toggleWalkinSub(){
 
 function setFilter(day) {
   activeDay = (day === 'all') ? 'all' : Number(day);
+  localStorage.setItem('pubDay', String(activeDay));
   [1,2,3].forEach(d => {
     const c = document.getElementById(`card-d${d}`);
     if(c) c.classList.toggle('selected', activeDay === d);
