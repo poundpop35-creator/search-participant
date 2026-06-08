@@ -466,6 +466,8 @@ const EN_TO_TH={
   'Uttaradit':'อุตรดิตถ์','Yala':'ยะลา','Yasothon':'ยโสธร'
 };
 let thaiGeoCache=null;
+let selectedZonePub=null;
+let extProvCounts={};
 
 function toggleZonePub(id,arrow){
   const row=document.getElementById(id);
@@ -597,16 +599,53 @@ function renderZonePanel(data, bodyId, countId){
   }).join('');
 }
 
+function highlightZonePub(z){
+  selectedZonePub = selectedZonePub===z ? null : z;
+  d3.select('#zoneMapExt svg').selectAll('path')
+    .attr('fill',d=>{
+      const th=EN_TO_TH[d.properties.name];
+      if(!th) return '#e8edf2';
+      const pz=getZonePub(th)||13;
+      const base=ZONE_COLORS_PUB[pz%ZONE_COLORS_PUB.length];
+      const cnt=extProvCounts[th]||0;
+      if(selectedZonePub===null){
+        if(!cnt){const c=d3.color(base);c.opacity=0.18;return c.toString();}
+        return base;
+      }
+      if(pz===selectedZonePub) return base;
+      const c=d3.color(base);c.opacity=0.1;return c.toString();
+    })
+    .attr('stroke',d=>{
+      if(selectedZonePub===null) return '#fff';
+      const th=EN_TO_TH[d.properties.name];
+      const pz=th?(getZonePub(th)||13):0;
+      return pz===selectedZonePub?'#1e293b':'#fff';
+    })
+    .attr('stroke-width',d=>{
+      if(selectedZonePub===null) return 0.6;
+      const th=EN_TO_TH[d.properties.name];
+      const pz=th?(getZonePub(th)||13):0;
+      return pz===selectedZonePub?1.8:0.4;
+    });
+  document.querySelectorAll('#zoneBodyExt tr[data-zone]').forEach(row=>{
+    const rz=Number(row.dataset.zone);
+    row.style.background=(selectedZonePub!==null&&rz===selectedZonePub)?'rgba(234,88,12,0.09)':'';
+    row.style.fontWeight=(selectedZonePub!==null&&rz===selectedZonePub)?'700':'';
+  });
+}
+
 async function renderExtPanel(extData){
+  selectedZonePub=null;
   const total=extData.length;
   document.getElementById('zoneCountExt').textContent=total?`(${total.toLocaleString()} คน)`:'';
 
   // Build province counts
-  const provCounts={};
+  extProvCounts={};
   extData.forEach(r=>{
     const p=(r.participants?.province||'').trim();
-    if(p) provCounts[p]=(provCounts[p]||0)+1;
+    if(p) extProvCounts[p]=(extProvCounts[p]||0)+1;
   });
+  const provCounts=extProvCounts;
 
   // Zone-grouped table with province sub-rows
   if(!total){
@@ -630,7 +669,7 @@ async function renderExtPanel(extData){
           <td style="padding:3px 10px;text-align:right;font-size:0.78rem;color:var(--prov-c);">${cnt.toLocaleString()}</td>
           <td style="padding:3px 10px;text-align:right;font-size:0.78rem;color:var(--prov-c2);">${fmtPctPub(cnt,total)}</td>
         </tr>`).join('');
-      return`<tr style="cursor:pointer;border-bottom:1px solid #e2e8f0;" onclick="toggleZonePub('${pid}',this.querySelector('.zarr'))">
+      return`<tr data-zone="${e.z}" style="cursor:pointer;border-bottom:1px solid #e2e8f0;transition:background .12s;" onclick="highlightZonePub(${e.z});toggleZonePub('${pid}',this.querySelector('.zarr'))">
         <td style="padding:5px 10px;" colspan="2">
           <span class="zarr" style="display:inline-block;width:12px;font-size:0.65rem;color:#94a3b8;">▶</span>
           <span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:${zc};margin:0 4px 0 2px;vertical-align:middle;"></span>
@@ -688,9 +727,15 @@ async function renderExtPanel(extData){
         const r=container.getBoundingClientRect();
         tip.style('left',(event.clientX-r.left+10)+'px').style('top',(event.clientY-r.top-44)+'px');
       })
-      .on('mouseout',function(){
+      .on('mouseout',function(event,d){
         tip.style('opacity','0');
-        d3.select(this).attr('stroke','#fff').attr('stroke-width',0.6);
+        if(selectedZonePub!==null){
+          const th=EN_TO_TH[d.properties.name];
+          const pz=th?(getZonePub(th)||13):0;
+          d3.select(this).attr('stroke',pz===selectedZonePub?'#1e293b':'#fff').attr('stroke-width',pz===selectedZonePub?1.8:0.4);
+        } else {
+          d3.select(this).attr('stroke','#fff').attr('stroke-width',0.6);
+        }
       });
 
   } catch(e){
