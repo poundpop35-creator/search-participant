@@ -515,6 +515,8 @@
     const items=p.items||'';
     const hasBag=items.includes('กระเป๋า');
     const otherItems=items.replace('กระเป๋า','').replace(/\+\+/g,'+').replace(/^\+|\+$/g,'').trim();
+    const hasShirt=(p.shirt_size||'').trim()!=='';
+    const shirtDone=p.shirt_received===true;
     const rows=[
       {label:'เวลา',val:time,style:'normal'},
       {label:'คูปองอาหาร',val:'รับได้',style:'ok'},
@@ -522,6 +524,7 @@
     if(!isWalkin){
       if(hasBag) rows.push({labelHtml:'ของที่ระลึก (1) <span style="color:#2563eb;font-weight:700">กระเป๋า</span>',label:'ของที่ระลึก (1) กระเป๋า',val:bagDone?'รับไปแล้ว':'รับได้',style:bagDone?'done':'ok'});
       if(otherItems) rows.push({labelHtml:`ของที่ระลึก (2) <span style="color:#2563eb;font-weight:700">${otherItems}</span>`,label:`ของที่ระลึก (2) ${otherItems}`,val:isFirst?'รับได้':'รับไปแล้ว',style:isFirst?'ok':'done'});
+      if(hasShirt) rows.push({labelHtml:`ของที่ระลึก (3) <span style="color:#0891b2;font-weight:700">เสื้อแจ็คเก็ต (${p.shirt_size})</span>`,label:`ของที่ระลึก (3) เสื้อแจ็คเก็ต`,val:shirtDone?'รับไปแล้ว':'รับได้',style:shirtDone?'done':'ok'});
     }
     rows.push({label:'ประเภท',val:isWalkin?'Walk-in':(p.tag||'-'),style:'normal'});
     return rows;
@@ -531,6 +534,8 @@
     const items=p.items||'';
     const hasBag=items.includes('กระเป๋า');
     const otherItems=items.replace('กระเป๋า','').replace(/\+\+/g,'+').replace(/^\+|\+$/g,'').trim();
+    const hasShirt=(p.shirt_size||'').trim()!=='';
+    const shirtDone=p.shirt_received===true;
     const rows=[
       {label:'เวลาที่เช็คอิน',val:time,style:'normal'},
       {label:'คูปองอาหาร',val:'รับไปแล้ว',style:'done'},
@@ -538,6 +543,7 @@
     if(!isWalkin){
       if(hasBag) rows.push({labelHtml:'ของที่ระลึก (1) <span style="color:#2563eb;font-weight:700">กระเป๋า</span>',label:'ของที่ระลึก (1) กระเป๋า',val:'รับไปแล้ว',style:'done'});
       if(otherItems) rows.push({labelHtml:`ของที่ระลึก (2) <span style="color:#2563eb;font-weight:700">${otherItems}</span>`,label:`ของที่ระลึก (2) ${otherItems}`,val:'รับไปแล้ว',style:'done'});
+      if(hasShirt) rows.push({labelHtml:`ของที่ระลึก (3) <span style="color:#0891b2;font-weight:700">เสื้อแจ็คเก็ต (${p.shirt_size})</span>`,label:`ของที่ระลึก (3) เสื้อแจ็คเก็ต`,val:shirtDone?'รับไปแล้ว':'รับได้',style:shirtDone?'done':'ok'});
     }
     rows.push({label:'ประเภท',val:isWalkin?'Walk-in':(p.tag||'-'),style:'normal'});
     return rows;
