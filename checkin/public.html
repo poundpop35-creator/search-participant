@@ -468,6 +468,8 @@ const EN_TO_TH={
 let thaiGeoCache=null;
 let selectedZonePub=null;
 let extProvCounts={};
+let mapGRef=null, mapPathRef=null, mapProjRef=null;
+let mapWRef=0, mapHRef=0, bkkPtRef=null, mapScaleRef=1;
 
 function toggleZonePub(id,arrow){
   const row=document.getElementById(id);
@@ -599,6 +601,49 @@ function renderZonePanel(data, bodyId, countId){
   }).join('');
 }
 
+function zoomToZonePub(z){
+  if(!mapGRef||!thaiGeoCache||!mapPathRef) return;
+  let tx=0,ty=0,s=1;
+
+  if(z!==null){
+    const feats=thaiGeoCache.features.filter(d=>{
+      const th=EN_TO_TH[d.properties.name];
+      return th&&(getZonePub(th)||13)===z;
+    });
+    let x0,y0,x1,y1;
+    if(feats.length){
+      const b=mapPathRef.bounds({type:'FeatureCollection',features:feats});
+      [[x0,y0],[x1,y1]]=b;
+    }
+    // Zone 13: Bangkok polygon is near-invisible — anchor on marker position
+    if(z===13&&bkkPtRef){
+      x0=Math.min(x0??bkkPtRef[0],bkkPtRef[0])-8;
+      y0=Math.min(y0??bkkPtRef[1],bkkPtRef[1])-8;
+      x1=Math.max(x1??bkkPtRef[0],bkkPtRef[0])+8;
+      y1=Math.max(y1??bkkPtRef[1],bkkPtRef[1])+8;
+    }
+    if(x0===undefined) return;
+    // Minimum bounding box: 18% of map size so tiny zones still look good
+    const cx=(x0+x1)/2, cy=(y0+y1)/2;
+    if(x1-x0<mapWRef*0.18){x0=cx-mapWRef*0.09;x1=cx+mapWRef*0.09;}
+    if(y1-y0<mapHRef*0.18){y0=cy-mapHRef*0.09;y1=cy+mapHRef*0.09;}
+    const pad=22;
+    s=Math.min(7, 0.88/Math.max((x1-x0+pad*2)/mapWRef,(y1-y0+pad*2)/mapHRef));
+    tx=mapWRef/2-s*(x0+x1)/2;
+    ty=mapHRef/2-s*(y0+y1)/2;
+  }
+
+  mapScaleRef=s;
+  mapGRef.transition().duration(700).attr('transform',`translate(${tx},${ty}) scale(${s})`);
+  mapGRef.selectAll('path').transition().duration(700).attr('stroke-width',0.6/s);
+  // Keep Bangkok marker visually same size regardless of zoom
+  if(bkkPtRef){
+    d3.select('#zoneMapExt .bkk-marker circle').transition().duration(700).attr('r',6/s);
+    d3.select('#zoneMapExt .bkk-marker text').transition().duration(700)
+      .attr('font-size',(0.62/s)+'rem').attr('x',bkkPtRef[0]+9/s);
+  }
+}
+
 function highlightZonePub(z){
   selectedZonePub = selectedZonePub===z ? null : z;
   d3.select('#zoneMapExt svg').selectAll('path')
@@ -632,10 +677,7 @@ function highlightZonePub(z){
     row.style.background=(selectedZonePub!==null&&rz===selectedZonePub)?'rgba(234,88,12,0.09)':'';
     row.style.fontWeight=(selectedZonePub!==null&&rz===selectedZonePub)?'700':'';
   });
-  // Update Bangkok marker opacity
-  const bkkOpacity=selectedZonePub===null?null:selectedZonePub===13?null:'0.12';
-  d3.selectAll('#zoneMapExt .bkk-marker circle, #zoneMapExt .bkk-marker text')
-    .attr('opacity',bkkOpacity);
+  zoomToZonePub(selectedZonePub);
 }
 
 async function renderExtPanel(extData){
@@ -697,7 +739,7 @@ async function renderExtPanel(extData){
     const pathGen=d3.geoPath().projection(proj);
 
     const svg=d3.select(container).append('svg')
-      .attr('width',w).attr('height',h).style('display','block');
+      .attr('width',w).attr('height',h).style('display','block').style('overflow','hidden');
     const tip=d3.select(container).append('div')
       .style('position','absolute').style('background','rgba(15,23,42,0.9)')
       .style('color','#fff').style('border-radius','6px').style('padding','5px 10px')
@@ -705,7 +747,10 @@ async function renderExtPanel(extData){
       .style('pointer-events','none').style('opacity','0').style('white-space','nowrap')
       .style('z-index','20').style('top','0').style('left','0');
 
-    svg.selectAll('path')
+    // Zoom group — all map elements animate together
+    const g=svg.append('g').attr('class','map-zoom-g');
+
+    g.selectAll('path')
       .data(thaiGeoCache.features).join('path')
       .attr('d',pathGen)
       .attr('fill',d=>{
@@ -725,35 +770,29 @@ async function renderExtPanel(extData){
         const z=getZonePub(th)||13;
         const cnt=provCounts[th]||0;
         tip.style('opacity','1').html(`<b>${th}</b> · ${ZONE_NAMES_PUB[z]||'เขต '+z}<br>${cnt.toLocaleString()} คน`);
-        d3.select(this).attr('stroke','#1e293b').attr('stroke-width',1.8);
+        d3.select(this).attr('stroke','#334155').attr('stroke-width',1.5/mapScaleRef);
       })
       .on('mousemove',function(event){
         const r=container.getBoundingClientRect();
         tip.style('left',(event.clientX-r.left+10)+'px').style('top',(event.clientY-r.top-44)+'px');
       })
-      .on('mouseout',function(event,d){
+      .on('mouseout',function(){
         tip.style('opacity','0');
-        if(selectedZonePub!==null){
-          const th=EN_TO_TH[d.properties.name];
-          const pz=th?(getZonePub(th)||13):0;
-          d3.select(this).attr('stroke',pz===selectedZonePub?'#1e293b':'#fff').attr('stroke-width',pz===selectedZonePub?1.8:0.4);
-        } else {
-          d3.select(this).attr('stroke','#fff').attr('stroke-width',0.6);
-        }
+        d3.select(this).attr('stroke','#fff').attr('stroke-width',0.6/mapScaleRef);
       });
 
-    // Bangkok marker — province polygon is too small to see at national scale
+    // Bangkok marker inside zoom group (too small as polygon at national scale)
     const bkkColor=ZONE_COLORS_PUB[13%ZONE_COLORS_PUB.length];
     const bkkCnt=provCounts['กรุงเทพมหานคร']||0;
-    const bkkPt=proj([100.5018,13.7563]);
-    if(bkkPt){
-      const bkkG=svg.append('g').attr('class','bkk-marker').style('pointer-events','all');
+    bkkPtRef=proj([100.5018,13.7563]);
+    if(bkkPtRef){
+      const bkkG=g.append('g').attr('class','bkk-marker').style('pointer-events','all');
       bkkG.append('circle')
-        .attr('cx',bkkPt[0]).attr('cy',bkkPt[1]).attr('r',6)
+        .attr('cx',bkkPtRef[0]).attr('cy',bkkPtRef[1]).attr('r',6)
         .attr('fill',bkkCnt?bkkColor:(()=>{const c=d3.color(bkkColor);c.opacity=0.18;return c.toString();}))
         .attr('stroke','#fff').attr('stroke-width',1.2);
       bkkG.append('text')
-        .attr('x',bkkPt[0]+9).attr('y',bkkPt[1]+4)
+        .attr('x',bkkPtRef[0]+9).attr('y',bkkPtRef[1]+4)
         .attr('font-size','0.62rem').attr('font-family','Sarabun,sans-serif')
         .attr('fill','#374151').attr('font-weight','600').attr('pointer-events','none')
         .text('กทม.');
@@ -766,6 +805,9 @@ async function renderExtPanel(extData){
         tip.style('opacity','0');
       });
     }
+
+    // Store refs for zoom
+    mapGRef=g; mapPathRef=pathGen; mapProjRef=proj; mapWRef=w; mapHRef=h; mapScaleRef=1;
 
   } catch(e){
     container.innerHTML='<div style="padding:20px;text-align:center;font-size:0.82rem;color:#94a3b8;">ไม่สามารถโหลดแผนที่ได้</div>';
