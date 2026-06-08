@@ -164,6 +164,17 @@
       </div>
     </div>
 
+    <!-- Hourly trend chart -->
+    <div class="dept-card">
+      <div class="dept-card-header">
+        <div class="dept-card-title">แนวโน้มการเช็คอินรายชั่วโมง</div>
+        <div class="dept-card-sub" id="execTrendSub">จำนวนผู้เช็คอินในแต่ละชั่วโมงตลอดวันงาน</div>
+      </div>
+      <div style="padding:16px 20px 20px;height:280px;position:relative;">
+        <canvas id="execTrendChart"></canvas>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -223,7 +234,8 @@ function num(v) {
 let execDay = null;
 let execMap = {};
 let execView = 'table';
-let barChartInst = null;
+let barChartInst = null, trendChartInst = null;
+let execRows = [];
 
 function setExecView(v) {
   execView = v;
@@ -287,6 +299,54 @@ function renderExecTable() {
     }).join('');
   }
   if(execView === 'chart') renderExecChart();
+  renderTrendChart();
+}
+
+function renderTrendChart() {
+  const canvas = document.getElementById('execTrendChart');
+  if(!canvas || !execRows.length) return;
+  const HOURS = [7,8,9,10,11,12,13,14,15,16,17,18,19,20];
+  const labels = HOURS.map(h => h+':00');
+  const getBkkHour = iso => {
+    if(!iso) return -1;
+    const bkk = new Date(new Date(iso).toLocaleString('en-US',{timeZone:'Asia/Bangkok'}));
+    return bkk.getHours();
+  };
+  const bucket = day => {
+    const c={}; HOURS.forEach(h=>c[h]=0);
+    execRows.filter(r=>r.day===day).forEach(r=>{ const h=getBkkHour(r.checkin_time); if(h>=7&&h<=20) c[h]++; });
+    return HOURS.map(h=>c[h]);
+  };
+  const COLORS = ['#2563eb','#7c3aed','#0891b2'];
+  const LABELS = ['24 มิ.ย. (วัน 1)','25 มิ.ย. (วัน 2)','26 มิ.ย. (วัน 3)'];
+  const sel = execDay || 0;
+  const datasets = [1,2,3].map((day,i) => {
+    const on = sel===0 || sel===day;
+    return { label:LABELS[i], data:bucket(day), borderColor:on?COLORS[i]:COLORS[i]+'44',
+      backgroundColor:on?COLORS[i]+'1a':'transparent', fill:on, tension:0.4,
+      pointRadius:on?3.5:2, pointBackgroundColor:COLORS[i], borderWidth:on?2.5:1, order:on?1:2 };
+  });
+  const sub = sel===0 ? 'ทุกวัน' : ['','24 มิ.ย. 2569','25 มิ.ย. 2569','26 มิ.ย. 2569'][sel];
+  document.getElementById('execTrendSub').textContent = 'จำนวนผู้เช็คอินในแต่ละชั่วโมง — ' + sub;
+  if(trendChartInst){ trendChartInst.destroy(); trendChartInst=null; }
+  trendChartInst = new Chart(canvas.getContext('2d'), {
+    type:'line', data:{labels, datasets},
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
+      plugins:{
+        legend:{position:'top',labels:{font:{family:'Sarabun',size:12},boxWidth:10,padding:14,usePointStyle:true}},
+        tooltip:{backgroundColor:'rgba(15,23,42,0.88)',titleFont:{family:'Sarabun',size:12},bodyFont:{family:'Sarabun',size:12},padding:10,
+          callbacks:{title:items=>items[0].label+' น.', label:c=>` ${c.dataset.label}: ${c.parsed.y} คน`}}
+      },
+      scales:{
+        x:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{family:'Sarabun',size:11},color:'#64748b'},
+           title:{display:true,text:'เวลา (น.)',font:{family:'Sarabun',size:11},color:'#94a3b8'}},
+        y:{beginAtZero:true,grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{family:'Sarabun',size:11},color:'#64748b',precision:0},
+           title:{display:true,text:'จำนวนคน',font:{family:'Sarabun',size:11},color:'#94a3b8'}}
+      }
+    }
+  });
 }
 
 function renderExecChart() {
@@ -366,7 +426,8 @@ function renderExecChart() {
 
 async function loadData() {
   try {
-    const rows = await fetchAll('/rest/v1/checkins?select=day,participants(dept,internal_external,is_walkin)&order=checkin_time.desc');
+    const rows = await fetchAll('/rest/v1/checkins?select=day,checkin_time,participants(dept,internal_external,is_walkin)&order=checkin_time.desc');
+    execRows = rows;
 
     const total = rows.length;
     const d1 = rows.filter(r => r.day === 1).length;
