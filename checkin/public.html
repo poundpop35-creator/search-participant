@@ -176,9 +176,6 @@
       <div class="big-num" id="pTotal"></div>
       <div class="big-sub" id="pTotalS">ราย (เช็คอินแล้ว)</div>
     </div>
-    <div id="clearFiltersBar" style="display:none;justify-content:flex-end;padding:2px 0 8px 0;">
-      <button onclick="clearAllFilters()" style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;border:1px solid #cbd5e1;background:#f1f5f9;color:#64748b;font-family:'Sarabun',sans-serif;font-size:0.75rem;cursor:pointer;line-height:1.5;">× ล้างฟิลเตอร์</button>
-    </div>
     <div class="big-stats-row" style="margin-bottom:14px;">
       <div class="big-card d1" id="card-d1" onclick="setFilter(activeDay===1?'all':1)">
         <div class="big-label">วันที่ 1<br>24 มิ.ย. 69</div>
@@ -303,6 +300,7 @@
           <div style="flex:0 0 200px;max-width:220px;margin-left:auto;margin-right:auto;">
             <div id="zoneMapExt" style="position:relative;width:100%;">
               <div id="zoneMapExt-label" style="display:none;position:absolute;bottom:10px;left:50%;transform:translateX(-50%);background:rgba(15,23,42,0.88);color:#fff;border-radius:8px;padding:6px 12px;font-size:0.78rem;font-family:'Sarabun',sans-serif;white-space:nowrap;z-index:10;pointer-events:none;text-align:center;line-height:1.5;"></div>
+              <button id="zoneMapExtClear" onclick="clearZoneFilter()" style="display:none;position:absolute;top:6px;right:6px;padding:2px 8px;border-radius:12px;border:1px solid #cbd5e1;background:rgba(255,255,255,0.92);color:#64748b;font-family:'Sarabun',sans-serif;font-size:0.72rem;cursor:pointer;z-index:11;">× ล้าง</button>
             </div>
           </div>
           <div style="flex:1;min-width:200px;overflow-x:auto;max-height:420px;overflow-y:auto;">
@@ -878,7 +876,7 @@ async function renderExtPanel(extData){
 
     mapGRef=g; mapPathRef=pathGen; mapProjRef=proj; mapWRef=w; mapHRef=h; mapScaleRef=1;
     // Re-apply zone selection if active (persisted across refresh)
-    if(selectedZonePub!==null){ const _z=selectedZonePub; selectedZonePub=null; setTimeout(()=>highlightZonePub(_z),30); }
+    if(selectedZonePub!==null){ const _z=selectedZonePub; selectedZonePub=null; setTimeout(()=>highlightZonePub(_z),30); } else { updateClearBtn(); }
 
   } catch(e){
     container.innerHTML='<div style="padding:20px;text-align:center;font-size:0.82rem;color:#94a3b8;">ไม่สามารถโหลดแผนที่ได้</div>';
@@ -1126,12 +1124,11 @@ function toggleWalkinSub(){
 }
 
 function updateClearBtn(){
-  const bar=document.getElementById('clearFiltersBar');
-  if(bar) bar.style.display=(activeDay!=='all'||selectedZonePub!==null)?'flex':'none';
+  const btn=document.getElementById('zoneMapExtClear');
+  if(btn) btn.style.display=selectedZonePub!==null?'block':'none';
 }
-function clearAllFilters(){
+function clearZoneFilter(){
   if(selectedZonePub!==null) highlightZonePub(selectedZonePub);
-  setFilter('all');
 }
 function setFilter(day) {
   activeDay = (day === 'all') ? 'all' : Number(day);
@@ -1141,7 +1138,6 @@ function setFilter(day) {
     if(c) c.classList.toggle('selected', activeDay === d);
   });
   renderStats();
-  updateClearBtn();
 }
 
 function renderStats() {
@@ -1286,7 +1282,6 @@ async function loadData() {
   try {
     allCheckins = await fetchAll('/rest/v1/checkins?select=day,checkin_time,participants(dept,ext_dept,internal_external,is_walkin,province)&order=checkin_time.desc');
     renderStats();
-    updateClearBtn();
     document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString('th-TH',{timeZone:'Asia/Bangkok'});
     document.getElementById('loadingArea').style.display = 'none';
     document.getElementById('contentArea').style.display = '';
