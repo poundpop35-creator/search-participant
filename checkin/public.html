@@ -322,6 +322,7 @@
           <div style="flex:0 0 200px;max-width:220px;margin-left:auto;margin-right:auto;">
             <div id="zoneMapInt" style="position:relative;width:100%;">
               <div id="zoneMapInt-label" style="display:none;position:absolute;bottom:10px;left:50%;transform:translateX(-50%);background:rgba(15,23,42,0.88);color:#fff;border-radius:8px;padding:6px 12px;font-size:0.78rem;font-family:'Sarabun',sans-serif;white-space:nowrap;z-index:10;pointer-events:none;text-align:center;line-height:1.5;"></div>
+              <button id="zoneMapIntClear" onclick="clearIntFilter()" style="display:none;position:absolute;top:6px;right:6px;padding:2px 8px;border-radius:12px;border:1px solid #cbd5e1;background:rgba(255,255,255,0.92);color:#64748b;font-family:'Sarabun',sans-serif;font-size:0.72rem;cursor:pointer;z-index:11;">× ล้าง</button>
             </div>
           </div>
           <div style="flex:1;min-width:200px;overflow-x:auto;max-height:360px;overflow-y:auto;">
@@ -891,8 +892,10 @@ async function renderIntMap(intData){
   try{
     if(!thaiGeoCache) thaiGeoCache=await d3.json('https://raw.githubusercontent.com/apisit/thailand.json/master/thailand.json');
     const savedIntLabel=document.getElementById('zoneMapInt-label');
+    const savedIntClear=document.getElementById('zoneMapIntClear');
     container.innerHTML='';
     if(savedIntLabel) container.appendChild(savedIntLabel);
+    if(savedIntClear) container.appendChild(savedIntClear);
     intProvCounts={};
     intData.forEach(r=>{
       const dept=(r.participants?.dept||'').trim();
@@ -1042,6 +1045,7 @@ function highlightIntProv(dept){
   } else {
     showMapLabel('zoneMapInt',null);
   }
+  updateIntClearBtn();
 }
 
 const DEPTS = [
@@ -1129,8 +1133,15 @@ function updateClearBtn(){
   const btn=document.getElementById('zoneMapExtClear');
   if(btn) btn.style.display=selectedZonePub!==null?'block':'none';
 }
+function updateIntClearBtn(){
+  const btn=document.getElementById('zoneMapIntClear');
+  if(btn) btn.style.display=selectedIntProv!==null?'block':'none';
+}
 function clearZoneFilter(){
   if(selectedZonePub!==null) highlightZonePub(selectedZonePub);
+}
+function clearIntFilter(){
+  if(selectedIntProv!==null) highlightIntProv(selectedIntProv);
 }
 function setFilter(day) {
   activeDay = (day === 'all') ? 'all' : Number(day);
