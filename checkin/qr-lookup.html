@@ -170,15 +170,8 @@ async function doSearch() {
     await ensureNames();
     const total = allNames.length;
     if (q.length < 1) {
-      // show first 30 to confirm data loaded
-      results = allNames.slice(0, 30);
       const wrap = document.getElementById('resultsWrap');
-      if (!results.length) { wrap.innerHTML = '<div class="no-result">โหลดข้อมูลแล้ว แต่ไม่มีรายการ (0 คน)</div>'; return; }
-      wrap.innerHTML = `<div class="search-hint" style="margin-bottom:8px;">โหลดข้อมูลสำเร็จ ${total} คน — แสดง 30 รายการแรก</div>`;
-      wrap.innerHTML += results.map((p, i) => {
-        const name = `${(p.prefix||'').replace(/\s*\([^)]*\)/g,'').trim()} ${p.first_name||''} ${p.last_name||''}`.trim().replace(/\s+/g,' ');
-        return `<div class="result-item" onclick="selectPerson(${i})"><div class="result-name">${name}</div></div>`;
-      }).join('');
+      wrap.innerHTML = `<div style="text-align:center;padding:12px 0;font-size:0.85rem;font-weight:700;color:#1e3a8a;">โหลดข้อมูลสำเร็จ ${total.toLocaleString()} คน</div>`;
       return;
     }
     results = allNames.filter(p =>
