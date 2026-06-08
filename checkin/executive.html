@@ -6,6 +6,7 @@
   <title>Dashboard ผู้บริหาร — ประชุมวิชาการวิทยาศาสตร์การแพทย์ ครั้งที่ 34</title>
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
   <style>
     :root{--blue:#1F3540;--blue-mid:#2C4B5D;--blue-light:#C8DDE8;--green:#16a34a;--white:#fff;--shadow:0 2px 16px rgba(31,53,64,0.10);}
     *{box-sizing:border-box;margin:0;padding:0;}
@@ -74,6 +75,9 @@
     .dot-live{width:8px;height:8px;border-radius:50%;background:#16a34a;animation:pulse 2s infinite;}
     @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
     .loading{text-align:center;padding:60px;color:#94a3b8;font-size:1rem;}
+    .view-toggle{display:flex;gap:6px;}
+    .vtbtn{padding:6px 14px;border-radius:8px;border:1.5px solid #C8DDE8;background:white;font-family:'Sarabun',sans-serif;font-size:0.82rem;cursor:pointer;color:#5a7a8e;font-weight:600;}
+    .vtbtn.active{background:#1F3540;color:white;border-color:#1F3540;}
   </style>
 <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
 </head>
@@ -120,15 +124,24 @@
     </div>
 
     <div class="dept-card" id="deptShareCard">
-      <div class="dept-card-header">
-        <div class="dept-card-title">จำนวนผู้เข้าร่วมงานแยกตามหน่วยงานภายใน (กรมวิทยาศาสตร์การแพทย์)</div>
-        <div class="dept-card-sub">ข้อมูลจากการเช็คอินจริง — อัปเดตอัตโนมัติทุก 1 นาที</div>
-        <button class="share-btn" onclick="shareDeptTable()">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          บันทึกเป็นรูปภาพ (A4)
-        </button>
+      <div class="dept-card-header" style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+        <div>
+          <div class="dept-card-title" id="execCardTitle">จำนวนผู้เข้าร่วมงานแยกตามหน่วยงานภายใน (กรมวิทยาศาสตร์การแพทย์)</div>
+          <div class="dept-card-sub">ข้อมูลจากการเช็คอินจริง — อัปเดตอัตโนมัติทุก 1 นาที</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+          <div class="view-toggle">
+            <button class="vtbtn active" id="vTable" onclick="setExecView('table')">ตาราง</button>
+            <button class="vtbtn" id="vChart" onclick="setExecView('chart')">แผนภูมิ</button>
+          </div>
+          <button class="share-btn" onclick="shareDeptTable()" style="margin-top:0;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            บันทึก A4
+          </button>
+        </div>
       </div>
-      <div class="scroll-wrap">
+      <!-- TABLE VIEW -->
+      <div id="execTableWrap" class="scroll-wrap">
         <table>
           <thead id="execTableHead">
             <tr>
@@ -142,6 +155,12 @@
           </thead>
           <tbody id="execDeptBody"></tbody>
         </table>
+      </div>
+      <!-- CHART VIEW -->
+      <div id="execChartWrap" style="display:none;padding:16px 20px;">
+        <div style="overflow-y:auto;max-height:600px;">
+          <canvas id="execBarChart"></canvas>
+        </div>
       </div>
     </div>
 
@@ -203,6 +222,17 @@ function num(v) {
 
 let execDay = null;
 let execMap = {};
+let execView = 'table';
+let barChartInst = null;
+
+function setExecView(v) {
+  execView = v;
+  document.getElementById('execTableWrap').style.display = v === 'table' ? '' : 'none';
+  document.getElementById('execChartWrap').style.display = v === 'chart' ? '' : 'none';
+  document.getElementById('vTable').classList.toggle('active', v === 'table');
+  document.getElementById('vChart').classList.toggle('active', v === 'chart');
+  if(v === 'chart') renderExecChart();
+}
 
 function setExecDay(day) {
   execDay = (execDay === day && day !== null) ? null : day;
@@ -256,6 +286,82 @@ function renderExecTable() {
       </tr>`;
     }).join('');
   }
+  if(execView === 'chart') renderExecChart();
+}
+
+function renderExecChart() {
+  const COLOR_D1 = '#2563eb', COLOR_D2 = '#7c3aed', COLOR_D3 = '#0891b2';
+  const dk = execDay ? `d${execDay}` : null;
+
+  const sorted = DEPTS
+    .map(d => ({
+      name: d,
+      d1: execMap[d]?.d1 || 0,
+      d2: execMap[d]?.d2 || 0,
+      d3: execMap[d]?.d3 || 0,
+      total: (execMap[d]?.d1||0)+(execMap[d]?.d2||0)+(execMap[d]?.d3||0)
+    }))
+    .filter(d => d.total > 0)
+    .sort((a,b) => b.total - a.total);
+
+  const labels = sorted.map(d => {
+    const s = d.name
+      .replace('กรมวิทยาศาสตร์การแพทย์','กรมวิทย์ฯ')
+      .replace('ศูนย์วิทยาศาสตร์การแพทย์ที่','ศวพ.')
+      .replace('สำนักงานเลขานุการกรม','สนง.เลขาฯ');
+    return s;
+  });
+  const fullLabels = sorted.map(d => d.name);
+
+  let datasets;
+  if(!execDay) {
+    datasets = [
+      { label:'24 มิ.ย.', data:sorted.map(d=>d.d1), backgroundColor:COLOR_D1+'cc', borderRadius:3 },
+      { label:'25 มิ.ย.', data:sorted.map(d=>d.d2), backgroundColor:COLOR_D2+'cc', borderRadius:3 },
+      { label:'26 มิ.ย.', data:sorted.map(d=>d.d3), backgroundColor:COLOR_D3+'cc', borderRadius:3 },
+    ];
+  } else {
+    const dayColor = [COLOR_D1,COLOR_D2,COLOR_D3][execDay-1];
+    const dayLabel = ['24 มิ.ย.','25 มิ.ย.','26 มิ.ย.'][execDay-1];
+    datasets = [{ label:dayLabel, data:sorted.map(d=>d[dk]||0), backgroundColor:dayColor+'cc', borderRadius:4 }];
+  }
+
+  const canvas = document.getElementById('execBarChart');
+  canvas.style.height = Math.max(320, sorted.length * 26) + 'px';
+
+  if(barChartInst){ barChartInst.destroy(); barChartInst = null; }
+  barChartInst = new Chart(canvas.getContext('2d'), {
+    type: 'bar',
+    data: { labels, datasets },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: !execDay, position:'top', labels:{ font:{family:'Sarabun',size:12}, boxWidth:12, padding:12 } },
+        tooltip: {
+          callbacks: {
+            title: items => fullLabels[items[0].dataIndex],
+            label: c => ` ${c.dataset.label}: ${c.raw.toLocaleString()} คน`
+          }
+        }
+      },
+      scales: {
+        x: {
+          stacked: !execDay,
+          ticks: { font:{family:'Sarabun',size:11}, color:'#5a7a8e' },
+          grid: { color:'#e2e8f0' },
+          border: { color:'#C8DDE8' }
+        },
+        y: {
+          stacked: !execDay,
+          ticks: { font:{family:'Sarabun',size:11}, color:'#1F3540' },
+          grid: { display:false },
+          border: { color:'#C8DDE8' }
+        }
+      }
+    }
+  });
 }
 
 async function loadData() {
