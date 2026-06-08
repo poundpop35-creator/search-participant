@@ -189,7 +189,8 @@ function renderResults() {
     wrap.innerHTML = '<div class="no-result">ไม่พบข้อมูล ลองตรวจสอบการสะกดชื่ออีกครั้ง</div>';
     return;
   }
-  wrap.innerHTML = results.map((p, i) => {
+  wrap.innerHTML = `<div style="text-align:center;padding:8px 0 4px;font-size:0.85rem;font-weight:700;color:#1e3a8a;">พบ ${results.length} คน</div>`;
+  wrap.innerHTML += results.map((p, i) => {
     const name = `${(p.prefix||'').replace(/\s*\([^)]*\)/g,'').trim()} ${p.first_name||''} ${p.last_name||''}`.trim().replace(/\s+/g,' ');
     const isIn = (p.internal_external||'').includes('ภายใน');
     const isOut = (p.internal_external||'').includes('ภายนอก');
