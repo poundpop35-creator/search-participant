@@ -568,9 +568,9 @@ function exportShirtStickers(){
   .page{padding:8mm 10mm;}
   .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:3mm;}
   .sticker{border:1px dashed #cbd5e1;border-radius:3mm;padding:3.5mm 4mm;height:36mm;display:flex;flex-direction:column;justify-content:center;overflow:hidden;page-break-inside:avoid;}
-  .s-size{font-size:20pt;font-weight:800;line-height:1;margin-bottom:1.5mm;}
-  .s-name{font-size:8.5pt;font-weight:700;color:#1e293b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .s-dept{font-size:7pt;color:#64748b;margin-top:1mm;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .s-size{font-size:15pt;font-weight:800;line-height:1;margin-bottom:1.5mm;}
+  .s-name{font-size:9.5pt;font-weight:700;color:#1e293b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .s-dept{font-size:7pt;color:#64748b;margin-top:1mm;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.35;}
   @media print{
     .toolbar{display:none;}
     .page{padding:5mm 8mm;}
