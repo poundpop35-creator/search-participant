@@ -430,10 +430,11 @@ document.addEventListener('DOMContentLoaded', function() {
           <tr>
             <th>#</th><th>ชื่อ-นามสกุล</th><th>หน่วยงาน</th>
             <th>ประเภทบุคคล</th><th>ประเภทการเข้าร่วม</th>
-            <th>TAG</th><th>วันที่เช็คอิน</th><th>เวลา</th><th>สแกนโดย</th>
+            <th>TAG</th><th>วันที่เช็คอิน</th><th>เวลา</th>
+            <th>กระเป๋า</th><th>เสื้อ</th><th>สแกนโดย</th>
           </tr>
         </thead>
-        <tbody id="tBody"><tr><td colspan="9" class="loading-td">กำลังโหลด...</td></tr></tbody>
+        <tbody id="tBody"><tr><td colspan="11" class="loading-td">กำลังโหลด...</td></tr></tbody>
       </table>
     </div>
     <div class="pager">
@@ -794,7 +795,7 @@ async function loadAll(){
   document.getElementById('dBody').innerHTML='<tr><td colspan="5" style="text-align:center;padding:30px;color:#94a3b8;">กำลังโหลด...</td></tr>';
 
   const [rows, preRegRes, allRes]=await Promise.all([
-    fetchAll('/rest/v1/checkins?select=id,participant_id,day,checkin_time,scanned_by,participants(prefix,first_name,last_name,tag,dept,ext_dept,internal_external,participation_type,items,is_walkin)&order=checkin_time.desc'),
+    fetchAll('/rest/v1/checkins?select=id,participant_id,day,checkin_time,scanned_by,participants(prefix,first_name,last_name,tag,dept,ext_dept,internal_external,participation_type,items,is_walkin,bag_received,bag_received_date,shirt_size,shirt_received,shirt_received_date)&order=checkin_time.desc'),
     fetch(SB_URL+'/rest/v1/participants?is_walkin=not.is.true&select=id',{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'count=exact','Range':'0-0','Range-Unit':'items'}}),
     fetch(SB_URL+'/rest/v1/participants?select=id',{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'count=exact','Range':'0-0','Range-Unit':'items'}})
   ]);
@@ -807,10 +808,17 @@ async function loadAll(){
     const p=r.participants||{};
     const isIn=(p.internal_external||'').includes('ภายใน');
     const dept=isIn?(p.dept||'-'):(p.ext_dept||p.dept||'-');
+    const fmtDate=v=>{if(!v)return null;const d=new Date(v);return d.toLocaleDateString('th-TH',{timeZone:'Asia/Bangkok',day:'numeric',month:'short'});};
+    const fmtTime=v=>{if(!v)return null;const d=new Date(v);return d.toLocaleTimeString('th-TH',{timeZone:'Asia/Bangkok',hour:'2-digit',minute:'2-digit'});};
     return{id:r.id,participantId:r.participant_id,day:r.day,time:r.checkin_time,scannedBy:r.scanned_by||'-',
       name:buildName(p),
       dept,isIn,tag:p.tag||'-',items:p.items||'-',
-      pt:p.participation_type||'-',isWalkin:p.is_walkin===true};
+      pt:p.participation_type||'-',isWalkin:p.is_walkin===true,
+      bagReceived:p.bag_received===true||p.bag_received===1||p.bag_received==='true',
+      bagDate:fmtDate(p.bag_received_date), bagTime:fmtTime(p.bag_received_date),
+      shirtSize:(p.shirt_size||'').trim(),
+      shirtReceived:p.shirt_received===true||p.shirt_received===1||p.shirt_received==='true',
+      shirtDate:fmtDate(p.shirt_received_date), shirtTime:fmtTime(p.shirt_received_date)};
   });
   deptRaw=[...allData];
 
@@ -1335,9 +1343,17 @@ function renderTable(){
   document.getElementById('pInfo').textContent=`แสดง ${tot===0?0:start+1}–${Math.min(start+PAGE,tot)} จาก ${tot.toLocaleString()} รายการ`;
   document.getElementById('bPrev').disabled=curPage<=1;
   document.getElementById('bNext').disabled=curPage>=totPages;
-  if(!page.length){document.getElementById('tBody').innerHTML='<tr><td colspan="9" class="loading-td">ไม่พบข้อมูล</td></tr>';return;}
+  if(!page.length){document.getElementById('tBody').innerHTML='<tr><td colspan="11" class="loading-td">ไม่พบข้อมูล</td></tr>';return;}
   document.getElementById('tBody').innerHTML=page.map((r,i)=>{
     const t=new Date(r.time).toLocaleTimeString('th-TH',{timeZone:'Asia/Bangkok',hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    const bagCell = r.bagReceived
+      ? `<span style="color:#16a34a;font-size:0.78rem;font-weight:700;">✓ รับแล้ว</span><br><span style="font-size:0.72rem;color:#64748b;">${r.bagDate||''} ${r.bagTime||''}</span>`
+      : `<span style="color:#94a3b8;font-size:0.78rem;">—</span>`;
+    const shirtCell = r.shirtSize
+      ? (r.shirtReceived
+          ? `<span style="color:#7c3aed;font-size:0.78rem;font-weight:700;">✓ ${r.shirtSize}</span><br><span style="font-size:0.72rem;color:#64748b;">${r.shirtDate||''} ${r.shirtTime||''}</span>`
+          : `<span style="color:#f59e0b;font-size:0.78rem;font-weight:700;">⏳ ${r.shirtSize}</span>`)
+      : `<span style="color:#94a3b8;font-size:0.78rem;">—</span>`;
     return`<tr>
       <td>${start+i+1}</td>
       <td>${r.name}</td>
@@ -1347,6 +1363,8 @@ function renderTable(){
       <td><span class="badge ${r.tag==='Staff'?'b-staff':'b-participant'}">${r.tag}</span></td>
       <td><span class="badge b-day">${DAY_L[r.day]||r.day}</span></td>
       <td>${t}</td>
+      <td style="white-space:nowrap;">${bagCell}</td>
+      <td style="white-space:nowrap;">${shirtCell}</td>
       <td style="font-size:0.8rem;color:#64748b;">${r.scannedBy}</td>
     </tr>`;
   }).join('');
