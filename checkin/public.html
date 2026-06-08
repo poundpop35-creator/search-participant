@@ -461,7 +461,7 @@ function renderTrendChart() {
       responsive:true, maintainAspectRatio:false,
       interaction:{mode:'index',intersect:false},
       plugins:{
-        legend:{position:'top',labels:{font:{family:'Sarabun',size:12},boxWidth:10,padding:14,usePointStyle:true}},
+        legend:{position:'top',onClick:()=>{},labels:{font:{family:'Sarabun',size:12},boxWidth:10,padding:14,usePointStyle:true}},
         tooltip:{backgroundColor:'rgba(15,23,42,0.88)',titleFont:{family:'Sarabun',size:12},bodyFont:{family:'Sarabun',size:12},padding:10,
           callbacks:{title:items=>items[0].label+' น.', label:c=>` ${c.dataset.label}: ${c.parsed.y} คน`}}
       },
