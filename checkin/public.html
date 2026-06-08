@@ -781,7 +781,9 @@ async function renderExtPanel(extData){
   const container=document.getElementById('zoneMapExt');
   try {
     if(!thaiGeoCache) thaiGeoCache=await d3.json('https://raw.githubusercontent.com/apisit/thailand.json/master/thailand.json');
+    const savedExtLabel=document.getElementById('zoneMapExt-label');
     container.innerHTML='';
+    if(savedExtLabel) container.appendChild(savedExtLabel);
     const w=container.clientWidth||200;
     const h=Math.round(w*1.65);
     container.style.height=h+'px';
@@ -870,7 +872,9 @@ async function renderIntMap(intData){
   if(!container) return;
   try{
     if(!thaiGeoCache) thaiGeoCache=await d3.json('https://raw.githubusercontent.com/apisit/thailand.json/master/thailand.json');
+    const savedIntLabel=document.getElementById('zoneMapInt-label');
     container.innerHTML='';
+    if(savedIntLabel) container.appendChild(savedIntLabel);
     intProvCounts={};
     intData.forEach(r=>{
       const dept=(r.participants?.dept||'').trim();
