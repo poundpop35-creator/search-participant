@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>จำนวนผู้มารับกระเป๋า (ก่อนวันงาน) — กรมวิทยาศาสตร์การแพทย์</title>
+  <title>ระบบรับของก่อนวันงาน — กรมวิทยาศาสตร์การแพทย์</title>
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <style>
@@ -72,6 +72,11 @@
     .pager{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-top:1px solid var(--border);font-size:0.83rem;color:#64748b;flex-wrap:wrap;gap:8px;}
     .pbtn{padding:5px 12px;border-radius:6px;border:1.5px solid var(--border);background:var(--white);cursor:pointer;font-size:0.8rem;}
     .pbtn:disabled{opacity:0.4;cursor:not-allowed;}
+    /* Main tabs */
+    .main-tabs{display:flex;gap:8px;margin-bottom:18px;}
+    .mtab{padding:10px 22px;border-radius:10px;border:2px solid var(--border);background:var(--white);font-family:'Sarabun',sans-serif;font-size:0.9rem;font-weight:700;cursor:pointer;color:#64748b;transition:all .15s;}
+    .mtab.active{background:var(--blue);color:white;border-color:var(--blue);}
+    .mtab:not(.active):hover{background:#f1f5f9;}
   </style>
 <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
 </head>
@@ -81,7 +86,7 @@
   <div style="display:flex;align-items:center;gap:10px;">
     <img src="https://raw.githubusercontent.com/poundpop35-creator/search-participant/main/logo-%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B8%8A%E0%B8%B8%E0%B8%A1%E0%B8%A7%E0%B8%B4%E0%B8%8A%E0%B8%B2%E0%B8%81%E0%B8%B2%E0%B8%A3-34-Final_0.png" style="height:36px;object-fit:contain;" alt="conf">
     <img src="https://raw.githubusercontent.com/poundpop35-creator/search-participant/main/logo-DMSc-MOPH%20(1)%20(2)_0.png" style="height:36px;object-fit:contain;" alt="dmsc">
-    <h1>จำนวนผู้มารับกระเป๋า (ก่อนวันงาน)</h1>
+    <h1>ระบบรับของก่อนวันงาน (กระเป๋า + เสื้อ)</h1>
   </div>
   <div class="topbar-btns">
     <span class="last-update" id="lastUpdate">-</span>
@@ -109,90 +114,162 @@
 </div>
 
 <div class="main">
-  <!-- Stats -->
-  <div class="stats-grid">
-    <div class="stat-card total"><div class="stat-label">มีสิทธิ์รับกระเป๋าทั้งหมด</div><div class="stat-num" id="sTotal">-</div><div class="stat-sub">ราย</div></div>
-    <div class="stat-card received"><div class="stat-label">รับแล้ว</div><div class="stat-num" id="sReceived">-</div><div class="stat-sub" id="sReceivedPct">-</div></div>
-    <div class="stat-card pending"><div class="stat-label">ยังไม่รับ</div><div class="stat-num" id="sPending">-</div><div class="stat-sub" id="sPendingPct">-</div></div>
+  <div class="main-tabs">
+    <button class="mtab active" id="tabBag" onclick="switchMainTab('bag')">🎒 กระเป๋า</button>
+    <button class="mtab" id="tabShirt" onclick="switchMainTab('shirt')">👕 เสื้อ</button>
   </div>
 
-  <!-- Filter -->
-  <div class="filter-bar">
-    <div class="filter-group">
-      <div class="filter-label">สถานะกระเป๋า</div>
-      <select class="filter-select" id="fStatus" onchange="applyFilters()">
-        <option value="">ทั้งหมด</option>
-        <option value="received">รับแล้ว</option>
-        <option value="pending">ยังไม่รับ</option>
-      </select>
+  <!-- ===== BAG SECTION ===== -->
+  <div id="sectionBag">
+    <div class="stats-grid">
+      <div class="stat-card total"><div class="stat-label">มีสิทธิ์รับกระเป๋าทั้งหมด</div><div class="stat-num" id="sTotal">-</div><div class="stat-sub">ราย</div></div>
+      <div class="stat-card received"><div class="stat-label">รับแล้ว</div><div class="stat-num" id="sReceived">-</div><div class="stat-sub" id="sReceivedPct">-</div></div>
+      <div class="stat-card pending"><div class="stat-label">ยังไม่รับ</div><div class="stat-num" id="sPending">-</div><div class="stat-sub" id="sPendingPct">-</div></div>
     </div>
-    <div class="filter-group">
-      <div class="filter-label">ประเภทการเข้าร่วม</div>
-      <select class="filter-select" id="fPT" onchange="applyFilters()">
-        <option value="">ทั้งหมด</option>
-        <option value="ผู้เข้าร่วมงาน">ผู้เข้าร่วมงาน</option>
-        <option value="ผู้บริหาร">ผู้บริหาร</option>
-        <option value="ผู้บริหาร+กรรมการ">ผู้บริหาร+กรรมการ</option>
-        <option value="ผู้บริหาร+คณะทำงาน">ผู้บริหาร+คณะทำงาน</option>
-        <option value="ผู้บริหาร+ผู้ส่งผลงาน">ผู้บริหาร+ผู้ส่งผลงาน</option>
-        <option value="ผู้ส่งผลงาน">ผู้ส่งผลงาน</option>
-      </select>
+    <div class="filter-bar">
+      <div class="filter-group">
+        <div class="filter-label">สถานะกระเป๋า</div>
+        <select class="filter-select" id="fStatus" onchange="applyFilters()">
+          <option value="">ทั้งหมด</option>
+          <option value="received">รับแล้ว</option>
+          <option value="pending">ยังไม่รับ</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <div class="filter-label">ประเภทการเข้าร่วม</div>
+        <select class="filter-select" id="fPT" onchange="applyFilters()">
+          <option value="">ทั้งหมด</option>
+          <option value="ผู้เข้าร่วมงาน">ผู้เข้าร่วมงาน</option>
+          <option value="ผู้บริหาร">ผู้บริหาร</option>
+          <option value="ผู้บริหาร+กรรมการ">ผู้บริหาร+กรรมการ</option>
+          <option value="ผู้บริหาร+คณะทำงาน">ผู้บริหาร+คณะทำงาน</option>
+          <option value="ผู้บริหาร+ผู้ส่งผลงาน">ผู้บริหาร+ผู้ส่งผลงาน</option>
+          <option value="ผู้ส่งผลงาน">ผู้ส่งผลงาน</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <div class="filter-label">หน่วยงาน</div>
+        <select class="filter-select" id="fDept" onchange="applyFilters()" style="max-width:260px;">
+          <option value="">ทั้งหมด</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <div class="filter-label">TAG</div>
+        <select class="filter-select" id="fTag" onchange="applyFilters()">
+          <option value="">ทั้งหมด</option>
+          <option value="participant">participant</option>
+          <option value="Staff">Staff</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <div class="filter-label">ค้นหา</div>
+        <input class="sbox" id="sBox" placeholder="ชื่อ / หน่วยงาน..." oninput="applyFilters()">
+      </div>
+      <button class="btn-reset" onclick="resetFilters()">✕ ล้าง</button>
     </div>
-    <div class="filter-group">
-      <div class="filter-label">หน่วยงาน</div>
-      <select class="filter-select" id="fDept" onchange="applyFilters()" style="max-width:260px;">
-        <option value="">ทั้งหมด</option>
-      </select>
+    <div class="tcard">
+      <div class="thead-row">
+        <div>
+          <span class="ttitle">ผู้มีสิทธิ์รับกระเป๋า (ก่อนวันงาน)</span>
+          <span class="tcount" id="tCount"></span>
+        </div>
+        <div class="export-btns">
+          <button class="btn-xl green" onclick="exportExcel()">⬇ Excel</button>
+          <button class="btn-xl teal"  onclick="exportCSV()">⬇ CSV</button>
+        </div>
+      </div>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th><th>ชื่อ-นามสกุล</th><th>หน่วยงาน</th>
+              <th>ประเภทการเข้าร่วม</th><th>TAG</th>
+              <th>สถานะกระเป๋า</th><th>วันที่รับ</th><th>เวลา</th>
+            </tr>
+          </thead>
+          <tbody id="tBody"><tr><td colspan="8" class="loading-td">กำลังโหลด...</td></tr></tbody>
+        </table>
+      </div>
+      <div class="pager">
+        <span id="pInfo">-</span>
+        <div style="display:flex;gap:6px;">
+          <button class="pbtn" id="bPrev" onclick="changePage(-1)">← ก่อนหน้า</button>
+          <button class="pbtn" id="bNext" onclick="changePage(1)">ถัดไป →</button>
+        </div>
+      </div>
     </div>
-    <div class="filter-group">
-      <div class="filter-label">TAG</div>
-      <select class="filter-select" id="fTag" onchange="applyFilters()">
-        <option value="">ทั้งหมด</option>
-        <option value="participant">participant</option>
-        <option value="Staff">Staff</option>
-      </select>
-    </div>
-    <div class="filter-group">
-      <div class="filter-label">ค้นหา</div>
-      <input class="sbox" id="sBox" placeholder="ชื่อ / หน่วยงาน..." oninput="applyFilters()">
-    </div>
-    <button class="btn-reset" onclick="resetFilters()">✕ ล้าง</button>
   </div>
 
-  <!-- Table -->
-  <div class="tcard">
-    <div class="thead-row">
-      <div>
-        <span class="ttitle" id="tTitle">ผู้มีสิทธิ์รับกระเป๋า (ก่อนวันงาน)</span>
-        <span class="tcount" id="tCount"></span>
-      </div>
-      <div class="export-btns">
-        <button class="btn-xl green" onclick="exportExcel()">⬇ Excel</button>
-        <button class="btn-xl teal"  onclick="exportCSV()">⬇ CSV</button>
-      </div>
+  <!-- ===== SHIRT SECTION ===== -->
+  <div id="sectionShirt" style="display:none;">
+    <div class="stats-grid">
+      <div class="stat-card total"><div class="stat-label">มีสิทธิ์รับเสื้อทั้งหมด</div><div class="stat-num" id="ssTotal">-</div><div class="stat-sub">ราย</div></div>
+      <div class="stat-card received"><div class="stat-label">รับแล้ว</div><div class="stat-num" id="ssReceived">-</div><div class="stat-sub" id="ssReceivedPct">-</div></div>
+      <div class="stat-card pending"><div class="stat-label">ยังไม่รับ</div><div class="stat-num" id="ssPending">-</div><div class="stat-sub" id="ssPendingPct">-</div></div>
     </div>
-    <div style="overflow-x:auto;">
-      <table>
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>ชื่อ-นามสกุล</th>
-            <th>หน่วยงาน</th>
-            <th>ประเภทการเข้าร่วม</th>
-            <th>TAG</th>
-            <th>สถานะกระเป๋า</th>
-            <th>วันที่รับ</th>
-            <th>เวลา</th>
-          </tr>
-        </thead>
-        <tbody id="tBody"><tr><td colspan="8" class="loading-td">กำลังโหลด...</td></tr></tbody>
-      </table>
+    <div class="filter-bar">
+      <div class="filter-group">
+        <div class="filter-label">สถานะเสื้อ</div>
+        <select class="filter-select" id="sfStatus" onchange="applyShirtFilters()">
+          <option value="">ทั้งหมด</option>
+          <option value="received">รับแล้ว</option>
+          <option value="pending">ยังไม่รับ</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <div class="filter-label">ไซต์เสื้อ</div>
+        <select class="filter-select" id="sfSize" onchange="applyShirtFilters()">
+          <option value="">ทั้งหมด</option>
+          <option value="XS">XS</option>
+          <option value="S">S</option>
+          <option value="M">M</option>
+          <option value="L">L</option>
+          <option value="XL">XL</option>
+          <option value="2XL">2XL</option>
+          <option value="3XL">3XL</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <div class="filter-label">หน่วยงาน</div>
+        <select class="filter-select" id="sfDept" onchange="applyShirtFilters()" style="max-width:260px;">
+          <option value="">ทั้งหมด</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <div class="filter-label">ค้นหา</div>
+        <input class="sbox" id="sfBox" placeholder="ชื่อ / หน่วยงาน..." oninput="applyShirtFilters()">
+      </div>
+      <button class="btn-reset" onclick="resetShirtFilters()">✕ ล้าง</button>
     </div>
-    <div class="pager">
-      <span id="pInfo">-</span>
-      <div style="display:flex;gap:6px;">
-        <button class="pbtn" id="bPrev" onclick="changePage(-1)">← ก่อนหน้า</button>
-        <button class="pbtn" id="bNext" onclick="changePage(1)">ถัดไป →</button>
+    <div class="tcard">
+      <div class="thead-row">
+        <div>
+          <span class="ttitle">ผู้มีสิทธิ์รับเสื้อ (ก่อนวันงาน)</span>
+          <span class="tcount" id="stCount"></span>
+        </div>
+        <div class="export-btns">
+          <button class="btn-xl green" onclick="exportShirtExcel()">⬇ Excel</button>
+          <button class="btn-xl teal"  onclick="exportShirtCSV()">⬇ CSV</button>
+        </div>
+      </div>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th><th>ชื่อ-นามสกุล</th><th>หน่วยงาน</th>
+              <th>ไซต์เสื้อ</th>
+              <th>สถานะเสื้อ</th><th>วันที่รับ</th><th>เวลา</th>
+            </tr>
+          </thead>
+          <tbody id="stBody"><tr><td colspan="7" class="loading-td">กำลังโหลด...</td></tr></tbody>
+        </table>
+      </div>
+      <div class="pager">
+        <span id="spInfo">-</span>
+        <div style="display:flex;gap:6px;">
+          <button class="pbtn" id="sbPrev" onclick="changeShirtPage(-1)">← ก่อนหน้า</button>
+          <button class="pbtn" id="sbNext" onclick="changeShirtPage(1)">ถัดไป →</button>
+        </div>
       </div>
     </div>
   </div>
@@ -219,6 +296,14 @@ document.getElementById('userDisplay').textContent = sessionStorage.getItem('dms
 })();
 
 let allData=[], filtered=[], curPage=1;
+let allShirtData=[], shirtFiltered=[], shirtPage=1;
+
+function switchMainTab(tab){
+  document.getElementById('sectionBag').style.display   = tab==='bag'   ? '' : 'none';
+  document.getElementById('sectionShirt').style.display = tab==='shirt' ? '' : 'none';
+  document.getElementById('tabBag').classList.toggle('active',   tab==='bag');
+  document.getElementById('tabShirt').classList.toggle('active', tab==='shirt');
+}
 
 (function populateDeptFilter(){
   const sel=document.getElementById('fDept');
@@ -244,7 +329,7 @@ async function loadAll(){
   try{
     let res=[], from=0;
     while(true){
-      const r=await fetch(`${SB_URL}/rest/v1/participants?select=id,prefix,first_name,last_name,dept,ext_dept,internal_external,participation_type,tag,items,bag_received,bag_received_date&order=last_name.asc`,{
+      const r=await fetch(`${SB_URL}/rest/v1/participants?select=id,prefix,first_name,last_name,dept,ext_dept,internal_external,participation_type,tag,items,bag_received,bag_received_date,shirt_size,shirt_received,shirt_received_date&order=last_name.asc`,{
         headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Range-Unit':'items','Range':`${from}-${from+999}`,'Prefer':'count=exact'}
       });
       if(!r.ok){
@@ -281,15 +366,43 @@ async function loadAll(){
     const total=allData.length;
     const receivedCount=allData.filter(r=>r.received).length;
     const pendingCount=total-receivedCount;
-
     document.getElementById('sTotal').textContent=total.toLocaleString();
     document.getElementById('sReceived').textContent=receivedCount.toLocaleString();
     document.getElementById('sPending').textContent=pendingCount.toLocaleString();
     document.getElementById('sReceivedPct').textContent=total?`${Math.round(receivedCount/total*100)}% ของทั้งหมด`:'-';
     document.getElementById('sPendingPct').textContent=total?`${Math.round(pendingCount/total*100)}% ของทั้งหมด`:'-';
+
+    // --- Shirt data ---
+    allShirtData = res.filter(p => p.shirt_size && p.shirt_size.trim()).map(p => {
+      const isIn=(p.internal_external||'').includes('ภายใน');
+      const dept=isIn?(p.dept||'-'):(p.ext_dept||p.dept||'-');
+      return{
+        name:`${(p.prefix||'').replace(/\s*\([^)]*\)/g,'').trim()} ${p.first_name||''} ${p.last_name||''}`.trim().replace(/\s+/g,' '),
+        dept, shirtSize:(p.shirt_size||'-').trim(),
+        received:p.shirt_received===true||p.shirt_received===1||p.shirt_received==='true',
+        receivedDate:fmtBagDate(p.shirt_received_date),
+        receivedTime:fmtBagTime(p.shirt_received_date)
+      };
+    });
+    // Populate shirt dept dropdown
+    const sfDept=document.getElementById('sfDept');
+    const existingShirtDepts=new Set(Array.from(sfDept.options).map(o=>o.value).filter(v=>v));
+    [...new Set(allShirtData.map(r=>r.dept))].sort().forEach(d=>{
+      if(!existingShirtDepts.has(d)){const o=document.createElement('option');o.value=d;o.textContent=d;sfDept.appendChild(o);}
+    });
+    const sTotal2=allShirtData.length;
+    const sRec=allShirtData.filter(r=>r.received).length;
+    const sPend=sTotal2-sRec;
+    document.getElementById('ssTotal').textContent=sTotal2.toLocaleString();
+    document.getElementById('ssReceived').textContent=sRec.toLocaleString();
+    document.getElementById('ssPending').textContent=sPend.toLocaleString();
+    document.getElementById('ssReceivedPct').textContent=sTotal2?`${Math.round(sRec/sTotal2*100)}% ของทั้งหมด`:'-';
+    document.getElementById('ssPendingPct').textContent=sTotal2?`${Math.round(sPend/sTotal2*100)}% ของทั้งหมด`:'-';
+
     document.getElementById('lastUpdate').textContent='อัปเดต: '+new Date().toLocaleTimeString('th-TH',{timeZone:'Asia/Bangkok'});
 
     applyFilters();
+    applyShirtFilters();
   }catch(e){
     document.getElementById('tBody').innerHTML='<tr><td colspan="8" class="loading-td">โหลดไม่สำเร็จ</td></tr>';
   }
@@ -344,6 +457,74 @@ function resetFilters(){
   document.getElementById('fDept').value='';
   document.getElementById('sBox').value='';
   applyFilters();
+}
+
+// ===== SHIRT FUNCTIONS =====
+function applyShirtFilters(){
+  const q=(document.getElementById('sfBox').value||'').toLowerCase();
+  const st=document.getElementById('sfStatus').value;
+  const sz=document.getElementById('sfSize').value;
+  const dp=document.getElementById('sfDept').value;
+  shirtFiltered=allShirtData.filter(r=>{
+    const mQ=!q||r.name.toLowerCase().includes(q)||r.dept.toLowerCase().includes(q);
+    const mSt=!st||(st==='received'&&r.received)||(st==='pending'&&!r.received);
+    const mSz=!sz||r.shirtSize===sz;
+    const mDp=!dp||r.dept===dp;
+    return mQ&&mSt&&mSz&&mDp;
+  });
+  shirtPage=1;
+  document.getElementById('stCount').textContent=`(${shirtFiltered.length.toLocaleString()} รายการ)`;
+  renderShirtTable();
+}
+
+function renderShirtTable(){
+  const start=(shirtPage-1)*PAGE;
+  const page=shirtFiltered.slice(start,start+PAGE);
+  const tot=shirtFiltered.length;
+  const totPages=Math.ceil(tot/PAGE)||1;
+  document.getElementById('spInfo').textContent=`แสดง ${tot===0?0:start+1}–${Math.min(start+PAGE,tot)} จาก ${tot.toLocaleString()} รายการ`;
+  document.getElementById('sbPrev').disabled=shirtPage<=1;
+  document.getElementById('sbNext').disabled=shirtPage>=totPages;
+  if(!page.length){document.getElementById('stBody').innerHTML='<tr><td colspan="7" class="loading-td">ไม่พบข้อมูล</td></tr>';return;}
+  document.getElementById('stBody').innerHTML=page.map((r,i)=>`<tr>
+    <td>${start+i+1}</td>
+    <td>${r.name}</td>
+    <td style="max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${r.dept}">${r.dept}</td>
+    <td style="font-weight:700;text-align:center;">${r.shirtSize}</td>
+    <td><span class="badge ${r.received?'b-received':'b-pending'}">${r.received?'รับแล้ว':'ยังไม่รับ'}</span></td>
+    <td>${r.received?r.receivedDate:'-'}</td>
+    <td>${r.received?r.receivedTime:'-'}</td>
+  </tr>`).join('');
+}
+
+function changeShirtPage(d){shirtPage+=d;renderShirtTable();window.scrollTo({top:0,behavior:'smooth'});}
+
+function resetShirtFilters(){
+  document.getElementById('sfStatus').value='';
+  document.getElementById('sfSize').value='';
+  document.getElementById('sfDept').value='';
+  document.getElementById('sfBox').value='';
+  applyShirtFilters();
+}
+
+function exportShirtExcel(){
+  const ws=XLSX.utils.json_to_sheet(getShirtRows());
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'เสื้อ');
+  XLSX.writeFile(wb,`shirt_dashboard_${new Date().toISOString().slice(0,10)}.xlsx`);
+}
+function exportShirtCSV(){
+  const rows=getShirtRows(),h=Object.keys(rows[0]);
+  const csv=[h.join(','),...rows.map(r=>h.map(k=>`"${String(r[k]).replace(/"/g,'""')}"`).join(','))].join('\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8'}));
+  a.download=`shirt_dashboard_${new Date().toISOString().slice(0,10)}.csv`;a.click();
+}
+function getShirtRows(){
+  return shirtFiltered.map((r,i)=>({'ลำดับ':i+1,'ชื่อ-นามสกุล':r.name,'หน่วยงาน':r.dept,
+    'ไซต์เสื้อ':r.shirtSize,
+    'สถานะเสื้อ':r.received?'รับแล้ว':'ยังไม่รับ',
+    'วันที่รับ':r.received?r.receivedDate:'-',
+    'เวลา':r.received?r.receivedTime:'-'}));
 }
 
 function exportExcel(){
