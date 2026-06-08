@@ -430,7 +430,7 @@ function highlightZone(idx){
 function renderTrendChart() {
   const canvas = document.getElementById('trendChart');
   if(!canvas) return;
-  const HOURS = [7,8,9,10,11,12,13,14,15];
+  const HOURS = [5,6,7,8,9,10,11,12,13,14,15];
   const labels = HOURS.map(h => h+':00');
   const getBkkHour = iso => {
     if(!iso) return -1;
@@ -439,7 +439,7 @@ function renderTrendChart() {
   };
   const bucket = day => {
     const c={}; HOURS.forEach(h=>c[h]=0);
-    allCheckins.filter(r=>r.day===day).forEach(r=>{ const h=getBkkHour(r.checkin_time); if(h>=7&&h<=15) c[h]++; });
+    allCheckins.filter(r=>r.day===day).forEach(r=>{ const h=getBkkHour(r.checkin_time); if(h>=5&&h<=15) c[h]++; });
     return HOURS.map(h=>c[h]);
   };
   const COLORS = ['#2563eb','#7c3aed','#0891b2'];
