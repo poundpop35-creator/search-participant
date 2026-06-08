@@ -77,6 +77,10 @@
     .mtab{padding:10px 22px;border-radius:10px;border:2px solid var(--border);background:var(--white);font-family:'Sarabun',sans-serif;font-size:0.9rem;font-weight:700;cursor:pointer;color:#64748b;transition:all .15s;}
     .mtab.active{background:var(--blue);color:white;border-color:var(--blue);}
     .mtab:not(.active):hover{background:#f1f5f9;}
+    /* Size pills */
+    .size-pill{padding:5px 11px;border-radius:20px;border:1.5px solid var(--border);background:white;font-family:'Sarabun',sans-serif;font-size:0.82rem;font-weight:600;cursor:pointer;color:#64748b;transition:all .15s;}
+    .size-pill:hover{border-color:#7c3aed;color:#7c3aed;}
+    .size-pill.active{background:#7c3aed;border-color:#7c3aed;color:white;}
   </style>
 <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
 </head>
@@ -218,16 +222,15 @@
       </div>
       <div class="filter-group">
         <div class="filter-label">ไซต์เสื้อ</div>
-        <select class="filter-select" id="sfSize" onchange="applyShirtFilters()">
-          <option value="">ทั้งหมด</option>
-          <option value="XS">XS</option>
-          <option value="S">S</option>
-          <option value="M">M</option>
-          <option value="L">L</option>
-          <option value="XL">XL</option>
-          <option value="2XL">2XL</option>
-          <option value="3XL">3XL</option>
-        </select>
+        <div id="sfSizeBtns" style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+          <button class="size-pill" data-size="XS" onclick="toggleSizePill(this)">XS</button>
+          <button class="size-pill" data-size="S" onclick="toggleSizePill(this)">S</button>
+          <button class="size-pill" data-size="M" onclick="toggleSizePill(this)">M</button>
+          <button class="size-pill" data-size="L" onclick="toggleSizePill(this)">L</button>
+          <button class="size-pill" data-size="XL" onclick="toggleSizePill(this)">XL</button>
+          <button class="size-pill" data-size="2XL" onclick="toggleSizePill(this)">2XL</button>
+          <button class="size-pill" data-size="3XL" onclick="toggleSizePill(this)">3XL</button>
+        </div>
       </div>
       <div class="filter-group">
         <div class="filter-label">หน่วยงาน</div>
@@ -388,7 +391,9 @@ async function loadAll(){
     // Populate shirt dept dropdown
     const sfDept=document.getElementById('sfDept');
     const existingShirtDepts=new Set(Array.from(sfDept.options).map(o=>o.value).filter(v=>v));
-    [...new Set(allShirtData.map(r=>r.dept))].sort().forEach(d=>{
+    const allShirtDepts=[...new Set(allShirtData.map(r=>r.dept))];
+    const sortedShirtDepts=[...DEPTS.filter(d=>allShirtDepts.includes(d)),...allShirtDepts.filter(d=>!DEPTS.includes(d)).sort((a,b)=>a.localeCompare(b,'th'))];
+    sortedShirtDepts.forEach(d=>{
       if(!existingShirtDepts.has(d)){const o=document.createElement('option');o.value=d;o.textContent=d;sfDept.appendChild(o);}
     });
     const sTotal2=allShirtData.length;
@@ -468,21 +473,28 @@ function resetFilters(){
 }
 
 // ===== SHIRT FUNCTIONS =====
+function toggleSizePill(btn){
+  btn.classList.toggle('active');
+  applyShirtFilters();
+}
+function getSelectedSizes(){
+  return [...document.querySelectorAll('#sfSizeBtns .size-pill.active')].map(b=>b.dataset.size);
+}
 function applyShirtFilters(){
   const q=(document.getElementById('sfBox').value||'').toLowerCase();
   const st=document.getElementById('sfStatus').value;
-  const sz=document.getElementById('sfSize').value;
+  const sizes=getSelectedSizes();
   const dp=document.getElementById('sfDept').value;
   shirtFiltered=allShirtData.filter(r=>{
     const mQ=!q||r.name.toLowerCase().includes(q)||r.dept.toLowerCase().includes(q);
     const mSt=!st||(st==='received'&&r.received)||(st==='pending'&&!r.received);
-    const mSz=!sz||r.shirtSize===sz;
+    const mSz=sizes.length===0||sizes.includes(r.shirtSize);
     const mDp=!dp||r.dept===dp;
     return mQ&&mSt&&mSz&&mDp;
   });
   shirtPage=1;
   const fTotal=shirtFiltered.length, fRec=shirtFiltered.filter(r=>r.received).length, fPend=fTotal-fRec;
-  const isFiltered=q||st||sz||dp;
+  const isFiltered=q||st||sizes.length>0||dp;
   document.getElementById('ssTotal').textContent=fTotal.toLocaleString();
   document.getElementById('ssReceived').textContent=fRec.toLocaleString();
   document.getElementById('ssPending').textContent=fPend.toLocaleString();
@@ -516,7 +528,7 @@ function changeShirtPage(d){shirtPage+=d;renderShirtTable();window.scrollTo({top
 
 function resetShirtFilters(){
   document.getElementById('sfStatus').value='';
-  document.getElementById('sfSize').value='';
+  document.querySelectorAll('#sfSizeBtns .size-pill.active').forEach(b=>b.classList.remove('active'));
   document.getElementById('sfDept').value='';
   document.getElementById('sfBox').value='';
   applyShirtFilters();

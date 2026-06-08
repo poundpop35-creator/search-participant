@@ -214,13 +214,13 @@
       <!-- Group 1: Pre-registered -->
       <div class="progress-row" style="margin-bottom:6px;">
         <div class="progress-row-top">
-          <span class="progress-label" style="color:#0891b2;">📋 ลงทะเบียนล่วงหน้า <span id="pPreReg" style="font-weight:700;">-</span> คน</span>
+          <span class="progress-label" style="color:#2563eb;">📋 ลงทะเบียนล่วงหน้า <span id="pPreReg" style="font-weight:700;">-</span> คน</span>
           <span style="display:flex;align-items:center;gap:6px;">
             <span id="pPreRegS" style="font-size:0.82rem;color:#94a3b8;">0%</span>
             <button id="preRegSubBtn" onclick="togglePreRegSub()" class="view-btn" style="padding:2px 8px;font-size:0.72rem;">▼ แสดง</button>
           </span>
         </div>
-        <div class="progress-bar"><div id="pBarPreReg" class="progress-fill" style="width:0%;background:#0891b2;"></div></div>
+        <div class="progress-bar"><div id="pBarPreReg" class="progress-fill" style="width:0%;background:#2563eb;"></div></div>
       </div>
       <div id="preRegSubSection" style="display:none;margin-left:14px;border-left:2px solid #e2e8f0;padding-left:10px;margin-bottom:12px;margin-top:4px;">
         <div class="progress-row">
@@ -471,6 +471,7 @@ function renderZoneChartPub(filtered){
 }
 
 const DEPTS = [
+  'อธิบดีกรมวิทยาศาสตร์การแพทย์','รองอธิบดีกรมวิทยาศาสตร์การแพทย์',
   'สำนักผู้ทรงคุณวุฒิกรมวิทยาศาสตร์การแพทย์','กองแผนงานและวิชาการ','กองทดสอบความชำนาญ',
   'กลุ่มพัฒนาระบบบริหาร','กลุ่มตรวจสอบภายใน','กลุ่มงานจริยธรรม','สำนักงานเลขานุการกรม',
   'สถาบันชีววัตถุ','สถาบันวิจัยวิทยาศาสตร์สาธารณสุข','สถาบันวิจัยสมุนไพร',
