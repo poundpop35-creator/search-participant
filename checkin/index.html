@@ -511,6 +511,8 @@
     }
   }
 
+  const fmtShort=v=>{if(!v)return null;const pts=v.split('-');if(pts.length===3){const d=new Date(Number(pts[0]),Number(pts[1])-1,Number(pts[2]));if(!isNaN(d))return d.toLocaleDateString('th-TH',{day:'numeric',month:'short'});}return null;};
+
   function buildSuccessRows(time,p,isFirst,isWalkin){
     const bagDone=p.bag_received===true;
     const items=p.items||'';
@@ -523,9 +525,9 @@
       {label:'คูปองอาหาร',val:'รับได้',style:'ok'},
     ];
     if(!isWalkin){
-      if(hasBag) rows.push({labelHtml:'ของที่ระลึก (1) <span style="color:#2563eb;font-weight:700">กระเป๋า</span>',label:'ของที่ระลึก (1) กระเป๋า',val:bagDone?'รับไปแล้ว':'รับได้',style:bagDone?'done':'ok'});
+      if(hasBag) rows.push({labelHtml:'ของที่ระลึก (1) <span style="color:#2563eb;font-weight:700">กระเป๋า</span>',label:'ของที่ระลึก (1) กระเป๋า',val:bagDone?'รับไปแล้ว':'รับได้',style:bagDone?'done':'ok',sub:bagDone?fmtShort(p.bag_received_date):null});
       if(otherItems) rows.push({labelHtml:`ของที่ระลึก (2) <span style="color:#2563eb;font-weight:700">${otherItems}</span>`,label:`ของที่ระลึก (2) ${otherItems}`,val:isFirst?'รับได้':'รับไปแล้ว',style:isFirst?'ok':'done'});
-      if(hasShirt) rows.push({labelHtml:`ของที่ระลึก (3) <span style="color:#0891b2;font-weight:700">เสื้อแจ็คเก็ต (${p.shirt_size})</span>`,label:`ของที่ระลึก (3) เสื้อแจ็คเก็ต`,val:shirtDone?'รับไปแล้ว':'รับได้',style:shirtDone?'done':'ok'});
+      if(hasShirt) rows.push({labelHtml:`ของที่ระลึก (3) <span style="color:#0891b2;font-weight:700">เสื้อแจ็คเก็ต (${p.shirt_size})</span>`,label:`ของที่ระลึก (3) เสื้อแจ็คเก็ต`,val:shirtDone?'รับไปแล้ว':'รับได้',style:shirtDone?'done':'ok',sub:shirtDone?fmtShort(p.shirt_received_date):null});
     }
     rows.push({label:'ประเภท',val:isWalkin?'Walk-in':(p.tag||'-'),style:'normal'});
     return rows;
@@ -542,9 +544,9 @@
       {label:'คูปองอาหาร',val:'รับไปแล้ว',style:'done'},
     ];
     if(!isWalkin){
-      if(hasBag) rows.push({labelHtml:'ของที่ระลึก (1) <span style="color:#2563eb;font-weight:700">กระเป๋า</span>',label:'ของที่ระลึก (1) กระเป๋า',val:'รับไปแล้ว',style:'done'});
+      if(hasBag) rows.push({labelHtml:'ของที่ระลึก (1) <span style="color:#2563eb;font-weight:700">กระเป๋า</span>',label:'ของที่ระลึก (1) กระเป๋า',val:'รับไปแล้ว',style:'done',sub:fmtShort(p.bag_received_date)});
       if(otherItems) rows.push({labelHtml:`ของที่ระลึก (2) <span style="color:#2563eb;font-weight:700">${otherItems}</span>`,label:`ของที่ระลึก (2) ${otherItems}`,val:'รับไปแล้ว',style:'done'});
-      if(hasShirt) rows.push({labelHtml:`ของที่ระลึก (3) <span style="color:#0891b2;font-weight:700">เสื้อแจ็คเก็ต (${p.shirt_size})</span>`,label:`ของที่ระลึก (3) เสื้อแจ็คเก็ต`,val:shirtDone?'รับไปแล้ว':'รับได้',style:shirtDone?'done':'ok'});
+      if(hasShirt) rows.push({labelHtml:`ของที่ระลึก (3) <span style="color:#0891b2;font-weight:700">เสื้อแจ็คเก็ต (${p.shirt_size})</span>`,label:`ของที่ระลึก (3) เสื้อแจ็คเก็ต`,val:shirtDone?'รับไปแล้ว':'รับได้',style:shirtDone?'done':'ok',sub:shirtDone?fmtShort(p.shirt_received_date):null});
     }
     rows.push({label:'ประเภท',val:isWalkin?'Walk-in':(p.tag||'-'),style:'normal'});
     return rows;
@@ -565,14 +567,14 @@
     const det=document.getElementById('modalDetail');
     if(rows&&rows.length>0){
       det.style.display='block';
-      det.innerHTML=rows.map(r=>`<div class="detail-row"><span class="detail-label">${r.labelHtml||r.label}</span><span class="detail-val ${r.style==='done'?'done':r.style==='ok'?'ok':r.style==='warn'?'warn':''}">${r.val}</span></div>`).join('');
+      det.innerHTML=rows.map(r=>`<div class="detail-row" style="${r.sub?'align-items:flex-start':''}"><span class="detail-label" style="${r.sub?'padding-top:2px':''}"><span>${r.labelHtml||r.label}</span></span><span style="text-align:right;"><span class="detail-val ${r.style==='done'?'done':r.style==='ok'?'ok':r.style==='warn'?'warn':''}">${r.val}</span>${r.sub?`<br><span style="font-size:0.7rem;color:#94a3b8;font-weight:400;">${r.sub}</span>`:''}</span></div>`).join('');
     } else det.style.display='none';
     document.getElementById('modalOverlay').classList.remove('hidden');
   }
 
   async function markShirtNow(pId, shirtSize, btn){
     btn.disabled=true; btn.textContent='⏳ กำลังบันทึก...';
-    const today=new Date().toLocaleDateString('th-TH',{timeZone:'Asia/Bangkok',year:'numeric',month:'long',day:'numeric'});
+    const today=new Date().toLocaleDateString('en-CA',{timeZone:'Asia/Bangkok'});
     try{
       const res=await sbFetch(`/rest/v1/participants?id=eq.${pId}`,'PATCH',{shirt_received:true,shirt_received_date:today});
       if(!res.ok&&res.status!==204){const et=await res.text().catch(()=>''); console.error('markShirt PATCH failed',res.status,et);}
