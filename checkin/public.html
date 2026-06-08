@@ -281,63 +281,53 @@
       </div>
     </div>
 
-    <!-- Zone card: ภายใน — department ranking -->
+    <!-- Zone card: merged with toggle -->
     <div class="dept-card">
-      <div class="dept-card-header">
-        <div style="display:flex;align-items:center;gap:10px;">
-          <span style="display:inline-block;width:13px;height:13px;border-radius:50%;background:#16a34a;flex-shrink:0;"></span>
-          <div>
-            <div class="dept-card-title" style="display:flex;align-items:center;gap:8px;">
-              บุคลากรภายใน
-              <span id="zoneCountInt" style="font-size:0.8rem;color:#64748b;font-weight:400;"></span>
-            </div>
-            <div class="dept-card-sub">จากผู้เช็คอินแล้ว — แยกตามหน่วยงาน เรียงจากมากไปน้อย</div>
-          </div>
+      <div class="dept-card-header" style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+        <div>
+          <div class="dept-card-title">สถิติผู้เข้าร่วมงานแยกตามเขตสุขภาพ</div>
+          <div class="dept-card-sub">จากผู้ที่เช็คอินแล้ว — กดปุ่มเพื่อสลับมุมมอง</div>
+        </div>
+        <div style="display:flex;gap:6px;flex-shrink:0;padding-top:2px;">
+          <button id="zoneTabExt" onclick="switchZoneTab('ext')" style="padding:6px 14px;border-radius:20px;border:1.5px solid #ea580c;background:#ea580c;color:#fff;font-family:'Sarabun',sans-serif;font-size:0.82rem;font-weight:700;cursor:pointer;transition:all .15s;">🌏 บุคคลภายนอก <span id="zoneCountExt" style="font-weight:400;opacity:0.9;"></span></button>
+          <button id="zoneTabInt" onclick="switchZoneTab('int')" style="padding:6px 14px;border-radius:20px;border:1.5px solid #e2e8f0;background:transparent;color:#64748b;font-family:'Sarabun',sans-serif;font-size:0.82rem;font-weight:400;cursor:pointer;transition:all .15s;">🏢 บุคลากรภายใน <span id="zoneCountInt" style="font-weight:400;opacity:0.9;"></span></button>
         </div>
       </div>
-      <div style="display:flex;flex-wrap:wrap;gap:12px;padding:16px;align-items:flex-start;">
-        <div style="flex:0 0 160px;max-width:180px;"><canvas id="zoneChartInt"></canvas></div>
-        <div style="flex:1;min-width:200px;overflow-x:auto;max-height:360px;overflow-y:auto;">
-          <table style="width:100%;border-collapse:collapse;font-size:0.83rem;">
-            <thead><tr style="position:sticky;top:0;background:#fff;z-index:1;">
-              <th style="padding:6px 10px;width:32px;text-align:left;font-size:0.72rem;font-weight:700;color:var(--zone-th-c);border-bottom:2px solid var(--zone-th-bdr);">#</th>
-              <th style="padding:6px 10px;text-align:left;font-size:0.72rem;font-weight:700;color:var(--zone-th-c);border-bottom:2px solid var(--zone-th-bdr);">หน่วยงาน</th>
-              <th style="padding:6px 10px;text-align:right;font-size:0.72rem;font-weight:700;color:var(--zone-th-c);border-bottom:2px solid var(--zone-th-bdr);">คน</th>
-              <th style="padding:6px 10px;text-align:left;font-size:0.72rem;font-weight:700;color:var(--zone-th-c);border-bottom:2px solid var(--zone-th-bdr);">สัดส่วน</th>
-            </tr></thead>
-            <tbody id="zoneBodyInt"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
 
-    <!-- Zone card: ภายนอก — map + province ranking -->
-    <div class="dept-card">
-      <div class="dept-card-header">
-        <div style="display:flex;align-items:center;gap:10px;">
-          <span style="display:inline-block;width:13px;height:13px;border-radius:50%;background:#ea580c;flex-shrink:0;"></span>
-          <div>
-            <div class="dept-card-title" style="display:flex;align-items:center;gap:8px;">
-              บุคคลภายนอก
-              <span id="zoneCountExt" style="font-size:0.8rem;color:#64748b;font-weight:400;"></span>
-            </div>
-            <div class="dept-card-sub">จากผู้เช็คอินแล้ว — สีแผนที่แยกตามเขตสุขภาพ เรียงจากมากไปน้อย</div>
+      <!-- External view (default shown) -->
+      <div id="zoneViewExt">
+        <div style="display:flex;flex-wrap:wrap;gap:12px;padding:16px;align-items:flex-start;">
+          <div style="flex:0 0 200px;max-width:220px;">
+            <div id="zoneMapExt" style="position:relative;width:100%;"></div>
+          </div>
+          <div style="flex:1;min-width:200px;overflow-x:auto;max-height:420px;overflow-y:auto;">
+            <table style="width:100%;border-collapse:collapse;font-size:0.83rem;">
+              <thead><tr style="position:sticky;top:0;background:#fff;z-index:1;">
+                <th style="padding:6px 10px;text-align:left;font-size:0.72rem;font-weight:700;color:var(--zone-th-c);border-bottom:2px solid var(--zone-th-bdr);">เขตสุขภาพ</th>
+                <th style="padding:6px 10px;text-align:right;font-size:0.72rem;font-weight:700;color:var(--zone-th-c);border-bottom:2px solid var(--zone-th-bdr);">คน</th>
+                <th style="padding:6px 10px;text-align:right;font-size:0.72rem;font-weight:700;color:var(--zone-th-c);border-bottom:2px solid var(--zone-th-bdr);">%</th>
+              </tr></thead>
+              <tbody id="zoneBodyExt"></tbody>
+            </table>
           </div>
         </div>
       </div>
-      <div style="display:flex;flex-wrap:wrap;gap:12px;padding:16px;align-items:flex-start;">
-        <div style="flex:0 0 200px;max-width:220px;">
-          <div id="zoneMapExt" style="position:relative;width:100%;"></div>
-        </div>
-        <div style="flex:1;min-width:200px;overflow-x:auto;max-height:420px;overflow-y:auto;">
-          <table style="width:100%;border-collapse:collapse;font-size:0.83rem;">
-            <thead><tr style="position:sticky;top:0;background:#fff;z-index:1;">
-              <th style="padding:6px 10px;text-align:left;font-size:0.72rem;font-weight:700;color:var(--zone-th-c);border-bottom:2px solid var(--zone-th-bdr);">เขตสุขภาพ</th>
-              <th style="padding:6px 10px;text-align:right;font-size:0.72rem;font-weight:700;color:var(--zone-th-c);border-bottom:2px solid var(--zone-th-bdr);">คน</th>
-              <th style="padding:6px 10px;text-align:right;font-size:0.72rem;font-weight:700;color:var(--zone-th-c);border-bottom:2px solid var(--zone-th-bdr);">%</th>
-            </tr></thead>
-            <tbody id="zoneBodyExt"></tbody>
-          </table>
+
+      <!-- Internal view (hidden by default) -->
+      <div id="zoneViewInt" style="display:none;">
+        <div style="display:flex;flex-wrap:wrap;gap:12px;padding:16px;align-items:flex-start;">
+          <div style="flex:0 0 160px;max-width:180px;"><canvas id="zoneChartInt"></canvas></div>
+          <div style="flex:1;min-width:200px;overflow-x:auto;max-height:360px;overflow-y:auto;">
+            <table style="width:100%;border-collapse:collapse;font-size:0.83rem;">
+              <thead><tr style="position:sticky;top:0;background:#fff;z-index:1;">
+                <th style="padding:6px 10px;width:32px;text-align:left;font-size:0.72rem;font-weight:700;color:var(--zone-th-c);border-bottom:2px solid var(--zone-th-bdr);">#</th>
+                <th style="padding:6px 10px;text-align:left;font-size:0.72rem;font-weight:700;color:var(--zone-th-c);border-bottom:2px solid var(--zone-th-bdr);">หน่วยงาน</th>
+                <th style="padding:6px 10px;text-align:right;font-size:0.72rem;font-weight:700;color:var(--zone-th-c);border-bottom:2px solid var(--zone-th-bdr);">คน</th>
+                <th style="padding:6px 10px;text-align:left;font-size:0.72rem;font-weight:700;color:var(--zone-th-c);border-bottom:2px solid var(--zone-th-bdr);">สัดส่วน</th>
+              </tr></thead>
+              <tbody id="zoneBodyInt"></tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
@@ -536,6 +526,21 @@ function renderTrendChart() {
       }
     }
   });
+}
+
+function switchZoneTab(tab){
+  document.getElementById('zoneViewExt').style.display=tab==='ext'?'':'none';
+  document.getElementById('zoneViewInt').style.display=tab==='int'?'':'none';
+  const btnExt=document.getElementById('zoneTabExt');
+  const btnInt=document.getElementById('zoneTabInt');
+  if(tab==='ext'){
+    btnExt.style.cssText='padding:6px 14px;border-radius:20px;border:1.5px solid #ea580c;background:#ea580c;color:#fff;font-family:Sarabun,sans-serif;font-size:0.82rem;font-weight:700;cursor:pointer;transition:all .15s;';
+    btnInt.style.cssText='padding:6px 14px;border-radius:20px;border:1.5px solid #e2e8f0;background:transparent;color:#64748b;font-family:Sarabun,sans-serif;font-size:0.82rem;font-weight:400;cursor:pointer;transition:all .15s;';
+  } else {
+    btnInt.style.cssText='padding:6px 14px;border-radius:20px;border:1.5px solid #16a34a;background:#16a34a;color:#fff;font-family:Sarabun,sans-serif;font-size:0.82rem;font-weight:700;cursor:pointer;transition:all .15s;';
+    btnExt.style.cssText='padding:6px 14px;border-radius:20px;border:1.5px solid #e2e8f0;background:transparent;color:#64748b;font-family:Sarabun,sans-serif;font-size:0.82rem;font-weight:400;cursor:pointer;transition:all .15s;';
+  }
+  if(tab==='int'&&zoneIntInst) setTimeout(()=>zoneIntInst.resize(),20);
 }
 
 function renderZonePanel(data, bodyId, countId){
