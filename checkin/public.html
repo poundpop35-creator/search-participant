@@ -281,49 +281,58 @@
       </div>
     </div>
 
-    <!-- Zone chart (check-in data) — split internal / external -->
+    <!-- Zone card: ภายใน — department ranking -->
     <div class="dept-card">
       <div class="dept-card-header">
-        <div class="dept-card-title">สถิติผู้เข้าร่วมงานแยกตามเขตสุขภาพ</div>
-        <div class="dept-card-sub">จากผู้ที่เช็คอินแล้ว — แยกบุคลากรภายใน และ บุคคลภายนอก</div>
-      </div>
-
-      <!-- ภายใน -->
-      <div style="padding:10px 18px;border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:rgba(22,163,74,0.07);display:flex;align-items:center;gap:8px;">
-        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#16a34a;flex-shrink:0;"></span>
-        <span style="font-weight:700;color:#16a34a;font-size:0.88rem;">บุคลากรภายใน</span>
-        <span id="zoneCountInt" style="font-size:0.78rem;color:#64748b;"></span>
-      </div>
-      <div style="display:flex;flex-wrap:wrap;gap:12px;padding:16px;border-bottom:2px solid var(--border);align-items:flex-start;">
-        <div style="flex:0 0 160px;max-width:180px;margin:0 auto;"><canvas id="zoneChartInt"></canvas></div>
-        <div style="flex:1;min-width:200px;overflow-x:auto;">
-          <table style="width:100%;border-collapse:collapse;font-size:0.83rem;">
-            <thead><tr>
-              <th style="padding:6px 10px;text-align:left;font-size:0.72rem;font-weight:700;color:var(--zone-th-c);border-bottom:2px solid var(--zone-th-bdr);">เขตสุขภาพ</th>
-              <th style="padding:6px 10px;text-align:right;font-size:0.72rem;font-weight:700;color:var(--zone-th-c);border-bottom:2px solid var(--zone-th-bdr);">คน</th>
-              <th style="padding:6px 10px;text-align:right;font-size:0.72rem;font-weight:700;color:var(--zone-th-c);border-bottom:2px solid var(--zone-th-bdr);">%</th>
-            </tr></thead>
-            <tbody id="zoneBodyInt"></tbody>
-          </table>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="display:inline-block;width:13px;height:13px;border-radius:50%;background:#16a34a;flex-shrink:0;"></span>
+          <div>
+            <div class="dept-card-title" style="display:flex;align-items:center;gap:8px;">
+              บุคลากรภายใน
+              <span id="zoneCountInt" style="font-size:0.8rem;color:#64748b;font-weight:400;"></span>
+            </div>
+            <div class="dept-card-sub">จากผู้เช็คอินแล้ว — แยกตามหน่วยงาน เรียงจากมากไปน้อย</div>
+          </div>
         </div>
       </div>
+      <div style="overflow-x:auto;max-height:360px;overflow-y:auto;">
+        <table style="width:100%;border-collapse:collapse;font-size:0.83rem;">
+          <thead><tr style="position:sticky;top:0;background:#fff;z-index:1;">
+            <th style="padding:6px 10px;width:32px;text-align:left;font-size:0.72rem;font-weight:700;color:var(--zone-th-c);border-bottom:2px solid var(--zone-th-bdr);">#</th>
+            <th style="padding:6px 10px;text-align:left;font-size:0.72rem;font-weight:700;color:var(--zone-th-c);border-bottom:2px solid var(--zone-th-bdr);">หน่วยงาน</th>
+            <th style="padding:6px 10px;text-align:right;font-size:0.72rem;font-weight:700;color:var(--zone-th-c);border-bottom:2px solid var(--zone-th-bdr);">คน</th>
+            <th style="padding:6px 10px;text-align:left;font-size:0.72rem;font-weight:700;color:var(--zone-th-c);border-bottom:2px solid var(--zone-th-bdr);">สัดส่วน</th>
+          </tr></thead>
+          <tbody id="zoneBodyInt"></tbody>
+        </table>
+      </div>
+    </div>
 
-      <!-- ภายนอก -->
-      <div style="padding:10px 18px;border-bottom:1px solid var(--border);background:rgba(234,88,12,0.07);display:flex;align-items:center;gap:8px;">
-        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#ea580c;flex-shrink:0;"></span>
-        <span style="font-weight:700;color:#ea580c;font-size:0.88rem;">บุคคลภายนอก</span>
-        <span id="zoneCountExt" style="font-size:0.78rem;color:#64748b;"></span>
+    <!-- Zone card: ภายนอก — map + province ranking -->
+    <div class="dept-card">
+      <div class="dept-card-header">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="display:inline-block;width:13px;height:13px;border-radius:50%;background:#ea580c;flex-shrink:0;"></span>
+          <div>
+            <div class="dept-card-title" style="display:flex;align-items:center;gap:8px;">
+              บุคคลภายนอก
+              <span id="zoneCountExt" style="font-size:0.8rem;color:#64748b;font-weight:400;"></span>
+            </div>
+            <div class="dept-card-sub">จากผู้เช็คอินแล้ว — สีแผนที่แยกตามเขตสุขภาพ เรียงจากมากไปน้อย</div>
+          </div>
+        </div>
       </div>
       <div style="display:flex;flex-wrap:wrap;gap:12px;padding:16px;align-items:flex-start;">
         <div style="flex:0 0 200px;max-width:220px;">
           <div id="zoneMapExt" style="position:relative;width:100%;"></div>
         </div>
-        <div style="flex:1;min-width:200px;overflow-x:auto;">
+        <div style="flex:1;min-width:200px;overflow-x:auto;max-height:420px;overflow-y:auto;">
           <table style="width:100%;border-collapse:collapse;font-size:0.83rem;">
-            <thead><tr>
-              <th style="padding:6px 10px;text-align:left;font-size:0.72rem;font-weight:700;color:var(--zone-th-c);border-bottom:2px solid var(--zone-th-bdr);">เขตสุขภาพ</th>
+            <thead><tr style="position:sticky;top:0;background:#fff;z-index:1;">
+              <th style="padding:6px 10px;width:32px;text-align:left;font-size:0.72rem;font-weight:700;color:var(--zone-th-c);border-bottom:2px solid var(--zone-th-bdr);">#</th>
+              <th style="padding:6px 10px;text-align:left;font-size:0.72rem;font-weight:700;color:var(--zone-th-c);border-bottom:2px solid var(--zone-th-bdr);">จังหวัด</th>
               <th style="padding:6px 10px;text-align:right;font-size:0.72rem;font-weight:700;color:var(--zone-th-c);border-bottom:2px solid var(--zone-th-bdr);">คน</th>
-              <th style="padding:6px 10px;text-align:right;font-size:0.72rem;font-weight:700;color:var(--zone-th-c);border-bottom:2px solid var(--zone-th-bdr);">%</th>
+              <th style="padding:6px 10px;text-align:left;font-size:0.72rem;font-weight:700;color:var(--zone-th-c);border-bottom:2px solid var(--zone-th-bdr);">สัดส่วน</th>
             </tr></thead>
             <tbody id="zoneBodyExt"></tbody>
           </table>
@@ -434,7 +443,7 @@ const ZONE_COLORS_PUB=['#94a3b8','#3b82f6','#10b981','#f59e0b','#ef4444','#8b5cf
 function getZonePub(prov){if(!prov)return null;if(HEALTH_ZONE[prov])return HEALTH_ZONE[prov];if(prov.includes('กรมวิทยาศาสตร์'))return 13;return null;}
 function fmtPctPub(cnt,total){if(!total||!cnt)return'0%';const v=cnt/total*100;return v<1?v.toFixed(1)+'%':Math.round(v)+'%';}
 
-let zoneIntInst=null;
+let zoneIntInst=null; // kept for safety, unused
 
 const EN_TO_TH={
   'Amnat Charoen':'อำนาจเจริญ','Ang Thong':'อ่างทอง','Bangkok':'กรุงเทพมหานคร',
@@ -526,105 +535,79 @@ function renderTrendChart() {
   });
 }
 
-function renderZonePanel(data, canvasId, bodyId, countId, subType){
+function renderZonePanel(data, bodyId, countId){
   const total=data.length;
+  document.getElementById(countId).textContent=total?`(${total.toLocaleString()} คน)`:'';
   if(!total){
-    document.getElementById(bodyId).innerHTML='<tr><td colspan="3" style="text-align:center;padding:16px;color:#94a3b8;">ยังไม่มีข้อมูล</td></tr>';
-    document.getElementById(countId).textContent='';
-    if(zoneIntInst){zoneIntInst.destroy();zoneIntInst=null;}
+    document.getElementById(bodyId).innerHTML='<tr><td colspan="4" style="text-align:center;padding:16px;color:#94a3b8;">ยังไม่มีข้อมูล</td></tr>';
     return;
   }
-  document.getElementById(countId).textContent=`(${total.toLocaleString()} คน)`;
-  const counts={}, subByZone={};
+  const deptCounts={};
   data.forEach(r=>{
-    const prov=(r.participants?.province||'').trim()||'(ว่าง)';
-    const z=getZonePub(prov==='(ว่าง)'?'':prov)||13;
-    counts[z]=(counts[z]||0)+1;
-    if(!subByZone[z]) subByZone[z]={};
-    const subKey=subType==='dept'?((r.participants?.dept||'').trim()||'(ว่าง)'):prov;
-    subByZone[z][subKey]=(subByZone[z][subKey]||0)+1;
+    const d=(r.participants?.dept||'').trim()||'(ไม่ระบุ)';
+    deptCounts[d]=(deptCounts[d]||0)+1;
   });
-  const entries=Object.entries(counts).map(([z,n])=>({z:Number(z),n})).sort((a,b)=>a.z-b.z);
-  const chartData=entries.map(e=>e.n);
-  const colors=entries.map(e=>ZONE_COLORS_PUB[e.z%ZONE_COLORS_PUB.length]);
-  if(zoneIntInst) zoneIntInst.destroy();
-  const ctx=document.getElementById(canvasId).getContext('2d');
-  zoneIntInst=new Chart(ctx,{
-    type:'doughnut',
-    data:{labels:entries.map(e=>ZONE_NAMES_PUB[e.z]||'เขต '+e.z),datasets:[{data:chartData,backgroundColor:colors.slice(),borderWidth:2,borderColor:'#fff',hoverOffset:6}]},
-    options:{responsive:true,cutout:'58%',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.label}: ${c.raw.toLocaleString()} คน (${Math.round(c.raw/total*100)}%)`}}}},
-    plugins:[{id:'zoneCenterTextInt',afterDraw(chart){
-      const {ctx:c,chartArea:{top,left,right,bottom}}=chart;
-      const cx=(left+right)/2,cy=(top+bottom)/2;
-      c.save();c.textAlign='center';c.textBaseline='middle';
-      c.font='bold 1.8rem Sarabun,sans-serif';c.fillStyle='#1e293b';
-      c.fillText(total.toLocaleString(),cx,cy);c.restore();
-    }}]
-  });
-  document.getElementById(bodyId).innerHTML=entries.map((e,idx)=>{
-    const pid=`zint-${e.z}`;
-    const subRows=Object.entries(subByZone[e.z]||{}).sort((a,b)=>b[1]-a[1]).map(([sub,cnt])=>`
-      <tr style="background:var(--prov-bg);">
-        <td style="padding:3px 10px 3px 28px;font-size:0.78rem;color:var(--prov-c);">⌙ ${sub}</td>
-        <td style="padding:3px 10px;text-align:right;font-size:0.78rem;color:var(--prov-c);">${cnt.toLocaleString()}</td>
-        <td style="padding:3px 10px;text-align:right;font-size:0.78rem;color:var(--prov-c2);">${fmtPctPub(cnt,total)}</td>
-      </tr>`).join('');
-    return`<tr style="cursor:pointer;border-bottom:1px solid #e2e8f0;" onclick="toggleZonePub('zint-${e.z}',this.querySelector('.zarr'))">
-      <td style="padding:5px 10px;">
-        <span class="zarr" style="display:inline-block;width:12px;font-size:0.65rem;color:#94a3b8;">▶</span>
-        <span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:${colors[idx]};margin:0 4px 0 2px;vertical-align:middle;"></span>${ZONE_NAMES_PUB[e.z]||'เขต '+e.z}</td>
-      <td style="padding:5px 10px;text-align:right;font-weight:700;">${e.n.toLocaleString()}</td>
-      <td style="padding:5px 10px;text-align:right;color:#94a3b8;">${fmtPctPub(e.n,total)}</td>
-    </tr>
-    <tr id="${pid}" style="display:none;"><td colspan="3" style="padding:0;border-bottom:1px solid #e2e8f0;"><table style="width:100%;border-collapse:collapse;">${subRows}</table></td></tr>`;
-  }).join('');
+  const entries=Object.entries(deptCounts).sort((a,b)=>b[1]-a[1]);
+  const maxN=entries[0]?.[1]||1;
+  document.getElementById(bodyId).innerHTML=entries.map(([dept,cnt],idx)=>`
+    <tr style="border-bottom:1px solid #e2e8f0;">
+      <td style="padding:5px 10px;color:#94a3b8;font-size:0.72rem;font-weight:700;">${idx+1}</td>
+      <td style="padding:5px 10px;">${dept}</td>
+      <td style="padding:5px 10px;text-align:right;font-weight:700;">${cnt.toLocaleString()}</td>
+      <td style="padding:5px 14px 5px 10px;min-width:100px;">
+        <div style="display:flex;align-items:center;gap:5px;">
+          <div style="flex:1;background:#e2e8f0;border-radius:4px;height:6px;overflow:hidden;">
+            <div style="width:${(cnt/maxN*100).toFixed(1)}%;background:#16a34a;height:100%;border-radius:4px;"></div>
+          </div>
+          <span style="font-size:0.7rem;color:#94a3b8;min-width:28px;">${fmtPctPub(cnt,total)}</span>
+        </div>
+      </td>
+    </tr>`).join('');
 }
 
 async function renderExtPanel(extData){
   const total=extData.length;
   document.getElementById('zoneCountExt').textContent=total?`(${total.toLocaleString()} คน)`:'';
 
-  // Province counts for map
+  // Build province counts
   const provCounts={};
   extData.forEach(r=>{
     const p=(r.participants?.province||'').trim();
     if(p) provCounts[p]=(provCounts[p]||0)+1;
   });
 
-  // Zone table
+  // Province ranking table (sorted by count desc)
   if(!total){
-    document.getElementById('zoneBodyExt').innerHTML='<tr><td colspan="3" style="text-align:center;padding:16px;color:#94a3b8;">ยังไม่มีข้อมูล</td></tr>';
+    document.getElementById('zoneBodyExt').innerHTML='<tr><td colspan="4" style="text-align:center;padding:16px;color:#94a3b8;">ยังไม่มีข้อมูล</td></tr>';
   } else {
-    const counts={},subByZone={};
-    extData.forEach(r=>{
-      const prov=(r.participants?.province||'').trim()||'(ว่าง)';
-      const z=getZonePub(prov==='(ว่าง)'?'':prov)||13;
-      counts[z]=(counts[z]||0)+1;
-      if(!subByZone[z]) subByZone[z]={};
-      subByZone[z][prov]=(subByZone[z][prov]||0)+1;
-    });
-    const entries=Object.entries(counts).map(([z,n])=>({z:Number(z),n})).sort((a,b)=>a.z-b.z);
-    const colors=entries.map(e=>ZONE_COLORS_PUB[e.z%ZONE_COLORS_PUB.length]);
-    document.getElementById('zoneBodyExt').innerHTML=entries.map((e,idx)=>{
-      const pid=`zext-${e.z}`;
-      const subRows=Object.entries(subByZone[e.z]||{}).sort((a,b)=>b[1]-a[1]).map(([sub,cnt])=>`
-        <tr style="background:var(--prov-bg);">
-          <td style="padding:3px 10px 3px 28px;font-size:0.78rem;color:var(--prov-c);">⌙ ${sub}</td>
-          <td style="padding:3px 10px;text-align:right;font-size:0.78rem;color:var(--prov-c);">${cnt.toLocaleString()}</td>
-          <td style="padding:3px 10px;text-align:right;font-size:0.78rem;color:var(--prov-c2);">${fmtPctPub(cnt,total)}</td>
-        </tr>`).join('');
-      return`<tr style="cursor:pointer;border-bottom:1px solid #e2e8f0;" onclick="toggleZonePub('${pid}',this.querySelector('.zarr'))">
+    const provEntries=Object.entries(provCounts).sort((a,b)=>b[1]-a[1]);
+    const maxN=provEntries[0]?.[1]||1;
+    document.getElementById('zoneBodyExt').innerHTML=provEntries.map(([prov,cnt],idx)=>{
+      const z=getZonePub(prov)||13;
+      const zc=ZONE_COLORS_PUB[z%ZONE_COLORS_PUB.length];
+      return`<tr style="border-bottom:1px solid #e2e8f0;">
+        <td style="padding:5px 10px;color:#94a3b8;font-size:0.72rem;font-weight:700;">${idx+1}</td>
         <td style="padding:5px 10px;">
-          <span class="zarr" style="display:inline-block;width:12px;font-size:0.65rem;color:#94a3b8;">▶</span>
-          <span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:${colors[idx]};margin:0 4px 0 2px;vertical-align:middle;"></span>${ZONE_NAMES_PUB[e.z]||'เขต '+e.z}</td>
-        <td style="padding:5px 10px;text-align:right;font-weight:700;">${e.n.toLocaleString()}</td>
-        <td style="padding:5px 10px;text-align:right;color:#94a3b8;">${fmtPctPub(e.n,total)}</td>
-      </tr>
-      <tr id="${pid}" style="display:none;"><td colspan="3" style="padding:0;border-bottom:1px solid #e2e8f0;"><table style="width:100%;border-collapse:collapse;">${subRows}</table></td></tr>`;
+          <div style="display:flex;align-items:center;gap:5px;">
+            <span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:${zc};flex-shrink:0;"></span>
+            <span>${prov}</span>
+            <span style="font-size:0.65rem;color:#94a3b8;">${ZONE_NAMES_PUB[z]||''}</span>
+          </div>
+        </td>
+        <td style="padding:5px 10px;text-align:right;font-weight:700;">${cnt.toLocaleString()}</td>
+        <td style="padding:5px 14px 5px 10px;min-width:100px;">
+          <div style="display:flex;align-items:center;gap:5px;">
+            <div style="flex:1;background:#e2e8f0;border-radius:4px;height:6px;overflow:hidden;">
+              <div style="width:${(cnt/maxN*100).toFixed(1)}%;background:${zc};height:100%;border-radius:4px;"></div>
+            </div>
+            <span style="font-size:0.7rem;color:#94a3b8;min-width:28px;">${fmtPctPub(cnt,total)}</span>
+          </div>
+        </td>
+      </tr>`;
     }).join('');
   }
 
-  // Thailand choropleth map
+  // Thailand choropleth map — zone-based coloring
   const container=document.getElementById('zoneMapExt');
   try {
     if(!thaiGeoCache) thaiGeoCache=await d3.json('https://raw.githubusercontent.com/apisit/thailand.json/master/thailand.json');
@@ -634,51 +617,59 @@ async function renderExtPanel(extData){
     container.style.height=h+'px';
     const proj=d3.geoMercator().fitSize([w,h],thaiGeoCache);
     const pathGen=d3.geoPath().projection(proj);
-    const maxCnt=Math.max(...Object.values(provCounts),1);
-    const colorFn=t=>d3.interpolateOranges(t*0.8+0.15);
-    const scale=d3.scaleSequential().domain([0,maxCnt]).interpolator(colorFn);
+
     const svg=d3.select(container).append('svg')
       .attr('width',w).attr('height',h).style('display','block');
-    // Tooltip div
     const tip=d3.select(container).append('div')
       .style('position','absolute').style('background','rgba(15,23,42,0.9)')
       .style('color','#fff').style('border-radius','6px').style('padding','5px 10px')
       .style('font-size','0.78rem').style('font-family','Sarabun,sans-serif')
       .style('pointer-events','none').style('opacity','0').style('white-space','nowrap')
       .style('z-index','20').style('top','0').style('left','0');
+
     svg.selectAll('path')
       .data(thaiGeoCache.features).join('path')
       .attr('d',pathGen)
       .attr('fill',d=>{
         const th=EN_TO_TH[d.properties.name];
-        const cnt=th?(provCounts[th]||0):0;
-        return cnt>0?scale(cnt):'#e8edf2';
+        if(!th) return '#e8edf2';
+        const z=getZonePub(th)||13;
+        const base=ZONE_COLORS_PUB[z%ZONE_COLORS_PUB.length];
+        const cnt=provCounts[th]||0;
+        if(!cnt){
+          const c=d3.color(base); c.opacity=0.18; return c.toString();
+        }
+        return base;
       })
       .attr('stroke','#fff').attr('stroke-width',0.6).attr('stroke-linejoin','round')
       .on('mouseover',function(event,d){
         const th=EN_TO_TH[d.properties.name]||d.properties.name;
+        const z=getZonePub(th)||13;
         const cnt=provCounts[th]||0;
-        tip.style('opacity','1').html(`<b>${th}</b>: ${cnt.toLocaleString()} คน`);
-        d3.select(this).attr('stroke','#ea580c').attr('stroke-width',1.8);
+        tip.style('opacity','1').html(`<b>${th}</b> · ${ZONE_NAMES_PUB[z]||'เขต '+z}<br>${cnt.toLocaleString()} คน`);
+        d3.select(this).attr('stroke','#1e293b').attr('stroke-width',1.8);
       })
       .on('mousemove',function(event){
         const r=container.getBoundingClientRect();
-        tip.style('left',(event.clientX-r.left+10)+'px').style('top',(event.clientY-r.top-34)+'px');
+        tip.style('left',(event.clientX-r.left+10)+'px').style('top',(event.clientY-r.top-44)+'px');
       })
       .on('mouseout',function(){
         tip.style('opacity','0');
         d3.select(this).attr('stroke','#fff').attr('stroke-width',0.6);
       });
-    // Legend gradient
+
+    // Zone color legend (only zones with participants)
     if(total>0){
-      const lw=w-24,lh=8;
-      const leg=svg.append('g').attr('transform',`translate(12,${h-22})`);
-      const defs=svg.append('defs');
-      const grd=defs.append('linearGradient').attr('id','extMapGrad');
-      [0,0.25,0.5,0.75,1].forEach(t=>grd.append('stop').attr('offset',t*100+'%').attr('stop-color',scale(maxCnt*t)));
-      leg.append('rect').attr('width',lw).attr('height',lh).attr('rx',3).attr('fill','url(#extMapGrad)').attr('opacity',0.9);
-      leg.append('text').attr('y',lh+9).attr('font-size','0.6rem').attr('fill','#64748b').attr('font-family','Sarabun').text('0');
-      leg.append('text').attr('x',lw).attr('y',lh+9).attr('font-size','0.6rem').attr('fill','#64748b').attr('font-family','Sarabun').attr('text-anchor','end').text(maxCnt.toLocaleString()+' คน');
+      const zoneSeen={};
+      Object.keys(provCounts).forEach(p=>{ const z=getZonePub(p)||13; zoneSeen[z]=(zoneSeen[z]||0)+provCounts[p]; });
+      const zoneEntries=Object.entries(zoneSeen).map(([z,n])=>({z:Number(z),n})).sort((a,b)=>a.z-b.z);
+      const legH=zoneEntries.length*14+4;
+      const leg=svg.append('g').attr('transform',`translate(4,${h-legH})`);
+      zoneEntries.forEach((e,i)=>{
+        const c=ZONE_COLORS_PUB[e.z%ZONE_COLORS_PUB.length];
+        leg.append('rect').attr('y',i*14).attr('width',9).attr('height',9).attr('rx',2).attr('fill',c);
+        leg.append('text').attr('x',12).attr('y',i*14+8).attr('font-size','0.58rem').attr('fill','#475569').attr('font-family','Sarabun').text(`${ZONE_NAMES_PUB[e.z]||'เขต '+e.z} (${e.n})`);
+      });
     }
   } catch(e){
     container.innerHTML='<div style="padding:20px;text-align:center;font-size:0.82rem;color:#94a3b8;">ไม่สามารถโหลดแผนที่ได้</div>';
@@ -853,7 +844,7 @@ function renderStats() {
   // Zone chart (check-in data) — split internal / external
   const intData=filtered.filter(r=>(r.participants?.internal_external||'').includes('ภายใน'));
   const extData=filtered.filter(r=>!(r.participants?.internal_external||'').includes('ภายใน'));
-  renderZonePanel(intData,'zoneChartInt','zoneBodyInt','zoneCountInt','dept');
+  renderZonePanel(intData,'zoneBodyInt','zoneCountInt');
   renderExtPanel(extData);
   renderTrendChart();
 }
