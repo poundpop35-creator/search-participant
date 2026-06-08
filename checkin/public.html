@@ -619,13 +619,13 @@ function highlightZonePub(z){
       if(selectedZonePub===null) return '#fff';
       const th=EN_TO_TH[d.properties.name];
       const pz=th?(getZonePub(th)||13):0;
-      return pz===selectedZonePub?'#1e293b':'#fff';
+      return '#fff';
     })
     .attr('stroke-width',d=>{
       if(selectedZonePub===null) return 0.6;
       const th=EN_TO_TH[d.properties.name];
       const pz=th?(getZonePub(th)||13):0;
-      return pz===selectedZonePub?1.8:0.4;
+      return pz===selectedZonePub?1.4:0.3;
     });
   document.querySelectorAll('#zoneBodyExt tr[data-zone]').forEach(row=>{
     const rz=Number(row.dataset.zone);
