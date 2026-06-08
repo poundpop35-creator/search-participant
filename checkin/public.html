@@ -289,8 +289,8 @@
           <div class="dept-card-sub">จากผู้ที่เช็คอินแล้ว — กดปุ่มเพื่อสลับมุมมอง</div>
         </div>
         <div style="display:flex;gap:6px;">
-          <button id="zoneTabExt" onclick="switchZoneTab('ext')" style="flex:1;padding:6px 14px;border-radius:20px;border:1.5px solid #ea580c;background:#ea580c;color:#fff;font-family:'Sarabun',sans-serif;font-size:0.82rem;font-weight:700;cursor:pointer;transition:all .15s;text-align:center;">🌏 บุคคลภายนอก <span id="zoneCountExt" style="font-weight:400;opacity:0.9;"></span></button>
-          <button id="zoneTabInt" onclick="switchZoneTab('int')" style="flex:1;padding:6px 14px;border-radius:20px;border:1.5px solid #e2e8f0;background:transparent;color:#64748b;font-family:'Sarabun',sans-serif;font-size:0.82rem;font-weight:400;cursor:pointer;transition:all .15s;text-align:center;">🏢 บุคลากรภายใน <span id="zoneCountInt" style="font-weight:400;opacity:0.9;"></span></button>
+          <button id="zoneTabExt" onclick="switchZoneTab('ext')" style="flex:1;padding:8px 14px;border-radius:20px;border:1.5px solid #ea580c;background:#ea580c;color:#fff;font-family:'Sarabun',sans-serif;font-size:0.82rem;font-weight:700;cursor:pointer;transition:all .15s;display:flex;flex-direction:column;align-items:center;gap:1px;">🌏 บุคคลภายนอก<span id="zoneCountExt" style="font-size:0.78rem;font-weight:400;opacity:0.85;"></span></button>
+          <button id="zoneTabInt" onclick="switchZoneTab('int')" style="flex:1;padding:8px 14px;border-radius:20px;border:1.5px solid #e2e8f0;background:transparent;color:#64748b;font-family:'Sarabun',sans-serif;font-size:0.82rem;font-weight:400;cursor:pointer;transition:all .15s;display:flex;flex-direction:column;align-items:center;gap:1px;">🏢 บุคลากรภายใน<span id="zoneCountInt" style="font-size:0.78rem;font-weight:400;opacity:0.85;"></span></button>
         </div>
       </div>
 
@@ -538,11 +538,11 @@ function switchZoneTab(tab){
   const btnExt=document.getElementById('zoneTabExt');
   const btnInt=document.getElementById('zoneTabInt');
   if(tab==='ext'){
-    btnExt.style.cssText='flex:1;padding:6px 14px;border-radius:20px;border:1.5px solid #ea580c;background:#ea580c;color:#fff;font-family:Sarabun,sans-serif;font-size:0.82rem;font-weight:700;cursor:pointer;transition:all .15s;text-align:center;';
-    btnInt.style.cssText='flex:1;padding:6px 14px;border-radius:20px;border:1.5px solid #e2e8f0;background:transparent;color:#64748b;font-family:Sarabun,sans-serif;font-size:0.82rem;font-weight:400;cursor:pointer;transition:all .15s;text-align:center;';
+    btnExt.style.cssText='flex:1;padding:8px 14px;border-radius:20px;border:1.5px solid #ea580c;background:#ea580c;color:#fff;font-family:Sarabun,sans-serif;font-size:0.82rem;font-weight:700;cursor:pointer;transition:all .15s;display:flex;flex-direction:column;align-items:center;gap:1px;';
+    btnInt.style.cssText='flex:1;padding:8px 14px;border-radius:20px;border:1.5px solid #e2e8f0;background:transparent;color:#64748b;font-family:Sarabun,sans-serif;font-size:0.82rem;font-weight:400;cursor:pointer;transition:all .15s;display:flex;flex-direction:column;align-items:center;gap:1px;';
   } else {
-    btnInt.style.cssText='flex:1;padding:6px 14px;border-radius:20px;border:1.5px solid #16a34a;background:#16a34a;color:#fff;font-family:Sarabun,sans-serif;font-size:0.82rem;font-weight:700;cursor:pointer;transition:all .15s;text-align:center;';
-    btnExt.style.cssText='flex:1;padding:6px 14px;border-radius:20px;border:1.5px solid #e2e8f0;background:transparent;color:#64748b;font-family:Sarabun,sans-serif;font-size:0.82rem;font-weight:400;cursor:pointer;transition:all .15s;text-align:center;';
+    btnInt.style.cssText='flex:1;padding:8px 14px;border-radius:20px;border:1.5px solid #16a34a;background:#16a34a;color:#fff;font-family:Sarabun,sans-serif;font-size:0.82rem;font-weight:700;cursor:pointer;transition:all .15s;display:flex;flex-direction:column;align-items:center;gap:1px;';
+    btnExt.style.cssText='flex:1;padding:8px 14px;border-radius:20px;border:1.5px solid #e2e8f0;background:transparent;color:#64748b;font-family:Sarabun,sans-serif;font-size:0.82rem;font-weight:400;cursor:pointer;transition:all .15s;display:flex;flex-direction:column;align-items:center;gap:1px;';
   }
   if(tab==='int'&&zoneIntInst) setTimeout(()=>zoneIntInst.resize(),20);
 }
