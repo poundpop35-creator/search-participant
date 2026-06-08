@@ -478,8 +478,9 @@ document.addEventListener('DOMContentLoaded', function() {
       <div id="pListView">
         <div style="display:flex;border-bottom:2px solid var(--border);padding:0 8px;">
           <button class="ptab active" id="ptab0" onclick="event.stopPropagation();switchPTab(0)">ลงทะเบียนล่วงหน้า <span id="pPreCount"></span></button>
-          <button class="ptab" id="ptab2" onclick="event.stopPropagation();switchPTab(2)">แยกตามเขตสุขภาพ</button>
+          <button class="ptab" id="ptab2" onclick="event.stopPropagation();switchPTab(2)">Chart แยกเขตสุขภาพ (ลงทะเบียนล่วงหน้า)</button>
           <button class="ptab" id="ptab1" onclick="event.stopPropagation();switchPTab(1)">Walk-in <span id="pWiCount"></span></button>
+          <button class="ptab" id="ptab3" onclick="event.stopPropagation();switchPTab(3)">Chart แยกเขตสุขภาพ (Walk-in)</button>
         </div>
         <!-- Zone tab content -->
         <div id="pZoneTabContent" style="display:none;padding:20px;">
@@ -489,6 +490,18 @@ document.addEventListener('DOMContentLoaded', function() {
               <table class="dtable">
                 <thead><tr><th>เขตสุขภาพ</th><th style="text-align:right;">คน</th><th style="text-align:right;">%</th></tr></thead>
                 <tbody id="zoneSumBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <!-- Walk-in zone tab content -->
+        <div id="pZoneWiTabContent" style="display:none;padding:20px;">
+          <div style="display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap;">
+            <div style="flex:0 0 200px;max-width:220px;margin:0 auto;"><canvas id="zoneWiChart"></canvas></div>
+            <div style="flex:1;min-width:220px;overflow-x:auto;">
+              <table class="dtable">
+                <thead><tr><th>เขตสุขภาพ</th><th style="text-align:right;">คน</th><th style="text-align:right;">%</th></tr></thead>
+                <tbody id="zoneWiBody"></tbody>
               </table>
             </div>
           </div>
@@ -744,7 +757,7 @@ let allData=[], filtered=[], curTab=0, curPage=1;
 let selPT=new Set(), selDPT=new Set(), selDDept=new Set(), selFDept=new Set();
 let deptRaw=[], dView='table', dChart=null;
 let totalPreReg=0, totalAll=0;
-let allParticipants=[], curPTab=0, curPPage=1, zoneChartPreInst=null, zoneChartWiInst=null, zoneSumInst=null;
+let allParticipants=[], curPTab=0, curPPage=1, zoneChartPreInst=null, zoneChartWiInst=null, zoneSumInst=null, zoneWiInst=null;
 const P_PAGE=20;
 const HEALTH_ZONE={
   'เชียงราย':1,'น่าน':1,'พะเยา':1,'แพร่':1,'เชียงใหม่':1,'แม่ฮ่องสอน':1,'ลำปาง':1,'ลำพูน':1,
@@ -1051,11 +1064,12 @@ function toggleDeptCard(){
 
 function switchPTab(t){
   curPTab=t; curPPage=1;
-  [0,1,2].forEach(i=>{const b=document.getElementById('ptab'+i);if(b)b.classList.toggle('active',i===t);});
-  const isZone=t===2;
-  document.getElementById('pListContent').style.display=isZone?'none':'block';
-  document.getElementById('pZoneTabContent').style.display=isZone?'block':'none';
-  if(isZone) renderZoneRegSummary();
+  [0,1,2,3].forEach(i=>{const b=document.getElementById('ptab'+i);if(b)b.classList.toggle('active',i===t);});
+  document.getElementById('pListContent').style.display=(t===0||t===1)?'block':'none';
+  document.getElementById('pZoneTabContent').style.display=t===2?'block':'none';
+  document.getElementById('pZoneWiTabContent').style.display=t===3?'block':'none';
+  if(t===2) renderZoneRegSummary();
+  else if(t===3) renderZoneWiSummary();
   else renderParticipants();
 }
 
@@ -1173,6 +1187,42 @@ function renderZoneRegSummary(){
     const provRows=Object.entries(provByZone[e.z]||{}).sort((a,b)=>b[1]-a[1])
       .map(([pv,cnt])=>`<tr style="background:#f8fafc;"><td style="padding:3px 10px 3px 26px;font-size:0.78rem;color:#64748b;">${pv}</td><td style="padding:3px 10px;text-align:right;font-size:0.78rem;color:#64748b;">${cnt.toLocaleString()}</td><td style="padding:3px 10px;text-align:right;font-size:0.78rem;color:#94a3b8;">${Math.round(cnt/total*100)}%</td></tr>`).join('');
     const detId=`zsRow-${e.z}`;
+    return`<tr style="cursor:pointer;border-bottom:1px solid #e2e8f0;" onclick="const r=document.getElementById('${detId}');r.style.display=r.style.display==='none'?'table-row':'none'">
+      <td style="padding:6px 10px;"><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:${bgColors[i]};margin-right:6px;vertical-align:middle;"></span>${ZONE_NAMES[e.z]||'เขตสุขภาพที่ '+e.z}</td>
+      <td style="padding:6px 10px;text-align:right;font-weight:700;">${e.n.toLocaleString()}</td>
+      <td style="padding:6px 10px;text-align:right;color:#64748b;">${pct}%</td>
+    </tr><tr id="${detId}" style="display:none;"><td colspan="3" style="padding:0;"><table style="width:100%;">${provRows}</table></td></tr>`;
+  }).join('');
+}
+
+function renderZoneWiSummary(){
+  const wi=allParticipants.filter(p=>p.is_walkin===true);
+  const total=wi.length;
+  const counts={},provByZone={};
+  wi.forEach(p=>{
+    const prov=(p.province||'').trim();
+    const z=getZone(prov)||0;
+    counts[z]=(counts[z]||0)+1;
+    if(!provByZone[z]) provByZone[z]={};
+    const k=prov||'(ว่าง)';
+    provByZone[z][k]=(provByZone[z][k]||0)+1;
+  });
+  const entries=Object.entries(counts).map(([z,n])=>({z:Number(z),n})).sort((a,b)=>a.z-b.z);
+  if(!total){document.getElementById('zoneWiBody').innerHTML='<tr><td colspan="3" style="text-align:center;padding:16px;color:#94a3b8;">ไม่มีข้อมูล</td></tr>';return;}
+  const labels=entries.map(e=>ZONE_NAMES[e.z]||'เขตสุขภาพที่ '+e.z);
+  const bgColors=entries.map(e=>ZONE_COLORS[e.z%ZONE_COLORS.length]);
+  if(zoneWiInst) zoneWiInst.destroy();
+  const ctx=document.getElementById('zoneWiChart').getContext('2d');
+  zoneWiInst=new Chart(ctx,{
+    type:'doughnut',
+    data:{labels,datasets:[{data:entries.map(e=>e.n),backgroundColor:bgColors,borderWidth:2,borderColor:'#fff',hoverOffset:6}]},
+    options:{responsive:true,cutout:'58%',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.label}: ${c.raw.toLocaleString()} คน (${Math.round(c.raw/total*100)}%)`}}}}
+  });
+  document.getElementById('zoneWiBody').innerHTML=entries.map((e,i)=>{
+    const pct=Math.round(e.n/total*100);
+    const detId=`zwRow-${e.z}`;
+    const provRows=Object.entries(provByZone[e.z]||{}).sort((a,b)=>b[1]-a[1])
+      .map(([pv,cnt])=>`<tr style="background:#f8fafc;"><td style="padding:3px 10px 3px 26px;font-size:0.78rem;color:#64748b;">${pv}</td><td style="padding:3px 10px;text-align:right;font-size:0.78rem;color:#64748b;">${cnt.toLocaleString()}</td><td style="padding:3px 10px;text-align:right;font-size:0.78rem;color:#94a3b8;">${Math.round(cnt/total*100)}%</td></tr>`).join('');
     return`<tr style="cursor:pointer;border-bottom:1px solid #e2e8f0;" onclick="const r=document.getElementById('${detId}');r.style.display=r.style.display==='none'?'table-row':'none'">
       <td style="padding:6px 10px;"><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:${bgColors[i]};margin-right:6px;vertical-align:middle;"></span>${ZONE_NAMES[e.z]||'เขตสุขภาพที่ '+e.z}</td>
       <td style="padding:6px 10px;text-align:right;font-weight:700;">${e.n.toLocaleString()}</td>
