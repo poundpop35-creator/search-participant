@@ -466,7 +466,7 @@ const EN_TO_TH={
   'Uttaradit':'อุตรดิตถ์','Yala':'ยะลา','Yasothon':'ยโสธร'
 };
 let thaiGeoCache=null;
-let selectedZonePub=(()=>{const s=localStorage.getItem('pubZone');const n=Number(s);return[1,2,3,4,5,6,7,8,9,10,11,12,13].includes(n)?n:null;})();
+let selectedZonePub=(()=>{const s=sessionStorage.getItem('pubZone');const n=Number(s);return[1,2,3,4,5,6,7,8,9,10,11,12,13].includes(n)?n:null;})();
 let extProvCounts={};
 let mapGRef=null, mapPathRef=null, mapProjRef=null;
 let mapWRef=0, mapHRef=0, bkkPtRef=null, mapScaleRef=1;
@@ -560,7 +560,12 @@ function renderZonePanel(data, bodyId, countId){
     const d=(r.participants?.dept||'').trim()||'(ไม่ระบุ)';
     deptCounts[d]=(deptCounts[d]||0)+1;
   });
-  const entries=Object.entries(deptCounts).sort((a,b)=>b[1]-a[1]);
+  const deptIdx=Object.fromEntries(DEPTS.map((d,i)=>[d,i]));
+  const entries=Object.entries(deptCounts).sort((a,b)=>{
+    const ia=deptIdx[a[0]]??Infinity, ib=deptIdx[b[0]]??Infinity;
+    if(ia!==ib) return ia-ib;
+    return a[0].localeCompare(b[0],'th');
+  });
   const maxN=entries[0]?.[1]||1;
   const TOP=12;
   const topLabels=entries.slice(0,TOP).map(([d])=>d);
@@ -646,7 +651,7 @@ function zoomToZonePub(z){
 
 function highlightZonePub(z){
   selectedZonePub = selectedZonePub===z ? null : z;
-  localStorage.setItem('pubZone', selectedZonePub===null?'':String(selectedZonePub));
+  sessionStorage.setItem('pubZone', selectedZonePub===null?'':String(selectedZonePub));
   d3.select('#zoneMapExt svg').selectAll('path')
     .attr('fill',d=>{
       const th=EN_TO_TH[d.properties.name];
@@ -817,6 +822,7 @@ async function renderExtPanel(extData){
 }
 
 const DEPTS = [
+  'อธิบดีกรมวิทยาศาสตร์การแพทย์','รองอธิบดีกรมวิทยาศาสตร์การแพทย์',
   'สำนักผู้ทรงคุณวุฒิกรมวิทยาศาสตร์การแพทย์','กองแผนงานและวิชาการ','กองทดสอบความชำนาญ',
   'กลุ่มพัฒนาระบบบริหาร','กลุ่มตรวจสอบภายใน','กลุ่มงานจริยธรรม','สำนักงานเลขานุการกรม',
   'สถาบันชีววัตถุ','สถาบันวิจัยวิทยาศาสตร์สาธารณสุข','สถาบันวิจัยสมุนไพร',
@@ -836,7 +842,7 @@ const DEPTS = [
   'ศูนย์วิทยาศาสตร์การแพทย์ที่ 12/1 ตรัง'
 ];
 let allCheckins = [];
-let activeDay=(()=>{const s=localStorage.getItem('pubDay');if(s==='all')return 'all';const n=Number(s);return[1,2,3].includes(n)?n:'all';})();
+let activeDay=(()=>{const s=sessionStorage.getItem('pubDay');if(s==='all')return 'all';const n=Number(s);return[1,2,3].includes(n)?n:'all';})();
 let deptView = 'table', extDeptView = 'table';
 let intChartInst = null, extChartInst = null, trendChartInst = null;
 let lastSorted = [], lastExtSorted = [], lastFillColor = '#9C7564';
@@ -856,7 +862,7 @@ function toggleWalkinSub(){
 
 function setFilter(day) {
   activeDay = (day === 'all') ? 'all' : Number(day);
-  localStorage.setItem('pubDay', String(activeDay));
+  sessionStorage.setItem('pubDay', String(activeDay));
   [1,2,3].forEach(d => {
     const c = document.getElementById(`card-d${d}`);
     if(c) c.classList.toggle('selected', activeDay === d);
@@ -1196,7 +1202,7 @@ function applyTheme(id, save=true) {
   const t = THEMES[id] || THEMES[1];
   const root = document.documentElement;
   Object.entries(t.vars).forEach(([k,v]) => root.style.setProperty(k, v));
-  if(save) localStorage.setItem('pubTheme', String(id));
+  if(save) sessionStorage.setItem('pubTheme', String(id));
 }
 
 async function loadThemeFromSupabase() {
@@ -1213,9 +1219,9 @@ async function loadThemeFromSupabase() {
 }
 
 // Apply cached theme + hero bg instantly, then sync from Supabase
-applyTheme(parseInt(localStorage.getItem('pubTheme')||'3'), false);
+applyTheme(parseInt(sessionStorage.getItem('pubTheme')||'3'), false);
 (function(){
-  const cached = localStorage.getItem('heroImgUrl');
+  const cached = sessionStorage.getItem('heroImgUrl');
   if(cached) document.querySelector('.hero').style.backgroundImage = "url('" + cached + "')";
 })();
 
@@ -1227,7 +1233,7 @@ async function loadHeroBgFromSupabase() {
     const d = await r.json();
     if(Array.isArray(d) && d.length) {
       const v = d[0].value || '';
-      localStorage.setItem('heroImgUrl', v);
+      sessionStorage.setItem('heroImgUrl', v);
       document.querySelector('.hero').style.backgroundImage = v ? "url('" + v + "')" : '';
     }
   } catch(e) {}
@@ -1239,8 +1245,8 @@ loadData();
 setInterval(loadData, 60000);
 setInterval(loadThemeFromSupabase, 30000);
 setInterval(loadHeroBgFromSupabase, 30000);
-(function(){const c=localStorage.getItem('publicBgUrl');if(c)document.body.style.backgroundImage=`linear-gradient(rgba(232,240,254,0.55),rgba(232,240,254,0.55)),url('${c}')`;})();
-async function _loadPageBg(){try{const r=await fetch(SUPABASE_URL+'/rest/v1/app_settings?key=eq.public_bg&select=value',{headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}});const d=await r.json();if(Array.isArray(d)&&d.length){const v=d[0].value||'';localStorage.setItem('publicBgUrl',v);document.body.style.backgroundImage=v?`linear-gradient(rgba(232,240,254,0.55),rgba(232,240,254,0.55)),url('${v}')`:''}}catch(e){}}
+(function(){const c=sessionStorage.getItem('publicBgUrl');if(c)document.body.style.backgroundImage=`linear-gradient(rgba(232,240,254,0.55),rgba(232,240,254,0.55)),url('${c}')`;})();
+async function _loadPageBg(){try{const r=await fetch(SUPABASE_URL+'/rest/v1/app_settings?key=eq.public_bg&select=value',{headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}});const d=await r.json();if(Array.isArray(d)&&d.length){const v=d[0].value||'';sessionStorage.setItem('publicBgUrl',v);document.body.style.backgroundImage=v?`linear-gradient(rgba(232,240,254,0.55),rgba(232,240,254,0.55)),url('${v}')`:''}}catch(e){}}
 _loadPageBg();setInterval(_loadPageBg,30000);
 
 </script>

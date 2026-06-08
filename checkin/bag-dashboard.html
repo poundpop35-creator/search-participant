@@ -364,16 +364,22 @@ function onPTChange(){
   updateBtnDD('fPTBtn',selPT,'ประเภท');applyFilters();
 }
 
-// Init dept checkboxes (bag section)
-(function initDeptFilter(){
+// Init dept checkboxes (bag section) - called after data load
+function initBagDeptFilter(data){
   const list=document.getElementById('fDeptList');
-  DEPTS.forEach(d=>{
+  list.innerHTML='';
+  selFDept=new Set();
+  const allBagDepts=[...new Set(data.map(r=>r.dept).filter(d=>d&&d!=='-'))];
+  const deptSet=new Set(DEPTS);
+  const sorted=[...DEPTS.filter(d=>allBagDepts.includes(d)),...allBagDepts.filter(d=>!deptSet.has(d)).sort((a,b)=>a.localeCompare(b,'th'))];
+  sorted.forEach(d=>{
     const lbl=document.createElement('label');
     lbl.innerHTML=`<input type="checkbox" class="fDeptCb" value="${d}" checked> ${d}`;
     lbl.querySelector('input').onchange=onFDeptChange;
     list.appendChild(lbl);
   });
-})();
+  updateBtnDD('fDeptBtn',selFDept,'หน่วยงาน');
+}
 function toggleFDeptAll(){
   const checked=document.getElementById('fDeptAll').checked;
   document.querySelectorAll('.fDeptCb').forEach(cb=>cb.checked=checked);
@@ -453,6 +459,7 @@ async function loadAll(){
         receivedTime:fmtBagTime(p.bag_received_date)
       };
     });
+    initBagDeptFilter(allData);
 
     const total=allData.length;
     const receivedCount=allData.filter(r=>r.received).length;

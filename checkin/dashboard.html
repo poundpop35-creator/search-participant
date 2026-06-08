@@ -890,7 +890,10 @@ async function loadAll(){
     dDeptDd.querySelectorAll('input:not(#dDeptAll)').forEach(cb=>cb.checked=this.checked);
     selDDept=new Set();updateBtn('dDeptBtn',selDDept);renderDept();
   };
-  DEPTS.forEach(d=>{
+  const deptSet=new Set(DEPTS);
+  const extraDepts=[...new Set(allData.filter(r=>r.isIn&&r.dept&&r.dept!=='-'&&!deptSet.has(r.dept)).map(r=>r.dept))].sort((a,b)=>a.localeCompare(b,'th'));
+  const allDDepts=[...DEPTS,...extraDepts];
+  allDDepts.forEach(d=>{
     const lbl=document.createElement('label');
     lbl.innerHTML=`<input type="checkbox" value="${d}" checked> ${d}`;
     lbl.querySelector('input').onchange=function(){
@@ -908,8 +911,10 @@ async function loadAll(){
   const intDeptEl  = document.getElementById('fDeptInternal');
   const extDeptEl  = document.getElementById('fDeptExternal');
   intDeptEl.innerHTML=''; extDeptEl.innerHTML='';
-  // หน่วยงานภายใน = DEPTS list
-  DEPTS.forEach(d=>{
+  // หน่วยงานภายใน = DEPTS list + extra internal depts from data
+  const deptSet2=new Set(DEPTS);
+  const extraIntDepts=[...new Set(allData.filter(r=>r.isIn&&r.dept&&r.dept!=='-'&&!deptSet2.has(r.dept)).map(r=>r.dept))].sort((a,b)=>a.localeCompare(b,'th'));
+  [...DEPTS,...extraIntDepts].forEach(d=>{
     const lbl=document.createElement('label');
     lbl.innerHTML=`<input type="checkbox" class="fDeptCb" value="${d}" checked> ${d}`;
     lbl.querySelector('input').onchange=onFDeptChange;
@@ -1574,10 +1579,20 @@ function renderDept(){
   // นับต่อ dept
   const stats={};
   DEPTS.forEach(d=>stats[d]={1:0,2:0,3:0});
-  data.forEach(r=>{if(stats[r.dept])stats[r.dept][r.day]++;});
+  const _deptSet=new Set(DEPTS);
+  data.forEach(r=>{
+    if(r.dept&&r.dept!=='-'&&!_deptSet.has(r.dept)&&!stats[r.dept]) stats[r.dept]={1:0,2:0,3:0};
+    if(r.dept&&stats[r.dept]) stats[r.dept][r.day]++;
+  });
+  const _deptIdx=Object.fromEntries(DEPTS.map((d,i)=>[d,i]));
+  const allSortedDepts=Object.keys(stats).sort((a,b)=>{
+    const ia=_deptIdx[a]??Infinity, ib=_deptIdx[b]??Infinity;
+    if(ia!==ib) return ia-ib;
+    return a.localeCompare(b,'th');
+  });
 
   // กรองหน่วยงานตาม selDDept และ search
-  const depts=DEPTS.filter(d=>{
+  const depts=allSortedDepts.filter(d=>{
     const matchSel=selDDept.size===0||selDDept.has(d);
     const matchQ=!q||d.toLowerCase().includes(q);
     return matchSel&&matchQ;
@@ -1651,8 +1666,14 @@ function setDeptView(v){
     const dayF=parseInt(document.getElementById('dDay').value);
     const data=allData.filter(r=>(dayF===0||r.day===dayF)&&(selDPT.size===0||selDPT.has(r.pt)));
     const stats={};DEPTS.forEach(d=>stats[d]={1:0,2:0,3:0});
-    data.forEach(r=>{if(stats[r.dept])stats[r.dept][r.day]++;});
-    renderDeptChart(DEPTS.filter(d=>!q||d.toLowerCase().includes(q)),stats,dayF);
+    const _ds=new Set(DEPTS);
+    data.forEach(r=>{
+      if(r.dept&&r.dept!=='-'&&!_ds.has(r.dept)&&!stats[r.dept]) stats[r.dept]={1:0,2:0,3:0};
+      if(r.dept&&stats[r.dept]) stats[r.dept][r.day]++;
+    });
+    const _di=Object.fromEntries(DEPTS.map((d,i)=>[d,i]));
+    const chartDepts=Object.keys(stats).filter(d=>!q||d.toLowerCase().includes(q)).sort((a,b)=>{const ia=_di[a]??Infinity,ib=_di[b]??Infinity;return ia!==ib?ia-ib:a.localeCompare(b,'th');});
+    renderDeptChart(chartDepts,stats,dayF);
   }
 }
 
