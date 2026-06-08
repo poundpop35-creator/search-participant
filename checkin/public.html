@@ -176,6 +176,9 @@
       <div class="big-num" id="pTotal"></div>
       <div class="big-sub" id="pTotalS">ราย (เช็คอินแล้ว)</div>
     </div>
+    <div id="clearFiltersBar" style="display:none;justify-content:flex-end;padding:2px 0 8px 0;">
+      <button onclick="clearAllFilters()" style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;border:1px solid #cbd5e1;background:#f1f5f9;color:#64748b;font-family:'Sarabun',sans-serif;font-size:0.75rem;cursor:pointer;line-height:1.5;">× ล้างฟิลเตอร์</button>
+    </div>
     <div class="big-stats-row" style="margin-bottom:14px;">
       <div class="big-card d1" id="card-d1" onclick="setFilter(activeDay===1?'all':1)">
         <div class="big-label">วันที่ 1<br>24 มิ.ย. 69</div>
@@ -737,6 +740,7 @@ function highlightZonePub(z){
   } else {
     showMapLabel('zoneMapExt',null);
   }
+  updateClearBtn();
 }
 
 async function renderExtPanel(extData){
@@ -1121,6 +1125,14 @@ function toggleWalkinSub(){
   else{sec.style.display='none';btn.textContent='▼ แสดง';}
 }
 
+function updateClearBtn(){
+  const bar=document.getElementById('clearFiltersBar');
+  if(bar) bar.style.display=(activeDay!=='all'||selectedZonePub!==null)?'flex':'none';
+}
+function clearAllFilters(){
+  if(selectedZonePub!==null) highlightZonePub(selectedZonePub);
+  setFilter('all');
+}
 function setFilter(day) {
   activeDay = (day === 'all') ? 'all' : Number(day);
   sessionStorage.setItem('pubDay', String(activeDay));
@@ -1129,6 +1141,7 @@ function setFilter(day) {
     if(c) c.classList.toggle('selected', activeDay === d);
   });
   renderStats();
+  updateClearBtn();
 }
 
 function renderStats() {
@@ -1273,6 +1286,7 @@ async function loadData() {
   try {
     allCheckins = await fetchAll('/rest/v1/checkins?select=day,checkin_time,participants(dept,ext_dept,internal_external,is_walkin,province)&order=checkin_time.desc');
     renderStats();
+    updateClearBtn();
     document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString('th-TH',{timeZone:'Asia/Bangkok'});
     document.getElementById('loadingArea').style.display = 'none';
     document.getElementById('contentArea').style.display = '';
