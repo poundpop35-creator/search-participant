@@ -805,6 +805,30 @@ async function renderExtPanel(extData){
     }
 
     // Store refs for zoom
+    // Zone count labels
+    const _zt={},_zc={};
+    thaiGeoCache.features.forEach(d=>{
+      const th=EN_TO_TH[d.properties.name];if(!th)return;
+      const z=getZonePub(th)||13;
+      _zt[z]=(_zt[z]||0)+(provCounts[th]||0);
+      const c=pathGen.centroid(d);
+      if(!isNaN(c[0])){if(!_zc[z])_zc[z]=[];_zc[z].push(c);}
+    });
+    if(bkkPtRef){if(!_zc[13])_zc[13]=[];_zc[13].push(bkkPtRef);}
+    Object.entries(_zt).forEach(([z,cnt])=>{
+      if(!cnt)return;
+      const cs=_zc[Number(z)]||[];if(!cs.length)return;
+      const x=cs.reduce((s,c)=>s+c[0],0)/cs.length;
+      const y=cs.reduce((s,c)=>s+c[1],0)/cs.length;
+      g.append('text').attr('x',x).attr('y',y)
+        .attr('text-anchor','middle').attr('dominant-baseline','middle')
+        .attr('font-size',10).attr('font-family','Sarabun,sans-serif')
+        .attr('font-weight','700').attr('fill','#fff')
+        .attr('stroke','rgba(30,41,59,0.55)').attr('stroke-width',3)
+        .attr('paint-order','stroke').attr('pointer-events','none')
+        .text(cnt);
+    });
+
     mapGRef=g; mapPathRef=pathGen; mapProjRef=proj; mapWRef=w; mapHRef=h; mapScaleRef=1;
     // Re-apply zone selection if active (persisted across refresh)
     if(selectedZonePub!==null){ const _z=selectedZonePub; selectedZonePub=null; setTimeout(()=>highlightZonePub(_z),30); }
@@ -896,7 +920,32 @@ async function renderIntMap(intData){
         tip.style('left',(event.clientX-r.left+10)+'px').style('top',(event.clientY-r.top-44)+'px');
       }).on('mouseout',function(){tip.style('opacity','0');})
         .on('click',function(){highlightIntProv('กรุงเทพมหานคร');});
+      // Bangkok count label
+      if(bkkCnt>0){
+        g.append('text').attr('x',bkkPt[0]).attr('y',bkkPt[1])
+          .attr('text-anchor','middle').attr('dominant-baseline','middle')
+          .attr('font-size',9).attr('font-family','Sarabun,sans-serif')
+          .attr('font-weight','700').attr('fill','#fff')
+          .attr('stroke','rgba(30,41,59,0.55)').attr('stroke-width',2.5)
+          .attr('paint-order','stroke').attr('pointer-events','none')
+          .text(bkkCnt);
+      }
     }
+    // Province count labels
+    thaiGeoCache.features.forEach(d=>{
+      const th=EN_TO_TH[d.properties.name];
+      const cnt=intProvCounts[th]||0;
+      if(!cnt)return;
+      const c=pathGen.centroid(d);
+      if(!c||isNaN(c[0]))return;
+      g.append('text').attr('x',c[0]).attr('y',c[1])
+        .attr('text-anchor','middle').attr('dominant-baseline','middle')
+        .attr('font-size',9).attr('font-family','Sarabun,sans-serif')
+        .attr('font-weight','700').attr('fill','#fff')
+        .attr('stroke','rgba(30,41,59,0.55)').attr('stroke-width',2.5)
+        .attr('paint-order','stroke').attr('pointer-events','none')
+        .text(cnt);
+    });
   } catch(e){
     container.innerHTML='<div style="padding:20px;text-align:center;font-size:0.82rem;color:#94a3b8;">ไม่สามารถโหลดแผนที่ได้</div>';
   }
