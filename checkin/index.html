@@ -408,7 +408,7 @@
           ]);
           return;
         }
-        const today=new Date().toLocaleDateString('th-TH',{timeZone:'Asia/Bangkok',year:'numeric',month:'long',day:'numeric'});
+        const today=new Date().toLocaleDateString('en-CA',{timeZone:'Asia/Bangkok'});
         const bagRes=await sbFetch(`/rest/v1/participants?id=eq.${p.id}`,'PATCH',{bag_received:true,bag_received_date:today});
         if(bagRes.ok||bagRes.status===204){
           todayCount++;
@@ -453,8 +453,9 @@
           ]);
           return;
         }
-        const today=new Date().toLocaleDateString('th-TH',{timeZone:'Asia/Bangkok',year:'numeric',month:'long',day:'numeric'});
+        const today=new Date().toLocaleDateString('en-CA',{timeZone:'Asia/Bangkok'});
         const shirtRes=await sbFetch(`/rest/v1/participants?id=eq.${p.id}`,'PATCH',{shirt_received:true,shirt_received_date:today});
+        if(!shirtRes.ok&&shirtRes.status!==204){const errTxt=await shirtRes.text().catch(()=>''); console.error('shirt PATCH failed',shirtRes.status,errTxt);}
         if(shirtRes.ok||shirtRes.status===204){
           todayCount++;
           document.getElementById('count').textContent=todayCount.toLocaleString();
@@ -574,6 +575,7 @@
     const today=new Date().toLocaleDateString('th-TH',{timeZone:'Asia/Bangkok',year:'numeric',month:'long',day:'numeric'});
     try{
       const res=await sbFetch(`/rest/v1/participants?id=eq.${pId}`,'PATCH',{shirt_received:true,shirt_received_date:today});
+      if(!res.ok&&res.status!==204){const et=await res.text().catch(()=>''); console.error('markShirt PATCH failed',res.status,et);}
       if(res.ok||res.status===204){
         btn.textContent='✓ รับเสื้อ '+shirtSize+' แล้ว';
         btn.style.background='#16a34a';
