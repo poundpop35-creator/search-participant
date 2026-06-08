@@ -469,8 +469,23 @@ document.addEventListener('DOMContentLoaded', function() {
       <div id="pListView">
         <div style="display:flex;border-bottom:2px solid var(--border);padding:0 8px;">
           <button class="ptab active" id="ptab0" onclick="event.stopPropagation();switchPTab(0)">ลงทะเบียนล่วงหน้า <span id="pPreCount"></span></button>
+          <button class="ptab" id="ptab2" onclick="event.stopPropagation();switchPTab(2)">แยกตามเขตสุขภาพ</button>
           <button class="ptab" id="ptab1" onclick="event.stopPropagation();switchPTab(1)">Walk-in <span id="pWiCount"></span></button>
         </div>
+        <!-- Zone tab content -->
+        <div id="pZoneTabContent" style="display:none;padding:20px;">
+          <div style="display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap;">
+            <div style="flex:0 0 200px;max-width:220px;margin:0 auto;"><canvas id="zoneSumChart"></canvas></div>
+            <div style="flex:1;min-width:220px;overflow-x:auto;">
+              <table class="dtable">
+                <thead><tr><th>เขตสุขภาพ</th><th style="text-align:right;">คน</th><th style="text-align:right;">%</th></tr></thead>
+                <tbody id="zoneSumBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <!-- List content -->
+        <div id="pListContent">
         <div style="padding:12px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
           <input class="sbox" id="pSearch" placeholder="ค้นหาชื่อ / หน่วยงาน" oninput="renderParticipants()" style="flex:1;min-width:160px;">
           <span id="pCountBar" style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:20px;padding:3px 12px;font-size:0.8rem;color:#1e40af;white-space:nowrap;flex-shrink:0;">พบ <b id="pCountFiltered">-</b> ราย <span id="pCountBreakdown" style="color:#94a3b8;font-size:0.75rem;"></span></span>
@@ -566,6 +581,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <button class="pbtn" id="pNext" onclick="changePPage(1)">ถัดไป →</button>
           </div>
         </div>
+        </div><!-- end pListContent -->
       </div>
       <!-- ZONE CHART VIEW -->
       <div id="pZoneView" style="display:none;">
@@ -617,27 +633,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 <tbody id="zoneBodyWi"></tbody></table>
             </div>
           </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ZONE SUMMARY CARD -->
-  <div class="dept-card" style="margin-bottom:24px;">
-    <div class="dept-top">
-      <div>
-        <span style="font-weight:700;color:var(--blue);font-size:1rem;">ผู้ลงทะเบียนแยกตามเขตสุขภาพ</span>
-        <span id="zoneSumCount" style="font-size:0.82rem;color:#64748b;margin-left:6px;"></span>
-      </div>
-    </div>
-    <div style="padding:20px;">
-      <div style="display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap;">
-        <div style="flex:0 0 200px;max-width:220px;margin:0 auto;"><canvas id="zoneSumChart"></canvas></div>
-        <div style="flex:1;min-width:220px;overflow-x:auto;">
-          <table class="dtable">
-            <thead><tr><th>เขตสุขภาพ</th><th style="text-align:right;">คน</th><th style="text-align:right;">%</th></tr></thead>
-            <tbody id="zoneSumBody"></tbody>
-          </table>
         </div>
       </div>
     </div>
@@ -904,7 +899,6 @@ async function loadParticipants(){
   document.getElementById('pRegCount').textContent=`(ล่วงหน้า ${preC.toLocaleString()} | Walk-in ${wiC.toLocaleString()})`;
   document.getElementById('pPreCount').textContent=`(${preC.toLocaleString()})`;
   document.getElementById('pWiCount').textContent=`(${wiC.toLocaleString()})`;
-  renderZoneRegSummary();
   // Build dynamic filter checkboxes
   const depts=[...new Set(allParticipants.map(p=>{
     const isIn=(p.internal_external||'').includes('ภายใน');
@@ -1001,8 +995,12 @@ function toggleDeptCard(){
 
 function switchPTab(t){
   curPTab=t; curPPage=1;
-  document.querySelectorAll('.ptab').forEach((b,i)=>b.classList.toggle('active',i===t));
-  renderParticipants();
+  [0,1,2].forEach(i=>{const b=document.getElementById('ptab'+i);if(b)b.classList.toggle('active',i===t);});
+  const isZone=t===2;
+  document.getElementById('pListContent').style.display=isZone?'none':'block';
+  document.getElementById('pZoneTabContent').style.display=isZone?'block':'none';
+  if(isZone) renderZoneRegSummary();
+  else renderParticipants();
 }
 
 function resetPFilters(){
