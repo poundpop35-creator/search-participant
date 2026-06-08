@@ -472,6 +472,8 @@ let selectedZonePub=(()=>{const s=sessionStorage.getItem('pubZone');const n=Numb
 let extProvCounts={};
 let mapGRef=null, mapPathRef=null, mapProjRef=null;
 let mapWRef=0, mapHRef=0, bkkPtRef=null, mapScaleRef=1;
+let intMapGRef=null, intMapPathRef=null, intMapWRef=0, intMapHRef=0, intBkkPtRef=null, intMapScaleRef=1;
+let selectedIntProv=null, intProvCounts={};
 
 function toggleZonePub(id,arrow){
   const row=document.getElementById(id);
@@ -570,7 +572,8 @@ function renderZonePanel(data, bodyId, countId){
   const TOP=12;
   document.getElementById(bodyId).innerHTML=entries.map(([dept,cnt],idx)=>{
     const dc=DEPT_COLORS[idx<TOP?idx:DEPT_COLORS.length-1];
-    return`<tr style="border-bottom:1px solid #e2e8f0;">
+    const hasProv=!!DEPT_TO_PROVINCE[dept];
+    return`<tr data-dept="${dept.replace(/"/g,'&quot;')}" style="border-bottom:1px solid #e2e8f0;${hasProv?'cursor:pointer;transition:background .12s;':''}" ${hasProv?`onclick="highlightIntProv(this.dataset.dept)"`:''}>
       <td style="padding:5px 10px;color:#94a3b8;font-size:0.72rem;font-weight:700;">${idx+1}</td>
       <td style="padding:5px 10px;">
         <span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:${dc};margin-right:4px;vertical-align:middle;flex-shrink:0;"></span>${dept}</td>
@@ -817,17 +820,19 @@ async function renderIntMap(intData){
   try{
     if(!thaiGeoCache) thaiGeoCache=await d3.json('https://raw.githubusercontent.com/apisit/thailand.json/master/thailand.json');
     container.innerHTML='';
-    const provCounts={};
+    intProvCounts={};
     intData.forEach(r=>{
       const dept=(r.participants?.dept||'').trim();
       const prov=DEPT_TO_PROVINCE[dept];
-      if(prov) provCounts[prov]=(provCounts[prov]||0)+1;
+      if(prov) intProvCounts[prov]=(intProvCounts[prov]||0)+1;
     });
     const w=container.clientWidth||200;
     const h=Math.round(w*1.65);
     container.style.height=h+'px';
+    intMapWRef=w; intMapHRef=h; intMapScaleRef=1; selectedIntProv=null;
     const proj=d3.geoMercator().fitExtent([[12,12],[w-12,h-12]],thaiGeoCache);
     const pathGen=d3.geoPath().projection(proj);
+    intMapPathRef=pathGen;
     const svg=d3.select(container).append('svg')
       .attr('width',w).attr('height',h).style('display','block').style('overflow','hidden');
     const tip=d3.select(container).append('div')
@@ -837,6 +842,7 @@ async function renderIntMap(intData){
       .style('pointer-events','none').style('opacity','0').style('white-space','nowrap')
       .style('z-index','20').style('top','0').style('left','0');
     const g=svg.append('g');
+    intMapGRef=g;
     g.selectAll('path')
       .data(thaiGeoCache.features).join('path')
       .attr('d',pathGen)
@@ -845,18 +851,18 @@ async function renderIntMap(intData){
         if(!th) return '#e8edf2';
         const z=getZonePub(th)||13;
         const base=ZONE_COLORS_PUB[z%ZONE_COLORS_PUB.length];
-        const cnt=provCounts[th]||0;
+        const cnt=intProvCounts[th]||0;
         if(!cnt){const c=d3.color(base);c.opacity=0.18;return c.toString();}
         return base;
       })
       .attr('stroke','#fff').attr('stroke-width',0.6).attr('stroke-linejoin','round')
       .on('mouseover',function(event,d){
         const th=EN_TO_TH[d.properties.name]||d.properties.name;
-        const cnt=provCounts[th]||0;
+        const cnt=intProvCounts[th]||0;
         if(!cnt) return;
         const z=getZonePub(th)||13;
         tip.style('opacity','1').html(`<b>${th}</b> · ${ZONE_NAMES_PUB[z]||'เขต '+z}<br>${cnt.toLocaleString()} คน`);
-        d3.select(this).attr('stroke','#334155').attr('stroke-width',1.5);
+        d3.select(this).attr('stroke','#334155').attr('stroke-width',1.5/intMapScaleRef);
       })
       .on('mousemove',function(event){
         const r=container.getBoundingClientRect();
@@ -864,13 +870,15 @@ async function renderIntMap(intData){
       })
       .on('mouseout',function(){
         tip.style('opacity','0');
-        d3.select(this).attr('stroke','#fff').attr('stroke-width',0.6);
+        const th=EN_TO_TH[this.__data__?.properties?.name];
+        d3.select(this).attr('stroke','#fff').attr('stroke-width',0.6/intMapScaleRef);
       });
     const bkkColor=ZONE_COLORS_PUB[13%ZONE_COLORS_PUB.length];
-    const bkkCnt=provCounts['กรุงเทพมหานคร']||0;
+    const bkkCnt=intProvCounts['กรุงเทพมหานคร']||0;
     const bkkPt=proj([100.5018,13.7563]);
+    intBkkPtRef=bkkPt;
     if(bkkPt){
-      const bkkG=g.append('g').style('pointer-events','all');
+      const bkkG=g.append('g').attr('class','bkk-int-marker').style('pointer-events','all');
       bkkG.append('circle')
         .attr('cx',bkkPt[0]).attr('cy',bkkPt[1]).attr('r',6)
         .attr('fill',bkkCnt?bkkColor:(()=>{const c=d3.color(bkkColor);c.opacity=0.18;return c.toString();}))
@@ -881,15 +889,79 @@ async function renderIntMap(intData){
         .attr('fill','#374151').attr('font-weight','600').attr('pointer-events','none')
         .text('กทม.');
       bkkG.on('mouseover',function(){
+        if(!bkkCnt) return;
         tip.style('opacity','1').html(`<b>กรุงเทพมหานคร</b> · เขต 13 (กทม.)<br>${bkkCnt.toLocaleString()} คน`);
       }).on('mousemove',function(event){
         const r=container.getBoundingClientRect();
         tip.style('left',(event.clientX-r.left+10)+'px').style('top',(event.clientY-r.top-44)+'px');
-      }).on('mouseout',function(){tip.style('opacity','0');});
+      }).on('mouseout',function(){tip.style('opacity','0');})
+        .on('click',function(){highlightIntProv('กรุงเทพมหานคร');});
     }
   } catch(e){
     container.innerHTML='<div style="padding:20px;text-align:center;font-size:0.82rem;color:#94a3b8;">ไม่สามารถโหลดแผนที่ได้</div>';
   }
+}
+
+function zoomToIntProv(prov){
+  if(!intMapGRef||!thaiGeoCache||!intMapPathRef) return;
+  let tx=0,ty=0,s=1;
+  if(prov!==null){
+    let x0,y0,x1,y1;
+    if(prov==='กรุงเทพมหานคร'&&intBkkPtRef){
+      x0=intBkkPtRef[0]-10;y0=intBkkPtRef[1]-10;x1=intBkkPtRef[0]+10;y1=intBkkPtRef[1]+10;
+    } else {
+      const feat=thaiGeoCache.features.find(d=>EN_TO_TH[d.properties.name]===prov);
+      if(!feat) return;
+      [[x0,y0],[x1,y1]]=intMapPathRef.bounds(feat);
+    }
+    const cx=(x0+x1)/2,cy=(y0+y1)/2;
+    if(x1-x0<intMapWRef*0.18){x0=cx-intMapWRef*0.09;x1=cx+intMapWRef*0.09;}
+    if(y1-y0<intMapHRef*0.18){y0=cy-intMapHRef*0.09;y1=cy+intMapHRef*0.09;}
+    const pad=22;
+    s=Math.min(7,0.88/Math.max((x1-x0+pad*2)/intMapWRef,(y1-y0+pad*2)/intMapHRef));
+    tx=intMapWRef/2-s*(x0+x1)/2;
+    ty=intMapHRef/2-s*(y0+y1)/2;
+  }
+  intMapScaleRef=s;
+  intMapGRef.transition().duration(700).attr('transform',`translate(${tx},${ty}) scale(${s})`);
+  intMapGRef.selectAll('path').transition().duration(700).attr('stroke-width',0.6/s);
+  if(intBkkPtRef){
+    d3.select('#zoneMapInt .bkk-int-marker circle').transition().duration(700).attr('r',6/s);
+    d3.select('#zoneMapInt .bkk-int-marker text').transition().duration(700)
+      .attr('font-size',(0.62/s)+'rem').attr('x',intBkkPtRef[0]+9/s);
+  }
+}
+
+function highlightIntProv(dept){
+  const prov=dept==='กรุงเทพมหานคร'?dept:DEPT_TO_PROVINCE[dept];
+  if(!prov) return;
+  selectedIntProv=selectedIntProv===prov?null:prov;
+  d3.select('#zoneMapInt svg').selectAll('path')
+    .attr('fill',d=>{
+      const th=EN_TO_TH[d.properties.name];
+      if(!th) return '#e8edf2';
+      const z=getZonePub(th)||13;
+      const base=ZONE_COLORS_PUB[z%ZONE_COLORS_PUB.length];
+      const cnt=intProvCounts[th]||0;
+      if(selectedIntProv===null){
+        if(!cnt){const c=d3.color(base);c.opacity=0.18;return c.toString();}
+        return base;
+      }
+      if(th===selectedIntProv) return base;
+      const c=d3.color(base);c.opacity=0.1;return c.toString();
+    })
+    .attr('stroke-width',d=>{
+      if(selectedIntProv===null) return 0.6/intMapScaleRef;
+      const th=EN_TO_TH[d.properties.name];
+      return(th===selectedIntProv?1.4:0.3)/intMapScaleRef;
+    });
+  document.querySelectorAll('#zoneBodyInt tr[data-dept]').forEach(row=>{
+    const rowProv=DEPT_TO_PROVINCE[row.dataset.dept];
+    const sel=selectedIntProv!==null&&rowProv===selectedIntProv;
+    row.style.background=sel?'rgba(22,163,74,0.09)':'';
+    row.style.fontWeight=sel?'700':'';
+  });
+  zoomToIntProv(selectedIntProv);
 }
 
 const DEPTS = [
