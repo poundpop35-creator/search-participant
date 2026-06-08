@@ -145,6 +145,7 @@
     <option value="2">วันที่ 2 — 25 มิถุนายน 2569</option>
     <option value="3">วันที่ 3 — 26 มิถุนายน 2569</option>
     <option value="bag">รับกระเป๋า (ก่อนวันงาน) </option>
+    <option value="shirt">รับเสื้อ (ก่อนวันงาน)</option>
   </select>
 
   <div class="row-label">เลือกวิธีสแกน</div>
@@ -226,14 +227,19 @@
     const isAdmin=sessionStorage.getItem('dmsc_role')==='admin';
     const sel=document.getElementById('day');
     const bagOpt=sel.querySelector('option[value="bag"]');
+    const shirtOpt=sel.querySelector('option[value="shirt"]');
     const bagOpenAt=new Date(2026,4,29,8,0,0); // 29 พ.ค. 08:00 น.
     if(now<bagOpenAt){
       bagOpt.disabled=true;
       bagOpt.textContent='รับกระเป๋า — เปิด 29 พ.ค. 08:00 น.';
+      shirtOpt.disabled=true;
+      shirtOpt.textContent='รับเสื้อ — เปิด 29 พ.ค. 08:00 น.';
     }
     if(isBangkok2026June&&confDays[d]){
       bagOpt.disabled=true;
       bagOpt.textContent='รับกระเป๋า (ก่อนวันงาน) — ปิดแล้ว';
+      shirtOpt.disabled=true;
+      shirtOpt.textContent='รับเสื้อ (ก่อนวันงาน) — ปิดแล้ว';
       sel.value=String(confDays[d]);
       if(!isAdmin){
         sel.disabled=true;
@@ -252,8 +258,23 @@
     document.getElementById('counterSub').textContent='กำลังโหลด...';
     const user=sessionStorage.getItem('dmsc_user')||'';
     document.getElementById('staffCounterName').textContent=user||'—';
-    document.getElementById('staffCounterBox').style.display=day==='bag'?'none':'flex';
-    if(day==='bag'){
+    document.getElementById('staffCounterBox').style.display=(day==='bag'||day==='shirt')?'none':'flex';
+    if(day==='shirt'){
+      document.getElementById('counterLabel').textContent='รับเสื้อแล้ว';
+      try{
+        const res=await fetch(`${SB_URL}/rest/v1/participants?shirt_received=eq.true&select=id`,
+          {headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON,'Prefer':'count=exact','Range':'0-0'}});
+        const range=res.headers.get('Content-Range');
+        let count=0;
+        if(range){const m=range.match(/\/(\d+)/);if(m)count=parseInt(m[1]);}
+        todayCount=count;
+        document.getElementById('count').textContent=count.toLocaleString();
+        document.getElementById('counterSub').textContent='ราย (รับเสื้อแล้ว)';
+      }catch(e){
+        document.getElementById('count').textContent='?';
+        document.getElementById('counterSub').textContent='โหลดไม่สำเร็จ';
+      }
+    } else if(day==='bag'){
       document.getElementById('counterLabel').textContent='รับกระเป๋าแล้ว';
       try{
         const res=await fetch(`${SB_URL}/rest/v1/participants?bag_received=eq.true&select=id`,
@@ -351,12 +372,14 @@
     showModal('loading','กำลังดำเนินการ','กำลังบันทึกข้อมูล','',null);
     try{
       const keyword=decodedText.trim();
-      const searchRes=await sbFetch(`/rest/v1/participants?or=(id_card.eq.${encodeURIComponent(keyword)},passport.eq.${encodeURIComponent(keyword)})&select=id,prefix,first_name,last_name,tag,items,is_walkin,internal_external,participation_type,bag_received,bag_received_date,dept`,'GET');
+      const searchRes=await sbFetch(`/rest/v1/participants?or=(id_card.eq.${encodeURIComponent(keyword)},passport.eq.${encodeURIComponent(keyword)})&select=id,prefix,first_name,last_name,tag,items,is_walkin,internal_external,participation_type,bag_received,bag_received_date,shirt_size,shirt_received,shirt_received_date,dept`,'GET');
       if(!searchRes.ok){showModal('error','ข้อผิดพลาด','ไม่สามารถค้นหาข้อมูลได้','',null);return;}
       const participants=await searchRes.json();
       if(!participants||participants.length===0){
         if(day==='bag'){
           showModal('error','ไม่มีสิทธิ์','ท่านไม่มีสิทธิ์รับกระเป๋าก่อนวันงาน','',null);
+        } else if(day==='shirt'){
+          showModal('error','ไม่มีสิทธิ์','ท่านไม่มีสิทธิ์รับเสื้อก่อนวันงาน','',null);
         } else {
           showModal('error','ไม่พบข้อมูล','ไม่พบข้อมูลในระบบ','',null);
         }
@@ -390,12 +413,57 @@
         if(bagRes.ok||bagRes.status===204){
           todayCount++;
           document.getElementById('count').textContent=todayCount.toLocaleString();
-          showModal('success','รับกระเป๋าสำเร็จ','บันทึกการรับกระเป๋าเรียบร้อย',fullName,[
+          const bagRows=[
             {label:'ประเภท',val:pType,style:'normal'},
             {label:'วันที่รับ',val:today,style:'normal'},
             {label:'สถานะกระเป๋า',val:'รับได้เลย ✓',style:'ok'}
-          ]);
+          ];
+          if(p.shirt_size&&p.shirt_received===true){
+            bagRows.push({label:'เสื้อ ('+p.shirt_size+')',val:'รับไปแล้ว ✓',style:'done'});
+          }
+          showModal('success','รับกระเป๋าสำเร็จ','บันทึกการรับกระเป๋าเรียบร้อย',fullName,bagRows);
+          if(p.shirt_size&&p.shirt_received!==true){
+            const det=document.getElementById('modalDetail');
+            det.style.display='block';
+            det.innerHTML+=`<div style="border-top:1px solid #e2e8f0;margin-top:10px;padding-top:10px;text-align:center;">
+              <div style="font-size:0.78rem;color:#64748b;margin-bottom:8px;">มีเสื้อไซต์ <b>${p.shirt_size}</b> — ยังไม่ได้รับ</div>
+              <button id="shirtBtn_${p.id}" onclick="markShirtNow(${p.id},'${p.shirt_size}',this)" style="width:100%;padding:11px;border-radius:10px;border:none;background:#0891b2;color:white;font-family:'Sarabun',sans-serif;font-size:0.92rem;font-weight:700;cursor:pointer;">👕 รับเสื้อพร้อมกันด้วย</button>
+            </div>`;
+          }
           setStatus('รับกระเป๋าสำเร็จ');
+        } else {
+          showModal('error','เกิดข้อผิดพลาด','ไม่สามารถบันทึกได้','',null);
+        }
+        return;
+      }
+
+      // โหมดรับเสื้อ
+      if(day==='shirt'){
+        if(!p.shirt_size||!p.shirt_size.trim()){
+          showModal('error','ไม่มีสิทธิ์','ท่านไม่มีสิทธิ์รับเสื้อก่อนวันงาน',fullName,[
+            {label:'ประเภท',val:pType,style:'normal'}
+          ]);
+          return;
+        }
+        if(p.shirt_received===true){
+          showModal('warning','รับเสื้อแล้ว','บุคคลนี้รับเสื้อไปแล้ว',fullName,[
+            {label:'ไซต์เสื้อ',val:p.shirt_size,style:'normal'},
+            {label:'วันที่รับ',val:p.shirt_received_date||'-',style:'normal'},
+            {label:'สถานะ',val:'รับเสื้อไปแล้ว ✓',style:'warn'}
+          ]);
+          return;
+        }
+        const today=new Date().toLocaleDateString('th-TH',{timeZone:'Asia/Bangkok',year:'numeric',month:'long',day:'numeric'});
+        const shirtRes=await sbFetch(`/rest/v1/participants?id=eq.${p.id}`,'PATCH',{shirt_received:true,shirt_received_date:today});
+        if(shirtRes.ok||shirtRes.status===204){
+          todayCount++;
+          document.getElementById('count').textContent=todayCount.toLocaleString();
+          showModal('success','รับเสื้อสำเร็จ','บันทึกการรับเสื้อเรียบร้อย',fullName,[
+            {label:'ไซต์เสื้อ',val:p.shirt_size,style:'ok'},
+            {label:'วันที่รับ',val:today,style:'normal'},
+            {label:'สถานะเสื้อ',val:'รับได้เลย ✓',style:'ok'}
+          ]);
+          setStatus('รับเสื้อสำเร็จ');
         } else {
           showModal('error','เกิดข้อผิดพลาด','ไม่สามารถบันทึกได้','',null);
         }
@@ -493,6 +561,21 @@
       det.innerHTML=rows.map(r=>`<div class="detail-row"><span class="detail-label">${r.labelHtml||r.label}</span><span class="detail-val ${r.style==='done'?'done':r.style==='ok'?'ok':r.style==='warn'?'warn':''}">${r.val}</span></div>`).join('');
     } else det.style.display='none';
     document.getElementById('modalOverlay').classList.remove('hidden');
+  }
+
+  async function markShirtNow(pId, shirtSize, btn){
+    btn.disabled=true; btn.textContent='⏳ กำลังบันทึก...';
+    const today=new Date().toLocaleDateString('th-TH',{timeZone:'Asia/Bangkok',year:'numeric',month:'long',day:'numeric'});
+    try{
+      const res=await sbFetch(`/rest/v1/participants?id=eq.${pId}`,'PATCH',{shirt_received:true,shirt_received_date:today});
+      if(res.ok||res.status===204){
+        btn.textContent='✓ รับเสื้อ '+shirtSize+' แล้ว';
+        btn.style.background='#16a34a';
+        btn.style.cursor='default';
+      } else {
+        btn.disabled=false; btn.textContent='❌ ลองใหม่';
+      }
+    }catch(e){btn.disabled=false; btn.textContent='❌ ลองใหม่';}
   }
 
   function closeModal(){
