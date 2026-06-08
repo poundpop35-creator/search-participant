@@ -1762,17 +1762,24 @@ async function doLogout() {
   window.location.href = 'login.html';
 }
 const CLEAR_PASS = "P@und3142";
+let _clearStep = 0;
 
 function openClearModal() {
+  _clearStep = 0;
   document.getElementById('clearPwInput').value = '';
+  document.getElementById('clearPwInput').style.display = '';
   document.getElementById('clearErr').textContent = '';
-  document.getElementById('clearConfirmBtn').disabled = false;
-  document.getElementById('clearConfirmBtn').textContent = 'ล้างข้อมูล';
+  document.getElementById('clearErr').style.color = '#dc2626';
+  const btn = document.getElementById('clearConfirmBtn');
+  btn.disabled = false;
+  btn.textContent = 'ล้างข้อมูล';
+  btn.style.background = '';
   document.getElementById('clearOverlay').classList.remove('hidden');
   setTimeout(() => document.getElementById('clearPwInput').focus(), 100);
 }
 
 function closeClearModal() {
+  _clearStep = 0;
   document.getElementById('clearOverlay').classList.add('hidden');
 }
 
@@ -1781,22 +1788,30 @@ async function confirmClear() {
   const errEl = document.getElementById('clearErr');
   const btn = document.getElementById('clearConfirmBtn');
 
-  if (pw !== CLEAR_PASS) {
-    errEl.textContent = '❌ รหัสผ่านไม่ถูกต้อง';
-    document.getElementById('clearPwInput').value = '';
-    document.getElementById('clearPwInput').focus();
+  if (_clearStep === 0) {
+    if (pw !== CLEAR_PASS) {
+      errEl.style.color = '#dc2626';
+      errEl.textContent = '❌ รหัสผ่านไม่ถูกต้อง';
+      document.getElementById('clearPwInput').value = '';
+      document.getElementById('clearPwInput').focus();
+      return;
+    }
+    _clearStep = 1;
+    document.getElementById('clearPwInput').style.display = 'none';
+    errEl.style.color = '#ea580c';
+    errEl.textContent = '⚠️ ข้อมูลจะถูกลบถาวร กดปุ่มแดงอีกครั้งเพื่อยืนยัน';
+    btn.style.background = '#991b1b';
+    btn.textContent = '⚠️ ยืนยันล้างข้อมูลถาวร';
     return;
   }
 
-  // ยืนยันอีกรอบ
-  if (!confirm('⚠️ ยืนยันการล้างข้อมูลเช็คอินทั้งหมด?\n\nการกระทำนี้ไม่สามารถย้อนกลับได้')) return;
-
+  _clearStep = 0;
   btn.disabled = true;
   btn.textContent = '⏳ กำลังล้างข้อมูล...';
   errEl.textContent = '';
 
   try {
-    const res = await fetch(`${SB_URL}/rest/v1/checkins?participant_id=gte.0`, {
+    const res = await fetch(`${SB_URL}/rest/v1/checkins?day=gte.1`, {
       method: 'DELETE',
       headers: {
         'apikey': SB_KEY,
@@ -1811,14 +1826,20 @@ async function confirmClear() {
       loadAll();
     } else {
       const err = await res.json().catch(() => ({}));
+      errEl.style.color = '#dc2626';
       errEl.textContent = '❌ เกิดข้อผิดพลาด: ' + (err.message || res.status);
       btn.disabled = false;
       btn.textContent = 'ล้างข้อมูล';
+      btn.style.background = '';
+      document.getElementById('clearPwInput').style.display = '';
     }
   } catch(e) {
+    errEl.style.color = '#dc2626';
     errEl.textContent = '❌ เชื่อมต่อไม่ได้';
     btn.disabled = false;
     btn.textContent = 'ล้างข้อมูล';
+    btn.style.background = '';
+    document.getElementById('clearPwInput').style.display = '';
   }
 }
 

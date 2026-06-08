@@ -109,16 +109,17 @@
     <button class="tbtn" onclick="loadAll()">รีเฟรช</button>
     <a class="tbtn" href="dashboard.html">← Dashboard เช็คอิน</a>
     <a class="tbtn" href="index.html">← ระบบสแกนเช็คอิน</a>
-    <button class="clear-btn" onclick="openClearModal()">ล้างข้อมูล</button>
+    <button class="clear-btn" onclick="openClearModal('bag')">🗑️ ล้างข้อมูลกระเป๋า</button>
+    <button class="clear-btn" onclick="openClearModal('shirt')" style="background:#7c3aed;">🗑️ ล้างข้อมูลเสื้อ</button>
     <button class="tbtn" onclick="doLogout()" style="background:#dc2626;color:white;border-color:#dc2626;font-weight:600;">ออกจากระบบ</button>
   </div>
 </div>
 
 <div class="clear-overlay hidden" id="clearOverlay">
   <div class="clear-modal">
-    <div class="clear-icon">🗑️</div>
-    <h3>ล้างข้อมูลการรับกระเป๋าทั้งหมด</h3>
-    <p>การล้างข้อมูลจะ<strong>รีเซ็ตสถานะการรับกระเป๋าทั้งหมด</strong>ออกจากระบบถาวร<br>ข้อมูลผู้ลงทะเบียนจะยังคงอยู่</p>
+    <div class="clear-icon" id="clearIcon">🗑️</div>
+    <h3 id="clearTitle">ล้างข้อมูลการรับกระเป๋าทั้งหมด</h3>
+    <p id="clearDesc">การล้างข้อมูลจะ<strong>รีเซ็ตสถานะการรับกระเป๋าทั้งหมด</strong>ออกจากระบบถาวร<br>ข้อมูลผู้ลงทะเบียนจะยังคงอยู่</p>
     <input class="clear-pw-input" type="password" id="clearPwInput" placeholder="ใส่รหัสผ่าน" onkeydown="if(event.key==='Enter')confirmClear()">
     <div class="clear-err" id="clearErr"></div>
     <div class="clear-actions">
@@ -721,17 +722,41 @@ async function doLogout(){
 }
 
 const CLEAR_PASS='P@und3142';
+let _clearMode='bag', _clearStep=0;
 
-function openClearModal(){
+const _clearCfg={
+  bag:{
+    title:'ล้างข้อมูลการรับกระเป๋าทั้งหมด',
+    desc:'การล้างข้อมูลจะ<strong>รีเซ็ตสถานะการรับกระเป๋าทั้งหมด</strong>ออกจากระบบถาวร<br>ข้อมูลผู้ลงทะเบียนจะยังคงอยู่',
+    patch:{bag_received:false,bag_received_date:null},
+    ok:'✅ ล้างข้อมูลกระเป๋าเรียบร้อยแล้ว'
+  },
+  shirt:{
+    title:'ล้างข้อมูลการรับเสื้อทั้งหมด',
+    desc:'การล้างข้อมูลจะ<strong>รีเซ็ตสถานะการรับเสื้อทั้งหมด</strong>ออกจากระบบถาวร<br>ข้อมูลผู้ลงทะเบียนจะยังคงอยู่',
+    patch:{shirt_received:false,shirt_received_date:null},
+    ok:'✅ ล้างข้อมูลเสื้อเรียบร้อยแล้ว'
+  }
+};
+
+function openClearModal(mode){
+  _clearMode=mode||'bag';
+  _clearStep=0;
+  const cfg=_clearCfg[_clearMode];
+  document.getElementById('clearTitle').textContent=cfg.title;
+  document.getElementById('clearDesc').innerHTML=cfg.desc;
   document.getElementById('clearPwInput').value='';
+  document.getElementById('clearPwInput').style.display='';
   document.getElementById('clearErr').textContent='';
-  document.getElementById('clearConfirmBtn').disabled=false;
-  document.getElementById('clearConfirmBtn').textContent='ล้างข้อมูล';
+  document.getElementById('clearErr').style.color='#dc2626';
+  const btn=document.getElementById('clearConfirmBtn');
+  btn.disabled=false; btn.textContent='ล้างข้อมูล'; btn.style.background='';
   document.getElementById('clearOverlay').classList.remove('hidden');
   setTimeout(()=>document.getElementById('clearPwInput').focus(),100);
 }
 
 function closeClearModal(){
+  _clearStep=0;
   document.getElementById('clearOverlay').classList.add('hidden');
 }
 
@@ -739,31 +764,48 @@ async function confirmClear(){
   const pw=document.getElementById('clearPwInput').value;
   const errEl=document.getElementById('clearErr');
   const btn=document.getElementById('clearConfirmBtn');
-  if(pw!==CLEAR_PASS){
-    errEl.textContent='❌ รหัสผ่านไม่ถูกต้อง';
-    document.getElementById('clearPwInput').value='';
-    document.getElementById('clearPwInput').focus();
+
+  if(_clearStep===0){
+    if(pw!==CLEAR_PASS){
+      errEl.style.color='#dc2626';
+      errEl.textContent='❌ รหัสผ่านไม่ถูกต้อง';
+      document.getElementById('clearPwInput').value='';
+      document.getElementById('clearPwInput').focus();
+      return;
+    }
+    _clearStep=1;
+    document.getElementById('clearPwInput').style.display='none';
+    errEl.style.color='#ea580c';
+    errEl.textContent='⚠️ ข้อมูลจะถูกรีเซ็ตถาวร กดปุ่มแดงอีกครั้งเพื่อยืนยัน';
+    btn.style.background='#991b1b';
+    btn.textContent='⚠️ ยืนยันล้างข้อมูลถาวร';
     return;
   }
-  if(!confirm('⚠️ ยืนยันการล้างข้อมูลการรับกระเป๋าทั้งหมด?\n\nการกระทำนี้ไม่สามารถย้อนกลับได้')) return;
+
+  _clearStep=0;
   btn.disabled=true; btn.textContent='⏳ กำลังล้างข้อมูล...'; errEl.textContent='';
+  const cfg=_clearCfg[_clearMode];
   try{
     const res=await fetch(`${SB_URL}/rest/v1/participants?id=gte.0`,{
       method:'PATCH',
       headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},
-      body:JSON.stringify({bag_received:false,bag_received_date:null})
+      body:JSON.stringify(cfg.patch)
     });
     if(res.ok||res.status===204){
       closeClearModal();
-      alert('✅ ล้างข้อมูลการรับกระเป๋าเรียบร้อยแล้ว');
+      alert(cfg.ok);
       loadAll();
     } else {
+      errEl.style.color='#dc2626';
       errEl.textContent='❌ เกิดข้อผิดพลาด: '+res.status;
-      btn.disabled=false; btn.textContent='ล้างข้อมูล';
+      btn.disabled=false; btn.textContent='ล้างข้อมูล'; btn.style.background='';
+      document.getElementById('clearPwInput').style.display='';
     }
   }catch(e){
+    errEl.style.color='#dc2626';
     errEl.textContent='❌ '+e.message;
-    btn.disabled=false; btn.textContent='ล้างข้อมูล';
+    btn.disabled=false; btn.textContent='ล้างข้อมูล'; btn.style.background='';
+    document.getElementById('clearPwInput').style.display='';
   }
 }
 
