@@ -1214,14 +1214,13 @@ function renderStats() {
     if(card) card.classList.toggle('dimmed', activeDay !== 'all' && activeDay !== d);
   });
 
-  // Goal: 1,800/day; when all-days view compare against 1,800×3=5,400
-  const GOAL = activeDay === 'all' ? 5400 : 1800;
+  const GOAL = 1800;
   const goalVal = total;
   const goalPct = Math.min(Math.round(goalVal / GOAL * 100), 100);
   const overGoal = goalVal >= GOAL;
   const dayNames = {1:'วันที่ 1',2:'วันที่ 2',3:'วันที่ 3'};
   document.getElementById('goalTitle').textContent = activeDay === 'all'
-    ? 'เป้าหมายสะสม 3 วัน (1,800 คน/วัน)'
+    ? 'เป้าหมายผู้เข้าร่วมงาน (3 วันรวม)'
     : `เป้าหมายผู้เข้าร่วมงาน — ${dayNames[activeDay]}`;
   document.getElementById('goalCurrent').textContent = goalVal.toLocaleString();
   document.getElementById('goalBar').style.width = goalPct + '%';
@@ -1236,7 +1235,7 @@ function renderStats() {
     ? `${goalPct}% — เกินเป้า +${(goalVal-GOAL).toLocaleString()} คน`
     : `${goalPct}%`;
   document.getElementById('goalPct').style.color = overGoal ? '#2563eb' : _goalColor;
-  document.getElementById('goalExtra').textContent = activeDay === 'all' ? 'เป้าหมาย 5,400 ราย (3 วัน)' : 'เป้าหมาย 1,800 คน';
+  document.getElementById('goalExtra').textContent = 'เป้าหมาย 1,800 คน';
 
   // Dept card subtitles
   const daySubText = activeDay === 'all' ? 'เรียงตามจำนวนผู้เข้าร่วมงานสูงสุด'
