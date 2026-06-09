@@ -693,9 +693,24 @@ function zoomToProvExt(prov){
   ty=mapHRef/2-s*(y0+y1)/2;
   mapScaleRef=s;
   mapGRef.transition().duration(700).attr('transform',`translate(${tx},${ty}) scale(${s})`);
-  mapGRef.selectAll('path').transition().duration(700).attr('stroke-width',0.6/s);
+  // Highlight selected province, dim all others
+  mapGRef.selectAll('path')
+    .transition().duration(700)
+    .attr('stroke-width', d => (EN_TO_TH[d.properties.name]===prov ? 1.4 : 0.3)/s)
+    .attr('stroke', d => EN_TO_TH[d.properties.name]===prov ? '#334155' : '#fff')
+    .attr('fill', d => {
+      const th=EN_TO_TH[d.properties.name];
+      if(!th) return '#e8edf2';
+      const pz=getZonePub(th)||13;
+      const base=ZONE_COLORS_PUB[pz%ZONE_COLORS_PUB.length];
+      if(th===prov) return base;
+      const c=d3.color(base); c.opacity=0.1; return c.toString();
+    });
   if(bkkPtRef){
-    d3.select('#zoneMapExt .bkk-marker circle').transition().duration(700).attr('r',6/s);
+    const isBkk=prov==='กรุงเทพมหานคร';
+    const bkkBase=ZONE_COLORS_PUB[13%ZONE_COLORS_PUB.length];
+    d3.select('#zoneMapExt .bkk-marker circle').transition().duration(700)
+      .attr('r',6/s).attr('fill', isBkk ? bkkBase : 'rgba(100,116,139,0.25)');
     d3.select('#zoneMapExt .bkk-marker text').transition().duration(700)
       .attr('font-size',(0.62/s)+'rem').attr('x',bkkPtRef[0]+9/s);
   }
@@ -741,6 +756,13 @@ function highlightZonePub(z){
     row.style.fontWeight=(selectedZonePub!==null&&rz===selectedZonePub)?'700':'';
   });
   selectedProvExt=null;
+  // Restore Bangkok marker to zone-based fill
+  if(bkkPtRef){
+    const bkkBase=ZONE_COLORS_PUB[13%ZONE_COLORS_PUB.length];
+    const bkkCnt=extProvCounts['กรุงเทพมหานคร']||0;
+    const bkkFill=selectedZonePub===null?(bkkCnt?bkkBase:(()=>{const c=d3.color(bkkBase);c.opacity=0.18;return c.toString();})()):(selectedZonePub===13?bkkBase:(()=>{const c=d3.color(bkkBase);c.opacity=0.1;return c.toString();})());
+    d3.select('#zoneMapExt .bkk-marker circle').attr('fill',bkkFill);
+  }
   zoomToZonePub(selectedZonePub);
   if(selectedZonePub!==null){
     const zoneCnt=Object.keys(extProvCounts).filter(p=>(getZonePub(p)||13)===selectedZonePub).reduce((s,p)=>s+(extProvCounts[p]||0),0);
