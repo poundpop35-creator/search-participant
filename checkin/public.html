@@ -1205,10 +1205,14 @@ function renderStats() {
   document.getElementById('pBarWalkinExt').style.width = wkExtPct + '%';
 
   // Day cards: always show all-days counts, dim non-selected
-  const dTotal = allCheckins.length;
-  [1,2,3].forEach(d => {
-    const cnt = allCheckins.filter(r => r.day === d).length;
-    document.getElementById(`pD${d}`).textContent = cnt.toLocaleString();
+  const dayCounts = [1,2,3].map(d => allCheckins.filter(r => r.day === d).length);
+  const maxDigits = Math.max(...dayCounts.map(c => String(c).length));
+  const dayFs = maxDigits <= 2 ? '2.8rem' : maxDigits === 3 ? '2.4rem' : maxDigits === 4 ? '1.9rem' : '1.6rem';
+  [1,2,3].forEach((d,i) => {
+    const cnt = dayCounts[i];
+    const el = document.getElementById(`pD${d}`);
+    el.textContent = cnt.toLocaleString();
+    el.style.fontSize = dayFs;
     document.getElementById(`pD${d}s`).textContent = 'ราย';
     const card = document.getElementById(`card-d${d}`);
     if(card) card.classList.toggle('dimmed', activeDay !== 'all' && activeDay !== d);
