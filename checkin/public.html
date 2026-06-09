@@ -1255,17 +1255,16 @@ function renderStats() {
     : `เป้าหมายผู้เข้าร่วมงาน — ${dayNames[activeDay]}`;
   document.getElementById('goalCurrent').textContent = goalVal.toLocaleString();
   document.getElementById('goalBar').style.width = goalPct + '%';
-  const _goalColor = goalVal < 300 ? '#ef4444'
-    : goalVal < 600  ? '#eab308'
-    : goalVal < 900  ? '#f97316'
-    : goalVal < 1200 ? '#86efac'
-    : goalVal < 1500 ? '#16a34a'
+  const _pctOfGoal = goalVal / GOAL * 100;
+  const _goalColor = _pctOfGoal < 20 ? '#ef4444'
+    : _pctOfGoal < 50 ? '#f97316'
+    : _pctOfGoal < 80 ? '#86efac'
     : '#3b82f6';
-  document.getElementById('goalBar').style.backgroundColor = overGoal ? '#2563eb' : _goalColor;
+  document.getElementById('goalBar').style.backgroundColor = _goalColor;
   document.getElementById('goalPct').textContent = overGoal
     ? `${goalPct}% — เกินเป้า +${(goalVal-GOAL).toLocaleString()} คน`
     : `${goalPct}%`;
-  document.getElementById('goalPct').style.color = overGoal ? '#2563eb' : _goalColor;
+  document.getElementById('goalPct').style.color = _goalColor;
   document.getElementById('goalExtra').textContent = 'เป้าหมาย 1,800 คน';
 
   // Dept card subtitles
