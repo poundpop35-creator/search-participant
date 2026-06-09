@@ -108,7 +108,7 @@
         90deg,
         transparent 0px, transparent 13px,
         rgba(255,255,255,0.45) 13px, rgba(255,255,255,0.45) 15px
-      );
+      ) !important;
     }
     .progress-title{font-size:0.9rem;font-weight:700;color:var(--navy);margin-bottom:16px;}
     .progress-row{margin-bottom:14px;}
@@ -1255,31 +1255,17 @@ function renderStats() {
     : `เป้าหมายผู้เข้าร่วมงาน — ${dayNames[activeDay]}`;
   document.getElementById('goalCurrent').textContent = goalVal.toLocaleString();
   document.getElementById('goalBar').style.width = goalPct + '%';
-  // Multi-color zone gradient
-  const _zBar={};
-  filtered.forEach(r=>{
-    const p=r.participants;
-    const z=p?.internal_external?.includes('ภายนอก')?(getZonePub(p.province)||0):13;
-    _zBar[z]=(_zBar[z]||0)+1;
-  });
-  const _stripes='repeating-linear-gradient(90deg,transparent 0,transparent 13px,rgba(255,255,255,0.4) 13px,rgba(255,255,255,0.4) 15px)';
-  const _segs=[];let _cum=0;
-  [1,2,3,4,5,6,7,8,9,10,11,12,13,0].forEach(z=>{
-    if(!_zBar[z])return;
-    const pct=_zBar[z]/total*100;
-    const col=ZONE_COLORS_PUB[z%ZONE_COLORS_PUB.length];
-    _segs.push(`${col} ${_cum.toFixed(1)}% ${(_cum+pct).toFixed(1)}%`);
-    _cum+=pct;
-  });
-  const _gb=document.getElementById('goalBar');
-  if(_segs.length){
-    _gb.style.backgroundColor='';
-    _gb.style.backgroundImage=`${_stripes},linear-gradient(90deg,${_segs.join(',')})`;
-  }
+  const _goalColor = goalVal < 300 ? '#ef4444'
+    : goalVal < 600  ? '#eab308'
+    : goalVal < 900  ? '#f97316'
+    : goalVal < 1200 ? '#86efac'
+    : goalVal < 1500 ? '#16a34a'
+    : '#3b82f6';
+  document.getElementById('goalBar').style.backgroundColor = overGoal ? '#2563eb' : _goalColor;
   document.getElementById('goalPct').textContent = overGoal
     ? `${goalPct}% — เกินเป้า +${(goalVal-GOAL).toLocaleString()} คน`
     : `${goalPct}%`;
-  document.getElementById('goalPct').style.color = overGoal ? '#2563eb' : '#16a34a';
+  document.getElementById('goalPct').style.color = overGoal ? '#2563eb' : _goalColor;
   document.getElementById('goalExtra').textContent = 'เป้าหมาย 1,800 คน';
 
   // Dept card subtitles
