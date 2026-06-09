@@ -495,7 +495,12 @@ function showMapLabel(mapId, html, x, y){
   if(html){
     el.innerHTML=html;
     el.style.display='block';
-    if(x!==undefined){
+    if(x==='tl'){
+      el.style.left='8px';
+      el.style.top='8px';
+      el.style.bottom='';
+      el.style.transform='none';
+    } else if(x!==undefined){
       el.style.left=x+'px';
       el.style.top=y+'px';
       el.style.bottom='';
@@ -718,7 +723,7 @@ function zoomToProvExt(prov){
   const z=getZonePub(prov)||13;
   const cnt=extProvCounts[prov]||0;
   // After zoom, province centroid is at map center
-  showMapLabel('zoneMapExt',`<b>${prov}</b> · ${ZONE_NAMES_PUB[z]||'เขต '+z}<br>${cnt.toLocaleString()} คน`, mapWRef/2, mapHRef/2);
+  showMapLabel('zoneMapExt',`<b>${prov}</b> · ${ZONE_NAMES_PUB[z]||'เขต '+z}<br>${cnt.toLocaleString()} คน`,'tl');
 }
 
 function highlightZonePub(z){
@@ -1072,7 +1077,7 @@ function highlightIntProv(dept){
   if(selectedIntProv!==null){
     const z=getZonePub(selectedIntProv)||13;
     const cnt=intProvCounts[selectedIntProv]||0;
-    showMapLabel('zoneMapInt',`<b>${selectedIntProv}</b> · ${ZONE_NAMES_PUB[z]||'เขต '+z}<br>${cnt.toLocaleString()} คน`, intMapWRef/2, intMapHRef/2);
+    showMapLabel('zoneMapInt',`<b>${selectedIntProv}</b> · ${ZONE_NAMES_PUB[z]||'เขต '+z}<br>${cnt.toLocaleString()} คน`,'tl');
   } else {
     showMapLabel('zoneMapInt',null);
   }
