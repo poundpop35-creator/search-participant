@@ -164,12 +164,19 @@
   <p>กรมวิทยาศาสตร์การแพทย์ กระทรวงสาธารณสุข</p>
   <a class="hero-staff-btn" href="executive.html">Dashboard ผู้บริหาร</a>
   <a class="hero-staff-btn" href="login.html">สำหรับเจ้าหน้าที่</a>
+  <a class="hero-staff-btn" href="public.html?demo=1" style="background:rgba(245,158,11,0.15);border-color:rgba(245,158,11,0.5);color:#92400e;">⚡ Demo</a>
   <a class="hero-staff-btn" href="qr-lookup.html"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px;"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>ค้นหา QR Code ของคุณ</a>
 </div>
 
 <div class="main">
   <div id="loadingArea" class="loading">กำลังโหลดข้อมูล...</div>
   <div id="contentArea" style="display:none;">
+
+    <div id="demoBanner" style="display:none;align-items:center;justify-content:center;gap:8px;background:#fef3c7;border:1.5px solid #f59e0b;border-radius:12px;padding:8px 16px;margin-bottom:12px;font-family:'Sarabun',sans-serif;font-size:0.82rem;color:#92400e;">
+      <span style="font-size:1rem;">⚠️</span>
+      <span><b>โหมด Demo</b> — ข้อมูลนี้เป็นข้อมูลจำลองเท่านั้น ไม่ใช่ข้อมูลจริง</span>
+      <a href="public.html" style="margin-left:8px;color:#b45309;font-weight:700;text-decoration:underline;">← กลับหน้าจริง</a>
+    </div>
 
     <div class="total-card" onclick="setFilter('all')" title="คลิกเพื่อดูรวมทุกวัน">
       <div class="big-label">ผู้เข้าร่วมงาน (สะสม)</div>
@@ -473,6 +480,7 @@ const EN_TO_TH={
   'Ubon Ratchathani':'อุบลราชธานี','Udon Thani':'อุดรธานี','Uthai Thani':'อุทัยธานี',
   'Uttaradit':'อุตรดิตถ์','Yala':'ยะลา','Yasothon':'ยโสธร'
 };
+const IS_DEMO = new URLSearchParams(location.search).has('demo');
 let thaiGeoCache=null;
 let selectedZonePub=(()=>{const s=sessionStorage.getItem('pubZone');const n=Number(s);return[1,2,3,4,5,6,7,8,9,10,11,12,13].includes(n)?n:null;})();
 let extProvCounts={};
@@ -1291,7 +1299,81 @@ async function fetchAll(path) {
   return res;
 }
 
+function generateMockData(){
+  const rn=(a,b)=>a+Math.random()*(b-a);
+  // Internal: counts per dept
+  const INT_COUNTS=[
+    ['อธิบดีกรมวิทยาศาสตร์การแพทย์',1],['รองอธิบดีกรมวิทยาศาสตร์การแพทย์',2],
+    ['สำนักผู้ทรงคุณวุฒิกรมวิทยาศาสตร์การแพทย์',5],['กองแผนงานและวิชาการ',14],['กองทดสอบความชำนาญ',10],
+    ['กลุ่มพัฒนาระบบบริหาร',8],['กลุ่มตรวจสอบภายใน',5],['กลุ่มงานจริยธรรม',4],['สำนักงานเลขานุการกรม',12],
+    ['สถาบันชีววัตถุ',14],['สถาบันวิจัยวิทยาศาสตร์สาธารณสุข',16],['สถาบันวิจัยสมุนไพร',10],
+    ['สถาบันชีววิทยาศาสตร์ทางการแพทย์',12],['สำนักคุณภาพและความปลอดภัยอาหาร',13],
+    ['สำนักเครื่องสำอางและวัตถุอันตราย',10],['สำนักรังสีและเครื่องมือแพทย์',11],
+    ['สำนักมาตรฐานห้องปฏิบัติการ',13],['สำนักยาและวัตถุเสพติด',11],['ศูนย์รวมบริการ',7],
+    ['ศูนย์เทคโนโลยีสารสนเทศและการสื่อสาร',8],['กองความร่วมมือระหว่างประเทศ',7],
+    ['กองบริหารทรัพยากรบุคคล',11],['กองบริหารการคลัง',10],['กองประชาสัมพันธ์และสื่อสารสาธารณะ',7],
+    ['ศูนย์ตอบโต้เหตุฉุกเฉินด้านห้องปฏิบัติการและรังสี',5],
+    ['ศูนย์วิทยาศาสตร์การแพทย์ที่ 1 เชียงใหม่',10],['ศูนย์วิทยาศาสตร์การแพทย์ที่ 1/1 เชียงราย',7],
+    ['ศูนย์วิทยาศาสตร์การแพทย์ที่ 2 พิษณุโลก',7],['ศูนย์วิทยาศาสตร์การแพทย์ที่ 3 นครสวรรค์',6],
+    ['ศูนย์วิทยาศาสตร์การแพทย์ที่ 4 สระบุรี',7],['ศูนย์วิทยาศาสตร์การแพทย์ที่ 5 สมุทรสงคราม',6],
+    ['ศูนย์วิทยาศาสตร์การแพทย์ที่ 6 ชลบุรี',7],['ศูนย์วิทยาศาสตร์การแพทย์ที่ 7 ขอนแก่น',8],
+    ['ศูนย์วิทยาศาสตร์การแพทย์ที่ 8 อุดรธานี',7],['ศูนย์วิทยาศาสตร์การแพทย์ที่ 9 นครราชสีมา',7],
+    ['ศูนย์วิทยาศาสตร์การแพทย์ที่ 10 อุบลราชธานี',7],['ศูนย์วิทยาศาสตร์การแพทย์ที่ 11 สุราษฎร์ธานี',7],
+    ['ศูนย์วิทยาศาสตร์การแพทย์ที่ 11/1 ภูเก็ต',5],['ศูนย์วิทยาศาสตร์การแพทย์ที่ 12 สงขลา',7],
+    ['ศูนย์วิทยาศาสตร์การแพทย์ที่ 12/1 ตรัง',5]
+  ];
+  // External: province → count (total ~1518)
+  const EXT_PROVS=[
+    ['กรุงเทพมหานคร',130],
+    ['เชียงใหม่',41],['เชียงราย',31],['ลำปาง',22],['ลำพูน',19],['แพร่',15],['น่าน',14],['พะเยา',12],['แม่ฮ่องสอน',8],
+    ['พิษณุโลก',29],['เพชรบูรณ์',22],['ตาก',15],['สุโขทัย',15],['อุตรดิตถ์',12],
+    ['นครสวรรค์',26],['กำแพงเพชร',19],['ชัยนาท',15],['อุทัยธานี',12],['พิจิตร',12],
+    ['สระบุรี',26],['พระนครศรีอยุธยา',26],['ลพบุรี',22],['นนทบุรี',26],['ปทุมธานี',22],['อ่างทอง',12],['สิงห์บุรี',10],
+    ['ราชบุรี',22],['กาญจนบุรี',19],['นครปฐม',22],['สมุทรสาคร',19],['สมุทรสงคราม',15],['เพชรบุรี',15],['ประจวบคีรีขันธ์',12],['สุพรรณบุรี',15],
+    ['ชลบุรี',33],['ระยอง',26],['ฉะเชิงเทรา',19],['ปราจีนบุรี',15],['จันทบุรี',12],['ตราด',10],['สระแก้ว',12],['นครนายก',10],
+    ['ขอนแก่น',36],['มหาสารคาม',22],['ร้อยเอ็ด',19],['กาฬสินธุ์',15],
+    ['อุดรธานี',29],['หนองคาย',19],['หนองบัวลำภู',15],['เลย',15],['สกลนคร',19],['นครพนม',15],['บึงกาฬ',10],
+    ['นครราชสีมา',36],['ชัยภูมิ',22],['บุรีรัมย์',22],['สุรินทร์',19],
+    ['อุบลราชธานี',29],['ศรีสะเกษ',19],['ยโสธร',12],['อำนาจเจริญ',12],['มุกดาหาร',10],
+    ['สุราษฎร์ธานี',29],['นครศรีธรรมราช',26],['ชุมพร',15],['กระบี่',12],['พังงา',10],['ระนอง',7],
+    ['ภูเก็ต',22],
+    ['สงขลา',33],['ตรัง',19],['พัทลุง',15],['นราธิวาส',12],['ปัตตานี',12],['ยะลา',12],['สตูล',10]
+  ];
+  // Build participant pool
+  const pool=[];
+  for(const [dept,cnt] of INT_COUNTS)
+    for(let i=0;i<cnt;i++) pool.push({dept,internal_external:'ภายใน',is_walkin:false,province:null,ext_dept:null});
+  for(const [prov,cnt] of EXT_PROVS)
+    for(let i=0;i<cnt;i++) pool.push({province:prov,internal_external:'ภายนอก',is_walkin:Math.random()<0.08,dept:null,ext_dept:null});
+  // Shuffle
+  for(let i=pool.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[pool[i],pool[j]]=[pool[j],pool[i]];}
+  // Check-in time generator: peak 06:00-12:00 Bangkok (23:00-05:00 UTC prev day)
+  const BASES=[Date.parse('2026-06-23T23:00:00Z'),Date.parse('2026-06-24T23:00:00Z'),Date.parse('2026-06-25T23:00:00Z')];
+  function mkTime(di){
+    const x=Math.random();
+    const m=x<0.12?rn(0,60):x<0.35?rn(60,120):x<0.60?rn(120,180):x<0.78?rn(180,240):x<0.90?rn(240,360):rn(360,660);
+    return new Date(BASES[di]+m*60000).toISOString();
+  }
+  const N=pool.length;
+  const checkins=[];
+  for(let di=0;di<3;di++){
+    const cnt=di===0?N:di===1?Math.round(N*0.70):Math.round(N*0.50);
+    for(let i=0;i<cnt;i++) checkins.push({day:di+1,checkin_time:mkTime(di),participants:{...pool[i]}});
+  }
+  return checkins;
+}
+
 async function loadData() {
+  if(IS_DEMO){
+    allCheckins=generateMockData();
+    renderStats();
+    document.getElementById('lastUpdate').textContent='ข้อมูลจำลอง';
+    document.getElementById('loadingArea').style.display='none';
+    document.getElementById('contentArea').style.display='';
+    const banner=document.getElementById('demoBanner');
+    if(banner) banner.style.display='flex';
+    return;
+  }
   try {
     allCheckins = await fetchAll('/rest/v1/checkins?select=day,checkin_time,participants(dept,ext_dept,internal_external,is_walkin,province)&order=checkin_time.desc');
     renderStats();
