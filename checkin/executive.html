@@ -449,23 +449,24 @@ async function loadData() {
     ]);
     const planPreReg = planRows.length;
 
-    // Inject virtual check-ins for locked departments so ALL totals include them
+    // Lock exact headcount per day — remove actual scans, replace with virtual records
     const LOCKED = {'อธิบดีกรมวิทยาศาสตร์การแพทย์':1,'รองอธิบดีกรมวิทยาศาสตร์การแพทย์':3,'กองแผนงานและวิชาการ':planPreReg};
+    const LSET = new Set(Object.keys(LOCKED));
+    const cleanRows = rows.filter(r=>!LSET.has(r.participants?.dept));
     const DT = ['2026-06-23T23:30:00Z','2026-06-24T23:30:00Z','2026-06-25T23:30:00Z'];
+    let vpid = -1;
     for(const [dept,locked] of Object.entries(LOCKED)){
       if(!locked) continue;
-      for(const day of [1,2,3]){
-        const actual=rows.filter(r=>r.day===day&&!r.participants?.is_walkin&&r.participants?.dept===dept).length;
-        for(let i=0;i<Math.max(0,locked-actual);i++)
-          rows.push({day,checkin_time:DT[day-1],participants:{dept,internal_external:'ภายใน',is_walkin:false}});
-      }
+      for(const day of [1,2,3])
+        for(let i=0;i<locked;i++)
+          cleanRows.push({day,checkin_time:DT[day-1],participants:{dept,internal_external:'ภายใน',is_walkin:false}});
     }
-    execRows = rows;
+    execRows = cleanRows;
 
-    const total = rows.length;
-    const d1 = rows.filter(r => r.day === 1).length;
-    const d2 = rows.filter(r => r.day === 2).length;
-    const d3 = rows.filter(r => r.day === 3).length;
+    const total = cleanRows.length;
+    const d1 = cleanRows.filter(r => r.day === 1).length;
+    const d2 = cleanRows.filter(r => r.day === 2).length;
+    const d3 = cleanRows.filter(r => r.day === 3).length;
 
     document.getElementById('eTotal').textContent = total.toLocaleString();
     document.getElementById('eD1').textContent = d1.toLocaleString();
@@ -476,7 +477,7 @@ async function loadData() {
     execMap = {};
     DEPTS.forEach(d => { execMap[d] = {d1:0, d2:0, d3:0}; });
 
-    rows.forEach(r => {
+    cleanRows.forEach(r => {
       const p = r.participants;
       if(!p || p.is_walkin || !(p.internal_external||'').includes('ภายใน')) return;
       const dept = p.dept || '';

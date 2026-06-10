@@ -1431,17 +1431,17 @@ async function loadData() {
     ]);
     allCheckins = _ci;
     planPreRegCount = _planRows.length;
-    // Inject virtual check-ins for locked depts so ALL totals include them
+    // Lock exact headcount per day — remove actual scans, replace with virtual records
     const _LOCKED = {'อธิบดีกรมวิทยาศาสตร์การแพทย์':1,'รองอธิบดีกรมวิทยาศาสตร์การแพทย์':3,'กองแผนงานและวิชาการ':planPreRegCount};
+    const _LSET = new Set(Object.keys(_LOCKED));
+    allCheckins = allCheckins.filter(r=>!_LSET.has(r.participants?.dept));
     const _DT=['2026-06-23T23:30:00Z','2026-06-24T23:30:00Z','2026-06-25T23:30:00Z'];
     let _vpid=-1;
     for(const [dept,locked] of Object.entries(_LOCKED)){
       if(!locked) continue;
-      for(const day of [1,2,3]){
-        const actual=allCheckins.filter(r=>r.day===day&&!r.participants?.is_walkin&&r.participants?.dept===dept).length;
-        for(let i=0;i<Math.max(0,locked-actual);i++)
+      for(const day of [1,2,3])
+        for(let i=0;i<locked;i++)
           allCheckins.push({day,checkin_time:_DT[day-1],participant_id:_vpid--,participants:{dept,internal_external:'ภายใน',is_walkin:false,province:null,ext_dept:null}});
-      }
     }
     renderStats();
     document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString('th-TH',{timeZone:'Asia/Bangkok'});
