@@ -738,10 +738,19 @@ function renderZoneTable() {
   document.getElementById('zoneTableBody').innerHTML = entries.map(e => {
     const zc = ZONE_COLORS_PUB[e.z % ZONE_COLORS_PUB.length];
     const pct = grandTotal ? Math.round(e.n / grandTotal * 100) : 0;
+    const detId = `qrz-${e.z}`;
     const provRows = Object.entries(provByZone[e.z]||{}).sort((a,b)=>b[1]-a[1])
       .map(([pv,cnt])=>`<tr data-prov="${pv.replace(/"/g,'&quot;')}" style="background:#f8fafc;cursor:pointer;transition:background .12s;" onclick="event.stopPropagation();zoomQrProv(this.dataset.prov)" onmouseover="this.style.background='rgba(59,130,246,0.08)'" onmouseout="this.style.background=''"><td style="padding:3px 10px 3px 28px;font-size:0.76rem;color:#64748b;">⌙ ${pv}</td><td style="padding:3px 10px;text-align:right;font-size:0.76rem;color:#64748b;">${cnt.toLocaleString()}</td><td style="padding:3px 10px;text-align:right;font-size:0.76rem;color:#94a3b8;">${grandTotal?Math.round(cnt/grandTotal*100):0}%</td></tr>`).join('');
-    return `<tr style="cursor:pointer;border-bottom:1px solid #e2e8f0;transition:background .12s;" onmouseover="this.style.background='rgba(59,130,246,0.06)'" onmouseout="this.style.background=''" onclick="zoomQrZone(${e.z})"><td style="padding:7px 10px;"><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:${zc};margin-right:6px;vertical-align:middle;"></span>${ZONE_NAMES_PUB[e.z]||'เขต '+e.z}</td><td style="padding:7px 10px;text-align:right;font-weight:700;">${e.n.toLocaleString()}</td><td style="padding:7px 10px;text-align:right;color:#64748b;">${pct}%</td></tr><tr style="border-bottom:1px solid #f1f5f9;"><td colspan="3" style="padding:0;"><table style="width:100%;border-collapse:collapse;">${provRows}</table></td></tr>`;
+    return `<tr data-zone="${e.z}" style="cursor:pointer;border-bottom:1px solid #e2e8f0;transition:background .12s;" onmouseover="this.style.background='rgba(59,130,246,0.06)'" onmouseout="this.style.background=''" onclick="zoomQrZone(${e.z});toggleQrZone('${detId}',this.querySelector('.qrzArr'))"><td style="padding:7px 10px;"><span class="qrzArr" style="display:inline-block;width:12px;font-size:0.65rem;color:#94a3b8;margin-right:2px;">▶</span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:${zc};margin-right:6px;vertical-align:middle;"></span>${ZONE_NAMES_PUB[e.z]||'เขต '+e.z}</td><td style="padding:7px 10px;text-align:right;font-weight:700;">${e.n.toLocaleString()}</td><td style="padding:7px 10px;text-align:right;color:#64748b;">${pct}%</td></tr><tr id="${detId}" style="display:none;"><td colspan="3" style="padding:0;border-bottom:1px solid #e2e8f0;"><table style="width:100%;border-collapse:collapse;">${provRows}</table></td></tr>`;
   }).join('');
+}
+
+function toggleQrZone(id, arrow) {
+  const row = document.getElementById(id);
+  if (!row) return;
+  const open = row.style.display !== 'none';
+  row.style.display = open ? 'none' : '';
+  if (arrow) arrow.textContent = open ? '▶' : '▼';
 }
 
 // Auto-load map on page start (mapBody starts open)
