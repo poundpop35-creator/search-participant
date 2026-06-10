@@ -448,6 +448,18 @@ async function loadData() {
       fetchAll('/rest/v1/participants?dept=eq.' + encodeURIComponent('กองแผนงานและวิชาการ') + '&is_walkin=eq.false&select=id')
     ]);
     const planPreReg = planRows.length;
+
+    // Inject virtual check-ins for locked departments so ALL totals include them
+    const LOCKED = {'อธิบดีกรมวิทยาศาสตร์การแพทย์':1,'รองอธิบดีกรมวิทยาศาสตร์การแพทย์':3,'กองแผนงานและวิชาการ':planPreReg};
+    const DT = ['2026-06-23T23:30:00Z','2026-06-24T23:30:00Z','2026-06-25T23:30:00Z'];
+    for(const [dept,locked] of Object.entries(LOCKED)){
+      if(!locked) continue;
+      for(const day of [1,2,3]){
+        const actual=rows.filter(r=>r.day===day&&!r.participants?.is_walkin&&r.participants?.dept===dept).length;
+        for(let i=0;i<Math.max(0,locked-actual);i++)
+          rows.push({day,checkin_time:DT[day-1],participants:{dept,internal_external:'ภายใน',is_walkin:false}});
+      }
+    }
     execRows = rows;
 
     const total = rows.length;
@@ -472,16 +484,6 @@ async function loadData() {
       if(r.day === 1) execMap[dept].d1++;
       else if(r.day === 2) execMap[dept].d2++;
       else if(r.day === 3) execMap[dept].d3++;
-    });
-
-    // Lock headcount for leadership + กองแผน to pre-registered count every day
-    const _ov = {'อธิบดีกรมวิทยาศาสตร์การแพทย์':1,'รองอธิบดีกรมวิทยาศาสตร์การแพทย์':3,'กองแผนงานและวิชาการ':planPreReg};
-    Object.entries(_ov).forEach(([dept,min])=>{
-      if(execMap[dept]){
-        execMap[dept].d1=min;
-        execMap[dept].d2=min;
-        execMap[dept].d3=min;
-      }
     });
 
     renderExecTable();
