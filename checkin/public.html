@@ -487,7 +487,9 @@ let extProvCounts={};
 let mapGRef=null, mapPathRef=null, mapProjRef=null;
 let mapWRef=0, mapHRef=0, bkkPtRef=null, mapScaleRef=1;
 let intMapGRef=null, intMapPathRef=null, intMapWRef=0, intMapHRef=0, intBkkPtRef=null, intMapScaleRef=1;
-let selectedIntProv=null, intProvCounts={}, selectedProvExt=null;
+let selectedIntProv=(()=>{const s=sessionStorage.getItem('pubIntProv');return s||null;})();
+let intProvCounts={};
+let selectedProvExt=(()=>{const s=sessionStorage.getItem('pubProvExt');return s||null;})();
 
 function showMapLabel(mapId, html, x, y){
   const el=document.getElementById(mapId+'-label');
@@ -720,6 +722,7 @@ function zoomToProvExt(prov){
       .attr('font-size',(0.62/s)+'rem').attr('x',bkkPtRef[0]+9/s);
   }
   selectedProvExt=prov;
+  sessionStorage.setItem('pubProvExt',prov);
   const z=getZonePub(prov)||13;
   const cnt=extProvCounts[prov]||0;
   // After zoom, province centroid is at map center
@@ -761,6 +764,7 @@ function highlightZonePub(z){
     row.style.fontWeight=(selectedZonePub!==null&&rz===selectedZonePub)?'700':'';
   });
   selectedProvExt=null;
+  sessionStorage.removeItem('pubProvExt');
   // Restore Bangkok marker to zone-based fill
   if(bkkPtRef){
     const bkkBase=ZONE_COLORS_PUB[13%ZONE_COLORS_PUB.length];
@@ -915,7 +919,9 @@ async function renderExtPanel(extData){
 
     mapGRef=g; mapPathRef=pathGen; mapProjRef=proj; mapWRef=w; mapHRef=h; mapScaleRef=1;
     // Re-apply zone selection if active (persisted across refresh)
-    if(selectedZonePub!==null){ const _z=selectedZonePub; selectedZonePub=null; setTimeout(()=>highlightZonePub(_z),30); } else { updateClearBtn(); }
+    if(selectedProvExt!==null){ const _p=selectedProvExt; selectedProvExt=null; setTimeout(()=>zoomToProvExt(_p),50); }
+    else if(selectedZonePub!==null){ const _z=selectedZonePub; selectedZonePub=null; setTimeout(()=>highlightZonePub(_z),30); }
+    else { updateClearBtn(); }
 
   } catch(e){
     container.innerHTML='<div style="padding:20px;text-align:center;font-size:0.82rem;color:#94a3b8;">ไม่สามารถโหลดแผนที่ได้</div>';
@@ -941,7 +947,7 @@ async function renderIntMap(intData){
     const w=container.clientWidth||200;
     const h=Math.round(w*1.65);
     container.style.height=h+'px';
-    intMapWRef=w; intMapHRef=h; intMapScaleRef=1; selectedIntProv=null;
+    intMapWRef=w; intMapHRef=h; intMapScaleRef=1;
     const proj=d3.geoMercator().fitExtent([[12,12],[w-12,h-12]],thaiGeoCache);
     const pathGen=d3.geoPath().projection(proj);
     intMapPathRef=pathGen;
@@ -1009,6 +1015,7 @@ async function renderIntMap(intData){
       }).on('mouseout',function(){tip.style('opacity','0');})
         .on('click',function(){highlightIntProv('กรุงเทพมหานคร');});
     }
+    if(selectedIntProv!==null){ const _p=selectedIntProv; selectedIntProv=null; setTimeout(()=>highlightIntProv(_p),60); } else { updateIntClearBtn(); }
   } catch(e){
     container.innerHTML='<div style="padding:20px;text-align:center;font-size:0.82rem;color:#94a3b8;">ไม่สามารถโหลดแผนที่ได้</div>';
   }
@@ -1044,10 +1051,11 @@ function zoomToIntProv(prov){
   }
 }
 
-function highlightIntProv(dept){
-  const prov=dept==='กรุงเทพมหานคร'?dept:DEPT_TO_PROVINCE[dept];
+function highlightIntProv(deptOrProv){
+  const prov=deptOrProv==='กรุงเทพมหานคร'?deptOrProv:(DEPT_TO_PROVINCE[deptOrProv]??deptOrProv);
   if(!prov) return;
   selectedIntProv=selectedIntProv===prov?null:prov;
+  sessionStorage.setItem('pubIntProv',selectedIntProv||'');
   d3.select('#zoneMapInt svg').selectAll('path')
     .attr('fill',d=>{
       const th=EN_TO_TH[d.properties.name];
