@@ -470,6 +470,16 @@ async function loadData() {
       else if(r.day === 3) execMap[dept].d3++;
     });
 
+    // Leadership positions: always show at least fixed headcount each day
+    const _ov = {'อธิบดีกรมวิทยาศาสตร์การแพทย์':1,'รองอธิบดีกรมวิทยาศาสตร์การแพทย์':3};
+    Object.entries(_ov).forEach(([dept,min])=>{
+      if(execMap[dept]){
+        execMap[dept].d1=min;
+        execMap[dept].d2=min;
+        execMap[dept].d3=min;
+      }
+    });
+
     renderExecTable();
     document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString('th-TH', {timeZone: 'Asia/Bangkok'});
     document.getElementById('loadingArea').style.display = 'none';
