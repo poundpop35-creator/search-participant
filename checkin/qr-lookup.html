@@ -157,17 +157,17 @@
       <span style="font-size:0.98rem;font-weight:700;color:var(--blue);">รายชื่อผู้ลงทะเบียนล่วงหน้าทั้งหมด</span>
       <span id="ciCount" style="font-size:0.8rem;color:#64748b;margin-left:6px;font-weight:400;"></span>
     </div>
-    <div style="display:flex;gap:8px;align-items:center;">
-      <button class="sec-btn green" onclick="exportCheckinExcel()">⬇ Excel</button>
-      <button class="sec-btn" id="ciToggleBtn" onclick="toggleCI()">▼ ดูรายชื่อ</button>
-    </div>
+    <button class="sec-btn" id="ciToggleBtn" onclick="toggleCI()">▼ ดูรายชื่อ</button>
   </div>
 
   <div id="ciBody" style="display:none;margin-top:14px;">
-    <!-- Search -->
-    <input id="ciSearch" type="text" placeholder="ค้นหาชื่อ / หน่วยงาน / จังหวัด" oninput="ciApplyFilters()"
-      style="width:100%;border:1.5px solid var(--border);border-radius:10px;padding:8px 12px;font-family:Sarabun,sans-serif;font-size:0.88rem;outline:none;margin-bottom:10px;transition:border-color .2s;"
-      onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='var(--border)'">
+    <!-- Search row + Excel button -->
+    <div style="display:flex;gap:8px;margin-bottom:10px;">
+      <input id="ciSearch" type="text" placeholder="ค้นหาชื่อ / หน่วยงาน / จังหวัด" oninput="ciApplyFilters()"
+        style="flex:1;border:1.5px solid var(--border);border-radius:10px;padding:8px 12px;font-family:Sarabun,sans-serif;font-size:0.88rem;outline:none;transition:border-color .2s;"
+        onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='var(--border)'">
+      <button class="sec-btn green" onclick="exportCheckinExcel()" style="white-space:nowrap;">⬇ Excel</button>
+    </div>
     <!-- Table -->
     <div style="overflow-x:auto;">
       <table class="ci-tbl">
@@ -198,10 +198,10 @@
       <span style="font-size:0.98rem;font-weight:700;color:var(--blue);">แผนที่ผู้ลงทะเบียนล่วงหน้า — แยกตามเขตสุขภาพ</span>
       <span id="mapCount" style="font-size:0.8rem;color:#64748b;margin-left:6px;font-weight:400;"></span>
     </div>
-    <button class="sec-btn" id="mapToggleBtn" onclick="toggleMap()">▼ ดูแผนที่</button>
+    <button class="sec-btn" id="mapToggleBtn" onclick="toggleMap()">▲ ซ่อน</button>
   </div>
 
-  <div id="mapBody" style="display:none;margin-top:14px;">
+  <div id="mapBody" style="display:block;margin-top:14px;">
     <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap;">
       <!-- Thailand map -->
       <div id="qrLookupMap" style="position:relative;flex:0 0 180px;min-width:140px;max-width:220px;">
@@ -506,7 +506,7 @@ const EN_TO_TH={
 let thaiGeoCache = null;
 let mapRendered = false;
 let qrMapProvCounts = {};
-let qrMapG = null, qrMapPath = null, qrMapW = 0, qrMapH = 0, qrMapScale = 1, qrMapBkkPt = null, qrMapSelProv = null;
+let qrMapG = null, qrMapPath = null, qrMapW = 0, qrMapH = 0, qrMapScale = 1, qrMapBkkPt = null, qrMapSelProv = null, qrMapSelZone = null;
 
 async function toggleMap() {
   const body = document.getElementById('mapBody');
@@ -626,9 +626,42 @@ async function renderQrMap() {
   }
 }
 
+function zoomQrZone(z) {
+  if (!qrMapG || !thaiGeoCache || !qrMapPath) return;
+  if (qrMapSelZone === z) { resetQrMap(); return; }
+  qrMapSelZone = z; qrMapSelProv = null;
+  const feats = thaiGeoCache.features.filter(d => { const th=EN_TO_TH[d.properties.name]; return th&&(getZonePub(th)||13)===z; });
+  let x0, y0, x1, y1;
+  if (feats.length) { const b=qrMapPath.bounds({type:'FeatureCollection',features:feats}); [[x0,y0],[x1,y1]]=b; }
+  if (z===13 && qrMapBkkPt) {
+    x0=Math.min(x0??qrMapBkkPt[0],qrMapBkkPt[0])-8; y0=Math.min(y0??qrMapBkkPt[1],qrMapBkkPt[1])-8;
+    x1=Math.max(x1??qrMapBkkPt[0],qrMapBkkPt[0])+8; y1=Math.max(y1??qrMapBkkPt[1],qrMapBkkPt[1])+8;
+  }
+  if (x0===undefined) return;
+  const cx=(x0+x1)/2, cy=(y0+y1)/2;
+  if (x1-x0<qrMapW*0.18){x0=cx-qrMapW*0.09;x1=cx+qrMapW*0.09;}
+  if (y1-y0<qrMapH*0.18){y0=cy-qrMapH*0.09;y1=cy+qrMapH*0.09;}
+  const pad=20, s=Math.min(7,0.88/Math.max((x1-x0+pad*2)/qrMapW,(y1-y0+pad*2)/qrMapH));
+  const tx=qrMapW/2-s*(x0+x1)/2, ty=qrMapH/2-s*(y0+y1)/2;
+  qrMapScale=s;
+  qrMapG.transition().duration(700).attr('transform',`translate(${tx},${ty}) scale(${s})`);
+  qrMapG.selectAll('path').transition().duration(700)
+    .attr('fill',d=>{ const th=EN_TO_TH[d.properties.name]; if(!th) return '#e8edf2'; const pz=getZonePub(th)||13; const base=ZONE_COLORS_PUB[pz%ZONE_COLORS_PUB.length]; if(pz===z) return base; const c=d3.color(base);c.opacity=0.1;return c.toString(); })
+    .attr('stroke-width',0.6/s);
+  const bkkBase=ZONE_COLORS_PUB[13%ZONE_COLORS_PUB.length];
+  d3.select('#qrLookupMap .bkk-dot').transition().duration(700)
+    .attr('fill',z===13?bkkBase:(()=>{const c=d3.color(bkkBase);c.opacity=0.1;return c.toString();})());
+  const zoneCnt=Object.keys(qrMapProvCounts).filter(p=>(getZonePub(p)||13)===z).reduce((s,p)=>s+(qrMapProvCounts[p]||0),0);
+  const lbl=document.getElementById('qrMapLabel');
+  lbl.innerHTML=`<b>${ZONE_NAMES_PUB[z]||'เขต '+z}</b><br>${zoneCnt.toLocaleString()} คน`;
+  lbl.style.display='block';
+  document.getElementById('qrMapClear').style.display='block';
+}
+
 function zoomQrProv(prov) {
   if (!qrMapG || !thaiGeoCache || !qrMapPath) return;
-  if (qrMapSelProv === prov) { resetQrMap(); return; }
+  if (qrMapSelProv === prov && qrMapSelZone === null) { resetQrMap(); return; }
+  qrMapSelZone = null;
   qrMapSelProv = prov;
   let x0, y0, x1, y1;
   if (prov === 'กรุงเทพมหานคร' && qrMapBkkPt) {
@@ -669,7 +702,7 @@ function zoomQrProv(prov) {
 
 function resetQrMap() {
   if (!qrMapG) return;
-  qrMapSelProv = null; qrMapScale = 1;
+  qrMapSelProv = null; qrMapSelZone = null; qrMapScale = 1;
   qrMapG.transition().duration(600).attr('transform', '');
   qrMapG.selectAll('path').transition().duration(600)
     .attr('fill', d => {
@@ -707,14 +740,26 @@ function renderZoneTable() {
     const pct = grandTotal ? Math.round(e.n / grandTotal * 100) : 0;
     const detId = `qrz-${e.z}`;
     const provRows = Object.entries(provByZone[e.z]||{}).sort((a,b)=>b[1]-a[1])
-      .map(([pv,cnt])=>`<tr style="background:#f8fafc;"><td style="padding:3px 10px 3px 26px;font-size:0.76rem;color:#64748b;">${pv}</td><td style="padding:3px 10px;text-align:right;font-size:0.76rem;color:#64748b;">${cnt.toLocaleString()}</td><td style="padding:3px 10px;text-align:right;font-size:0.76rem;color:#94a3b8;">${grandTotal?Math.round(cnt/grandTotal*100):0}%</td></tr>`).join('');
-    return `<tr style="cursor:pointer;border-bottom:1px solid #e2e8f0;" onclick="const r=document.getElementById('${detId}');r.style.display=r.style.display==='none'?'table-row':'none'">
-      <td style="padding:7px 10px;"><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:${zc};margin-right:6px;vertical-align:middle;"></span>${ZONE_NAMES_PUB[e.z]||'เขต '+e.z}</td>
+      .map(([pv,cnt])=>`<tr data-prov="${pv.replace(/"/g,'&quot;')}" style="background:#f8fafc;cursor:pointer;transition:background .12s;"
+        onclick="event.stopPropagation();zoomQrProv(this.dataset.prov)"
+        onmouseover="this.style.background='rgba(59,130,246,0.08)'" onmouseout="this.style.background=''">
+        <td style="padding:3px 10px 3px 28px;font-size:0.76rem;color:#64748b;">⌙ ${pv}</td>
+        <td style="padding:3px 10px;text-align:right;font-size:0.76rem;color:#64748b;">${cnt.toLocaleString()}</td>
+        <td style="padding:3px 10px;text-align:right;font-size:0.76rem;color:#94a3b8;">${grandTotal?Math.round(cnt/grandTotal*100):0}%</td>
+      </tr>`).join('');
+    return `<tr style="cursor:pointer;border-bottom:1px solid #e2e8f0;transition:background .12s;"
+      onmouseover="this.style.background='rgba(59,130,246,0.06)'" onmouseout="this.style.background=''"
+      onclick="zoomQrZone(${e.z});const r=document.getElementById('${detId}');r.style.display=r.style.display==='none'?'table-row':'none';this.querySelector('.qrzArr').textContent=r.style.display==='none'?'▶':'▼'">
+      <td style="padding:7px 10px;"><span class="qrzArr" style="display:inline-block;width:12px;font-size:0.65rem;color:#94a3b8;margin-right:2px;">▶</span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:${zc};margin-right:6px;vertical-align:middle;"></span>${ZONE_NAMES_PUB[e.z]||'เขต '+e.z}</td>
       <td style="padding:7px 10px;text-align:right;font-weight:700;">${e.n.toLocaleString()}</td>
       <td style="padding:7px 10px;text-align:right;color:#64748b;">${pct}%</td>
-    </tr><tr id="${detId}" style="display:none;"><td colspan="3" style="padding:0;"><table style="width:100%;">${provRows}</table></td></tr>`;
+    </tr><tr id="${detId}" style="display:none;"><td colspan="3" style="padding:0;"><table style="width:100%;border-collapse:collapse;">${provRows}</table></td></tr>`;
   }).join('');
 }
+
+// Auto-load map on page start (mapBody starts open)
+mapRendered = true;
+loadMapData();
 </script>
 </body>
 </html>
