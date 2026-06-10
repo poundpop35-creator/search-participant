@@ -1156,6 +1156,7 @@ const DEPT_TO_PROVINCE={
   'ศูนย์วิทยาศาสตร์การแพทย์ที่ 12/1 ตรัง':'ตรัง',
 };
 let allCheckins = [];
+let planPreRegCount = 0;
 let activeDay=(()=>{const s=sessionStorage.getItem('pubDay');if(s==='all')return 'all';const n=Number(s);return[1,2,3].includes(n)?n:'all';})();
 let deptView = 'table', extDeptView = 'table';
 let intChartInst = null, extChartInst = null, trendChartInst = null;
@@ -1293,6 +1294,10 @@ function renderStats() {
       deptCount[p.dept]++;
     }
   });
+  // Lock กองแผนงานและวิชาการ to pre-registered count (each day = full count)
+  if(planPreRegCount > 0) {
+    deptCount['กองแผนงานและวิชาการ'] = activeDay === 'all' ? planPreRegCount * 3 : planPreRegCount;
+  }
   const sorted = DEPTS.filter(d => !HIDDEN_DEPTS_PUBLIC.has(d))
     .map(d => ({name:d, count:deptCount[d]}))
     .filter(d => d.count > 0)
@@ -1424,7 +1429,12 @@ async function loadData() {
     return;
   }
   try {
-    allCheckins = await fetchAll('/rest/v1/checkins?select=participant_id,day,checkin_time,participants(dept,ext_dept,internal_external,is_walkin,province)&order=checkin_time.desc');
+    const [_ci, _planRows] = await Promise.all([
+      fetchAll('/rest/v1/checkins?select=participant_id,day,checkin_time,participants(dept,ext_dept,internal_external,is_walkin,province)&order=checkin_time.desc'),
+      fetchAll('/rest/v1/participants?dept=eq.' + encodeURIComponent('กองแผนงานและวิชาการ') + '&is_walkin=eq.false&select=id')
+    ]);
+    allCheckins = _ci;
+    planPreRegCount = _planRows.length;
     renderStats();
     document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString('th-TH',{timeZone:'Asia/Bangkok'});
     document.getElementById('loadingArea').style.display = 'none';

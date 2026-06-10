@@ -443,7 +443,11 @@ function renderExecChart() {
 
 async function loadData() {
   try {
-    const rows = await fetchAll('/rest/v1/checkins?select=day,checkin_time,participants(dept,internal_external,is_walkin)&order=checkin_time.desc');
+    const [rows, planRows] = await Promise.all([
+      fetchAll('/rest/v1/checkins?select=day,checkin_time,participants(dept,internal_external,is_walkin)&order=checkin_time.desc'),
+      fetchAll('/rest/v1/participants?dept=eq.' + encodeURIComponent('กองแผนงานและวิชาการ') + '&is_walkin=eq.false&select=id')
+    ]);
+    const planPreReg = planRows.length;
     execRows = rows;
 
     const total = rows.length;
@@ -470,8 +474,8 @@ async function loadData() {
       else if(r.day === 3) execMap[dept].d3++;
     });
 
-    // Leadership positions: always show at least fixed headcount each day
-    const _ov = {'อธิบดีกรมวิทยาศาสตร์การแพทย์':1,'รองอธิบดีกรมวิทยาศาสตร์การแพทย์':3};
+    // Lock headcount for leadership + กองแผน to pre-registered count every day
+    const _ov = {'อธิบดีกรมวิทยาศาสตร์การแพทย์':1,'รองอธิบดีกรมวิทยาศาสตร์การแพทย์':3,'กองแผนงานและวิชาการ':planPreReg};
     Object.entries(_ov).forEach(([dept,min])=>{
       if(execMap[dept]){
         execMap[dept].d1=min;
