@@ -709,6 +709,14 @@ function zoomQrProv(prov) {
   lbl.innerHTML = `<b>${prov}</b> · ${ZONE_NAMES_PUB[z]||'เขต '+z}<br>${cnt.toLocaleString()} คน`;
   lbl.style.display = 'block';
   document.getElementById('qrMapClear').style.display = 'block';
+  // Highlight corresponding zone row + province row in table
+  const detRow2 = document.getElementById(`qrz-${z}`);
+  const arrow2 = document.querySelector(`#zoneTableBody tr[data-zone="${z}"] .qrzArr`);
+  if (detRow2 && detRow2.style.display === 'none') { detRow2.style.display=''; if(arrow2) arrow2.textContent='▼'; }
+  document.querySelectorAll('#zoneTableBody tr[data-zone]').forEach(r=>{r.style.background='';r.style.fontWeight='';});
+  document.querySelectorAll('#zoneTableBody tr[data-prov]').forEach(r=>r.style.background='');
+  const provRowEl = document.querySelector(`#zoneTableBody tr[data-prov="${prov.replace(/"/g,'&quot;')}"]`);
+  if (provRowEl) { provRowEl.style.background='rgba(59,130,246,0.15)'; provRowEl.scrollIntoView({behavior:'smooth',block:'nearest'}); }
 }
 
 function resetQrMap() {
@@ -732,6 +740,8 @@ function resetQrMap() {
     .attr('fill', bkkCnt ? bkkBase : (()=>{ const c=d3.color(bkkBase); c.opacity=0.18; return c.toString(); })());
   document.getElementById('qrMapLabel').style.display = 'none';
   document.getElementById('qrMapClear').style.display = 'none';
+  document.querySelectorAll('#zoneTableBody tr[data-zone]').forEach(r=>{r.style.background='';r.style.fontWeight='';});
+  document.querySelectorAll('#zoneTableBody tr[data-prov]').forEach(r=>r.style.background='');
 }
 
 function renderZoneTable() {

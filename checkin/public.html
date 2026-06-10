@@ -725,8 +725,16 @@ function zoomToProvExt(prov){
   sessionStorage.setItem('pubProvExt',prov);
   const z=getZonePub(prov)||13;
   const cnt=extProvCounts[prov]||0;
-  // After zoom, province centroid is at map center
   showMapLabel('zoneMapExt',`<b>${prov}</b> · ${ZONE_NAMES_PUB[z]||'เขต '+z}<br>${cnt.toLocaleString()} คน`,'tl');
+  // Highlight zone row + province row in table
+  const pid=`zext-${z}`;
+  const detRow=document.getElementById(pid);
+  const arrow=document.querySelector(`#zoneBodyExt tr[data-zone="${z}"] .zarr`);
+  if(detRow&&detRow.style.display==='none'){ detRow.style.display=''; if(arrow) arrow.textContent='▼'; }
+  document.querySelectorAll('#zoneBodyExt tr[data-zone]').forEach(r=>{r.style.background='';r.style.fontWeight='';});
+  document.querySelectorAll('#zoneBodyExt tr[data-prov]').forEach(r=>r.style.background='');
+  const provRowEl=document.querySelector(`#zoneBodyExt tr[data-prov="${prov.replace(/"/g,'&quot;')}"]`);
+  if(provRowEl){ provRowEl.style.background='rgba(234,88,12,0.12)'; provRowEl.scrollIntoView({behavior:'smooth',block:'nearest'}); }
 }
 
 function highlightZonePub(z){
