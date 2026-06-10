@@ -1415,7 +1415,44 @@ function generateMockData(){
 
 async function loadData() {
   if(IS_DEMO){
-    allCheckins=generateMockData();
+    try {
+      const [_parts, _planRows] = await Promise.all([
+        fetchAll('/rest/v1/participants?is_walkin=eq.false&select=id,dept,ext_dept,internal_external,province'),
+        fetchAll('/rest/v1/participants?dept=eq.' + encodeURIComponent('กองแผนงานและวิชาการ') + '&is_walkin=eq.false&select=id')
+      ]);
+      planPreRegCount = _planRows.length;
+      const _LOCKED = {'อธิบดีกรมวิทยาศาสตร์การแพทย์':1,'รองอธิบดีกรมวิทยาศาสตร์การแพทย์':3,'กองแผนงานและวิชาการ':planPreRegCount};
+      const _LSET = new Set(Object.keys(_LOCKED));
+      const pool = _parts.filter(p => !_LSET.has(p.dept));
+      const WI_DEPTS=['กองแผนงานและวิชาการ','สำนักงานเลขานุการกรม','สถาบันชีววัตถุ','สถาบันวิจัยวิทยาศาสตร์สาธารณสุข','สถาบันวิจัยสมุนไพร','สำนักคุณภาพและความปลอดภัยอาหาร','สำนักยาและวัตถุเสพติด'];
+      const WI_PROVS=['กรุงเทพมหานคร','นนทบุรี','ปทุมธานี','ชลบุรี','เชียงใหม่','ขอนแก่น','นครราชสีมา','สงขลา'];
+      const walkinPool=[];
+      for(let i=0;i<30;i++) walkinPool.push({dept:WI_DEPTS[i%WI_DEPTS.length],internal_external:'ภายใน',is_walkin:true,province:null,ext_dept:null});
+      for(let i=0;i<70;i++) walkinPool.push({province:WI_PROVS[i%WI_PROVS.length],internal_external:'ภายนอก',is_walkin:true,dept:null,ext_dept:null});
+      for(let i=pool.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[pool[i],pool[j]]=[pool[j],pool[i]];}
+      for(let i=walkinPool.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[walkinPool[i],walkinPool[j]]=[walkinPool[j],walkinPool[i]];}
+      const rn=(a,b)=>a+Math.random()*(b-a);
+      const BASES=[Date.parse('2026-06-23T23:00:00Z'),Date.parse('2026-06-24T23:00:00Z'),Date.parse('2026-06-25T23:00:00Z')];
+      function mkTime(di){const x=Math.random();const m=x<0.12?rn(0,60):x<0.35?rn(60,120):x<0.60?rn(120,180):x<0.78?rn(180,240):x<0.90?rn(240,360):rn(360,660);return new Date(BASES[di]+m*60000).toISOString();}
+      const N=pool.length;
+      allCheckins=[];
+      let pid=0;
+      for(let di=0;di<3;di++){
+        const cnt=di===0?N:di===1?Math.round(N*0.70):Math.round(N*0.50);
+        for(let i=0;i<cnt;i++) allCheckins.push({day:di+1,checkin_time:mkTime(di),participant_id:pid++,participants:{...pool[i],is_walkin:false}});
+        for(let i=0;i<100;i++) allCheckins.push({day:di+1,checkin_time:mkTime(di),participant_id:pid++,participants:{...walkinPool[i%walkinPool.length]}});
+      }
+      const _DT=['2026-06-23T23:30:00Z','2026-06-24T23:30:00Z','2026-06-25T23:30:00Z'];
+      let _vpid=-1;
+      for(const [dept,locked] of Object.entries(_LOCKED)){
+        if(!locked) continue;
+        for(const day of [1,2,3])
+          for(let i=0;i<locked;i++)
+            allCheckins.push({day,checkin_time:_DT[day-1],participant_id:_vpid--,participants:{dept,internal_external:'ภายใน',is_walkin:false,province:null,ext_dept:null}});
+      }
+    } catch(e) {
+      allCheckins = generateMockData();
+    }
     renderStats();
     document.getElementById('lastUpdate').textContent='ข้อมูลจำลอง';
     document.getElementById('loadingArea').style.display='none';
