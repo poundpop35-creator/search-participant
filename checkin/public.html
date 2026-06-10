@@ -732,9 +732,9 @@ function zoomToProvExt(prov){
   const arrow=document.querySelector(`#zoneBodyExt tr[data-zone="${z}"] .zarr`);
   if(detRow&&detRow.style.display==='none'){ detRow.style.display=''; if(arrow) arrow.textContent='▼'; }
   document.querySelectorAll('#zoneBodyExt tr[data-zone]').forEach(r=>{r.style.background='';r.style.fontWeight='';});
-  document.querySelectorAll('#zoneBodyExt tr[data-prov]').forEach(r=>r.style.background='');
+  document.querySelectorAll('#zoneBodyExt tr[data-prov]').forEach(r=>{r.style.background='';delete r.dataset.hl;});
   const provRowEl=document.querySelector(`#zoneBodyExt tr[data-prov="${prov.replace(/"/g,'&quot;')}"]`);
-  if(provRowEl){ provRowEl.style.background='rgba(234,88,12,0.12)'; provRowEl.scrollIntoView({behavior:'smooth',block:'nearest'}); }
+  if(provRowEl){ provRowEl.dataset.hl='1'; provRowEl.style.background='rgba(234,88,12,0.18)'; provRowEl.scrollIntoView({behavior:'smooth',block:'nearest'}); }
 }
 
 function highlightZonePub(z){
@@ -773,6 +773,7 @@ function highlightZonePub(z){
   });
   selectedProvExt=null;
   sessionStorage.removeItem('pubProvExt');
+  document.querySelectorAll('#zoneBodyExt tr[data-prov]').forEach(r=>{r.style.background='';delete r.dataset.hl;});
   // Restore Bangkok marker to zone-based fill
   if(bkkPtRef){
     const bkkBase=ZONE_COLORS_PUB[13%ZONE_COLORS_PUB.length];
@@ -821,7 +822,7 @@ async function renderExtPanel(extData){
       const provRows=Object.entries(provByZone[e.z]||{}).sort((a,b)=>b[1]-a[1]).map(([prov,cnt])=>`
         <tr data-prov="${prov.replace(/"/g,'&quot;')}" style="background:var(--prov-bg);cursor:pointer;transition:background .12s;"
             onclick="event.stopPropagation();zoomToProvExt(this.dataset.prov)"
-            onmouseover="this.style.background='rgba(234,88,12,0.08)'" onmouseout="this.style.background=''">
+            onmouseover="if(!this.dataset.hl)this.style.background='rgba(234,88,12,0.08)'" onmouseout="if(!this.dataset.hl)this.style.background=''">
           <td style="padding:3px 10px 3px 28px;font-size:0.78rem;color:var(--prov-c);" colspan="2">⌙ ${prov}</td>
           <td style="padding:3px 10px;text-align:right;font-size:0.78rem;color:var(--prov-c);">${cnt.toLocaleString()}</td>
           <td style="padding:3px 10px;text-align:right;font-size:0.78rem;color:var(--prov-c2);">${fmtPctPub(cnt,total)}</td>
@@ -1099,12 +1100,15 @@ function highlightIntProv(deptOrProv){
       const th=EN_TO_TH[d.properties.name];
       return(th===selectedIntProv?1.4:0.3)/intMapScaleRef;
     });
+  let firstIntRow=null;
   document.querySelectorAll('#zoneBodyInt tr[data-dept]').forEach(row=>{
     const rowProv=DEPT_TO_PROVINCE[row.dataset.dept];
     const sel=selectedIntProv!==null&&rowProv===selectedIntProv;
-    row.style.background=sel?'rgba(22,163,74,0.09)':'';
+    row.style.background=sel?'rgba(22,163,74,0.12)':'';
     row.style.fontWeight=sel?'700':'';
+    if(sel&&!firstIntRow) firstIntRow=row;
   });
+  if(firstIntRow) firstIntRow.scrollIntoView({behavior:'smooth',block:'nearest'});
   zoomToIntProv(selectedIntProv);
   if(selectedIntProv!==null){
     const z=getZonePub(selectedIntProv)||13;

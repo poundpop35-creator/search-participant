@@ -1428,9 +1428,9 @@ function zoomDashProv(prov, instKey) {
   const arrow=document.querySelector(`#${bodyId} tr[data-zone="${z}"] .dzArr`);
   if(detRow&&detRow.style.display==='none'){ detRow.style.display=''; if(arrow) arrow.textContent='▼'; }
   document.querySelectorAll(`#${bodyId} tr[data-zone]`).forEach(r=>{r.style.background='';r.style.fontWeight='';});
-  document.querySelectorAll(`#${bodyId} tr[data-prov]`).forEach(r=>r.style.background='');
+  document.querySelectorAll(`#${bodyId} tr[data-prov]`).forEach(r=>{r.style.background='';delete r.dataset.hl;});
   const provRow=document.querySelector(`#${bodyId} tr[data-prov="${prov.replace(/"/g,'&quot;')}"]`);
-  if(provRow){ provRow.style.background='rgba(59,130,246,0.15)'; provRow.scrollIntoView({behavior:'smooth',block:'nearest'}); }
+  if(provRow){ provRow.dataset.hl='1'; provRow.style.background='rgba(59,130,246,0.18)'; provRow.scrollIntoView({behavior:'smooth',block:'nearest'}); }
 }
 
 function resetDashMap(instKey) {
@@ -1449,7 +1449,7 @@ function resetDashMap(instKey) {
   document.getElementById(`${mapId}Clear`).style.display='none';
   const bodyId=`zoneBody${instKey==='pre'?'Pre':'Wi'}`;
   document.querySelectorAll(`#${bodyId} tr[data-zone]`).forEach(r=>{r.style.background='';r.style.fontWeight='';});
-  document.querySelectorAll(`#${bodyId} tr[data-prov]`).forEach(r=>r.style.background='');
+  document.querySelectorAll(`#${bodyId} tr[data-prov]`).forEach(r=>{r.style.background='';delete r.dataset.hl;});
 }
 
 let pRegViewMode='list';
