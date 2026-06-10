@@ -682,6 +682,45 @@ function zoomToZonePub(z){
 
 function zoomToProvExt(prov){
   if(!mapGRef||!thaiGeoCache||!mapPathRef) return;
+
+  // Toggle: clicking the same province again → zoom back out
+  if(selectedProvExt===prov){
+    selectedProvExt=null;
+    sessionStorage.removeItem('pubProvExt');
+    document.querySelectorAll('#zoneBodyExt tr[data-prov]').forEach(r=>{r.style.background='';delete r.dataset.hl;});
+    // Recalculate target zoom (zone or full)
+    let tx=0,ty=0,s=1;
+    if(selectedZonePub!==null){
+      const feats=thaiGeoCache.features.filter(d=>{const th=EN_TO_TH[d.properties.name];return th&&(getZonePub(th)||13)===selectedZonePub;});
+      let x0,y0,x1,y1;
+      if(feats.length){const b=mapPathRef.bounds({type:'FeatureCollection',features:feats});[[x0,y0],[x1,y1]]=b;}
+      if(selectedZonePub===13&&bkkPtRef){x0=Math.min(x0??bkkPtRef[0],bkkPtRef[0])-8;y0=Math.min(y0??bkkPtRef[1],bkkPtRef[1])-8;x1=Math.max(x1??bkkPtRef[0],bkkPtRef[0])+8;y1=Math.max(y1??bkkPtRef[1],bkkPtRef[1])+8;}
+      if(x0!==undefined){
+        const cx=(x0+x1)/2,cy=(y0+y1)/2;
+        if(x1-x0<mapWRef*0.18){x0=cx-mapWRef*0.09;x1=cx+mapWRef*0.09;} if(y1-y0<mapHRef*0.18){y0=cy-mapHRef*0.09;y1=cy+mapHRef*0.09;}
+        const pad=22; s=Math.min(7,0.88/Math.max((x1-x0+pad*2)/mapWRef,(y1-y0+pad*2)/mapHRef));
+        tx=mapWRef/2-s*(x0+x1)/2; ty=mapHRef/2-s*(y0+y1)/2;
+      }
+    }
+    mapScaleRef=s;
+    mapGRef.transition().duration(600).attr('transform',s===1?'':(`translate(${tx},${ty}) scale(${s})`));
+    mapGRef.selectAll('path').transition().duration(600)
+      .attr('fill',d=>{const th=EN_TO_TH[d.properties.name];if(!th)return '#e8edf2';const pz=getZonePub(th)||13;const base=ZONE_COLORS_PUB[pz%ZONE_COLORS_PUB.length];if(selectedZonePub===null){const cnt=extProvCounts[th]||0;if(!cnt){const c=d3.color(base);c.opacity=0.18;return c.toString();}return base;}if(pz===selectedZonePub)return base;const c=d3.color(base);c.opacity=0.1;return c.toString();})
+      .attr('stroke','#fff').attr('stroke-width',0.6/s);
+    if(bkkPtRef){
+      const bkkBase=ZONE_COLORS_PUB[13%ZONE_COLORS_PUB.length];const bkkCnt=extProvCounts['กรุงเทพมหานคร']||0;
+      const bkkFill=selectedZonePub===null?(bkkCnt?bkkBase:(()=>{const c=d3.color(bkkBase);c.opacity=0.18;return c.toString();})()):(selectedZonePub===13?bkkBase:(()=>{const c=d3.color(bkkBase);c.opacity=0.1;return c.toString();})());
+      d3.select('#zoneMapExt .bkk-marker circle').transition().duration(600).attr('r',6/s).attr('fill',bkkFill);
+      d3.select('#zoneMapExt .bkk-marker text').transition().duration(600).attr('font-size',(0.62/s)+'rem').attr('x',bkkPtRef[0]+9/s);
+    }
+    if(selectedZonePub!==null){
+      const zoneCnt=Object.keys(extProvCounts).filter(p=>(getZonePub(p)||13)===selectedZonePub).reduce((sum,p)=>sum+(extProvCounts[p]||0),0);
+      showMapLabel('zoneMapExt',`<b>${ZONE_NAMES_PUB[selectedZonePub]||'เขต '+selectedZonePub}</b><br>${zoneCnt.toLocaleString()} คน`);
+    } else { showMapLabel('zoneMapExt',null); }
+    updateClearBtn();
+    return;
+  }
+
   let tx=0,ty=0,s=1;
   let x0,y0,x1,y1;
   if(prov==='กรุงเทพมหานคร'&&bkkPtRef){
