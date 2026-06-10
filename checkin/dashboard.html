@@ -1543,7 +1543,7 @@ function renderZoneChart(){
   });
   const pre=base.filter(p=>!p.is_walkin);
   const wi=base.filter(p=>p.is_walkin===true);
-  document.getElementById('zoneChartCount').textContent=`(${base.length.toLocaleString()} คน)`;
+  const _zcc=document.getElementById('zoneChartCount'); if(_zcc) _zcc.textContent=`(${base.length.toLocaleString()} คน)`;
   buildZoneChart(pre,'zoneChartPre','zoneBodyPre','zonePreCount','pre');
   buildZoneChart(wi,'zoneChartWi','zoneBodyWi','zoneWiCount','wi');
 }

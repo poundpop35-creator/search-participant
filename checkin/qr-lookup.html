@@ -522,7 +522,12 @@ async function toggleMap() {
 }
 
 async function loadMapData() {
-  document.getElementById('qrLookupMap').innerHTML = '<div style="padding:20px;text-align:center;font-size:0.82rem;color:#94a3b8;">กำลังโหลด...</div>';
+  const mc = document.getElementById('qrLookupMap');
+  const savedLbl = document.getElementById('qrMapLabel');
+  const savedClr = document.getElementById('qrMapClear');
+  mc.innerHTML = '<div style="padding:20px;text-align:center;font-size:0.82rem;color:#94a3b8;">กำลังโหลด...</div>';
+  if (savedLbl) mc.appendChild(savedLbl);
+  if (savedClr) mc.appendChild(savedClr);
   document.getElementById('zoneTableBody').innerHTML = '<tr><td colspan="3" style="padding:16px;text-align:center;color:#94a3b8;">กำลังโหลด...</td></tr>';
   try {
     const H = { 'apikey': SB_ANON, 'Authorization': 'Bearer ' + SB_ANON };
@@ -541,7 +546,12 @@ async function loadMapData() {
     await renderQrMap();
     renderZoneTable();
   } catch(e) {
-    document.getElementById('qrLookupMap').innerHTML = '<div style="padding:20px;text-align:center;font-size:0.82rem;color:#94a3b8;">ไม่สามารถโหลดแผนที่ได้</div>';
+    const mc2 = document.getElementById('qrLookupMap');
+    const lbl2 = document.getElementById('qrMapLabel');
+    const clr2 = document.getElementById('qrMapClear');
+    mc2.innerHTML = '<div style="padding:20px;text-align:center;font-size:0.82rem;color:#94a3b8;">ไม่สามารถโหลดแผนที่ได้</div>';
+    if (lbl2) mc2.appendChild(lbl2);
+    if (clr2) mc2.appendChild(clr2);
     document.getElementById('zoneTableBody').innerHTML = '';
   }
 }
@@ -623,6 +633,8 @@ async function renderQrMap() {
     }
   } catch(e) {
     container.innerHTML = '<div style="padding:20px;text-align:center;font-size:0.82rem;color:#94a3b8;">ไม่สามารถโหลดแผนที่ได้</div>';
+    if (savedLabel) container.appendChild(savedLabel);
+    if (savedClear) container.appendChild(savedClear);
   }
 }
 
