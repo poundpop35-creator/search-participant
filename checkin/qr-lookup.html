@@ -154,7 +154,7 @@
 <div class="card wide-card" style="margin-top:16px;padding:20px;">
   <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
     <div>
-      <span style="font-size:0.98rem;font-weight:700;color:var(--blue);">รายชื่อผู้เช็คอินทั้งหมด</span>
+      <span style="font-size:0.98rem;font-weight:700;color:var(--blue);">รายชื่อผู้ลงทะเบียนล่วงหน้าทั้งหมด</span>
       <span id="ciCount" style="font-size:0.8rem;color:#64748b;margin-left:6px;font-weight:400;"></span>
     </div>
     <div style="display:flex;gap:8px;align-items:center;">
@@ -164,15 +164,8 @@
   </div>
 
   <div id="ciBody" style="display:none;margin-top:14px;">
-    <!-- Day tabs -->
-    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">
-      <button class="ci-tab active" onclick="setCIDay(0)">ทั้งหมด</button>
-      <button class="ci-tab" onclick="setCIDay(1)">วัน 1 — 24 มิ.ย.</button>
-      <button class="ci-tab" onclick="setCIDay(2)">วัน 2 — 25 มิ.ย.</button>
-      <button class="ci-tab" onclick="setCIDay(3)">วัน 3 — 26 มิ.ย.</button>
-    </div>
     <!-- Search -->
-    <input id="ciSearch" type="text" placeholder="ค้นหาชื่อ / หน่วยงาน" oninput="ciApplyFilters()"
+    <input id="ciSearch" type="text" placeholder="ค้นหาชื่อ / หน่วยงาน / จังหวัด" oninput="ciApplyFilters()"
       style="width:100%;border:1.5px solid var(--border);border-radius:10px;padding:8px 12px;font-family:Sarabun,sans-serif;font-size:0.88rem;outline:none;margin-bottom:10px;transition:border-color .2s;"
       onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='var(--border)'">
     <!-- Table -->
@@ -181,7 +174,7 @@
         <thead>
           <tr>
             <th>#</th><th>ชื่อ-นามสกุล</th><th>หน่วยงาน</th>
-            <th>ประเภท</th><th>วัน</th><th>เวลา</th>
+            <th>จังหวัด</th><th>เขตสุขภาพ</th><th>ประเภทบุคคล</th>
           </tr>
         </thead>
         <tbody id="ciTBody"><tr><td colspan="6" style="text-align:center;padding:24px;color:#94a3b8;">กำลังโหลด...</td></tr></tbody>
@@ -211,7 +204,10 @@
   <div id="mapBody" style="display:none;margin-top:14px;">
     <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap;">
       <!-- Thailand map -->
-      <div id="qrLookupMap" style="position:relative;flex:0 0 180px;min-width:140px;max-width:220px;"></div>
+      <div id="qrLookupMap" style="position:relative;flex:0 0 180px;min-width:140px;max-width:220px;">
+        <div id="qrMapLabel" style="display:none;position:absolute;left:8px;top:8px;z-index:10;background:rgba(15,23,42,0.82);color:#fff;padding:5px 9px;border-radius:8px;font-size:0.72rem;line-height:1.5;pointer-events:none;font-family:Sarabun,sans-serif;"></div>
+        <button id="qrMapClear" onclick="resetQrMap()" style="display:none;position:absolute;right:6px;top:6px;z-index:10;background:rgba(255,255,255,0.92);border:1.5px solid #e2e8f0;border-radius:8px;padding:3px 10px;font-family:Sarabun,sans-serif;font-size:0.72rem;cursor:pointer;color:#334155;">✕ ล้าง</button>
+      </div>
       <!-- Zone table -->
       <div style="flex:1;min-width:200px;overflow-x:auto;">
         <table class="zone-tbl">
@@ -359,10 +355,9 @@ function downloadQR() {
   else { const imgSrc = container.querySelector('img')?.src || ''; if (imgSrc) window.open(imgSrc, '_blank'); }
 }
 
-// ─── CHECK-IN LIST ───
+// ─── PRE-REGISTERED LIST ───
 let allCIData = null;
 let ciFiltered = [];
-let ciDay = 0;
 let ciPage = 1;
 const CI_PAGE = 25;
 
@@ -376,7 +371,7 @@ async function ensureCIData() {
   let data = [], from = 0;
   while(true) {
     const r = await fetch(
-      `${SB_URL}/rest/v1/checkins?select=day,checkin_time,participants(prefix,first_name,last_name,dept,ext_dept,internal_external)&order=checkin_time.desc&limit=1000&offset=${from}`,
+      `${SB_URL}/rest/v1/participants?is_walkin=eq.false&select=prefix,first_name,last_name,dept,ext_dept,internal_external,province&order=last_name.asc&limit=1000&offset=${from}`,
       { headers: H }
     );
     const d = await r.json();
@@ -385,10 +380,10 @@ async function ensureCIData() {
     if (d.length < 1000) break;
     from += 1000;
   }
-  allCIData = data.map(r => {
-    const p = r.participants || {};
+  allCIData = data.map(p => {
     const isIn = (p.internal_external || '').includes('ภายใน');
-    return { day: r.day, time: r.checkin_time, name: _buildName(p), dept: (isIn ? (p.dept||'-') : (p.ext_dept||p.dept||'-')), isIn };
+    const prov = (p.province || '').trim();
+    return { name: _buildName(p), dept: (isIn ? (p.dept||'-') : (p.ext_dept||p.dept||'-')), province: prov||'-', zone: getZonePub(prov), isIn };
   });
 }
 
@@ -409,18 +404,11 @@ async function toggleCI() {
   }
 }
 
-function setCIDay(d) {
-  ciDay = d;
-  document.querySelectorAll('.ci-tab').forEach((t, i) => t.classList.toggle('active', i === d));
-  ciPage = 1;
-  ciApplyFilters();
-}
-
 function ciApplyFilters() {
   if (!allCIData) return;
   const q = (document.getElementById('ciSearch').value || '').toLowerCase();
-  ciFiltered = allCIData.filter(r => (ciDay === 0 || r.day === ciDay) && (!q || r.name.toLowerCase().includes(q) || r.dept.toLowerCase().includes(q)));
-  document.getElementById('ciCount').textContent = `(${ciFiltered.length.toLocaleString()} รายการ)`;
+  ciFiltered = allCIData.filter(r => !q || r.name.toLowerCase().includes(q) || r.dept.toLowerCase().includes(q) || r.province.toLowerCase().includes(q));
+  document.getElementById('ciCount').textContent = `(${ciFiltered.length.toLocaleString()} คน)`;
   ciPage = 1;
   renderCITable();
 }
@@ -430,20 +418,20 @@ function renderCITable() {
   const page = ciFiltered.slice(start, start + CI_PAGE);
   const tot = ciFiltered.length;
   const totPages = Math.ceil(tot / CI_PAGE) || 1;
-  document.getElementById('ciInfo').textContent = tot === 0 ? 'ไม่พบข้อมูล' : `แสดง ${start + 1}–${Math.min(start + CI_PAGE, tot)} จาก ${tot.toLocaleString()} รายการ`;
+  document.getElementById('ciInfo').textContent = tot === 0 ? 'ไม่พบข้อมูล' : `แสดง ${start + 1}–${Math.min(start + CI_PAGE, tot)} จาก ${tot.toLocaleString()} คน`;
   document.getElementById('ciPrev').disabled = ciPage <= 1;
   document.getElementById('ciNext').disabled = ciPage >= totPages;
-  const DL = ['','24 มิ.ย.','25 มิ.ย.','26 มิ.ย.'];
   document.getElementById('ciTBody').innerHTML = page.length
     ? page.map((r, i) => {
-        const t = new Date(r.time).toLocaleTimeString('th-TH',{timeZone:'Asia/Bangkok',hour:'2-digit',minute:'2-digit'});
+        const zc = r.zone ? ZONE_COLORS_PUB[r.zone % ZONE_COLORS_PUB.length] : '#94a3b8';
+        const zLabel = r.zone ? `เขต ${r.zone}` : '-';
         return `<tr>
           <td style="color:#94a3b8;min-width:36px;">${start+i+1}</td>
           <td style="font-weight:600;min-width:160px;">${r.name}</td>
           <td style="color:#475569;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:120px;" title="${r.dept}">${r.dept}</td>
+          <td style="color:#475569;min-width:90px;">${r.province}</td>
+          <td style="min-width:72px;"><span style="background:${zc}22;color:${zc};font-size:0.7rem;font-weight:700;padding:2px 8px;border-radius:99px;border:1px solid ${zc}44;">${zLabel}</span></td>
           <td style="min-width:80px;"><span style="background:${r.isIn?'#dbeafe':'#dcfce7'};color:${r.isIn?'#1d4ed8':'#15803d'};font-size:0.7rem;font-weight:700;padding:2px 8px;border-radius:99px;">${r.isIn?'ภายใน':'ภายนอก'}</span></td>
-          <td style="text-align:center;color:#2563eb;font-weight:600;min-width:72px;">${DL[r.day]||r.day}</td>
-          <td style="text-align:center;color:#64748b;min-width:56px;">${t}</td>
         </tr>`;
       }).join('')
     : '<tr><td colspan="6" style="text-align:center;padding:20px;color:#94a3b8;">ไม่พบข้อมูล</td></tr>';
@@ -457,17 +445,15 @@ function changeCIPage(d) {
 
 function exportCheckinExcel() {
   if (!allCIData) { alert('ยังไม่มีข้อมูล — กรุณาเปิดดูรายชื่อก่อน'); return; }
-  const DL = ['','24 มิ.ย. 2569','25 มิ.ย. 2569','26 มิ.ย. 2569'];
   const src = ciFiltered.length > 0 ? ciFiltered : allCIData;
   const rows = src.map((r, i) => ({
     'ลำดับ': i+1, 'ชื่อ-นามสกุล': r.name, 'หน่วยงาน': r.dept,
-    'ประเภทบุคคล': r.isIn ? 'บุคลากรภายใน' : 'บุคคลภายนอก',
-    'วัน': DL[r.day]||r.day,
-    'เวลา': new Date(r.time).toLocaleTimeString('th-TH',{timeZone:'Asia/Bangkok',hour:'2-digit',minute:'2-digit'})
+    'จังหวัด': r.province, 'เขตสุขภาพ': r.zone ? 'เขตสุขภาพที่ ' + r.zone : '-',
+    'ประเภทบุคคล': r.isIn ? 'บุคลากรภายใน' : 'บุคคลภายนอก'
   }));
   const ws = XLSX.utils.json_to_sheet(rows);
-  const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'CheckIn');
-  XLSX.writeFile(wb, `checkin_dmsc_${new Date().toISOString().slice(0,10)}.xlsx`);
+  const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'PreRegistered');
+  XLSX.writeFile(wb, `pre_registered_dmsc_${new Date().toISOString().slice(0,10)}.xlsx`);
 }
 
 // ─── MAP ───
@@ -520,6 +506,7 @@ const EN_TO_TH={
 let thaiGeoCache = null;
 let mapRendered = false;
 let qrMapProvCounts = {};
+let qrMapG = null, qrMapPath = null, qrMapW = 0, qrMapH = 0, qrMapScale = 1, qrMapBkkPt = null, qrMapSelProv = null;
 
 async function toggleMap() {
   const body = document.getElementById('mapBody');
@@ -561,14 +548,21 @@ async function loadMapData() {
 
 async function renderQrMap() {
   const container = document.getElementById('qrLookupMap');
+  // Preserve label + clear button
+  const savedLabel = document.getElementById('qrMapLabel');
+  const savedClear = document.getElementById('qrMapClear');
   try {
     if (!thaiGeoCache) thaiGeoCache = await d3.json('https://raw.githubusercontent.com/apisit/thailand.json/master/thailand.json');
     container.innerHTML = '';
+    if (savedLabel) container.appendChild(savedLabel);
+    if (savedClear) container.appendChild(savedClear);
     const w = container.clientWidth || 180;
     const h = Math.round(w * 1.65);
     container.style.height = h + 'px';
+    qrMapW = w; qrMapH = h; qrMapScale = 1; qrMapSelProv = null;
     const proj = d3.geoMercator().fitExtent([[12,12],[w-12,h-12]], thaiGeoCache);
     const pathGen = d3.geoPath().projection(proj);
+    qrMapPath = pathGen;
     const svg = d3.select(container).append('svg').attr('width',w).attr('height',h).style('display','block').style('overflow','hidden');
     const tip = d3.select(container).append('div')
       .style('position','absolute').style('background','rgba(15,23,42,0.88)').style('color','#fff')
@@ -576,6 +570,7 @@ async function renderQrMap() {
       .style('pointer-events','none').style('opacity','0').style('white-space','nowrap')
       .style('z-index','20').style('top','0').style('left','0').style('font-family','Sarabun');
     const g = svg.append('g');
+    qrMapG = g;
     const provCounts = qrMapProvCounts;
 
     g.selectAll('path')
@@ -591,12 +586,19 @@ async function renderQrMap() {
         return base;
       })
       .attr('stroke','#fff').attr('stroke-width',0.6).attr('stroke-linejoin','round')
+      .style('cursor','pointer')
+      .on('click', function(event, d) {
+        const th = EN_TO_TH[d.properties.name];
+        if (!th) return;
+        tip.style('opacity','0');
+        zoomQrProv(th);
+      })
       .on('mouseover', function(event, d) {
         const th = EN_TO_TH[d.properties.name] || d.properties.name;
         const z = getZonePub(th) || 13;
         const cnt = provCounts[th] || 0;
         tip.style('opacity','1').html(`<b>${th}</b> · ${ZONE_NAMES_PUB[z]||'เขต '+z}<br>${cnt.toLocaleString()} คน`);
-        d3.select(this).attr('stroke','#334155').attr('stroke-width',1.5);
+        if (qrMapSelProv === null) d3.select(this).attr('stroke','#334155').attr('stroke-width',1.5/qrMapScale);
       })
       .on('mousemove', function(event) {
         const [mx,my] = d3.pointer(event, container);
@@ -604,7 +606,7 @@ async function renderQrMap() {
       })
       .on('mouseout', function() {
         tip.style('opacity','0');
-        d3.select(this).attr('stroke','#fff').attr('stroke-width',0.6);
+        if (qrMapSelProv === null) d3.select(this).attr('stroke','#fff').attr('stroke-width',0.6);
       });
 
     // Bangkok dot (too small as polygon)
@@ -612,13 +614,80 @@ async function renderQrMap() {
     const bkkCnt = provCounts['กรุงเทพมหานคร'] || 0;
     const bkkFill = bkkCnt ? bkkColor : (()=>{ const c=d3.color(bkkColor); c.opacity=0.18; return c.toString(); })();
     const bkkPt = proj([100.5018, 13.7563]);
+    qrMapBkkPt = bkkPt;
     if (bkkPt) {
-      g.append('circle').attr('cx',bkkPt[0]).attr('cy',bkkPt[1]).attr('r',5).attr('fill',bkkFill).attr('stroke','#fff').attr('stroke-width',1);
-      g.append('text').attr('x',bkkPt[0]+7).attr('y',bkkPt[1]+4).attr('font-size','0.55rem').attr('fill','#1e3a8a').attr('font-family','Sarabun').text('กทม.');
+      const bkkG = g.append('g').attr('class','bkk-marker').style('cursor','pointer')
+        .on('click', () => { tip.style('opacity','0'); zoomQrProv('กรุงเทพมหานคร'); });
+      bkkG.append('circle').attr('class','bkk-dot').attr('cx',bkkPt[0]).attr('cy',bkkPt[1]).attr('r',5).attr('fill',bkkFill).attr('stroke','#fff').attr('stroke-width',1);
+      bkkG.append('text').attr('x',bkkPt[0]+7).attr('y',bkkPt[1]+4).attr('font-size','0.55rem').attr('fill','#1e3a8a').attr('font-family','Sarabun').text('กทม.');
     }
   } catch(e) {
     container.innerHTML = '<div style="padding:20px;text-align:center;font-size:0.82rem;color:#94a3b8;">ไม่สามารถโหลดแผนที่ได้</div>';
   }
+}
+
+function zoomQrProv(prov) {
+  if (!qrMapG || !thaiGeoCache || !qrMapPath) return;
+  if (qrMapSelProv === prov) { resetQrMap(); return; }
+  qrMapSelProv = prov;
+  let x0, y0, x1, y1;
+  if (prov === 'กรุงเทพมหานคร' && qrMapBkkPt) {
+    x0=qrMapBkkPt[0]-10; y0=qrMapBkkPt[1]-10; x1=qrMapBkkPt[0]+10; y1=qrMapBkkPt[1]+10;
+  } else {
+    const feat = thaiGeoCache.features.find(d => EN_TO_TH[d.properties.name] === prov);
+    if (!feat) return;
+    [[x0,y0],[x1,y1]] = qrMapPath.bounds(feat);
+  }
+  const cx=(x0+x1)/2, cy=(y0+y1)/2;
+  if (x1-x0 < qrMapW*0.18) { x0=cx-qrMapW*0.09; x1=cx+qrMapW*0.09; }
+  if (y1-y0 < qrMapH*0.12) { y0=cy-qrMapH*0.06; y1=cy+qrMapH*0.06; }
+  const s = Math.min(qrMapW/(x1-x0), qrMapH/(y1-y0)) * 0.85;
+  const tx = qrMapW/2 - s*cx, ty = qrMapH/2 - s*cy;
+  qrMapScale = s;
+  qrMapG.transition().duration(700).attr('transform', `translate(${tx},${ty}) scale(${s})`);
+  qrMapG.selectAll('path').transition().duration(700)
+    .attr('fill', d => {
+      const th = EN_TO_TH[d.properties.name];
+      if (!th) return '#e8edf2';
+      const z = getZonePub(th) || 13;
+      const base = ZONE_COLORS_PUB[z % ZONE_COLORS_PUB.length];
+      if (th === prov) return base;
+      const c = d3.color(base); c.opacity = 0.1; return c.toString();
+    })
+    .attr('stroke-width', 0.6/s);
+  const isBkk = prov === 'กรุงเทพมหานคร';
+  const bkkBase = ZONE_COLORS_PUB[13 % ZONE_COLORS_PUB.length];
+  d3.select('#qrLookupMap .bkk-dot').transition().duration(700)
+    .attr('fill', isBkk ? bkkBase : (()=>{ const c=d3.color(bkkBase); c.opacity=0.1; return c.toString(); })());
+  const z = getZonePub(prov) || 13;
+  const cnt = qrMapProvCounts[prov] || 0;
+  const lbl = document.getElementById('qrMapLabel');
+  lbl.innerHTML = `<b>${prov}</b> · ${ZONE_NAMES_PUB[z]||'เขต '+z}<br>${cnt.toLocaleString()} คน`;
+  lbl.style.display = 'block';
+  document.getElementById('qrMapClear').style.display = 'block';
+}
+
+function resetQrMap() {
+  if (!qrMapG) return;
+  qrMapSelProv = null; qrMapScale = 1;
+  qrMapG.transition().duration(600).attr('transform', '');
+  qrMapG.selectAll('path').transition().duration(600)
+    .attr('fill', d => {
+      const th = EN_TO_TH[d.properties.name];
+      if (!th) return '#e8edf2';
+      const z = getZonePub(th) || 13;
+      const base = ZONE_COLORS_PUB[z % ZONE_COLORS_PUB.length];
+      const cnt = qrMapProvCounts[th] || 0;
+      if (!cnt) { const c = d3.color(base); c.opacity=0.18; return c.toString(); }
+      return base;
+    })
+    .attr('stroke-width', 0.6);
+  const bkkBase = ZONE_COLORS_PUB[13 % ZONE_COLORS_PUB.length];
+  const bkkCnt = qrMapProvCounts['กรุงเทพมหานคร'] || 0;
+  d3.select('#qrLookupMap .bkk-dot').transition().duration(600)
+    .attr('fill', bkkCnt ? bkkBase : (()=>{ const c=d3.color(bkkBase); c.opacity=0.18; return c.toString(); })());
+  document.getElementById('qrMapLabel').style.display = 'none';
+  document.getElementById('qrMapClear').style.display = 'none';
 }
 
 function renderZoneTable() {
