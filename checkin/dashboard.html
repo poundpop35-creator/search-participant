@@ -481,6 +481,11 @@ document.addEventListener('DOMContentLoaded', function() {
       </div>
     </div>
     <div id="pRegSection" style="display:none;">
+      <!-- View toggle: รายชื่อ ↔ แผนที่เขตสุขภาพ -->
+      <div style="display:flex;gap:0;border-bottom:2px solid var(--border);padding:0 8px;">
+        <button id="pVListBtn" class="ptab active" onclick="event.stopPropagation();setPRegView('list')">☰ รายชื่อ</button>
+        <button id="pVZoneBtn" class="ptab" onclick="event.stopPropagation();setPRegView('zone')">📊 แผนที่แยกตามเขตสุขภาพ</button>
+      </div>
       <!-- LIST VIEW -->
       <div id="pListView">
         <div style="display:flex;border-bottom:2px solid var(--border);padding:0 8px;">
@@ -1454,6 +1459,7 @@ function setPRegView(v){
   document.getElementById('pZoneView').style.display=v==='zone'?'':'none';
   document.getElementById('pVListBtn').classList.toggle('active',v==='list');
   document.getElementById('pVZoneBtn').classList.toggle('active',v==='zone');
+  if(v==='zone') renderZoneChart();
 }
 function setZoneTab(t){
   document.getElementById('zonePanelPre').style.display=t==='pre'?'':'none';

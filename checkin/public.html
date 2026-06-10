@@ -884,12 +884,19 @@ async function renderExtPanel(extData){
         return base;
       })
       .attr('stroke','#fff').attr('stroke-width',0.6).attr('stroke-linejoin','round')
+      .style('cursor','pointer')
+      .on('click',function(event,d){
+        const th=EN_TO_TH[d.properties.name];
+        if(!th) return;
+        tip.style('opacity','0');
+        zoomToProvExt(th);
+      })
       .on('mouseover',function(event,d){
         const th=EN_TO_TH[d.properties.name]||d.properties.name;
         const z=getZonePub(th)||13;
         const cnt=provCounts[th]||0;
         tip.style('opacity','1').html(`<b>${th}</b> · ${ZONE_NAMES_PUB[z]||'เขต '+z}<br>${cnt.toLocaleString()} คน`);
-        d3.select(this).attr('stroke','#334155').attr('stroke-width',1.5/mapScaleRef);
+        if(selectedProvExt===null) d3.select(this).attr('stroke','#334155').attr('stroke-width',1.5/mapScaleRef);
       })
       .on('mousemove',function(event){
         const r=container.getBoundingClientRect();
@@ -897,7 +904,7 @@ async function renderExtPanel(extData){
       })
       .on('mouseout',function(){
         tip.style('opacity','0');
-        d3.select(this).attr('stroke','#fff').attr('stroke-width',0.6/mapScaleRef);
+        if(selectedProvExt===null) d3.select(this).attr('stroke','#fff').attr('stroke-width',0.6/mapScaleRef);
       });
 
     // Bangkok marker inside zoom group (too small as polygon at national scale)
@@ -915,14 +922,16 @@ async function renderExtPanel(extData){
         .attr('font-size','0.62rem').attr('font-family','Sarabun,sans-serif')
         .attr('fill','#374151').attr('font-weight','600').attr('pointer-events','none')
         .text('กทม.');
-      bkkG.on('mouseover',function(){
-        tip.style('opacity','1').html(`<b>กรุงเทพมหานคร</b> · เขต 13 (กทม.)<br>${bkkCnt.toLocaleString()} คน`);
-      }).on('mousemove',function(event){
-        const r=container.getBoundingClientRect();
-        tip.style('left',(event.clientX-r.left+10)+'px').style('top',(event.clientY-r.top-44)+'px');
-      }).on('mouseout',function(){
-        tip.style('opacity','0');
-      });
+      bkkG.style('cursor','pointer')
+        .on('click',function(){ tip.style('opacity','0'); zoomToProvExt('กรุงเทพมหานคร'); })
+        .on('mouseover',function(){
+          tip.style('opacity','1').html(`<b>กรุงเทพมหานคร</b> · เขต 13 (กทม.)<br>${bkkCnt.toLocaleString()} คน`);
+        }).on('mousemove',function(event){
+          const r=container.getBoundingClientRect();
+          tip.style('left',(event.clientX-r.left+10)+'px').style('top',(event.clientY-r.top-44)+'px');
+        }).on('mouseout',function(){
+          tip.style('opacity','0');
+        });
     }
 
     mapGRef=g; mapPathRef=pathGen; mapProjRef=proj; mapWRef=w; mapHRef=h; mapScaleRef=1;
@@ -982,6 +991,13 @@ async function renderIntMap(intData){
         return base;
       })
       .attr('stroke','#fff').attr('stroke-width',0.6).attr('stroke-linejoin','round')
+      .style('cursor','pointer')
+      .on('click',function(event,d){
+        const th=EN_TO_TH[d.properties.name];
+        if(!th) return;
+        tip.style('opacity','0');
+        highlightIntProv(th);
+      })
       .on('mouseover',function(event,d){
         const th=EN_TO_TH[d.properties.name]||d.properties.name;
         const cnt=intProvCounts[th]||0;
