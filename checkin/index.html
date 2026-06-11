@@ -203,9 +203,26 @@
   const SB_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2eHl0bmpmeWVwcWhia21jam1zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0MzE2NDAsImV4cCI6MjA5NTAwNzY0MH0.RAr_ehb4cxfNliDR0h5XcihUaP-0ltZTTGIAv2Fw1kk";
   const DAY_TH  = {1:'24 มิถุนายน 2569',2:'25 มิถุนายน 2569',3:'26 มิถุนายน 2569'};
   const VIP_DEPTS = new Set(['อธิบดีกรมวิทยาศาสตร์การแพทย์','รองอธิบดีกรมวิทยาศาสตร์การแพทย์','กองแผนงานและวิชาการ']);
+  const EVENT_DATE_DAY = {'2026-06-24':1,'2026-06-25':2,'2026-06-26':3};
 
   if(sessionStorage.getItem('dmsc_auth')!=='ok') window.location.href='login.html';
   document.getElementById('userDisplay').textContent=sessionStorage.getItem('dmsc_user')||'';
+
+  // ซ่อน/แสดง bag+shirt option และ auto-select วันงาน
+  (function(){
+    const bkk = new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Bangkok'}));
+    const todayStr = bkk.getFullYear()+'-'+String(bkk.getMonth()+1).padStart(2,'0')+'-'+String(bkk.getDate()).padStart(2,'0');
+    const eventDay = EVENT_DATE_DAY[todayStr];
+    const sel = document.getElementById('day');
+    if(eventDay){
+      // วันงาน: ซ่อน bag และ shirt option
+      ['bag','shirt'].forEach(v=>{
+        const opt = sel.querySelector(`option[value="${v}"]`);
+        if(opt) opt.style.display='none';
+      });
+      sel.value = String(eventDay);
+    }
+  })();
 
   (function(){
     const _u=sessionStorage.getItem('dmsc_user');
