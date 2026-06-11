@@ -196,6 +196,44 @@
   </div>
 </div>
 
+<!-- ─── WALK-IN LIST CARD ─── -->
+<div class="card wide-card" style="margin-top:16px;padding:20px;">
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+    <div>
+      <span style="font-size:0.98rem;font-weight:700;color:#ea580c;">รายชื่อผู้ลงทะเบียน Walk-in</span>
+      <span id="wiCount" style="font-size:0.8rem;color:#64748b;margin-left:6px;font-weight:400;"></span>
+    </div>
+    <button class="sec-btn" id="wiToggleBtn" onclick="toggleWI()" style="background:#ea580c;">▼ ดูรายชื่อ</button>
+  </div>
+
+  <div id="wiBody" style="display:none;margin-top:14px;">
+    <div style="display:flex;gap:8px;margin-bottom:10px;">
+      <input id="wiSearch" type="text" placeholder="ค้นหาชื่อ / หน่วยงาน / จังหวัด" oninput="wiApplyFilters()"
+        style="flex:1;border:1.5px solid var(--border);border-radius:10px;padding:8px 12px;font-family:Sarabun,sans-serif;font-size:0.88rem;outline:none;transition:border-color .2s;"
+        onfocus="this.style.borderColor='#ea580c'" onblur="this.style.borderColor='var(--border)'">
+      <button class="sec-btn" onclick="exportWIExcel()" style="white-space:nowrap;background:#ea580c;">⬇ Excel</button>
+    </div>
+    <div style="overflow-x:auto;">
+      <table class="ci-tbl">
+        <thead>
+          <tr>
+            <th>#</th><th>ชื่อ-นามสกุล</th><th>หน่วยงาน</th>
+            <th>จังหวัด</th><th>เขตสุขภาพ</th><th>ประเภทบุคคล</th>
+          </tr>
+        </thead>
+        <tbody id="wiTBody"><tr><td colspan="6" style="text-align:center;padding:24px;color:#94a3b8;">กำลังโหลด...</td></tr></tbody>
+      </table>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px;flex-wrap:wrap;gap:8px;">
+      <span id="wiInfo" style="font-size:0.8rem;color:#64748b;"></span>
+      <div style="display:flex;gap:6px;">
+        <button class="page-btn" id="wiPrev" onclick="changeWIPage(-1)">← ก่อนหน้า</button>
+        <button class="page-btn" id="wiNext" onclick="changeWIPage(1)">ถัดไป →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ─── MAP CARD ─── -->
 <div class="card wide-card" style="margin-top:16px;padding:20px;">
   <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
@@ -364,7 +402,7 @@ function downloadQR() {
 let allCIData = null;
 let ciFiltered = [];
 let ciPage = 1;
-const CI_PAGE = 25;
+const CI_PAGE = 10;
 
 function _buildName(p) {
   return `${(p.prefix||'').replace(/\s*\([^)]*\)/g,'').trim()} ${p.first_name||''} ${p.last_name||''}`.trim().replace(/\s+/g,' ');
@@ -460,6 +498,116 @@ function exportCheckinExcel() {
   const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'PreRegistered');
   XLSX.writeFile(wb, `pre_registered_dmsc_${new Date().toISOString().slice(0,10)}.xlsx`);
 }
+
+// ─── WALK-IN LIST ───
+let allWIData = null;
+let wiFiltered = [];
+let wiPage = 1;
+const WI_PAGE = 10;
+
+async function ensureWIData() {
+  if (allWIData !== null) return;
+  const H = { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY };
+  let data = [], from = 0;
+  while(true) {
+    const r = await fetch(
+      `${SB_URL}/rest/v1/participants?is_walkin=eq.true&select=prefix,first_name,last_name,dept,ext_dept,internal_external,province&order=last_name.asc&limit=1000&offset=${from}`,
+      { headers: H }
+    );
+    const d = await r.json();
+    if (!Array.isArray(d) || !d.length) break;
+    data = data.concat(d);
+    if (d.length < 1000) break;
+    from += 1000;
+  }
+  allWIData = data.map(p => {
+    const isIn = (p.internal_external || '').includes('ภายใน');
+    const prov = (p.province || '').trim();
+    return { name: _buildName(p), dept: (isIn ? (p.dept||'-') : (p.ext_dept||p.dept||'-')), province: prov||'-', zone: getZonePub(prov), isIn };
+  });
+}
+
+async function toggleWI() {
+  const body = document.getElementById('wiBody');
+  const btn = document.getElementById('wiToggleBtn');
+  if (body.style.display === 'none') {
+    body.style.display = 'block';
+    btn.textContent = '▲ ซ่อน';
+    if (allWIData === null) {
+      document.getElementById('wiTBody').innerHTML = '<tr><td colspan="6" style="text-align:center;padding:28px;color:#94a3b8;">กำลังโหลด...</td></tr>';
+      try { await ensureWIData(); wiApplyFilters(); }
+      catch(e) { document.getElementById('wiTBody').innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:#dc2626;font-size:0.82rem;">โหลดข้อมูลไม่ได้ กรุณารีเฟรชหน้า</td></tr>'; }
+    }
+  } else {
+    body.style.display = 'none';
+    btn.textContent = '▼ ดูรายชื่อ';
+  }
+}
+
+function wiApplyFilters() {
+  if (!allWIData) return;
+  const q = (document.getElementById('wiSearch').value || '').toLowerCase();
+  wiFiltered = allWIData.filter(r => !q || r.name.toLowerCase().includes(q) || r.dept.toLowerCase().includes(q) || r.province.toLowerCase().includes(q));
+  document.getElementById('wiCount').textContent = `(${wiFiltered.length.toLocaleString()} คน)`;
+  wiPage = 1;
+  renderWITable();
+}
+
+function renderWITable() {
+  const start = (wiPage - 1) * WI_PAGE;
+  const page = wiFiltered.slice(start, start + WI_PAGE);
+  const tot = wiFiltered.length;
+  const totPages = Math.ceil(tot / WI_PAGE) || 1;
+  document.getElementById('wiInfo').textContent = tot === 0 ? 'ไม่พบข้อมูล' : `แสดง ${start + 1}–${Math.min(start + WI_PAGE, tot)} จาก ${tot.toLocaleString()} คน`;
+  document.getElementById('wiPrev').disabled = wiPage <= 1;
+  document.getElementById('wiNext').disabled = wiPage >= totPages;
+  document.getElementById('wiTBody').innerHTML = page.length
+    ? page.map((r, i) => {
+        const zc = r.zone ? ZONE_COLORS_PUB[r.zone % ZONE_COLORS_PUB.length] : '#94a3b8';
+        const zLabel = r.zone ? `เขต ${r.zone}` : '-';
+        return `<tr>
+          <td style="color:#94a3b8;min-width:36px;">${start+i+1}</td>
+          <td style="font-weight:600;min-width:160px;">${r.name}</td>
+          <td style="color:#475569;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:120px;" title="${r.dept}">${r.dept}</td>
+          <td style="color:#475569;min-width:90px;">${r.province}</td>
+          <td style="min-width:72px;"><span style="background:${zc}22;color:${zc};font-size:0.7rem;font-weight:700;padding:2px 8px;border-radius:99px;border:1px solid ${zc}44;">${zLabel}</span></td>
+          <td style="min-width:80px;"><span style="background:${r.isIn?'#dbeafe':'#dcfce7'};color:${r.isIn?'#1d4ed8':'#15803d'};font-size:0.7rem;font-weight:700;padding:2px 8px;border-radius:99px;">${r.isIn?'ภายใน':'ภายนอก'}</span></td>
+        </tr>`;
+      }).join('')
+    : '<tr><td colspan="6" style="text-align:center;padding:20px;color:#94a3b8;">ไม่พบข้อมูล</td></tr>';
+}
+
+function changeWIPage(d) {
+  wiPage += d;
+  renderWITable();
+  document.getElementById('wiBody').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function exportWIExcel() {
+  if (!allWIData) { alert('ยังไม่มีข้อมูล — กรุณาเปิดดูรายชื่อก่อน'); return; }
+  const src = wiFiltered.length > 0 ? wiFiltered : allWIData;
+  const rows = src.map((r, i) => ({
+    'ลำดับ': i+1, 'ชื่อ-นามสกุล': r.name, 'หน่วยงาน': r.dept,
+    'จังหวัด': r.province, 'เขตสุขภาพ': r.zone ? 'เขตสุขภาพที่ ' + r.zone : '-',
+    'ประเภทบุคคล': r.isIn ? 'บุคลากรภายใน' : 'บุคคลภายนอก'
+  }));
+  const ws = XLSX.utils.json_to_sheet(rows);
+  const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'WalkIn');
+  XLSX.writeFile(wb, `walkin_dmsc_${new Date().toISOString().slice(0,10)}.xlsx`);
+}
+
+// Also update wiCount on page load
+(async function initWICount() {
+  try {
+    const H = { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY };
+    const r = await fetch(`${SB_URL}/rest/v1/participants?is_walkin=eq.true&select=id&limit=1`, { headers: { ...H, 'Prefer': 'count=exact' } });
+    const cnt = r.headers.get('content-range');
+    if (cnt) {
+      const total = parseInt(cnt.split('/')[1]) || 0;
+      document.getElementById('wiCount').textContent = `(${total.toLocaleString()} คน)`;
+    }
+  } catch(e) {}
+})();
 
 // ─── MAP ───
 const HEALTH_ZONE={
