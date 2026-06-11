@@ -202,6 +202,7 @@
   const SB_URL  = "https://gvxytnjfyepqhbkmcjms.supabase.co";
   const SB_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2eHl0bmpmeWVwcWhia21jam1zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0MzE2NDAsImV4cCI6MjA5NTAwNzY0MH0.RAr_ehb4cxfNliDR0h5XcihUaP-0ltZTTGIAv2Fw1kk";
   const DAY_TH  = {1:'24 มิถุนายน 2569',2:'25 มิถุนายน 2569',3:'26 มิถุนายน 2569'};
+  const VIP_DEPTS = new Set(['อธิบดีกรมวิทยาศาสตร์การแพทย์','รองอธิบดีกรมวิทยาศาสตร์การแพทย์','กองแผนงานและวิชาการ']);
 
   if(sessionStorage.getItem('dmsc_auth')!=='ok') window.location.href='login.html';
   document.getElementById('userDisplay').textContent=sessionStorage.getItem('dmsc_user')||'';
@@ -472,11 +473,19 @@
       }
 
       // โหมดเช็คอิน
-      const checkTodayRes=await sbFetch(`/rest/v1/checkins?participant_id=eq.${p.id}&day=eq.${day}&select=id,checkin_time`,'GET');
+      const checkTodayRes=await sbFetch(`/rest/v1/checkins?participant_id=eq.${p.id}&day=eq.${day}&select=id,checkin_time,scanned_by`,'GET');
       const existingToday=await checkTodayRes.json();
       if(existingToday&&existingToday.length>0){
-        const t=new Date(existingToday[0].checkin_time).toLocaleTimeString('th-TH',{timeZone:'Asia/Bangkok'});
-        showModal('warning','เคยเช็คอินแล้ว',`เช็คอินวันที่ ${day} ไปแล้ว`,fullName,buildWarningRows(t,p,isWalkin),p.dept||'');
+        const rec=existingToday[0];
+        const t=new Date(rec.checkin_time).toLocaleTimeString('th-TH',{timeZone:'Asia/Bangkok'});
+        if(VIP_DEPTS.has(p.dept)&&rec.scanned_by==='auto'){
+          showModal('success','เช็คอินแล้ว โดย admin',`ได้รับการยกเว้นการเช็คอิน`,fullName,[
+            {label:'หน่วยงาน',val:p.dept,style:'normal'},
+            {label:'สถานะ',val:'✅ เช็คอินแล้ว โดย admin',style:'done'},
+          ],p.dept||'');
+        } else {
+          showModal('warning','เคยเช็คอินแล้ว',`เช็คอินวันที่ ${day} ไปแล้ว`,fullName,buildWarningRows(t,p,isWalkin),p.dept||'');
+        }
         return;
       }
 
