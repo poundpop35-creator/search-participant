@@ -8,9 +8,9 @@ on:
   workflow_dispatch:
     inputs:
       force_day:
-        description: 'Force event day number (1, 2 or 3). Leave empty to auto-detect.'
+        description: 'วันที่ต้องการเช็คอิน: 1, 2, 3 หรือ "all" เพื่อทำทุกวันพร้อมกัน (ว่างไว้ = auto-detect จากวันที่ปัจจุบัน)'
         required: false
-        default: ''
+        default: 'all'
 
 jobs:
   auto-checkin:
@@ -19,7 +19,7 @@ jobs:
       - name: Auto check-in อธิบดี / รองอธิบดี / กองแผนงานฯ
         env:
           SB_URL: https://gvxytnjfyepqhbkmcjms.supabase.co
-          SB_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2eHl0bmpmeWVwcWhia21jam1zIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3OTQzMTY0MCwiZXhwIjoyMDk1MDA3NjQwfQ.Hrfc0erkIatyVbmsOW2SU7piH3L65qbS2kdi2eYzbQk
+          SB_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2eHl0bmpmeWVwcWhia21cam1zIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3OTQzMTY0MCwiZXhwIjoyMDk1MDA3NjQwfQ.Hrfc0erkIatyVbmsOW2SU7piH3L65qbS2kdi2eYzbQk
           FORCE_DAY: ${{ github.event.inputs.force_day }}
         run: |
           python3 << 'PYEOF'
@@ -48,19 +48,23 @@ jobs:
               "2026-06-26": 3,
           }
 
-          # Allow manual override via workflow_dispatch input
-          force = os.environ.get("FORCE_DAY", "").strip()
-          if force:
-              day = int(force)
-              print(f"Manual override: event day {day}")
+          # Determine which days to process
+          force = os.environ.get("FORCE_DAY", "").strip().lower()
+          if force == "all":
+              days = [1, 2, 3]
+              print("Mode: เช็คอินทุกวัน (day 1, 2, 3)")
+          elif force in ("1", "2", "3"):
+              days = [int(force)]
+              print(f"Mode: manual override → day {force}")
           else:
               day = DAY_MAP.get(today_bkk.isoformat())
               if day is None:
                   print(f"Today in Bangkok ({today_bkk}) is not an event day. Nothing to do.")
                   sys.exit(0)
-              print(f"Auto-detected event day {day} (Bangkok date: {today_bkk})")
+              days = [day]
+              print(f"Mode: auto-detected → day {day} (Bangkok date: {today_bkk})")
 
-          # Departments to auto-check-in (all members, internal participants only)
+          # Departments to auto-check-in
           TARGET_DEPTS = [
               "อธิบดีกรมวิทยาศาสตร์การแพทย์",
               "รองอธิบดีกรมวิทยาศาสตร์การแพทย์",
@@ -88,37 +92,37 @@ jobs:
                   pid = p["id"]
                   name = f"{p.get('prefix','')} {p.get('first_name','')} {p.get('last_name','')}".strip()
 
-                  # Skip if already checked in for this day
-                  check = requests.get(
-                      f"{SB_URL}/rest/v1/checkins?participant_id=eq.{pid}&day=eq.{day}&select=id",
-                      headers=HEADERS,
-                  )
-                  check.raise_for_status()
-                  if check.json():
-                      print(f"  ข้าม  {name} (เช็คอินแล้ว)")
-                      total_skip += 1
-                      continue
+                  for day in days:
+                      # Skip if already checked in for this day
+                      check = requests.get(
+                          f"{SB_URL}/rest/v1/checkins?participant_id=eq.{pid}&day=eq.{day}&select=id",
+                          headers=HEADERS,
+                      )
+                      check.raise_for_status()
+                      if check.json():
+                          total_skip += 1
+                          continue
 
-                  # Insert checkin record
-                  ins = requests.post(
-                      f"{SB_URL}/rest/v1/checkins",
-                      headers=HEADERS,
-                      json={
-                          "participant_id": pid,
-                          "day": day,
-                          "checkin_time": checkin_time,
-                          "scanned_by": "auto",
-                      },
-                  )
-                  if ins.ok or ins.status_code == 201:
-                      print(f"  OK    {name}")
-                      total_ok += 1
-                  else:
-                      print(f"  ERROR {name}: {ins.status_code} {ins.text[:120]}")
-                      total_err += 1
+                      # Insert checkin record
+                      ins = requests.post(
+                          f"{SB_URL}/rest/v1/checkins",
+                          headers=HEADERS,
+                          json={
+                              "participant_id": pid,
+                              "day": day,
+                              "checkin_time": checkin_time,
+                              "scanned_by": "auto",
+                          },
+                      )
+                      if ins.ok or ins.status_code == 201:
+                          print(f"  OK    day{day}  {name}")
+                          total_ok += 1
+                      else:
+                          print(f"  ERROR day{day}  {name}: {ins.status_code} {ins.text[:120]}")
+                          total_err += 1
 
           print(f"\n{'='*50}")
-          print(f"เช็คอินสำเร็จ: {total_ok}  |  ข้าม: {total_skip}  |  ผิดพลาด: {total_err}")
+          print(f"เช็คอินสำเร็จ: {total_ok}  |  ข้าม (มีแล้ว): {total_skip}  |  ผิดพลาด: {total_err}")
           if total_err:
               sys.exit(1)
           PYEOF
