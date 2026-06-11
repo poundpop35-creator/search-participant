@@ -1933,6 +1933,16 @@ loadAll();
 loadActiveSessions();
 setInterval(loadActiveSessions, 30000);
 
+// Ensure default theme is blue (3) — write to Supabase only if not yet set
+(async()=>{try{
+  const r=await fetch(SB_URL+'/rest/v1/app_settings?key=eq.theme&select=value',{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}});
+  const d=await r.json();
+  if(!Array.isArray(d)||d.length===0||!d[0].value){
+    await fetch(SB_URL+'/rest/v1/app_settings',{method:'POST',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'},body:JSON.stringify({key:'theme',value:'3'})});
+    localStorage.setItem('pubTheme','3');
+  }
+}catch(e){}})();
+
 async function loadActiveSessions(){
   try{
     const r = await fetch(`${SB_URL}/rest/v1/staff_sessions?select=username,last_active&order=last_active.desc`,
@@ -2145,7 +2155,7 @@ const DASH_THEMES = [
 ];
 
 function buildThemeList() {
-  const cur = parseInt(localStorage.getItem('pubTheme')||'1');
+  const cur = parseInt(localStorage.getItem('pubTheme')||'3');
   document.getElementById('themeList').innerHTML = DASH_THEMES.map(t=>`
     <div onclick="pickTheme(${t.id})" style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:8px 10px;border-radius:10px;background:${cur===t.id?'#f1f5f9':'transparent'};border:2px solid ${cur===t.id?'#cbd5e1':'transparent'};transition:all 0.15s;" id="trow-${t.id}">
       <div style="display:flex;gap:3px;flex-shrink:0;">

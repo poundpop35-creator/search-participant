@@ -1749,7 +1749,7 @@ async function loadThemeFromSupabase() {
     });
     const d = await r.json();
     if(Array.isArray(d) && d.length > 0) {
-      const id = parseInt(d[0].value) || 1;
+      const id = parseInt(d[0].value) || 3;
       applyTheme(id, true);
     }
   } catch(e) {}
