@@ -1969,7 +1969,7 @@ function setAutoRefresh() {
   if (sec > 0) _refreshTimer = setInterval(loadAll, sec * 1000);
 }
 setAutoRefresh(); // เริ่มทันที (default 1 นาที)
-loadBgUrl();
+setTimeout(()=>{if(typeof loadBgUrl==='function')loadBgUrl();},0);
 
 async function doLogout() {
   const _u=sessionStorage.getItem('dmsc_user');
