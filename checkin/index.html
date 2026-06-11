@@ -208,14 +208,14 @@
   if(sessionStorage.getItem('dmsc_auth')!=='ok') window.location.href='login.html';
   document.getElementById('userDisplay').textContent=sessionStorage.getItem('dmsc_user')||'';
 
-  // ซ่อน/แสดง bag+shirt option และ auto-select วันงาน
+  // ซ่อน/แสดง bag+shirt option และ auto-select วันงาน (ยกเว้น adminpound)
   (function(){
+    if(sessionStorage.getItem('dmsc_user')==='adminpound') return;
     const bkk = new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Bangkok'}));
     const todayStr = bkk.getFullYear()+'-'+String(bkk.getMonth()+1).padStart(2,'0')+'-'+String(bkk.getDate()).padStart(2,'0');
     const eventDay = EVENT_DATE_DAY[todayStr];
     const sel = document.getElementById('day');
     if(eventDay){
-      // วันงาน: ซ่อน bag และ shirt option
       ['bag','shirt'].forEach(v=>{
         const opt = sel.querySelector(`option[value="${v}"]`);
         if(opt) opt.style.display='none';
