@@ -2029,23 +2029,22 @@ async function confirmClear() {
   errEl.textContent = '';
 
   try {
-    const res = await fetch(`${SB_URL}/rest/v1/checkins?day=gte.1`, {
+    const res = await fetch(`${SB_URL}/rest/v1/checkins?id=gte.0`, {
       method: 'DELETE',
       headers: {
         'apikey': SB_KEY,
         'Authorization': 'Bearer ' + SB_KEY,
+        'Content-Type': 'application/json',
         'Prefer': 'return=minimal'
       }
     });
-
     if (res.ok || res.status === 204) {
       closeClearModal();
       alert('✅ ล้างข้อมูลเช็คอินเรียบร้อยแล้ว');
       loadAll();
     } else {
-      const err = await res.json().catch(() => ({}));
       errEl.style.color = '#dc2626';
-      errEl.textContent = '❌ เกิดข้อผิดพลาด: ' + (err.message || res.status);
+      errEl.textContent = '❌ เกิดข้อผิดพลาด: ' + res.status;
       btn.disabled = false;
       btn.textContent = 'ล้างข้อมูล';
       btn.style.background = '';
@@ -2053,7 +2052,7 @@ async function confirmClear() {
     }
   } catch(e) {
     errEl.style.color = '#dc2626';
-    errEl.textContent = '❌ เชื่อมต่อไม่ได้';
+    errEl.textContent = '❌ ' + e.message;
     btn.disabled = false;
     btn.textContent = 'ล้างข้อมูล';
     btn.style.background = '';
