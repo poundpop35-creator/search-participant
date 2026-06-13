@@ -8,6 +8,7 @@
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <style>
     :root{--blue:#0d2b6b;--blue-mid:#1a4eb8;--blue-light:#e8f0fe;--green:#16a34a;--yellow:#d97706;--white:#fff;--border:#e2e8f0;--shadow:0 2px 12px rgba(13,43,107,0.10);}
     *{box-sizing:border-box;margin:0;padding:0;}
@@ -698,6 +699,7 @@ document.addEventListener('DOMContentLoaded', function() {
           <button class="vbtn active" id="vTable" onclick="setDeptView('table')">ตาราง</button>
           <button class="vbtn" id="vChart" onclick="setDeptView('chart')">แผนภูมิ</button>
         </div>
+        <button class="btn-xl" onclick="shareDeptCard(this)" style="background:#0891b2;color:white;">📤 แชร์รูป</button>
         <button class="btn-xl" id="deptToggleBtn" style="background:var(--blue);color:white;" onclick="toggleDeptCard()">▼ แสดงสถิติ</button>
       </div>
     </div>
@@ -1095,6 +1097,48 @@ function toggleDeptCard(){
     sec.style.display='none';
     btn.textContent='▼ แสดงสถิติ';
   }
+}
+
+async function shareDeptCard(btn) {
+  const card = btn.closest('.dept-card');
+  const origTxt = btn.textContent;
+  btn.textContent = '⏳ กำลังสร้าง...';
+  btn.disabled = true;
+  try {
+    // Make sure section is visible for capture
+    const sec = document.getElementById('deptCardSection');
+    const wasHidden = sec.style.display === 'none';
+    if (wasHidden) { sec.style.display = 'block'; }
+    await new Promise(r => setTimeout(r, 120));
+    const canvas = await html2canvas(card, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: '#ffffff',
+      logging: false,
+    });
+    if (wasHidden) { sec.style.display = 'none'; }
+    canvas.toBlob(async (blob) => {
+      const file = new File([blob], 'dept_stats.png', { type: 'image/png' });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({ files: [file], title: 'สถิติแยกตามหน่วยงาน', text: 'จำนวนผู้เข้าร่วมงานแยกตามหน่วยงานภายใน กรมวิทยาศาสตร์การแพทย์' });
+        } catch(e) { if (e.name !== 'AbortError') downloadBlob(blob); }
+      } else {
+        downloadBlob(blob);
+      }
+      btn.textContent = origTxt; btn.disabled = false;
+    }, 'image/png');
+  } catch(e) {
+    alert('ไม่สามารถสร้างรูปได้: ' + e.message);
+    btn.textContent = origTxt; btn.disabled = false;
+  }
+}
+function downloadBlob(blob) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `dept_stats_${new Date().toISOString().slice(0,10)}.png`;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 5000);
 }
 
 function switchPTab(t){
