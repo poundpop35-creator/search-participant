@@ -136,7 +136,7 @@
           </div>
           <button class="share-btn" onclick="shareDeptTable()" style="margin-top:0;">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            บันทึก A4
+            📤 แชร์รูป
           </button>
         </div>
       </div>
@@ -547,14 +547,21 @@ async function shareDeptTable() {
       windowWidth: 794
     });
 
-    const link = document.createElement('a');
-    link.download = 'dept-summary-' + new Date().toISOString().slice(0,10) + '.png';
-    link.href = canvas.toDataURL('image/png');
-    link.click();
+    canvas.toBlob(async (blob) => {
+      const file = new File([blob], 'dept-summary-' + new Date().toISOString().slice(0,10) + '.png', { type: 'image/png' });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({ files: [file], title: 'สถิติแยกตามหน่วยงาน', text: 'จำนวนผู้เข้าร่วมงานแยกตามหน่วยงานภายใน กรมวิทยาศาสตร์การแพทย์' });
+        } catch(e) { if (e.name !== 'AbortError') { const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=file.name;a.click(); } }
+      } else {
+        const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=file.name; a.click();
+        setTimeout(()=>URL.revokeObjectURL(a.href),5000);
+      }
+    }, 'image/png');
   } catch(e) {
     alert('ไม่สามารถสร้างรูปภาพได้: ' + e.message);
   } finally {
-    btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> บันทึกเป็นรูปภาพ (A4)';
+    btn.innerHTML = '📤 แชร์รูป';
     btn.disabled = false;
   }
 }
