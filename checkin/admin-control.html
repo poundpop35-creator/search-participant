@@ -35,6 +35,7 @@
     .btn-primary{background:var(--blue);color:white;}
     .btn-green{background:var(--green);color:white;}
     .btn-red{background:var(--red);color:white;}
+    .btn-orange{background:var(--orange);color:white;}
     .btn-ghost{background:white;color:#475569;border:1.5px solid var(--border);}
     .btn-sm{padding:5px 12px;font-size:0.78rem;}
     /* Tables */
@@ -268,6 +269,44 @@
       <div id="vipStatus" style="margin-top:10px;"></div>
     </div>
 
+    <!-- Walk-in Auto Sync -->
+    <div class="card">
+      <div class="card-title">🔄 Walk-in Auto-Sync</div>
+      <p style="font-size:0.82rem;color:#64748b;margin-bottom:12px;line-height:1.6;">บันทึก URL Google Sheet Walk-in ไว้ที่นี่ — กด "ซิงค์เดี๋ยวนี้" หรือเปิด Auto-sync ให้ดึงอัตโนมัติทุก 5 นาที</p>
+      <div class="field">
+        <label>URL Google Sheet Walk-in (Publish as CSV)</label>
+        <div style="display:flex;gap:8px;">
+          <input id="walkinUrl" type="url" placeholder="https://docs.google.com/spreadsheets/d/e/.../pub?output=csv&gid=...">
+          <button class="btn btn-primary" onclick="saveWalkinUrl()">💾 บันทึก URL</button>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:4px;">
+        <button class="btn btn-green" id="syncNowBtn" onclick="syncWalkinNow()">🔄 ซิงค์เดี๋ยวนี้</button>
+        <button class="btn btn-ghost" id="autoSyncBtn" onclick="toggleAutoSync()">▶ เปิด Auto-sync (ทุก 5 นาที)</button>
+        <span id="syncCountdown" style="font-size:0.82rem;color:#64748b;"></span>
+      </div>
+      <div id="walkinSyncStatus" style="margin-top:10px;"></div>
+    </div>
+
+    <!-- สร้างงานใหม่ -->
+    <div class="card">
+      <div class="card-title">🎉 สร้างงานประชุมใหม่ (ปีถัดไป)</div>
+      <p style="font-size:0.82rem;color:#64748b;margin-bottom:14px;line-height:1.6;">ล้างข้อมูลเช็คอิน + รายชื่อผู้เข้าร่วมทั้งหมด แล้วตั้งชื่องานใหม่ เหมาะใช้เมื่อขึ้นปีงานใหม่</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <div class="field" style="flex:1;min-width:200px;margin-bottom:0;">
+          <label>ชื่องานใหม่</label>
+          <input id="newEventName" type="text" placeholder="ประชุมวิชาการวิทยาศาสตร์การแพทย์ ครั้งที่ 35">
+        </div>
+        <div class="field" style="width:120px;margin-bottom:0;">
+          <label>ปี (พ.ศ.)</label>
+          <input id="newEventYear" type="number" placeholder="2570" min="2560" max="2600">
+        </div>
+      </div>
+      <button class="btn btn-orange" style="margin-top:12px;" onclick="createNewEvent()">🎉 สร้างงานใหม่</button>
+      <div id="newEventStatus" style="margin-top:10px;"></div>
+      <div id="currentEventInfo" style="margin-top:12px;font-size:0.82rem;color:#475569;"></div>
+    </div>
+
     <div class="card">
       <div class="danger-box">
         <div class="danger-title">⚠️ Danger Zone — ล้างข้อมูล</div>
@@ -288,6 +327,13 @@
 const SB_URL = "https://gvxytnjfyepqhbkmcjms.supabase.co";
 const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2eHl0bmpmeWVwcWhia21jam1zIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3OTQzMTY0MCwiZXhwIjoyMDk1MDA3NjQwfQ.Hrfc0erkIatyVbmsOW2SU7piH3L65qbS2kdi2eYzbQk";
 const H = {'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'};
+
+// ─── ALL STATE VARS (declared early to avoid TDZ) ───
+let importType = 'pre';
+let csvHeaders = [], csvRows = [];
+let staffList = [], editIdx = null;
+let vipList = [];
+let _syncTimer = null, _syncCountdown = null;
 
 // ─── AUTH ───
 if(sessionStorage.getItem('dmsc_auth')!=='ok'||sessionStorage.getItem('dmsc_user')!=='adminpound'){
@@ -348,8 +394,7 @@ async function doClear(target){
 
 // ══════════════════════════════════════════
 // ─── IMPORT TYPE ───
-// ══════════════════════════════════════════
-let importType = 'pre'; // 'pre' | 'walkin'
+// ══════════════════════════════════════════ // 'pre' | 'walkin'
 
 const TEMPLATES = {
   pre: {
@@ -446,7 +491,6 @@ setImportType('pre');
 // ══════════════════════════════════════════
 // ─── GOOGLE SHEET IMPORT ───
 // ══════════════════════════════════════════
-let csvHeaders=[], csvRows=[];
 
 const DB_FIELDS=[
   {key:'prefix',     label:'คำนำหน้า',                 req:false},
@@ -617,7 +661,6 @@ async function doImport(mode){
 // ══════════════════════════════════════════
 // ─── STAFF MANAGEMENT ───
 // ══════════════════════════════════════════
-let staffList=[], editIdx=null;
 
 const DEFAULT_STAFF=[
   {username:'adminpound',display_name:'Admin',role:'admin',is_active:true},
@@ -769,7 +812,6 @@ async function forceLogout(u){
 // ══════════════════════════════════════════
 // ─── SETTINGS ───
 // ══════════════════════════════════════════
-let vipList=[];
 
 async function loadSettings(){
   const bg=await sbGetSetting('page_bg');
@@ -777,6 +819,9 @@ async function loadSettings(){
   const vip=await sbGetSetting('vip_depts');
   vipList=vip?JSON.parse(vip):['อธิบดีกรมวิทยาศาสตร์การแพทย์','รองอธิบดีกรมวิทยาศาสตร์การแพทย์','กองแผนงานและวิชาการ'];
   renderVip();
+  const walkinUrl=await sbGetSetting('walkin_sheet_url');
+  if(walkinUrl) document.getElementById('walkinUrl').value=walkinUrl;
+  loadCurrentEvent();
 }
 
 async function saveBg(){
@@ -792,6 +837,129 @@ function renderVip(){
 function addVip(){ const v=document.getElementById('vipInput').value.trim(); if(!v) return; if(!vipList.includes(v)) vipList.push(v); document.getElementById('vipInput').value=''; renderVip(); }
 function removeVip(i){ vipList.splice(i,1); renderVip(); }
 async function saveVip(){ await sbSetSetting('vip_depts',JSON.stringify(vipList)); setStatus('vipStatus','ok','✅ บันทึก VIP List แล้ว'); }
+
+// ─── WALK-IN AUTO SYNC ───
+async function saveWalkinUrl(){
+  const url = document.getElementById('walkinUrl').value.trim();
+  if(!url){ setStatus('walkinSyncStatus','warn','กรุณาใส่ URL ก่อน'); return; }
+  await sbSetSetting('walkin_sheet_url', url);
+  setStatus('walkinSyncStatus','ok','✅ บันทึก URL แล้ว');
+}
+
+async function syncWalkinNow(){
+  const btn = document.getElementById('syncNowBtn');
+  btn.disabled = true; btn.innerHTML = '<span class="sp"></span>กำลังซิงค์...';
+  setStatus('walkinSyncStatus','info','กำลังดึงข้อมูล Walk-in...');
+  try {
+    const url = document.getElementById('walkinUrl').value.trim()
+      || await sbGetSetting('walkin_sheet_url');
+    if(!url) throw new Error('ยังไม่ได้บันทึก URL — กรอก URL Walk-in Sheet ก่อน');
+    const res = await fetch(url);
+    if(!res.ok) throw new Error(`HTTP ${res.status}`);
+    const text = await res.text();
+    const {rows} = parseCSV(text);
+    if(!rows.length) throw new Error('ไม่พบข้อมูลใน Sheet');
+    // ดึง id_card ที่มีอยู่แล้ว (walkin) เพื่อ skip ซ้ำ
+    let existIds = new Set(), from = 0;
+    while(true){
+      const r = await fetch(`${SB_URL}/rest/v1/participants?is_walkin=eq.true&select=id_card&limit=1000&offset=${from}`,{headers:H});
+      const d = await r.json();
+      if(!Array.isArray(d)||!d.length) break;
+      d.forEach(p=>{ if(p.id_card) existIds.add(p.id_card.replace(/\D/g,'')); });
+      if(d.length<1000) break; from+=1000;
+    }
+    // Auto-map columns (ใช้ guess อัตโนมัติ)
+    const headers = Object.keys(rows[0]);
+    // ตั้ง csvHeaders ชั่วคราว
+    const prevH = csvHeaders; csvHeaders = headers;
+    const mapped = rows.map(r=>{
+      const obj = { is_walkin: true };
+      DB_FIELDS.forEach(f=>{
+        const col = guessCol(f.key);
+        if(col && r[col] !== undefined) obj[f.key] = r[col];
+      });
+      return obj;
+    }).filter(r=>r.first_name||r.last_name);
+    csvHeaders = prevH;
+    const toInsert = mapped.filter(r=>!r.id_card||!existIds.has((r.id_card||'').replace(/\D/g,'')));
+    let ok=0, skip=mapped.length-toInsert.length;
+    const BATCH=50;
+    for(let i=0;i<toInsert.length;i+=BATCH){
+      const b=toInsert.slice(i,i+BATCH);
+      const r=await fetch(`${SB_URL}/rest/v1/participants`,{
+        method:'POST', headers:{...H,'Prefer':'return=minimal'}, body:JSON.stringify(b)
+      });
+      if(r.ok||r.status===201) ok+=b.length;
+    }
+    const now = new Date().toLocaleTimeString('th-TH',{timeZone:'Asia/Bangkok'});
+    setStatus('walkinSyncStatus','ok',`✅ ซิงค์สำเร็จ [${now}] — เพิ่ม <strong>${ok} คน</strong> ข้าม (ซ้ำ): ${skip} คน`);
+  } catch(e) {
+    setStatus('walkinSyncStatus','err','❌ '+e.message);
+  } finally {
+    btn.disabled=false; btn.innerHTML='🔄 ซิงค์เดี๋ยวนี้';
+  }
+}
+
+function toggleAutoSync(){
+  const btn = document.getElementById('autoSyncBtn');
+  if(_syncTimer){
+    clearInterval(_syncTimer); clearInterval(_syncCountdown);
+    _syncTimer=null; _syncCountdown=null;
+    btn.textContent='▶ เปิด Auto-sync (ทุก 5 นาที)';
+    btn.style.background='';
+    document.getElementById('syncCountdown').textContent='';
+  } else {
+    syncWalkinNow();
+    let secs=300;
+    _syncCountdown=setInterval(()=>{
+      secs--;
+      if(secs<=0){ secs=300; syncWalkinNow(); }
+      const m=Math.floor(secs/60), s=secs%60;
+      document.getElementById('syncCountdown').textContent=`ซิงค์ถัดไป: ${m}:${String(s).padStart(2,'0')}`;
+    },1000);
+    _syncTimer=true;
+    btn.textContent='⏹ ปิด Auto-sync';
+    btn.style.background='#dc2626';
+    btn.style.color='white';
+    btn.style.borderColor='#dc2626';
+  }
+}
+
+// ─── NEW EVENT ───
+async function createNewEvent(){
+  const name = document.getElementById('newEventName').value.trim();
+  const year = document.getElementById('newEventYear').value.trim();
+  if(!name||!year){ setStatus('newEventStatus','warn','กรุณากรอกชื่องานและปีให้ครบ'); return; }
+  if(!confirm(`⚠️ สร้างงานใหม่: "${name} (${year})"\n\nจะล้างข้อมูลต่อไปนี้ทั้งหมด:\n• เช็คอินทั้งหมด\n• รายชื่อผู้เข้าร่วมทั้งหมด\n• URL Walk-in Sheet\n\nดำเนินการต่อ?`)) return;
+  const btn = document.querySelector('[onclick="createNewEvent()"]');
+  btn.disabled=true; btn.innerHTML='<span class="sp"></span>กำลังสร้าง...';
+  setStatus('newEventStatus','info','กำลังล้างข้อมูลเก่า...');
+  try {
+    await fetch(`${SB_URL}/rest/v1/checkins?id=gte.0`,{method:'DELETE',headers:H});
+    await fetch(`${SB_URL}/rest/v1/participants?id=gte.0`,{method:'DELETE',headers:H});
+    await sbSetSetting('event_name', name);
+    await sbSetSetting('event_year', year);
+    await sbSetSetting('walkin_sheet_url', '');
+    document.getElementById('walkinUrl').value='';
+    setStatus('newEventStatus','ok',`✅ สร้างงาน "${name} (${year})" สำเร็จ — พร้อมนำเข้าข้อมูลใหม่`);
+    loadCurrentEvent();
+  } catch(e){
+    setStatus('newEventStatus','err','❌ '+e.message);
+  } finally {
+    btn.disabled=false; btn.textContent='🎉 สร้างงานใหม่';
+  }
+}
+
+async function loadCurrentEvent(){
+  try {
+    const name = await sbGetSetting('event_name');
+    const year = await sbGetSetting('event_year');
+    if(name){
+      document.getElementById('currentEventInfo').innerHTML =
+        `📌 งานปัจจุบัน: <strong>${name}</strong>${year?' ('+year+')':''}`;
+    }
+  } catch(e) {}
+}
 </script>
 </body>
 </html>
