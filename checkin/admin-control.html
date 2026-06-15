@@ -136,6 +136,12 @@
 
 <div class="container">
 
+  <!-- Event Banner -->
+  <div id="eventBanner" style="background:white;border-radius:14px;box-shadow:var(--shadow);padding:16px 22px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+    <div id="eventBannerText" style="font-size:0.9rem;color:#64748b;">กำลังโหลดข้อมูลงาน...</div>
+    <button class="btn btn-ghost btn-sm" onclick="switchTab('settings');setTimeout(()=>document.getElementById('newEventName').focus(),300)">🎉 สร้างงานใหม่</button>
+  </div>
+
   <!-- Tabs -->
   <div class="tabs">
     <button class="tab-btn active" id="tb-import" onclick="switchTab('import')">📥 นำเข้าข้อมูล</button>
@@ -955,12 +961,21 @@ async function loadCurrentEvent(){
   try {
     const name = await sbGetSetting('event_name');
     const year = await sbGetSetting('event_year');
+    const banner = document.getElementById('eventBannerText');
+    const info = document.getElementById('currentEventInfo');
     if(name){
-      document.getElementById('currentEventInfo').innerHTML =
-        `📌 งานปัจจุบัน: <strong>${name}</strong>${year?' ('+year+')':''}`;
+      const txt = `📌 <strong style="color:#0d2b6b;">${name}</strong>${year?' <span style="color:#64748b;font-size:0.85rem;">(พ.ศ. '+year+')</span>':''}`;
+      if(banner) banner.innerHTML = `<span style="font-size:0.78rem;color:#94a3b8;margin-right:6px;">งานปัจจุบัน:</span> ${txt}`;
+      if(info) info.innerHTML = `📌 งานปัจจุบัน: <strong>${name}</strong>${year?' ('+year+')':''}`;
+    } else {
+      if(banner) banner.innerHTML = `<span style="color:#92400e;">⚠️ ยังไม่ได้ตั้งชื่องาน — ไปที่ <strong>ตั้งค่าระบบ → สร้างงานใหม่</strong></span>`;
+      if(info) info.innerHTML = '';
     }
   } catch(e) {}
 }
+
+// โหลด event banner ตอนเปิดหน้า
+loadCurrentEvent();
 </script>
 </body>
 </html>
