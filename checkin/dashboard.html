@@ -862,11 +862,18 @@ async function fetchAll(path,ps=1000){
 }
 
 let activeYear = '2568';
+let VIP_DEPTS = new Set(['อธิบดีกรมวิทยาศาสตร์การแพทย์','รองอธิบดีกรมวิทยาศาสตร์การแพทย์']);
+let EXEMPT_DEPTS = new Set(['กองแผนงานและวิชาการ']);
 async function loadActiveYear(){
   try{
-    const r=await fetch(`${SB_URL}/rest/v1/app_settings?key=eq.event_year&select=value`,{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}});
-    const d=await r.json();
-    if(d&&d.length&&d[0].value) activeYear=d[0].value;
+    const [yearRes,vipRes,exemptRes]=await Promise.all([
+      fetch(`${SB_URL}/rest/v1/app_settings?key=eq.event_year&select=value`,{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}}),
+      fetch(`${SB_URL}/rest/v1/app_settings?key=eq.vip_depts&select=value`,{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}}),
+      fetch(`${SB_URL}/rest/v1/app_settings?key=eq.exempt_depts&select=value`,{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}})
+    ]);
+    const yd=await yearRes.json(); if(yd&&yd.length&&yd[0].value) activeYear=yd[0].value;
+    const vd=await vipRes.json(); if(vd&&vd.length&&vd[0].value) VIP_DEPTS=new Set(JSON.parse(vd[0].value));
+    const ed=await exemptRes.json(); if(ed&&ed.length&&ed[0].value) EXEMPT_DEPTS=new Set(JSON.parse(ed[0].value));
   }catch(e){}
 }
 
@@ -886,12 +893,13 @@ async function loadAll(){
   const crAll=allRes.headers.get('Content-Range')||'';
   totalAll=parseInt(crAll.split('/')[1])||0;
 
+  const fmtDate=v=>{if(!v)return null;if(v.includes('T')){const d=new Date(v);return isNaN(d)?null:d.toLocaleDateString('th-TH',{timeZone:'Asia/Bangkok',day:'numeric',month:'long',year:'numeric'});}const pts=v.split('-');if(pts.length===3){const d=new Date(Number(pts[0]),Number(pts[1])-1,Number(pts[2]));return isNaN(d)?v:d.toLocaleDateString('th-TH',{day:'numeric',month:'long',year:'numeric'});}return v;};
+  const fmtTime=v=>{if(!v||!v.includes('T'))return null;const d=new Date(v);return isNaN(d)?null:d.toLocaleTimeString('th-TH',{timeZone:'Asia/Bangkok',hour:'2-digit',minute:'2-digit'});};
+
   allData=rows.map(r=>{
     const p=r.participants||{};
     const isIn=(p.internal_external||'').includes('ภายใน');
     const dept=isIn?(p.dept||'-'):(p.ext_dept||p.dept||'-');
-    const fmtDate=v=>{if(!v)return null;if(v.includes('T')){const d=new Date(v);return isNaN(d)?null:d.toLocaleDateString('th-TH',{timeZone:'Asia/Bangkok',day:'numeric',month:'long',year:'numeric'});}const p=v.split('-');if(p.length===3){const d=new Date(Number(p[0]),Number(p[1])-1,Number(p[2]));return isNaN(d)?v:d.toLocaleDateString('th-TH',{day:'numeric',month:'long',year:'numeric'});}return v;};
-    const fmtTime=v=>{if(!v||!v.includes('T'))return null;const d=new Date(v);return isNaN(d)?null:d.toLocaleTimeString('th-TH',{timeZone:'Asia/Bangkok',hour:'2-digit',minute:'2-digit'});};
     return{id:r.id,participantId:r.participant_id,day:r.day,time:r.checkin_time,scannedBy:r.scanned_by||'-',
       name:buildName(p),
       dept,isIn,tag:p.tag||'-',items:p.items||'-',
@@ -903,6 +911,27 @@ async function loadAll(){
       shirtDate:fmtDate(p.shirt_received_date), shirtTime:fmtTime(p.shirt_received_date),
       province:(p.province||'').trim()};
   });
+
+  // Add virtual rows for VIP/exempt dept members (เช็คอินโดย admin ทุกวัน)
+  const allExemptDepts=[...VIP_DEPTS,...EXEMPT_DEPTS];
+  if(allExemptDepts.length>0){
+    try{
+      const orFilter=allExemptDepts.map(d=>`dept.eq.${encodeURIComponent(d)}`).join(',');
+      const exemptPeople=await fetchAll(`/rest/v1/participants?event_year=eq.${yr}&or=(${orFilter})&select=id,prefix,first_name,last_name,dept,tag,participation_type,internal_external&order=last_name.asc`);
+      const checkedIds=new Set(allData.map(r=>r.participantId));
+      exemptPeople.forEach(p=>{
+        if(checkedIds.has(p.id)) return;
+        const exemptType=VIP_DEPTS.has(p.dept)?'vip':'staff';
+        allData.unshift({id:`exempt_${p.id}`,participantId:p.id,day:0,time:null,scannedBy:'admin',
+          name:buildName(p),dept:p.dept||'-',isIn:true,tag:p.tag||'-',items:'',
+          pt:p.participation_type||'-',isWalkin:false,
+          bagReceived:false,bagDate:null,bagTime:null,
+          shirtSize:'',shirtReceived:false,shirtDate:null,shirtTime:null,
+          province:'',isVIPExempt:true,exemptType});
+      });
+    }catch(e){}
+  }
+
   deptRaw=[...allData];
 
   // Build dropdowns
@@ -1681,7 +1710,7 @@ function applyFilters(){
   const tg=document.getElementById('fTag').value;
   const wi=document.getElementById('fWalkin').value;
   filtered=allData.filter(r=>{
-    const mDay=curTab===0||r.day===curTab;
+    const mDay=curTab===0||r.day===curTab||r.isVIPExempt;
     const mSearch=!q||r.name.toLowerCase().includes(q)||r.dept.toLowerCase().includes(q);
     const mIE=!ie||(ie==='internal'&&r.isIn)||(ie==='external'&&!r.isIn);
     const mPT=selPT.size===0||selPT.has(r.pt);
@@ -1740,6 +1769,27 @@ function renderTable(){
   document.getElementById('bNext').disabled=curPage>=totPages;
   if(!page.length){document.getElementById('tBody').innerHTML='<tr><td colspan="11" class="loading-td">ไม่พบข้อมูล</td></tr>';return;}
   document.getElementById('tBody').innerHTML=page.map((r,i)=>{
+    if(r.isVIPExempt){
+      const isVIP=r.exemptType==='vip';
+      const badge=isVIP
+        ?`<span style="display:inline-block;background:#ede9fe;color:#6d28d9;padding:2px 8px;border-radius:12px;font-size:0.7rem;font-weight:700;margin-left:4px;">🎖️ VIP</span>`
+        :`<span style="display:inline-block;background:#dbeafe;color:#1e40af;padding:2px 8px;border-radius:12px;font-size:0.7rem;font-weight:700;margin-left:4px;">👥 Staff</span>`;
+      const rowBg=isVIP?'background:#faf5ff;':'background:#eff6ff;';
+      const contactCell=`<span style="color:#64748b;font-size:0.75rem;">ติดต่อกองแผน</span>`;
+      return`<tr style="${rowBg}">
+        <td>${start+i+1}</td>
+        <td>${r.name}${badge}</td>
+        <td style="max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${r.dept}">${r.dept}</td>
+        <td><span class="badge b-in">ภายใน</span></td>
+        <td>${r.pt}</td>
+        <td><span class="badge b-staff">Staff</span></td>
+        <td><span style="font-size:0.75rem;color:${isVIP?'#6d28d9':'#1d4ed8'};font-weight:600;">เช็คอินแล้วทุกวัน</span></td>
+        <td style="font-size:0.75rem;color:${isVIP?'#6d28d9':'#1d4ed8'};font-weight:600;">โดย admin</td>
+        <td style="white-space:nowrap;">${contactCell}</td>
+        <td style="white-space:nowrap;">${contactCell}</td>
+        <td style="font-size:0.8rem;color:#64748b;">admin</td>
+      </tr>`;
+    }
     const t=new Date(r.time).toLocaleTimeString('th-TH',{timeZone:'Asia/Bangkok',hour:'2-digit',minute:'2-digit',second:'2-digit'});
     const bagDT=[r.bagDate,r.bagTime].filter(Boolean).join(' ');
     const bagCell = r.bagReceived

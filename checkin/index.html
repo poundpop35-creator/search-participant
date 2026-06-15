@@ -671,17 +671,39 @@
   }
 
   function showVIPModal(p, fullName){
-    showModal('success','🎖️ VIP','ได้รับการยกเว้น (ไม่ต้องเช็คอิน)',fullName,[
-      {label:'ตำแหน่ง',val:p.dept||'-',style:'normal'},
-      {label:'หมายเหตุ',val:'หากต้องการสิ่งใดเพิ่มเติม ติดต่อ กองแผนงานและวิชาการ',style:'normal'}
-    ],'');
+    document.getElementById('modalStatus').textContent='🎖️ VIP';
+    document.getElementById('modalStatus').className='modal-status success';
+    document.getElementById('modalTitle').textContent='ได้รับการยกเว้น (ไม่ต้องเช็คอิน)';
+    const nameEl=document.getElementById('modalName');
+    nameEl.style.display=''; nameEl.textContent=fullName;
+    document.getElementById('modalDept').style.display='none';
+    document.getElementById('btnOk').className='btn-ok success';
+    document.getElementById('btnOk').style.display='block';
+    const det=document.getElementById('modalDetail');
+    det.style.display='block';
+    det.innerHTML=`<div class="detail-row"><span class="detail-label">ตำแหน่ง</span><span class="detail-val" style="color:#6d28d9;">${p.dept||'-'}</span></div>
+      <div style="margin-top:10px;padding-top:10px;border-top:1px solid #ede9fe;text-align:center;font-size:0.85rem;color:#7c3aed;line-height:1.8;">
+        หากต้องการสิ่งใดเพิ่มเติม<br>ติดต่อ กองแผนงานและวิชาการ
+      </div>`;
+    document.getElementById('modalOverlay').classList.remove('hidden');
   }
   function showStaffExemptModal(p, fullName){
-    showModal('success','👥 Staff','ได้รับการยกเว้น (ไม่ต้องเช็คอิน)',fullName,[
-      {label:'ตำแหน่ง',val:p.participation_type||'-',style:'normal'},
-      {label:'หน่วยงาน',val:p.dept||'-',style:'normal'},
-      {label:'หมายเหตุ',val:'มีข้อสงสัยเพิ่มเติม ติดต่อ กองแผนงานและวิชาการ',style:'normal'}
-    ],'');
+    document.getElementById('modalStatus').textContent='👥 Staff';
+    document.getElementById('modalStatus').className='modal-status success';
+    document.getElementById('modalTitle').textContent='ได้รับการยกเว้น (ไม่ต้องเช็คอิน)';
+    const nameEl=document.getElementById('modalName');
+    nameEl.style.display=''; nameEl.textContent=fullName;
+    document.getElementById('modalDept').style.display='none';
+    document.getElementById('btnOk').className='btn-ok success';
+    document.getElementById('btnOk').style.display='block';
+    const det=document.getElementById('modalDetail');
+    det.style.display='block';
+    det.innerHTML=`<div class="detail-row"><span class="detail-label">ตำแหน่ง</span><span class="detail-val">${p.participation_type||'-'}</span></div>
+      <div class="detail-row"><span class="detail-label">หน่วยงาน</span><span class="detail-val">${p.dept||'-'}</span></div>
+      <div style="margin-top:10px;padding-top:10px;border-top:1px solid #dbeafe;text-align:center;font-size:0.85rem;color:#1d4ed8;line-height:1.8;">
+        มีข้อสงสัยเพิ่มเติม<br>ติดต่อ กองแผนงานและวิชาการ
+      </div>`;
+    document.getElementById('modalOverlay').classList.remove('hidden');
   }
 
   async function markShirtNow(pId, shirtSize, btn){
