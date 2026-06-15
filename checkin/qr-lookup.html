@@ -980,11 +980,9 @@ function toggleQrZone(id, arrow) {
   if (arrow) arrow.textContent = open ? '▶' : '▼';
 }
 
-// Auto-load both maps on page start
+// Auto-load pre-reg map on page start
 mapRendered = true;
 loadMapData();
-wiMapRendered = true;
-loadWIMapData();
 
 // ─── WI MAP ───
 let wiMapRendered = false;
@@ -1263,6 +1261,10 @@ function renderWIZoneTable() {
     return `<tr data-zone="${e.z}" style="cursor:pointer;border-bottom:1px solid #e2e8f0;transition:background .12s;" onmouseover="this.style.background='rgba(59,130,246,0.06)'" onmouseout="this.style.background=''" onclick="zoomWIZone(${e.z})"><td style="padding:7px 10px;"><span class="wizArr" style="display:inline-block;width:12px;font-size:0.65rem;color:#94a3b8;margin-right:2px;">▶</span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:${zc};margin-right:6px;vertical-align:middle;"></span>${ZONE_NAMES_PUB[e.z]||'เขต '+e.z}</td><td style="padding:7px 10px;text-align:right;font-weight:700;">${e.n.toLocaleString()}</td><td style="padding:7px 10px;text-align:right;color:#64748b;">${pct}%</td></tr><tr id="${detId}" style="display:none;"><td colspan="3" style="padding:0;border-bottom:1px solid #e2e8f0;"><table style="width:100%;border-collapse:collapse;">${provRows}</table></td></tr>`;
   }).join('');
 }
+
+// Auto-load WI map on page start (after all WI vars/functions are declared)
+wiMapRendered = true;
+loadWIMapData();
 </script>
 </body>
 </html>
