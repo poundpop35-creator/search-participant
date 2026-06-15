@@ -270,6 +270,31 @@
   </div>
 </div>
 
+<!-- ─── WI MAP CARD ─── -->
+<div class="card wide-card" style="margin-top:16px;padding:20px;">
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+    <div>
+      <span style="font-size:0.98rem;font-weight:700;color:var(--blue);">แผนที่ผู้ลงทะเบียน Walk-in — แยกตามเขตสุขภาพ</span>
+      <span id="wiMapCount" style="font-size:0.8rem;color:#64748b;margin-left:6px;font-weight:400;"></span>
+    </div>
+    <button class="sec-btn" id="wiMapToggleBtn" onclick="toggleWIMap()">▼ ดูแผนที่</button>
+  </div>
+  <div id="wiMapBody" style="display:none;margin-top:14px;">
+    <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap;justify-content:center;">
+      <div id="wiLookupMap" style="position:relative;flex:0 0 180px;min-width:140px;max-width:220px;">
+        <div id="wiMapLabel" style="display:none;position:absolute;left:8px;top:8px;z-index:10;background:rgba(15,23,42,0.82);color:#fff;padding:5px 9px;border-radius:8px;font-size:0.72rem;line-height:1.5;pointer-events:none;font-family:Sarabun,sans-serif;"></div>
+        <button id="wiMapClear" onclick="resetWIMap()" style="display:none;position:absolute;right:6px;top:6px;z-index:10;background:rgba(255,255,255,0.92);border:1.5px solid #e2e8f0;border-radius:8px;padding:3px 10px;font-family:Sarabun,sans-serif;font-size:0.72rem;cursor:pointer;color:#334155;">✕ ล้าง</button>
+      </div>
+      <div style="flex:1;min-width:200px;overflow-x:auto;">
+        <table class="zone-tbl">
+          <thead><tr><th>เขตสุขภาพ</th><th style="text-align:right;">คน</th><th style="text-align:right;">%</th></tr></thead>
+          <tbody id="wiZoneTableBody"><tr><td colspan="3" style="padding:16px;text-align:center;color:#94a3b8;">กดดูแผนที่เพื่อโหลด</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="footer">© 2026 Built by <span style="font-family:'Dancing Script',cursive;font-weight:700;font-size:1.3em;color:#0ABAB5;">Saharat Phetrnitchakun</span> · <span style="font-weight:800;letter-spacing:0.04em;font-size:1.05em;"><span style="color:#2563eb;">D</span><span style="color:#f59e0b;">P</span><span style="color:#16a34a;">T</span><span style="color:#dc2626;">C</span></span> · DMSc</div>
 
 <script>
@@ -958,6 +983,310 @@ function toggleQrZone(id, arrow) {
 // Auto-load map on page start (mapBody starts open)
 mapRendered = true;
 loadMapData();
+
+// ─── WI MAP ───
+let wiMapRendered = false;
+let wiMapProvCounts = {};
+let wiMapG = null, wiMapPath = null, wiMapW = 0, wiMapH = 0, wiMapScale = 1, wiMapBkkPt = null, wiMapDmscPt = null, wiMapSelProv = null, wiMapSelZone = null;
+
+async function toggleWIMap() {
+  const body = document.getElementById('wiMapBody');
+  const btn = document.getElementById('wiMapToggleBtn');
+  if (body.style.display === 'none') {
+    body.style.display = 'block';
+    btn.textContent = '▲ ซ่อน';
+    if (!wiMapRendered) { wiMapRendered = true; await loadWIMapData(); }
+  } else {
+    body.style.display = 'none';
+    btn.textContent = '▼ ดูแผนที่';
+  }
+}
+
+async function loadWIMapData() {
+  const mc = document.getElementById('wiLookupMap');
+  const savedLbl = document.getElementById('wiMapLabel');
+  const savedClr = document.getElementById('wiMapClear');
+  mc.innerHTML = '<div style="padding:20px;text-align:center;font-size:0.82rem;color:#94a3b8;">กำลังโหลด...</div>';
+  if (savedLbl) mc.appendChild(savedLbl);
+  if (savedClr) mc.appendChild(savedClr);
+  document.getElementById('wiZoneTableBody').innerHTML = '<tr><td colspan="3" style="padding:16px;text-align:center;color:#94a3b8;">กำลังโหลด...</td></tr>';
+  try {
+    const H = { 'apikey': SB_ANON, 'Authorization': 'Bearer ' + SB_ANON };
+    const yr = encodeURIComponent(activeYear);
+    let data = [], from = 0;
+    while (true) {
+      const r = await fetch(`${SB_URL}/rest/v1/participants?is_walkin=eq.true&event_year=eq.${yr}&select=province,internal_external&limit=1000&offset=${from}`, { headers: H });
+      const d = await r.json();
+      if (!Array.isArray(d) || !d.length) break;
+      data = data.concat(d);
+      if (d.length < 1000) break;
+      from += 1000;
+    }
+    document.getElementById('wiMapCount').textContent = `(${data.length.toLocaleString()} คน walk-in)`;
+    wiMapProvCounts = {};
+    data.forEach(p => {
+      let pv = (p.province || '').trim();
+      const isIn = p.internal_external === 'internal';
+      if (!pv && isIn) pv = 'กรมวิทยาศาสตร์การแพทย์';
+      if (pv) wiMapProvCounts[pv] = (wiMapProvCounts[pv] || 0) + 1;
+    });
+    await renderWIMap();
+    renderWIZoneTable();
+  } catch(e) {
+    const mc2 = document.getElementById('wiLookupMap');
+    const lbl2 = document.getElementById('wiMapLabel');
+    const clr2 = document.getElementById('wiMapClear');
+    mc2.innerHTML = '<div style="padding:20px;text-align:center;font-size:0.82rem;color:#94a3b8;">ไม่สามารถโหลดแผนที่ได้</div>';
+    if (lbl2) mc2.appendChild(lbl2);
+    if (clr2) mc2.appendChild(clr2);
+    document.getElementById('wiZoneTableBody').innerHTML = '';
+  }
+}
+
+async function renderWIMap() {
+  const container = document.getElementById('wiLookupMap');
+  const savedLabel = document.getElementById('wiMapLabel');
+  const savedClear = document.getElementById('wiMapClear');
+  try {
+    if (!thaiGeoCache) thaiGeoCache = await d3.json('https://raw.githubusercontent.com/apisit/thailand.json/master/thailand.json');
+    container.innerHTML = '';
+    if (savedLabel) container.appendChild(savedLabel);
+    if (savedClear) container.appendChild(savedClear);
+    const w = container.clientWidth || 180;
+    const h = Math.round(w * 1.65);
+    container.style.height = h + 'px';
+    wiMapW = w; wiMapH = h; wiMapScale = 1; wiMapSelProv = null;
+    const proj = d3.geoMercator().fitExtent([[12,12],[w-12,h-12]], thaiGeoCache);
+    const pathGen = d3.geoPath().projection(proj);
+    wiMapPath = pathGen;
+    const svg = d3.select(container).append('svg').attr('width',w).attr('height',h).style('display','block').style('overflow','hidden');
+    const tip = d3.select(container).append('div')
+      .style('position','absolute').style('background','rgba(15,23,42,0.88)').style('color','#fff')
+      .style('padding','6px 10px').style('border-radius','8px').style('font-size','0.75rem')
+      .style('pointer-events','none').style('opacity','0').style('white-space','nowrap')
+      .style('z-index','20').style('top','0').style('left','0').style('font-family','Sarabun');
+    const g = svg.append('g');
+    wiMapG = g;
+    const provCounts = wiMapProvCounts;
+
+    g.selectAll('path')
+      .data(thaiGeoCache.features).join('path')
+      .attr('d', pathGen)
+      .attr('fill', d => {
+        const th = EN_TO_TH[d.properties.name];
+        if (!th) return '#e8edf2';
+        const z = getZonePub(th) || 13;
+        const base = ZONE_COLORS_PUB[z % ZONE_COLORS_PUB.length];
+        const cnt = provCounts[th] || 0;
+        if (!cnt) { const c = d3.color(base); c.opacity = 0.18; return c.toString(); }
+        return base;
+      })
+      .attr('stroke','#fff').attr('stroke-width',0.6).attr('stroke-linejoin','round')
+      .style('cursor','pointer')
+      .on('click', function(event, d) {
+        const th = EN_TO_TH[d.properties.name];
+        if (!th) return;
+        tip.style('opacity','0');
+        zoomWIProv(th);
+      })
+      .on('mouseover', function(event, d) {
+        const th = EN_TO_TH[d.properties.name] || d.properties.name;
+        const z = getZonePub(th) || 13;
+        const cnt = provCounts[th] || 0;
+        tip.style('opacity','1').html(`<b>${th}</b> · ${ZONE_NAMES_PUB[z]||'เขต '+z}<br>${cnt.toLocaleString()} คน`);
+        if (wiMapSelProv === null) d3.select(this).attr('stroke','#334155').attr('stroke-width',1.5/wiMapScale);
+      })
+      .on('mousemove', function(event) {
+        const [mx,my] = d3.pointer(event, container);
+        tip.style('left',(mx+12)+'px').style('top',(my-30)+'px');
+      })
+      .on('mouseout', function() {
+        tip.style('opacity','0');
+        if (wiMapSelProv === null) d3.select(this).attr('stroke','#fff').attr('stroke-width',0.6);
+      });
+
+    // Bangkok dot (too small as polygon)
+    const bkkColor = ZONE_COLORS_PUB[13 % ZONE_COLORS_PUB.length];
+    const bkkCnt = provCounts['กรุงเทพมหานคร'] || 0;
+    const bkkFill = bkkCnt ? bkkColor : (()=>{ const c=d3.color(bkkColor); c.opacity=0.18; return c.toString(); })();
+    const bkkPt = proj([100.5018, 13.7563]);
+    wiMapBkkPt = bkkPt;
+    if (bkkPt) {
+      const bkkG = g.append('g').attr('class','bkk-marker').style('cursor','pointer')
+        .on('click', () => { tip.style('opacity','0'); zoomWIProv('กรุงเทพมหานคร'); });
+      bkkG.append('circle').attr('class','bkk-dot').attr('cx',bkkPt[0]).attr('cy',bkkPt[1]).attr('r',5).attr('fill',bkkFill).attr('stroke','#fff').attr('stroke-width',1);
+      bkkG.append('text').attr('x',bkkPt[0]+7).attr('y',bkkPt[1]+4).attr('font-size','0.55rem').attr('fill','#1e3a8a').attr('font-family','Sarabun').text('กทม.');
+    }
+
+    // DMSC dot (กรมวิทยาศาสตร์การแพทย์) — located in Nonthaburi
+    const dmscCnt = provCounts['กรมวิทยาศาสตร์การแพทย์'] || 0;
+    const dmscFill = dmscCnt ? bkkColor : (()=>{ const c=d3.color(bkkColor); c.opacity=0.18; return c.toString(); })();
+    const dmscPt = proj([100.521, 13.876]);
+    wiMapDmscPt = dmscPt;
+    if (dmscPt) {
+      const dmscG = g.append('g').attr('class','dmsc-marker').style('cursor','pointer')
+        .on('click', () => { tip.style('opacity','0'); zoomWIProv('กรมวิทยาศาสตร์การแพทย์'); });
+      dmscG.append('circle').attr('class','dmsc-dot').attr('cx',dmscPt[0]).attr('cy',dmscPt[1]).attr('r',5).attr('fill',dmscFill).attr('stroke','#fff').attr('stroke-width',1);
+      dmscG.append('text').attr('x',dmscPt[0]+7).attr('y',dmscPt[1]+4).attr('font-size','0.55rem').attr('fill','#1e3a8a').attr('font-family','Sarabun').text('DMSC');
+    }
+  } catch(e) {
+    container.innerHTML = '<div style="padding:20px;text-align:center;font-size:0.82rem;color:#94a3b8;">ไม่สามารถโหลดแผนที่ได้</div>';
+    if (savedLabel) container.appendChild(savedLabel);
+    if (savedClear) container.appendChild(savedClear);
+  }
+}
+
+function zoomWIZone(z) {
+  const detRow = document.getElementById(`wiz-${z}`);
+  const arrow = document.querySelector(`#wiZoneTableBody tr[data-zone="${z}"] .wizArr`);
+  if (!wiMapG || !thaiGeoCache || !wiMapPath) {
+    if (detRow) { const op=detRow.style.display!=='none'; detRow.style.display=op?'none':''; if(arrow) arrow.textContent=op?'▶':'▼'; }
+    return;
+  }
+  if (wiMapSelZone === z) {
+    resetWIMap();
+    if (detRow) { detRow.style.display='none'; if(arrow) arrow.textContent='▶'; }
+    return;
+  }
+  wiMapSelZone = z; wiMapSelProv = null;
+  const feats = thaiGeoCache.features.filter(d => { const th=EN_TO_TH[d.properties.name]; return th&&(getZonePub(th)||13)===z; });
+  let x0, y0, x1, y1;
+  if (feats.length) { const b=wiMapPath.bounds({type:'FeatureCollection',features:feats}); [[x0,y0],[x1,y1]]=b; }
+  if (z===13 && wiMapBkkPt) {
+    x0=Math.min(x0??wiMapBkkPt[0],wiMapBkkPt[0])-8; y0=Math.min(y0??wiMapBkkPt[1],wiMapBkkPt[1])-8;
+    x1=Math.max(x1??wiMapBkkPt[0],wiMapBkkPt[0])+8; y1=Math.max(y1??wiMapBkkPt[1],wiMapBkkPt[1])+8;
+  }
+  if (z===13 && wiMapDmscPt) {
+    x0=Math.min(x0??wiMapDmscPt[0],wiMapDmscPt[0])-8; y0=Math.min(y0??wiMapDmscPt[1],wiMapDmscPt[1])-8;
+    x1=Math.max(x1??wiMapDmscPt[0],wiMapDmscPt[0])+8; y1=Math.max(y1??wiMapDmscPt[1],wiMapDmscPt[1])+8;
+  }
+  if (x0===undefined) return;
+  const cx=(x0+x1)/2, cy=(y0+y1)/2;
+  if (x1-x0<wiMapW*0.18){x0=cx-wiMapW*0.09;x1=cx+wiMapW*0.09;}
+  if (y1-y0<wiMapH*0.18){y0=cy-wiMapH*0.09;y1=cy+wiMapH*0.09;}
+  const pad=20, s=Math.min(7,0.88/Math.max((x1-x0+pad*2)/wiMapW,(y1-y0+pad*2)/wiMapH));
+  const tx=wiMapW/2-s*(x0+x1)/2, ty=wiMapH/2-s*(y0+y1)/2;
+  wiMapScale=s;
+  wiMapG.transition().duration(700).attr('transform',`translate(${tx},${ty}) scale(${s})`);
+  wiMapG.selectAll('path').transition().duration(700)
+    .attr('fill',d=>{ const th=EN_TO_TH[d.properties.name]; if(!th) return '#e8edf2'; const pz=getZonePub(th)||13; const base=ZONE_COLORS_PUB[pz%ZONE_COLORS_PUB.length]; if(pz===z) return base; const c=d3.color(base);c.opacity=0.1;return c.toString(); })
+    .attr('stroke-width',0.6/s);
+  const bkkBase=ZONE_COLORS_PUB[13%ZONE_COLORS_PUB.length];
+  d3.select('#wiLookupMap .bkk-dot').transition().duration(700)
+    .attr('fill',z===13?bkkBase:(()=>{const c=d3.color(bkkBase);c.opacity=0.1;return c.toString();})());
+  d3.select('#wiLookupMap .dmsc-dot').transition().duration(700)
+    .attr('fill',z===13?bkkBase:(()=>{const c=d3.color(bkkBase);c.opacity=0.1;return c.toString();})());
+  const zoneCnt=Object.keys(wiMapProvCounts).filter(p=>(getZonePub(p)||13)===z).reduce((s,p)=>s+(wiMapProvCounts[p]||0),0);
+  const lbl=document.getElementById('wiMapLabel');
+  lbl.innerHTML=`<b>${ZONE_NAMES_PUB[z]||'เขต '+z}</b><br>${zoneCnt.toLocaleString()} คน`;
+  lbl.style.display='block';
+  document.getElementById('wiMapClear').style.display='block';
+  if (detRow) { detRow.style.display=''; if(arrow) arrow.textContent='▼'; }
+}
+
+function zoomWIProv(prov) {
+  if (!wiMapG || !thaiGeoCache || !wiMapPath) return;
+  if (wiMapSelProv === prov && wiMapSelZone === null) { resetWIMap(); return; }
+  wiMapSelZone = null;
+  wiMapSelProv = prov;
+  let x0, y0, x1, y1;
+  if (prov === 'กรุงเทพมหานคร' && wiMapBkkPt) {
+    x0=wiMapBkkPt[0]-10; y0=wiMapBkkPt[1]-10; x1=wiMapBkkPt[0]+10; y1=wiMapBkkPt[1]+10;
+  } else if (prov === 'กรมวิทยาศาสตร์การแพทย์' && wiMapDmscPt) {
+    x0=wiMapDmscPt[0]-10; y0=wiMapDmscPt[1]-10; x1=wiMapDmscPt[0]+10; y1=wiMapDmscPt[1]+10;
+  } else {
+    const feat = thaiGeoCache.features.find(d => EN_TO_TH[d.properties.name] === prov);
+    if (!feat) return;
+    [[x0,y0],[x1,y1]] = wiMapPath.bounds(feat);
+  }
+  const cx=(x0+x1)/2, cy=(y0+y1)/2;
+  if (x1-x0 < wiMapW*0.18) { x0=cx-wiMapW*0.09; x1=cx+wiMapW*0.09; }
+  if (y1-y0 < wiMapH*0.12) { y0=cy-wiMapH*0.06; y1=cy+wiMapH*0.06; }
+  const s = Math.min(wiMapW/(x1-x0), wiMapH/(y1-y0)) * 0.85;
+  const tx = wiMapW/2 - s*cx, ty = wiMapH/2 - s*cy;
+  wiMapScale = s;
+  wiMapG.transition().duration(700).attr('transform', `translate(${tx},${ty}) scale(${s})`);
+  wiMapG.selectAll('path').transition().duration(700)
+    .attr('fill', d => {
+      const th = EN_TO_TH[d.properties.name];
+      if (!th) return '#e8edf2';
+      const z = getZonePub(th) || 13;
+      const base = ZONE_COLORS_PUB[z % ZONE_COLORS_PUB.length];
+      if (th === prov) return base;
+      const c = d3.color(base); c.opacity = 0.1; return c.toString();
+    })
+    .attr('stroke-width', 0.6/s);
+  const isBkk = prov === 'กรุงเทพมหานคร';
+  const isDmsc = prov === 'กรมวิทยาศาสตร์การแพทย์';
+  const bkkBase = ZONE_COLORS_PUB[13 % ZONE_COLORS_PUB.length];
+  d3.select('#wiLookupMap .bkk-dot').transition().duration(700)
+    .attr('fill', isBkk ? bkkBase : (()=>{ const c=d3.color(bkkBase); c.opacity=0.1; return c.toString(); })());
+  d3.select('#wiLookupMap .dmsc-dot').transition().duration(700)
+    .attr('fill', isDmsc ? bkkBase : (()=>{ const c=d3.color(bkkBase); c.opacity=0.1; return c.toString(); })());
+  const z = getZonePub(prov) || 13;
+  const cnt = wiMapProvCounts[prov] || 0;
+  const lbl = document.getElementById('wiMapLabel');
+  lbl.innerHTML = `<b>${prov}</b> · ${ZONE_NAMES_PUB[z]||'เขต '+z}<br>${cnt.toLocaleString()} คน`;
+  lbl.style.display = 'block';
+  document.getElementById('wiMapClear').style.display = 'block';
+  const detRow2 = document.getElementById(`wiz-${z}`);
+  const arrow2 = document.querySelector(`#wiZoneTableBody tr[data-zone="${z}"] .wizArr`);
+  if (detRow2 && detRow2.style.display === 'none') { detRow2.style.display=''; if(arrow2) arrow2.textContent='▼'; }
+  document.querySelectorAll('#wiZoneTableBody tr[data-zone]').forEach(r=>{r.style.background='';r.style.fontWeight='';});
+  document.querySelectorAll('#wiZoneTableBody tr[data-prov]').forEach(r=>r.style.background='');
+  const provRowEl = document.querySelector(`#wiZoneTableBody tr[data-prov="${prov.replace(/"/g,'&quot;')}"]`);
+  if (provRowEl) { provRowEl.style.background='rgba(59,130,246,0.15)'; provRowEl.scrollIntoView({behavior:'smooth',block:'nearest'}); }
+}
+
+function resetWIMap() {
+  if (!wiMapG) return;
+  wiMapSelProv = null; wiMapSelZone = null; wiMapScale = 1;
+  wiMapG.transition().duration(600).attr('transform', '');
+  wiMapG.selectAll('path').transition().duration(600)
+    .attr('fill', d => {
+      const th = EN_TO_TH[d.properties.name];
+      if (!th) return '#e8edf2';
+      const z = getZonePub(th) || 13;
+      const base = ZONE_COLORS_PUB[z % ZONE_COLORS_PUB.length];
+      const cnt = wiMapProvCounts[th] || 0;
+      if (!cnt) { const c = d3.color(base); c.opacity=0.18; return c.toString(); }
+      return base;
+    })
+    .attr('stroke-width', 0.6);
+  const bkkBase = ZONE_COLORS_PUB[13 % ZONE_COLORS_PUB.length];
+  const bkkCnt = wiMapProvCounts['กรุงเทพมหานคร'] || 0;
+  d3.select('#wiLookupMap .bkk-dot').transition().duration(600)
+    .attr('fill', bkkCnt ? bkkBase : (()=>{ const c=d3.color(bkkBase); c.opacity=0.18; return c.toString(); })());
+  const dmscCnt = wiMapProvCounts['กรมวิทยาศาสตร์การแพทย์'] || 0;
+  d3.select('#wiLookupMap .dmsc-dot').transition().duration(600)
+    .attr('fill', dmscCnt ? bkkBase : (()=>{ const c=d3.color(bkkBase); c.opacity=0.18; return c.toString(); })());
+  document.getElementById('wiMapLabel').style.display = 'none';
+  document.getElementById('wiMapClear').style.display = 'none';
+  document.querySelectorAll('#wiZoneTableBody tr[data-zone]').forEach(r=>{r.style.background='';r.style.fontWeight='';});
+  document.querySelectorAll('#wiZoneTableBody tr[data-prov]').forEach(r=>r.style.background='');
+}
+
+function renderWIZoneTable() {
+  const provCounts = wiMapProvCounts;
+  const zoneCounts = {}, provByZone = {};
+  Object.entries(provCounts).forEach(([prov, cnt]) => {
+    const z = getZonePub(prov) || 13;
+    zoneCounts[z] = (zoneCounts[z] || 0) + cnt;
+    if (!provByZone[z]) provByZone[z] = {};
+    provByZone[z][prov] = cnt;
+  });
+  const entries = Object.entries(zoneCounts).map(([z,n]) => ({z:Number(z),n})).sort((a,b) => a.z-b.z);
+  if (!entries.length) { document.getElementById('wiZoneTableBody').innerHTML = '<tr><td colspan="3" style="padding:16px;text-align:center;color:#94a3b8;">ไม่มีข้อมูล</td></tr>'; return; }
+  const grandTotal = entries.reduce((s,e) => s+e.n, 0);
+  document.getElementById('wiZoneTableBody').innerHTML = entries.map(e => {
+    const zc = ZONE_COLORS_PUB[e.z % ZONE_COLORS_PUB.length];
+    const pct = grandTotal ? Math.round(e.n / grandTotal * 100) : 0;
+    const detId = `wiz-${e.z}`;
+    const provRows = Object.entries(provByZone[e.z]||{}).sort((a,b)=>b[1]-a[1])
+      .map(([pv,cnt])=>`<tr data-prov="${pv.replace(/"/g,'&quot;')}" style="background:#f8fafc;cursor:pointer;transition:background .12s;" onclick="event.stopPropagation();zoomWIProv(this.dataset.prov)" onmouseover="this.style.background='rgba(59,130,246,0.08)'" onmouseout="this.style.background=''"><td style="padding:3px 10px 3px 28px;font-size:0.76rem;color:#64748b;">⌙ ${pv}</td><td style="padding:3px 10px;text-align:right;font-size:0.76rem;color:#64748b;">${cnt.toLocaleString()}</td><td style="padding:3px 10px;text-align:right;font-size:0.76rem;color:#94a3b8;">${grandTotal?Math.round(cnt/grandTotal*100):0}%</td></tr>`).join('');
+    return `<tr data-zone="${e.z}" style="cursor:pointer;border-bottom:1px solid #e2e8f0;transition:background .12s;" onmouseover="this.style.background='rgba(59,130,246,0.06)'" onmouseout="this.style.background=''" onclick="zoomWIZone(${e.z})"><td style="padding:7px 10px;"><span class="wizArr" style="display:inline-block;width:12px;font-size:0.65rem;color:#94a3b8;margin-right:2px;">▶</span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:${zc};margin-right:6px;vertical-align:middle;"></span>${ZONE_NAMES_PUB[e.z]||'เขต '+e.z}</td><td style="padding:7px 10px;text-align:right;font-weight:700;">${e.n.toLocaleString()}</td><td style="padding:7px 10px;text-align:right;color:#64748b;">${pct}%</td></tr><tr id="${detId}" style="display:none;"><td colspan="3" style="padding:0;border-bottom:1px solid #e2e8f0;"><table style="width:100%;border-collapse:collapse;">${provRows}</table></td></tr>`;
+  }).join('');
+}
 </script>
 </body>
 </html>
