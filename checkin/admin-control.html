@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Control Panel — DMSc Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{--blue:#0d2b6b;--blue-mid:#1a4eb8;--blue-light:#e8f0fe;--green:#16a34a;--red:#dc2626;--orange:#ea580c;--white:#fff;--border:#e2e8f0;--shadow:0 2px 14px rgba(13,43,107,0.10);}
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:linear-gradient(rgba(232,240,254,0.60),rgba(232,240,254,0.60)),url('https://raw.githubusercontent.com/poundpop35-creator/search-participant/main/DNA.png') center/cover fixed;font-family:'Sarabun',sans-serif;min-height:100vh;}
+    .topbar{background:rgba(255,255,255,0.96);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);padding:13px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;position:sticky;top:0;z-index:50;box-shadow:0 2px 12px rgba(0,0,0,0.07);}
+    .topbar-left{display:flex;align-items:center;gap:12px;}
+    .topbar-title{font-size:1rem;font-weight:800;color:var(--blue);}
+    .back-btn{display:inline-flex;align-items:center;gap:6px;font-size:0.82rem;color:var(--blue);text-decoration:none;font-weight:600;padding:7px 14px;border-radius:10px;background:var(--blue-light);border:1.5px solid #c7d7fc;white-space:nowrap;}
+    .logout-btn{background:none;border:1.5px solid var(--border);border-radius:10px;padding:7px 14px;font-family:'Sarabun',sans-serif;font-size:0.82rem;color:#64748b;cursor:pointer;}
+    .container{max-width:960px;margin:0 auto;padding:24px 16px 56px;}
+    /* Tabs */
+    .tabs{display:flex;gap:4px;background:white;border-radius:14px;padding:6px;box-shadow:var(--shadow);margin-bottom:20px;flex-wrap:wrap;}
+    .tab-btn{flex:1;min-width:120px;padding:10px 14px;border:none;border-radius:10px;font-family:'Sarabun',sans-serif;font-size:0.88rem;font-weight:600;cursor:pointer;background:transparent;color:#64748b;transition:all .15s;white-space:nowrap;}
+    .tab-btn.active{background:var(--blue);color:white;}
+    .tab-btn:hover:not(.active){background:var(--blue-light);color:var(--blue);}
+    /* Cards */
+    .card{background:white;border-radius:16px;box-shadow:var(--shadow);padding:22px 24px;margin-bottom:16px;}
+    .card-title{font-size:0.98rem;font-weight:700;color:var(--blue);margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+    /* Forms */
+    .field{margin-bottom:13px;}
+    .field label{display:block;font-size:0.8rem;font-weight:700;color:#334155;margin-bottom:5px;}
+    .field input,.field select,.field textarea{width:100%;border:1.5px solid var(--border);border-radius:10px;padding:10px 13px;font-family:'Sarabun',sans-serif;font-size:0.9rem;outline:none;transition:border-color .2s;}
+    .field input:focus,.field select:focus{border-color:#3b82f6;}
+    /* Buttons */
+    .btn{padding:9px 18px;border-radius:10px;border:none;font-family:'Sarabun',sans-serif;font-size:0.88rem;font-weight:700;cursor:pointer;transition:opacity .15s;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;}
+    .btn:active{opacity:.82;}
+    .btn:disabled{opacity:.5;cursor:not-allowed;}
+    .btn-primary{background:var(--blue);color:white;}
+    .btn-green{background:var(--green);color:white;}
+    .btn-red{background:var(--red);color:white;}
+    .btn-ghost{background:white;color:#475569;border:1.5px solid var(--border);}
+    .btn-sm{padding:5px 12px;font-size:0.78rem;}
+    /* Tables */
+    .tbl{width:100%;border-collapse:collapse;font-size:0.84rem;}
+    .tbl th{padding:9px 12px;text-align:left;background:#f0f6ff;color:#1e3a8a;font-size:0.77rem;white-space:nowrap;}
+    .tbl td{padding:9px 12px;border-bottom:1px solid #f1f5f9;vertical-align:middle;}
+    .tbl tr:last-child td{border-bottom:none;}
+    .tbl-wrap{overflow-x:auto;}
+    /* Badges */
+    .badge{display:inline-block;font-size:0.68rem;font-weight:700;padding:2px 9px;border-radius:99px;}
+    .badge-admin{background:#ede9fe;color:#4c1d95;}
+    .badge-staff{background:#dbeafe;color:#1d4ed8;}
+    .badge-on{background:#dcfce7;color:#15803d;}
+    .badge-off{background:#fee2e2;color:#991b1b;}
+    /* Alerts */
+    .alert{padding:11px 15px;border-radius:10px;font-size:0.83rem;margin-bottom:12px;line-height:1.65;}
+    .alert-info{background:#eff6ff;border:1px solid #bfdbfe;color:#1e40af;}
+    .alert-warn{background:#fffbeb;border:1px solid #fcd34d;color:#92400e;}
+    .alert-ok{background:#f0fdf4;border:1px solid #bbf7d0;color:#14532d;}
+    .alert-err{background:#fef2f2;border:1px solid #fecaca;color:#991b1b;}
+    /* Map table */
+    .map-tbl{width:100%;border-collapse:collapse;font-size:0.83rem;}
+    .map-tbl th{padding:8px 10px;background:#f0f6ff;color:#1e3a8a;font-size:0.77rem;white-space:nowrap;}
+    .map-tbl td{padding:7px 10px;border-bottom:1px solid #f1f5f9;vertical-align:middle;}
+    .map-tbl select{width:100%;border:1.5px solid var(--border);border-radius:8px;padding:6px 10px;font-family:'Sarabun',sans-serif;font-size:0.82rem;outline:none;}
+    /* Preview */
+    .preview-wrap{overflow-x:auto;margin-top:12px;}
+    .preview-tbl{width:100%;border-collapse:collapse;font-size:0.79rem;}
+    .preview-tbl th{padding:7px 10px;background:#1e3a8a;color:white;white-space:nowrap;}
+    .preview-tbl td{padding:6px 10px;border-bottom:1px solid #f1f5f9;white-space:nowrap;color:#334155;}
+    /* Modal */
+    .overlay{position:fixed;inset:0;background:rgba(0,0,0,0.55);display:flex;align-items:center;justify-content:center;z-index:999;padding:20px;}
+    .overlay.hidden{display:none;}
+    .modal{background:white;border-radius:16px;padding:24px;width:100%;max-width:400px;box-shadow:0 8px 40px rgba(0,0,0,0.2);}
+    .modal h3{font-size:1rem;font-weight:700;color:var(--blue);margin-bottom:16px;}
+    /* Divider */
+    hr.div{border:none;border-top:1px solid var(--border);margin:18px 0;}
+    /* Danger zone */
+    .danger-box{border:1.5px solid #fca5a5;border-radius:12px;padding:18px;background:#fff5f5;}
+    .danger-title{font-size:0.88rem;font-weight:700;color:var(--red);margin-bottom:12px;}
+    /* Spinner */
+    .sp{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.4);border-top-color:white;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;}
+    @keyframes spin{to{transform:rotate(360deg);}}
+    /* VIP chip */
+    .vip-chip{display:inline-flex;align-items:center;gap:6px;background:#ede9fe;color:#4c1d95;padding:5px 12px;border-radius:99px;font-size:0.82rem;font-weight:600;margin:3px;}
+    .vip-chip button{background:none;border:none;cursor:pointer;color:#6d28d9;font-size:0.85rem;padding:0;line-height:1;}
+  </style>
+</head>
+<body>
+
+<!-- PIN/Confirm Modal -->
+<div class="overlay hidden" id="staffModal">
+  <div class="modal">
+    <h3 id="sfTitle">เพิ่ม Staff</h3>
+    <div class="field"><label>Username</label><input id="sfUser" type="text" placeholder="staff11" autocomplete="off"></div>
+    <div class="field"><label>ชื่อ / ชื่อเล่น</label><input id="sfName" type="text" placeholder="สมชาย" autocomplete="off"></div>
+    <div class="field"><label>รหัสผ่าน</label><input id="sfPwd" type="password" placeholder="••••••••" autocomplete="new-password"></div>
+    <div class="field"><label>Role</label>
+      <select id="sfRole"><option value="staff">Staff</option><option value="admin">Admin</option></select>
+    </div>
+    <div id="sfErr" style="font-size:0.8rem;color:#dc2626;min-height:16px;margin-bottom:8px;"></div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn btn-ghost" style="flex:1;" onclick="closeSfModal()">ยกเลิก</button>
+      <button class="btn btn-primary" style="flex:1;" id="sfSaveBtn" onclick="saveStaff()">บันทึก</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay hidden" id="cfModal">
+  <div class="modal">
+    <h3 id="cfTitle">ยืนยัน</h3>
+    <p id="cfMsg" style="font-size:0.88rem;color:#475569;margin-bottom:16px;line-height:1.7;"></p>
+    <div style="display:flex;gap:10px;">
+      <button class="btn btn-ghost" style="flex:1;" onclick="closeCf()">ยกเลิก</button>
+      <button class="btn btn-red" style="flex:1;" id="cfOkBtn">ยืนยัน</button>
+    </div>
+  </div>
+</div>
+
+<!-- Topbar -->
+<div class="topbar">
+  <div class="topbar-left">
+    <a href="dashboard.html" class="back-btn">← Dashboard</a>
+    <span class="topbar-title">⚙️ Control Panel</span>
+  </div>
+  <button class="logout-btn" onclick="doLogout()">ออกจากระบบ</button>
+</div>
+
+<div class="container">
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab-btn active" id="tb-import" onclick="switchTab('import')">📥 นำเข้าข้อมูล</button>
+    <button class="tab-btn" id="tb-staff" onclick="switchTab('staff')">👥 จัดการ Staff</button>
+    <button class="tab-btn" id="tb-settings" onclick="switchTab('settings')">⚙️ ตั้งค่าระบบ</button>
+  </div>
+
+  <!-- ══════════ TAB: IMPORT ══════════ -->
+  <div id="tc-import">
+
+    <div class="card">
+      <div class="card-title">📥 นำเข้าข้อมูลจาก Google Sheets</div>
+      <div class="alert alert-info">
+        <strong>วิธีเตรียม Google Sheet:</strong><br>
+        ไฟล์ → เผยแพร่ไปยังเว็บ → เลือกชีท → เลือกรูปแบบ <strong>CSV</strong> → คัดลอก URL แล้วนำมาวางด้านล่าง
+      </div>
+      <div class="field">
+        <label>URL ของ Google Sheet (Publish as CSV)</label>
+        <div style="display:flex;gap:8px;">
+          <input id="sheetUrl" type="url" placeholder="https://docs.google.com/spreadsheets/d/e/.../pub?output=csv">
+          <button class="btn btn-primary" id="fetchBtn" onclick="fetchSheet()">ดึงข้อมูล</button>
+        </div>
+      </div>
+      <div id="sheetStatus"></div>
+    </div>
+
+    <!-- Column mapping -->
+    <div class="card" id="mappingCard" style="display:none;">
+      <div class="card-title">🗂️ จับคู่คอลัมน์ Sheet → ฐานข้อมูล</div>
+      <p style="font-size:0.82rem;color:#64748b;margin-bottom:14px;">ระบุว่าคอลัมน์ไหนใน Sheet ตรงกับข้อมูลอะไร (ระบบช่วยเดาอัตโนมัติ)</p>
+      <div class="tbl-wrap">
+        <table class="map-tbl">
+          <thead><tr><th>ข้อมูลในระบบ</th><th>คอลัมน์ใน Sheet</th><th>ตัวอย่างค่า</th></tr></thead>
+          <tbody id="mapBody"></tbody>
+        </table>
+      </div>
+      <hr class="div">
+      <div class="field">
+        <label>โหมดการนำเข้า</label>
+        <select id="importMode">
+          <option value="add">เพิ่มใหม่เท่านั้น — ข้ามถ้าเลขบัตรซ้ำ</option>
+          <option value="upsert">เพิ่ม + อัปเดต — ถ้าเลขบัตรซ้ำให้อัปเดต</option>
+          <option value="replace">⚠️ ลบทั้งหมดแล้วนำเข้าใหม่</option>
+        </select>
+      </div>
+      <div id="previewSec" style="display:none;">
+        <div style="font-size:0.9rem;font-weight:700;color:var(--blue);margin-bottom:8px;">👀 Preview (5 แถวแรก)</div>
+        <div class="preview-wrap" id="previewWrap"></div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;">
+        <button class="btn btn-ghost" onclick="previewImport()">👁️ Preview</button>
+        <button class="btn btn-green" id="importBtn" style="display:none;" onclick="confirmImport()">✅ นำเข้าข้อมูล</button>
+      </div>
+      <div id="importStatus" style="margin-top:12px;"></div>
+    </div>
+
+  </div>
+
+  <!-- ══════════ TAB: STAFF ══════════ -->
+  <div id="tc-staff" style="display:none;">
+
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:16px;">
+        <div class="card-title" style="margin-bottom:0;">👥 บัญชี Staff ทั้งหมด</div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-ghost btn-sm" id="initBtn" onclick="initStaff()" style="display:none;">🔄 Initialize จาก Config</button>
+          <button class="btn btn-primary btn-sm" onclick="openAddStaff()">+ เพิ่ม Staff</button>
+        </div>
+      </div>
+      <div id="staffWrap"><p style="color:#94a3b8;font-size:0.88rem;padding:16px;text-align:center;">กำลังโหลด...</p></div>
+    </div>
+
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <div class="card-title" style="margin-bottom:0;">🟢 Session ที่ Login อยู่ตอนนี้</div>
+        <button class="btn btn-ghost btn-sm" onclick="loadSessions()">🔄 รีเฟรช</button>
+      </div>
+      <div id="sessWrap"><p style="color:#94a3b8;font-size:0.88rem;padding:8px;text-align:center;">กำลังโหลด...</p></div>
+    </div>
+
+  </div>
+
+  <!-- ══════════ TAB: SETTINGS ══════════ -->
+  <div id="tc-settings" style="display:none;">
+
+    <div class="card">
+      <div class="card-title">🖼️ รูปพื้นหลังของระบบ</div>
+      <div class="field">
+        <label>URL รูปพื้นหลัง (ว่างไว้ = ใช้ค่าเริ่มต้น DNA.png)</label>
+        <div style="display:flex;gap:8px;">
+          <input id="bgUrl" type="url" placeholder="https://...">
+          <button class="btn btn-primary" onclick="saveBg()">บันทึก</button>
+        </div>
+      </div>
+      <div id="bgStatus"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🎖️ หน่วยงาน VIP (Auto Check-in)</div>
+      <p style="font-size:0.82rem;color:#64748b;margin-bottom:12px;">หน่วยงานที่เช็คอินอัตโนมัติตี 5 และแสดง "เช็คอินแล้ว โดย admin" เมื่อสแกน QR</p>
+      <div id="vipChips" style="margin-bottom:12px;min-height:36px;"></div>
+      <div style="display:flex;gap:8px;margin-bottom:10px;">
+        <input id="vipInput" type="text" placeholder="ชื่อหน่วยงาน..." style="flex:1;border:1.5px solid var(--border);border-radius:10px;padding:9px 13px;font-family:'Sarabun',sans-serif;font-size:0.88rem;outline:none;">
+        <button class="btn btn-primary" onclick="addVip()">+ เพิ่ม</button>
+      </div>
+      <button class="btn btn-green btn-sm" onclick="saveVip()">💾 บันทึก VIP List</button>
+      <div id="vipStatus" style="margin-top:10px;"></div>
+    </div>
+
+    <div class="card">
+      <div class="danger-box">
+        <div class="danger-title">⚠️ Danger Zone — ล้างข้อมูล</div>
+        <p style="font-size:0.82rem;color:#7f1d1d;margin-bottom:14px;line-height:1.6;">การดำเนินการเหล่านี้ไม่สามารถกู้คืนได้</p>
+        <div style="display:flex;flex-wrap:wrap;gap:10px;">
+          <button class="btn btn-red btn-sm" onclick="askClear('checkins','ล้างข้อมูลเช็คอินทั้งหมด','ข้อมูลการเช็คอินทุกวัน ทุกคน จะถูกลบถาวร ยืนยันหรือไม่?')">🗑️ ล้างข้อมูลเช็คอิน</button>
+          <button class="btn btn-red btn-sm" onclick="askClear('participants','ล้างรายชื่อผู้เข้าร่วมทั้งหมด','รายชื่อผู้เข้าร่วมงานทั้งหมดจะถูกลบถาวร ยืนยันหรือไม่?')">🗑️ ล้างรายชื่อทั้งหมด</button>
+        </div>
+        <div id="clearStatus" style="margin-top:12px;"></div>
+      </div>
+    </div>
+
+  </div>
+
+</div><!-- /container -->
+
+<script>
+const SB_URL = "https://gvxytnjfyepqhbkmcjms.supabase.co";
+const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2eHl0bmpmeWVwcWhia21jam1zIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3OTQzMTY0MCwiZXhwIjoyMDk1MDA3NjQwfQ.Hrfc0erkIatyVbmsOW2SU7piH3L65qbS2kdi2eYzbQk";
+const H = {'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'};
+
+// ─── AUTH ───
+if(sessionStorage.getItem('dmsc_auth')!=='ok'||sessionStorage.getItem('dmsc_user')!=='adminpound'){
+  window.location.href='login.html?next=admin-control.html';
+}
+function doLogout(){ sessionStorage.clear(); window.location.href='login.html'; }
+
+// ─── TABS ───
+function switchTab(name){
+  ['import','staff','settings'].forEach(t=>{
+    document.getElementById('tc-'+t).style.display = t===name ? 'block' : 'none';
+    document.getElementById('tb-'+t).classList.toggle('active', t===name);
+  });
+  if(name==='staff'){ loadStaff(); loadSessions(); }
+  if(name==='settings'){ loadSettings(); }
+}
+
+// ─── HELPERS ───
+async function sha256hex(str){
+  const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+async function sbGetSetting(key){
+  const r=await fetch(`${SB_URL}/rest/v1/app_settings?key=eq.${encodeURIComponent(key)}&select=value`,{headers:H});
+  const d=await r.json();
+  return (d&&d.length)?d[0].value:null;
+}
+async function sbSetSetting(key,value){
+  // delete then insert (upsert via on-conflict needs constraint)
+  await fetch(`${SB_URL}/rest/v1/app_settings?key=eq.${encodeURIComponent(key)}`,{method:'DELETE',headers:H});
+  await fetch(`${SB_URL}/rest/v1/app_settings`,{
+    method:'POST',headers:{...H,'Prefer':'return=minimal'},
+    body:JSON.stringify({key,value:typeof value==='string'?value:JSON.stringify(value)})
+  });
+}
+function setStatus(id,type,html){
+  const c={ok:'alert-ok',err:'alert-err',info:'alert-info',warn:'alert-warn'}[type]||'alert-info';
+  const el=document.getElementById(id);
+  if(el) el.innerHTML=`<div class="alert ${c}">${html}</div>`;
+}
+
+// ─── CONFIRM MODAL ───
+let _cfCb=null;
+function askClear(target,title,msg){
+  document.getElementById('cfTitle').textContent=title;
+  document.getElementById('cfMsg').textContent=msg;
+  document.getElementById('cfModal').classList.remove('hidden');
+  document.getElementById('cfOkBtn').onclick=()=>{ closeCf(); doClear(target); };
+}
+function closeCf(){ document.getElementById('cfModal').classList.add('hidden'); }
+async function doClear(target){
+  try{
+    if(target==='checkins') await fetch(`${SB_URL}/rest/v1/checkins?id=gte.0`,{method:'DELETE',headers:H});
+    if(target==='participants') await fetch(`${SB_URL}/rest/v1/participants?id=gte.0`,{method:'DELETE',headers:H});
+    setStatus('clearStatus','ok',`✅ ล้างข้อมูลสำเร็จ`);
+  }catch(e){ setStatus('clearStatus','err','❌ '+e.message); }
+}
+
+// ══════════════════════════════════════════
+// ─── GOOGLE SHEET IMPORT ───
+// ══════════════════════════════════════════
+let csvHeaders=[], csvRows=[];
+
+const DB_FIELDS=[
+  {key:'prefix',     label:'คำนำหน้า',                 req:false},
+  {key:'first_name', label:'ชื่อ',                     req:true},
+  {key:'last_name',  label:'นามสกุล',                  req:true},
+  {key:'dept',       label:'หน่วยงาน (ภายใน)',         req:false},
+  {key:'ext_dept',   label:'หน่วยงาน (ภายนอก)',        req:false},
+  {key:'internal_external',label:'ประเภท (ภายใน/ภายนอก)',req:false},
+  {key:'province',   label:'จังหวัด',                  req:false},
+  {key:'id_card',    label:'เลขบัตรประชาชน',           req:false},
+  {key:'passport',   label:'หมายเลขพาสปอร์ต',          req:false},
+  {key:'email',      label:'อีเมล',                    req:false},
+  {key:'phone',      label:'เบอร์โทรศัพท์',            req:false},
+  {key:'bag_type',   label:'ประเภทของที่ระลึก',         req:false},
+  {key:'shirt_size', label:'ขนาดเสื้อ',                req:false},
+];
+
+const AUTO_GUESS={
+  prefix:['คำนำหน้า','prefix','นำหน้า','title'],
+  first_name:['ชื่อ','first_name','firstname','name','ชื่อจริง','ชื่อ-'],
+  last_name:['นามสกุล','last_name','lastname','surname','สกุล'],
+  dept:['หน่วยงาน','dept','department','สังกัด','กอง','สำนัก','division'],
+  ext_dept:['หน่วยงานภายนอก','ext_dept','บริษัท','องค์กร','company'],
+  internal_external:['ประเภท','internal_external','ภายใน','ภายนอก','type'],
+  province:['จังหวัด','province'],
+  id_card:['บัตรประชาชน','id_card','idcard','เลขบัตร','citizen','citizenid'],
+  passport:['พาสปอร์ต','passport','หนังสือเดินทาง'],
+  email:['อีเมล','email','e-mail','mail'],
+  phone:['เบอร์','phone','tel','โทร','mobile'],
+  bag_type:['ของที่ระลึก','bag','souvenir','กระเป๋า','bag_type'],
+  shirt_size:['เสื้อ','shirt','size','shirt_size'],
+};
+
+function parseCSVRow(line){
+  const res=[]; let cur='',inQ=false;
+  for(let i=0;i<line.length;i++){
+    if(line[i]==='"'){ if(inQ&&line[i+1]==='"'){cur+='"';i++;}else inQ=!inQ; }
+    else if(line[i]===','&&!inQ){ res.push(cur.trim()); cur=''; }
+    else cur+=line[i];
+  }
+  res.push(cur.trim()); return res;
+}
+
+function parseCSV(text){
+  const lines=text.replace(/\r/g,'').split('\n').filter(l=>l.trim());
+  const headers=parseCSVRow(lines[0]);
+  const rows=lines.slice(1).map(l=>{ const v=parseCSVRow(l); const o={}; headers.forEach((h,i)=>o[h]=(v[i]||'').trim()); return o; })
+    .filter(r=>Object.values(r).some(v=>v));
+  return {headers,rows};
+}
+
+function guessCol(dbKey){
+  const guesses=AUTO_GUESS[dbKey]||[];
+  for(const h of csvHeaders){
+    if(guesses.some(g=>h.toLowerCase().includes(g.toLowerCase()))) return h;
+  }
+  return '';
+}
+
+async function fetchSheet(){
+  const url=document.getElementById('sheetUrl').value.trim();
+  if(!url){ setStatus('sheetStatus','err','กรุณาใส่ URL'); return; }
+  const btn=document.getElementById('fetchBtn');
+  btn.disabled=true; btn.innerHTML='<span class="sp"></span>กำลังดึง...';
+  setStatus('sheetStatus','info','กำลังดึงข้อมูล...');
+  try{
+    const res=await fetch(url);
+    if(!res.ok) throw new Error(`HTTP ${res.status} — ตรวจสอบว่า Sheet ถูก Publish เป็น CSV แล้ว`);
+    const text=await res.text();
+    const parsed=parseCSV(text);
+    csvHeaders=parsed.headers; csvRows=parsed.rows;
+    if(!csvRows.length) throw new Error('ไม่พบข้อมูลใน Sheet');
+    setStatus('sheetStatus','ok',`✅ โหลดสำเร็จ: <strong>${csvRows.length.toLocaleString()} แถว</strong>, ${csvHeaders.length} คอลัมน์`);
+    renderMapping();
+    document.getElementById('mappingCard').style.display='block';
+  }catch(e){
+    setStatus('sheetStatus','err',`❌ ${e.message}`);
+  }finally{ btn.disabled=false; btn.textContent='ดึงข้อมูล'; }
+}
+
+function renderMapping(){
+  document.getElementById('mapBody').innerHTML=DB_FIELDS.map(f=>{
+    const guess=guessCol(f.key);
+    const opts=`<option value="">— ไม่ใช้ —</option>`+csvHeaders.map(h=>`<option ${h===guess?'selected':''}>${h}</option>`).join('');
+    const ex=guess&&csvRows[0]?(csvRows[0][guess]||''):'-';
+    return `<tr>
+      <td style="font-weight:600;white-space:nowrap;">${f.label}${f.req?'<span style="color:#dc2626"> *</span>':''}</td>
+      <td><select id="map_${f.key}">${opts}</select></td>
+      <td style="color:#64748b;font-size:0.77rem;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${ex}</td>
+    </tr>`;
+  }).join('');
+}
+
+function getMapped(row){
+  const obj={};
+  DB_FIELDS.forEach(f=>{ const col=document.getElementById('map_'+f.key)?.value; if(col&&row[col]!==undefined) obj[f.key]=row[col]; });
+  return obj;
+}
+
+function previewImport(){
+  const usedKeys=DB_FIELDS.filter(f=>document.getElementById('map_'+f.key)?.value).map(f=>f.key);
+  if(!usedKeys.length){ setStatus('importStatus','err','กรุณาเลือกคอลัมน์อย่างน้อย 1 ช่อง'); return; }
+  const labels={}; DB_FIELDS.forEach(f=>labels[f.key]=f.label);
+  const preview=csvRows.slice(0,5).map(r=>getMapped(r));
+  const head=usedKeys.map(k=>`<th>${labels[k]||k}</th>`).join('');
+  const body=preview.map(r=>`<tr>${usedKeys.map(k=>`<td>${r[k]||''}</td>`).join('')}</tr>`).join('');
+  document.getElementById('previewWrap').innerHTML=`<table class="preview-tbl"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>`;
+  document.getElementById('previewSec').style.display='block';
+  const btn=document.getElementById('importBtn');
+  btn.style.display='inline-flex';
+  btn.textContent=`✅ นำเข้า ${csvRows.length.toLocaleString()} คน`;
+}
+
+async function confirmImport(){
+  const mode=document.getElementById('importMode').value;
+  const labels={add:'เพิ่มใหม่เท่านั้น',upsert:'เพิ่ม+อัปเดต',replace:'ลบทั้งหมดและนำเข้าใหม่'};
+  if(!confirm(`ยืนยันนำเข้า ${csvRows.length.toLocaleString()} รายการ\nโหมด: ${labels[mode]}\n\nดำเนินการต่อ?`)) return;
+  await doImport(mode);
+}
+
+async function doImport(mode){
+  const btn=document.getElementById('importBtn');
+  btn.disabled=true; btn.innerHTML='<span class="sp"></span>กำลังนำเข้า...';
+  setStatus('importStatus','info','กำลังดำเนินการ...');
+  try{
+    let ok=0,skip=0,err=0;
+    if(mode==='replace'){
+      setStatus('importStatus','info','กำลังลบข้อมูลเก่า...');
+      await fetch(`${SB_URL}/rest/v1/participants?id=gte.0`,{method:'DELETE',headers:H});
+    }
+    let existIds=new Set();
+    if(mode==='add'){
+      let from=0;
+      while(true){
+        const r=await fetch(`${SB_URL}/rest/v1/participants?select=id_card&limit=1000&offset=${from}`,{headers:H});
+        const d=await r.json();
+        if(!Array.isArray(d)||!d.length) break;
+        d.forEach(p=>{ if(p.id_card) existIds.add(p.id_card.replace(/\D/g,'')); });
+        if(d.length<1000) break; from+=1000;
+      }
+    }
+    const mapped=csvRows.map(r=>getMapped(r)).filter(r=>r.first_name||r.last_name);
+    const BATCH=50;
+    for(let i=0;i<mapped.length;i+=BATCH){
+      setStatus('importStatus','info',`กำลังนำเข้า ${Math.min(i+BATCH,mapped.length).toLocaleString()}/${mapped.length.toLocaleString()}...`);
+      let batch=mapped.slice(i,i+BATCH);
+      if(mode==='add'){
+        const toInsert=batch.filter(r=>!r.id_card||!existIds.has(r.id_card.replace(/\D/g,'')));
+        skip+=batch.length-toInsert.length;
+        if(!toInsert.length) continue;
+        batch=toInsert;
+      }
+      const res=await fetch(`${SB_URL}/rest/v1/participants`,{
+        method:'POST',
+        headers:{...H,'Prefer':'return=minimal'+(mode==='upsert'?',resolution=merge-duplicates':'')},
+        body:JSON.stringify(batch)
+      });
+      if(res.ok||res.status===201) ok+=batch.length; else err+=batch.length;
+    }
+    setStatus('importStatus','ok',`✅ นำเข้าสำเร็จ: <strong>${ok.toLocaleString()} คน</strong>${skip?` | ข้าม: ${skip} คน`:''}${err?` | ผิดพลาด: ${err} คน`:''}`);
+  }catch(e){
+    setStatus('importStatus','err','❌ '+e.message);
+  }finally{
+    btn.disabled=false; btn.textContent=`✅ นำเข้า ${csvRows.length.toLocaleString()} คน`;
+  }
+}
+
+// ══════════════════════════════════════════
+// ─── STAFF MANAGEMENT ───
+// ══════════════════════════════════════════
+let staffList=[], editIdx=null;
+
+const DEFAULT_STAFF=[
+  {username:'adminpound',display_name:'Admin',role:'admin',is_active:true},
+  ...[1,2,3,4,5,6,7,8,9,10].map(n=>({username:`staff${String(n).padStart(2,'0')}`,display_name:`Staff ${String(n).padStart(2,'0')}`,role:'staff',is_active:true}))
+];
+
+async function loadStaff(){
+  document.getElementById('staffWrap').innerHTML='<p style="color:#94a3b8;font-size:0.88rem;padding:16px;text-align:center;">กำลังโหลด...</p>';
+  try{
+    const val=await sbGetSetting('staff_accounts');
+    if(val){ staffList=JSON.parse(val); document.getElementById('initBtn').style.display='none'; }
+    else { staffList=[]; document.getElementById('initBtn').style.display='inline-flex'; }
+    renderStaff();
+  }catch(e){ document.getElementById('staffWrap').innerHTML=`<p style="color:#dc2626;">โหลดไม่ได้: ${e.message}</p>`; }
+}
+
+function renderStaff(){
+  if(!staffList.length){
+    document.getElementById('staffWrap').innerHTML='<div class="alert alert-warn">ยังไม่มีบัญชี Staff — กด <strong>Initialize</strong> เพื่อสร้างจาก config ปัจจุบัน</div>';
+    return;
+  }
+  document.getElementById('staffWrap').innerHTML=`
+    <div class="tbl-wrap"><table class="tbl">
+      <thead><tr><th>Username</th><th>ชื่อ</th><th>Role</th><th>สถานะ</th><th>Action</th></tr></thead>
+      <tbody>${staffList.map((s,i)=>`
+        <tr>
+          <td style="font-weight:700;font-family:monospace;color:#1e3a8a;">${s.username}</td>
+          <td>${s.display_name||'-'}</td>
+          <td><span class="badge badge-${s.role==='admin'?'admin':'staff'}">${s.role}</span></td>
+          <td><span class="badge ${s.is_active?'badge-on':'badge-off'}">${s.is_active?'✅ ใช้งาน':'🔴 ปิด'}</span></td>
+          <td>
+            <div style="display:flex;gap:5px;flex-wrap:wrap;">
+              <button class="btn btn-ghost btn-sm" onclick="openEdit(${i})">✏️ แก้ไข</button>
+              <button class="btn btn-ghost btn-sm" onclick="toggleActive(${i})">${s.is_active?'ปิด':'เปิด'}</button>
+              ${s.username!=='adminpound'?`<button class="btn btn-red btn-sm" onclick="deleteStaff(${i})">ลบ</button>`:''}
+            </div>
+          </td>
+        </tr>`).join('')}
+      </tbody>
+    </table></div>`;
+}
+
+async function initStaff(){
+  if(!confirm('สร้างบัญชี Staff จาก config ปัจจุบัน?\n(adminpound + staff01-10)\nดำเนินการต่อ?')) return;
+  const btn=document.getElementById('initBtn');
+  btn.disabled=true; btn.innerHTML='<span class="sp"></span>กำลังสร้าง...';
+  try{
+    const defaultPwd={'adminpound':'P@und0258'};
+    const accounts=await Promise.all(DEFAULT_STAFF.map(async s=>({
+      ...s, password_hash: await sha256hex(defaultPwd[s.username]||'Dmsc@2569')
+    })));
+    await sbSetSetting('staff_accounts',JSON.stringify(accounts));
+    staffList=accounts; renderStaff();
+    btn.style.display='none';
+    setStatus('staffWrap','ok',''); // clear
+    alert('✅ สร้างบัญชีสำเร็จ — ระบบ login จะใช้ข้อมูลจาก database แทน hardcode');
+  }catch(e){ alert('เกิดข้อผิดพลาด: '+e.message); }
+  finally{ btn.disabled=false; btn.textContent='🔄 Initialize จาก Config'; }
+}
+
+function openAddStaff(){
+  editIdx=null;
+  document.getElementById('sfTitle').textContent='+ เพิ่ม Staff';
+  document.getElementById('sfUser').value=''; document.getElementById('sfUser').disabled=false;
+  document.getElementById('sfName').value='';
+  document.getElementById('sfPwd').value=''; document.getElementById('sfPwd').placeholder='••••••••';
+  document.getElementById('sfRole').value='staff';
+  document.getElementById('sfErr').textContent='';
+  document.getElementById('staffModal').classList.remove('hidden');
+}
+
+function openEdit(i){
+  editIdx=i; const s=staffList[i];
+  document.getElementById('sfTitle').textContent='แก้ไข — '+s.username;
+  document.getElementById('sfUser').value=s.username; document.getElementById('sfUser').disabled=true;
+  document.getElementById('sfName').value=s.display_name||'';
+  document.getElementById('sfPwd').value=''; document.getElementById('sfPwd').placeholder='ว่างไว้ = ไม่เปลี่ยนรหัสผ่าน';
+  document.getElementById('sfRole').value=s.role||'staff';
+  document.getElementById('sfErr').textContent='';
+  document.getElementById('staffModal').classList.remove('hidden');
+}
+
+function closeSfModal(){ document.getElementById('staffModal').classList.add('hidden'); }
+
+async function saveStaff(){
+  const username=document.getElementById('sfUser').value.trim().toLowerCase();
+  const display=document.getElementById('sfName').value.trim();
+  const pwd=document.getElementById('sfPwd').value;
+  const role=document.getElementById('sfRole').value;
+  const err=document.getElementById('sfErr');
+  const btn=document.getElementById('sfSaveBtn');
+  if(!username){ err.textContent='กรุณาใส่ username'; return; }
+  if(editIdx===null&&!pwd){ err.textContent='กรุณาใส่รหัสผ่าน'; return; }
+  if(editIdx===null&&staffList.find(s=>s.username===username)){ err.textContent='Username นี้มีอยู่แล้ว'; return; }
+  btn.disabled=true; btn.innerHTML='<span class="sp"></span>บันทึก...';
+  try{
+    if(editIdx===null){
+      staffList.push({username,display_name:display,role,is_active:true,password_hash:await sha256hex(pwd)});
+    } else {
+      const s=staffList[editIdx];
+      s.display_name=display; s.role=role;
+      if(pwd) s.password_hash=await sha256hex(pwd);
+    }
+    await sbSetSetting('staff_accounts',JSON.stringify(staffList));
+    renderStaff(); closeSfModal();
+  }catch(e){ err.textContent='บันทึกไม่ได้: '+e.message; }
+  finally{ btn.disabled=false; btn.textContent='บันทึก'; }
+}
+
+async function toggleActive(i){
+  staffList[i].is_active=!staffList[i].is_active;
+  await sbSetSetting('staff_accounts',JSON.stringify(staffList));
+  renderStaff();
+}
+
+async function deleteStaff(i){
+  if(!confirm(`ลบบัญชี "${staffList[i].username}"?`)) return;
+  staffList.splice(i,1);
+  await sbSetSetting('staff_accounts',JSON.stringify(staffList));
+  renderStaff();
+}
+
+async function loadSessions(){
+  document.getElementById('sessWrap').innerHTML='<p style="color:#94a3b8;font-size:0.88rem;padding:8px;text-align:center;">กำลังโหลด...</p>';
+  try{
+    const d=await(await fetch(`${SB_URL}/rest/v1/staff_sessions?select=username,logged_in_at,last_active&order=last_active.desc`,{headers:H})).json();
+    if(!d.length){ document.getElementById('sessWrap').innerHTML='<p style="color:#94a3b8;font-size:0.84rem;padding:8px;">ไม่มี session ที่ active</p>'; return; }
+    document.getElementById('sessWrap').innerHTML=`
+      <div class="tbl-wrap"><table class="tbl">
+        <thead><tr><th>Username</th><th>เข้าสู่ระบบเมื่อ</th><th>Active ล่าสุด</th><th></th></tr></thead>
+        <tbody>${d.map(s=>`
+          <tr>
+            <td style="font-weight:700;font-family:monospace;">${s.username}</td>
+            <td style="font-size:0.78rem;color:#64748b;">${new Date(s.logged_in_at).toLocaleString('th-TH',{timeZone:'Asia/Bangkok'})}</td>
+            <td style="font-size:0.78rem;color:#64748b;">${new Date(s.last_active).toLocaleString('th-TH',{timeZone:'Asia/Bangkok'})}</td>
+            <td><button class="btn btn-red btn-sm" onclick="forceLogout('${s.username}')">Force Logout</button></td>
+          </tr>`).join('')}
+        </tbody>
+      </table></div>`;
+  }catch(e){ document.getElementById('sessWrap').innerHTML=`<p style="color:#dc2626;font-size:0.84rem;">${e.message}</p>`; }
+}
+
+async function forceLogout(u){
+  if(!confirm(`Force logout "${u}"?`)) return;
+  await fetch(`${SB_URL}/rest/v1/staff_sessions?username=eq.${encodeURIComponent(u)}`,{method:'DELETE',headers:H});
+  loadSessions();
+}
+
+// ══════════════════════════════════════════
+// ─── SETTINGS ───
+// ══════════════════════════════════════════
+let vipList=[];
+
+async function loadSettings(){
+  const bg=await sbGetSetting('page_bg');
+  if(bg) document.getElementById('bgUrl').value=bg;
+  const vip=await sbGetSetting('vip_depts');
+  vipList=vip?JSON.parse(vip):['อธิบดีกรมวิทยาศาสตร์การแพทย์','รองอธิบดีกรมวิทยาศาสตร์การแพทย์','กองแผนงานและวิชาการ'];
+  renderVip();
+}
+
+async function saveBg(){
+  await sbSetSetting('page_bg',document.getElementById('bgUrl').value.trim());
+  setStatus('bgStatus','ok','✅ บันทึกแล้ว');
+}
+
+function renderVip(){
+  document.getElementById('vipChips').innerHTML=vipList.map((d,i)=>
+    `<span class="vip-chip">${d}<button onclick="removeVip(${i})">✕</button></span>`
+  ).join('')||'<p style="color:#94a3b8;font-size:0.82rem;">ยังไม่มีหน่วยงาน VIP</p>';
+}
+function addVip(){ const v=document.getElementById('vipInput').value.trim(); if(!v) return; if(!vipList.includes(v)) vipList.push(v); document.getElementById('vipInput').value=''; renderVip(); }
+function removeVip(i){ vipList.splice(i,1); renderVip(); }
+async function saveVip(){ await sbSetSetting('vip_depts',JSON.stringify(vipList)); setStatus('vipStatus','ok','✅ บันทึก VIP List แล้ว'); }
+</script>
+</body>
+</html>
