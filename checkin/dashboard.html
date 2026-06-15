@@ -662,7 +662,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <!-- Pre panel -->
         <div id="zonePanelPre" style="padding:20px;">
           <div style="display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;">
-            <div id="zoneMapPre" style="position:relative;flex:0 0 180px;min-width:140px;max-width:220px;">
+            <div id="zoneMapPre" style="position:relative;flex:0 0 220px;min-width:160px;max-width:260px;">
               <div id="zoneMapPreLabel" style="display:none;position:absolute;left:8px;top:8px;z-index:10;background:rgba(15,23,42,0.82);color:#fff;padding:5px 9px;border-radius:8px;font-size:0.72rem;line-height:1.5;pointer-events:none;font-family:Sarabun,sans-serif;"></div>
               <button id="zoneMapPreClear" onclick="resetDashMap('pre')" style="display:none;position:absolute;right:6px;top:6px;z-index:10;background:rgba(255,255,255,0.92);border:1.5px solid #e2e8f0;border-radius:8px;padding:3px 10px;font-family:Sarabun,sans-serif;font-size:0.72rem;cursor:pointer;color:#334155;">✕ ล้าง</button>
             </div>
@@ -675,7 +675,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <!-- Walk-in panel -->
         <div id="zonePanelWi" style="padding:20px;display:none;">
           <div style="display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;">
-            <div id="zoneMapWi" style="position:relative;flex:0 0 180px;min-width:140px;max-width:220px;">
+            <div id="zoneMapWi" style="position:relative;flex:0 0 220px;min-width:160px;max-width:260px;">
               <div id="zoneMapWiLabel" style="display:none;position:absolute;left:8px;top:8px;z-index:10;background:rgba(15,23,42,0.82);color:#fff;padding:5px 9px;border-radius:8px;font-size:0.72rem;line-height:1.5;pointer-events:none;font-family:Sarabun,sans-serif;"></div>
               <button id="zoneMapWiClear" onclick="resetDashMap('wi')" style="display:none;position:absolute;right:6px;top:6px;z-index:10;background:rgba(255,255,255,0.92);border:1.5px solid #e2e8f0;border-radius:8px;padding:3px 10px;font-family:Sarabun,sans-serif;font-size:0.72rem;cursor:pointer;color:#334155;">✕ ล้าง</button>
             </div>
@@ -1450,11 +1450,11 @@ function zoomDashProv(prov, instKey) {
   if (st.selProv === prov && st.selZone === null) { resetDashMap(instKey); return; }
   st.selZone = null; st.selProv = prov;
   let x0,y0,x1,y1;
-  if (prov==='กรุงเทพมหานคร'&&st.bkkPt) { x0=st.bkkPt[0]-10;y0=st.bkkPt[1]-10;x1=st.bkkPt[0]+10;y1=st.bkkPt[1]+10; }
+  if ((prov==='กรุงเทพมหานคร'||prov==='กรมวิทยาศาสตร์การแพทย์')&&st.bkkPt) { x0=st.bkkPt[0]-10;y0=st.bkkPt[1]-10;x1=st.bkkPt[0]+10;y1=st.bkkPt[1]+10; }
   else { const feat=thaiGeoCacheDash.features.find(d=>EN_TO_TH_DASH[d.properties.name]===prov); if(!feat) return; [[x0,y0],[x1,y1]]=st.path.bounds(feat); }
   const cx=(x0+x1)/2,cy=(y0+y1)/2;
   if(x1-x0<st.w*0.18){x0=cx-st.w*0.09;x1=cx+st.w*0.09;} if(y1-y0<st.h*0.12){y0=cy-st.h*0.06;y1=cy+st.h*0.06;}
-  const s=Math.min(st.w/(x1-x0),st.h/(y1-y0))*0.85;
+  const s=Math.min(st.w/(x1-x0),st.h/(y1-y0))*0.92;
   const tx=st.w/2-s*cx, ty=st.h/2-s*cy;
   st.scale=s;
   st.g.transition().duration(700).attr('transform',`translate(${tx},${ty}) scale(${s})`);
@@ -1464,7 +1464,7 @@ function zoomDashProv(prov, instKey) {
   const bkkBase=ZONE_COLORS[13%ZONE_COLORS.length];
   const mapId=`zoneMap${instKey==='pre'?'Pre':'Wi'}`;
   d3.select(`#${mapId} .bkk-dot`).transition().duration(700)
-    .attr('fill',prov==='กรุงเทพมหานคร'?bkkBase:(()=>{const c=d3.color(bkkBase);c.opacity=0.1;return c.toString();})());
+    .attr('fill',(prov==='กรุงเทพมหานคร'||prov==='กรมวิทยาศาสตร์การแพทย์')?bkkBase:(()=>{const c=d3.color(bkkBase);c.opacity=0.1;return c.toString();})());
   const z=getZone(prov)||13;
   const cnt=st.provCounts[prov]||0;
   const lbl=document.getElementById(`${mapId}Label`);

@@ -987,7 +987,7 @@ loadMapData();
 // ─── WI MAP ───
 let wiMapRendered = false;
 let wiMapProvCounts = {};
-let wiMapG = null, wiMapPath = null, wiMapW = 0, wiMapH = 0, wiMapScale = 1, wiMapBkkPt = null, wiMapDmscPt = null, wiMapSelProv = null, wiMapSelZone = null;
+let wiMapG = null, wiMapPath = null, wiMapW = 0, wiMapH = 0, wiMapScale = 1, wiMapBkkPt = null, wiMapSelProv = null, wiMapSelZone = null;
 
 async function toggleWIMap() {
   const body = document.getElementById('wiMapBody');
@@ -1105,9 +1105,9 @@ async function renderWIMap() {
         if (wiMapSelProv === null) d3.select(this).attr('stroke','#fff').attr('stroke-width',0.6);
       });
 
-    // Bangkok dot (too small as polygon)
+    // Bangkok dot — also represents กรมวิทยาศาสตร์การแพทย์ (same Zone 13 area)
     const bkkColor = ZONE_COLORS_PUB[13 % ZONE_COLORS_PUB.length];
-    const bkkCnt = provCounts['กรุงเทพมหานคร'] || 0;
+    const bkkCnt = (provCounts['กรุงเทพมหานคร'] || 0) + (provCounts['กรมวิทยาศาสตร์การแพทย์'] || 0);
     const bkkFill = bkkCnt ? bkkColor : (()=>{ const c=d3.color(bkkColor); c.opacity=0.18; return c.toString(); })();
     const bkkPt = proj([100.5018, 13.7563]);
     wiMapBkkPt = bkkPt;
@@ -1116,18 +1116,6 @@ async function renderWIMap() {
         .on('click', () => { tip.style('opacity','0'); zoomWIProv('กรุงเทพมหานคร'); });
       bkkG.append('circle').attr('class','bkk-dot').attr('cx',bkkPt[0]).attr('cy',bkkPt[1]).attr('r',5).attr('fill',bkkFill).attr('stroke','#fff').attr('stroke-width',1);
       bkkG.append('text').attr('x',bkkPt[0]+7).attr('y',bkkPt[1]+4).attr('font-size','0.55rem').attr('fill','#1e3a8a').attr('font-family','Sarabun').text('กทม.');
-    }
-
-    // DMSC dot (กรมวิทยาศาสตร์การแพทย์) — located in Nonthaburi
-    const dmscCnt = provCounts['กรมวิทยาศาสตร์การแพทย์'] || 0;
-    const dmscFill = dmscCnt ? bkkColor : (()=>{ const c=d3.color(bkkColor); c.opacity=0.18; return c.toString(); })();
-    const dmscPt = proj([100.521, 13.876]);
-    wiMapDmscPt = dmscPt;
-    if (dmscPt) {
-      const dmscG = g.append('g').attr('class','dmsc-marker').style('cursor','pointer')
-        .on('click', () => { tip.style('opacity','0'); zoomWIProv('กรมวิทยาศาสตร์การแพทย์'); });
-      dmscG.append('circle').attr('class','dmsc-dot').attr('cx',dmscPt[0]).attr('cy',dmscPt[1]).attr('r',5).attr('fill',dmscFill).attr('stroke','#fff').attr('stroke-width',1);
-      dmscG.append('text').attr('x',dmscPt[0]+7).attr('y',dmscPt[1]+4).attr('font-size','0.55rem').attr('fill','#1e3a8a').attr('font-family','Sarabun').text('DMSC');
     }
   } catch(e) {
     container.innerHTML = '<div style="padding:20px;text-align:center;font-size:0.82rem;color:#94a3b8;">ไม่สามารถโหลดแผนที่ได้</div>';
@@ -1156,10 +1144,6 @@ function zoomWIZone(z) {
     x0=Math.min(x0??wiMapBkkPt[0],wiMapBkkPt[0])-8; y0=Math.min(y0??wiMapBkkPt[1],wiMapBkkPt[1])-8;
     x1=Math.max(x1??wiMapBkkPt[0],wiMapBkkPt[0])+8; y1=Math.max(y1??wiMapBkkPt[1],wiMapBkkPt[1])+8;
   }
-  if (z===13 && wiMapDmscPt) {
-    x0=Math.min(x0??wiMapDmscPt[0],wiMapDmscPt[0])-8; y0=Math.min(y0??wiMapDmscPt[1],wiMapDmscPt[1])-8;
-    x1=Math.max(x1??wiMapDmscPt[0],wiMapDmscPt[0])+8; y1=Math.max(y1??wiMapDmscPt[1],wiMapDmscPt[1])+8;
-  }
   if (x0===undefined) return;
   const cx=(x0+x1)/2, cy=(y0+y1)/2;
   if (x1-x0<wiMapW*0.18){x0=cx-wiMapW*0.09;x1=cx+wiMapW*0.09;}
@@ -1173,8 +1157,6 @@ function zoomWIZone(z) {
     .attr('stroke-width',0.6/s);
   const bkkBase=ZONE_COLORS_PUB[13%ZONE_COLORS_PUB.length];
   d3.select('#wiLookupMap .bkk-dot').transition().duration(700)
-    .attr('fill',z===13?bkkBase:(()=>{const c=d3.color(bkkBase);c.opacity=0.1;return c.toString();})());
-  d3.select('#wiLookupMap .dmsc-dot').transition().duration(700)
     .attr('fill',z===13?bkkBase:(()=>{const c=d3.color(bkkBase);c.opacity=0.1;return c.toString();})());
   const zoneCnt=Object.keys(wiMapProvCounts).filter(p=>(getZonePub(p)||13)===z).reduce((s,p)=>s+(wiMapProvCounts[p]||0),0);
   const lbl=document.getElementById('wiMapLabel');
@@ -1190,10 +1172,8 @@ function zoomWIProv(prov) {
   wiMapSelZone = null;
   wiMapSelProv = prov;
   let x0, y0, x1, y1;
-  if (prov === 'กรุงเทพมหานคร' && wiMapBkkPt) {
+  if ((prov === 'กรุงเทพมหานคร' || prov === 'กรมวิทยาศาสตร์การแพทย์') && wiMapBkkPt) {
     x0=wiMapBkkPt[0]-10; y0=wiMapBkkPt[1]-10; x1=wiMapBkkPt[0]+10; y1=wiMapBkkPt[1]+10;
-  } else if (prov === 'กรมวิทยาศาสตร์การแพทย์' && wiMapDmscPt) {
-    x0=wiMapDmscPt[0]-10; y0=wiMapDmscPt[1]-10; x1=wiMapDmscPt[0]+10; y1=wiMapDmscPt[1]+10;
   } else {
     const feat = thaiGeoCache.features.find(d => EN_TO_TH[d.properties.name] === prov);
     if (!feat) return;
@@ -1216,13 +1196,10 @@ function zoomWIProv(prov) {
       const c = d3.color(base); c.opacity = 0.1; return c.toString();
     })
     .attr('stroke-width', 0.6/s);
-  const isBkk = prov === 'กรุงเทพมหานคร';
-  const isDmsc = prov === 'กรมวิทยาศาสตร์การแพทย์';
+  const isBkkOrDmsc = prov === 'กรุงเทพมหานคร' || prov === 'กรมวิทยาศาสตร์การแพทย์';
   const bkkBase = ZONE_COLORS_PUB[13 % ZONE_COLORS_PUB.length];
   d3.select('#wiLookupMap .bkk-dot').transition().duration(700)
-    .attr('fill', isBkk ? bkkBase : (()=>{ const c=d3.color(bkkBase); c.opacity=0.1; return c.toString(); })());
-  d3.select('#wiLookupMap .dmsc-dot').transition().duration(700)
-    .attr('fill', isDmsc ? bkkBase : (()=>{ const c=d3.color(bkkBase); c.opacity=0.1; return c.toString(); })());
+    .attr('fill', isBkkOrDmsc ? bkkBase : (()=>{ const c=d3.color(bkkBase); c.opacity=0.1; return c.toString(); })());
   const z = getZonePub(prov) || 13;
   const cnt = wiMapProvCounts[prov] || 0;
   const lbl = document.getElementById('wiMapLabel');
@@ -1254,12 +1231,9 @@ function resetWIMap() {
     })
     .attr('stroke-width', 0.6);
   const bkkBase = ZONE_COLORS_PUB[13 % ZONE_COLORS_PUB.length];
-  const bkkCnt = wiMapProvCounts['กรุงเทพมหานคร'] || 0;
+  const bkkCnt = (wiMapProvCounts['กรุงเทพมหานคร'] || 0) + (wiMapProvCounts['กรมวิทยาศาสตร์การแพทย์'] || 0);
   d3.select('#wiLookupMap .bkk-dot').transition().duration(600)
     .attr('fill', bkkCnt ? bkkBase : (()=>{ const c=d3.color(bkkBase); c.opacity=0.18; return c.toString(); })());
-  const dmscCnt = wiMapProvCounts['กรมวิทยาศาสตร์การแพทย์'] || 0;
-  d3.select('#wiLookupMap .dmsc-dot').transition().duration(600)
-    .attr('fill', dmscCnt ? bkkBase : (()=>{ const c=d3.color(bkkBase); c.opacity=0.18; return c.toString(); })());
   document.getElementById('wiMapLabel').style.display = 'none';
   document.getElementById('wiMapClear').style.display = 'none';
   document.querySelectorAll('#wiZoneTableBody tr[data-zone]').forEach(r=>{r.style.background='';r.style.fontWeight='';});
