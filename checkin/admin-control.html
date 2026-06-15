@@ -264,15 +264,27 @@
     </div>
 
     <div class="card">
-      <div class="card-title">🎖️ หน่วยงาน VIP (Auto Check-in)</div>
-      <p style="font-size:0.82rem;color:#64748b;margin-bottom:12px;">หน่วยงานที่เช็คอินอัตโนมัติตี 5 และแสดง "เช็คอินแล้ว โดย admin" เมื่อสแกน QR</p>
+      <div class="card-title">🎖️ หน่วยงาน VIP (ยกเว้นเช็คอิน)</div>
+      <p style="font-size:0.82rem;color:#64748b;margin-bottom:12px;">แสดงการ์ด VIP เมื่อสแกน QR — เหมาะสำหรับ อธิบดี, รองอธิบดี</p>
       <div id="vipChips" style="margin-bottom:12px;min-height:36px;"></div>
       <div style="display:flex;gap:8px;margin-bottom:10px;">
-        <input id="vipInput" type="text" placeholder="ชื่อหน่วยงาน..." style="flex:1;border:1.5px solid var(--border);border-radius:10px;padding:9px 13px;font-family:'Sarabun',sans-serif;font-size:0.88rem;outline:none;">
+        <input id="vipInput" type="text" placeholder="ชื่อหน่วยงาน/ตำแหน่ง..." style="flex:1;border:1.5px solid var(--border);border-radius:10px;padding:9px 13px;font-family:'Sarabun',sans-serif;font-size:0.88rem;outline:none;">
         <button class="btn btn-primary" onclick="addVip()">+ เพิ่ม</button>
       </div>
       <button class="btn btn-green btn-sm" onclick="saveVip()">💾 บันทึก VIP List</button>
       <div id="vipStatus" style="margin-top:10px;"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">👥 หน่วยงาน Staff (ยกเว้นเช็คอิน)</div>
+      <p style="font-size:0.82rem;color:#64748b;margin-bottom:12px;">แสดงการ์ด Staff เมื่อสแกน QR — เหมาะสำหรับ กองแผนงานและวิชาการ</p>
+      <div id="exemptChips" style="margin-bottom:12px;min-height:36px;"></div>
+      <div style="display:flex;gap:8px;margin-bottom:10px;">
+        <input id="exemptInput" type="text" placeholder="ชื่อหน่วยงาน..." style="flex:1;border:1.5px solid var(--border);border-radius:10px;padding:9px 13px;font-family:'Sarabun',sans-serif;font-size:0.88rem;outline:none;">
+        <button class="btn btn-primary" onclick="addExempt()">+ เพิ่ม</button>
+      </div>
+      <button class="btn btn-green btn-sm" onclick="saveExempt()">💾 บันทึก Staff List</button>
+      <div id="exemptStatus" style="margin-top:10px;"></div>
     </div>
 
     <!-- Walk-in Auto Sync -->
@@ -350,7 +362,7 @@ const H = {'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'appl
 let importType = 'pre';
 let csvHeaders = [], csvRows = [];
 let staffList = [], editIdx = null;
-let vipList = [];
+let vipList = [], exemptList = [];
 let _syncTimer = null, _syncCountdown = null;
 
 // ─── AUTH ───
@@ -836,8 +848,11 @@ async function loadSettings(){
   const bg=await sbGetSetting('page_bg');
   if(bg) document.getElementById('bgUrl').value=bg;
   const vip=await sbGetSetting('vip_depts');
-  vipList=vip?JSON.parse(vip):['อธิบดีกรมวิทยาศาสตร์การแพทย์','รองอธิบดีกรมวิทยาศาสตร์การแพทย์','กองแผนงานและวิชาการ'];
+  vipList=vip?JSON.parse(vip):['อธิบดีกรมวิทยาศาสตร์การแพทย์','รองอธิบดีกรมวิทยาศาสตร์การแพทย์'];
   renderVip();
+  const exempt=await sbGetSetting('exempt_depts');
+  exemptList=exempt?JSON.parse(exempt):['กองแผนงานและวิชาการ'];
+  renderExempt();
   const walkinUrl=await sbGetSetting('walkin_sheet_url');
   if(walkinUrl) document.getElementById('walkinUrl').value=walkinUrl;
   loadCurrentEvent();
@@ -893,6 +908,15 @@ function renderVip(){
 function addVip(){ const v=document.getElementById('vipInput').value.trim(); if(!v) return; if(!vipList.includes(v)) vipList.push(v); document.getElementById('vipInput').value=''; renderVip(); }
 function removeVip(i){ vipList.splice(i,1); renderVip(); }
 async function saveVip(){ await sbSetSetting('vip_depts',JSON.stringify(vipList)); setStatus('vipStatus','ok','✅ บันทึก VIP List แล้ว'); }
+
+function renderExempt(){
+  document.getElementById('exemptChips').innerHTML=exemptList.map((d,i)=>
+    `<span class="vip-chip" style="background:#dbeafe;color:#1e40af;">${d}<button onclick="removeExempt(${i})" style="color:#2563eb;">✕</button></span>`
+  ).join('')||'<p style="color:#94a3b8;font-size:0.82rem;">ยังไม่มีหน่วยงาน Staff</p>';
+}
+function addExempt(){ const v=document.getElementById('exemptInput').value.trim(); if(!v) return; if(!exemptList.includes(v)) exemptList.push(v); document.getElementById('exemptInput').value=''; renderExempt(); }
+function removeExempt(i){ exemptList.splice(i,1); renderExempt(); }
+async function saveExempt(){ await sbSetSetting('exempt_depts',JSON.stringify(exemptList)); setStatus('exemptStatus','ok','✅ บันทึก Staff List แล้ว'); }
 
 // ─── WALK-IN AUTO SYNC ───
 async function saveWalkinUrl(){

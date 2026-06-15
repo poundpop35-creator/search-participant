@@ -269,18 +269,22 @@
   let isProcessing=false, todayCount=0, staffCount=0, qrCode=null;
   let currentMode='scanner', scanBuffer='', scanTimer=null;
   let activeYear = '2568';
-  let VIP_DEPTS = new Set(['อธิบดีกรมวิทยาศาสตร์การแพทย์','รองอธิบดีกรมวิทยาศาสตร์การแพทย์','กองแผนงานและวิชาการ']);
+  let VIP_DEPTS = new Set(['อธิบดีกรมวิทยาศาสตร์การแพทย์','รองอธิบดีกรมวิทยาศาสตร์การแพทย์']);
+  let EXEMPT_DEPTS = new Set(['กองแผนงานและวิชาการ']);
 
   async function loadActiveYear(){
     try{
-      const [yearRes, vipRes] = await Promise.all([
+      const [yearRes, vipRes, exemptRes] = await Promise.all([
         fetch(`${SB_URL}/rest/v1/app_settings?key=eq.event_year&select=value`,{headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON}}),
-        fetch(`${SB_URL}/rest/v1/app_settings?key=eq.vip_depts&select=value`,{headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON}})
+        fetch(`${SB_URL}/rest/v1/app_settings?key=eq.vip_depts&select=value`,{headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON}}),
+        fetch(`${SB_URL}/rest/v1/app_settings?key=eq.exempt_depts&select=value`,{headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON}})
       ]);
       const yearData=await yearRes.json();
       if(yearData&&yearData.length&&yearData[0].value) activeYear=yearData[0].value;
       const vipData=await vipRes.json();
       if(vipData&&vipData.length&&vipData[0].value) VIP_DEPTS=new Set(JSON.parse(vipData[0].value));
+      const exemptData=await exemptRes.json();
+      if(exemptData&&exemptData.length&&exemptData[0].value) EXEMPT_DEPTS=new Set(JSON.parse(exemptData[0].value));
     }catch(e){}
   }
 
@@ -540,19 +544,14 @@
       }
 
       // โหมดเช็คอิน
+      if(VIP_DEPTS.has(p.dept)){ showVIPModal(p, fullName); return; }
+      if(EXEMPT_DEPTS.has(p.dept)){ showStaffExemptModal(p, fullName); return; }
       const checkTodayRes=await sbFetch(`/rest/v1/checkins?participant_id=eq.${p.id}&day=eq.${day}&event_year=eq.${encodeURIComponent(activeYear)}&select=id,checkin_time,scanned_by`,'GET');
       const existingToday=await checkTodayRes.json();
       if(existingToday&&existingToday.length>0){
         const rec=existingToday[0];
         const t=new Date(rec.checkin_time).toLocaleTimeString('th-TH',{timeZone:'Asia/Bangkok'});
-        if(VIP_DEPTS.has(p.dept)){
-          showModal('success','เช็คอินแล้ว โดย admin',`ได้รับการยกเว้นการเช็คอิน`,fullName,[
-            {label:'หน่วยงาน',val:p.dept,style:'normal'},
-            {label:'สถานะ',val:'✅ เช็คอินแล้ว โดย admin',style:'done'},
-          ],p.dept||'');
-        } else {
-          showModal('warning','เคยเช็คอินแล้ว',`เช็คอินวันที่ ${day} ไปแล้ว`,fullName,buildWarningRows(t,p,isWalkin),p.dept||'');
-        }
+        showModal('warning','เคยเช็คอินแล้ว',`เช็คอินวันที่ ${day} ไปแล้ว`,fullName,buildWarningRows(t,p,isWalkin),p.dept||'');
         return;
       }
 
@@ -669,6 +668,20 @@
       det.innerHTML=rows.map(r=>`<div class="detail-row" style="${r.sub?'align-items:flex-start':''}"><span class="detail-label" style="${r.sub?'padding-top:2px':''}"><span>${r.labelHtml||r.label}</span></span><span style="text-align:right;"><span class="detail-val ${r.style==='done'?'done':r.style==='ok'?'ok':r.style==='warn'?'warn':''}">${r.val}</span>${r.sub?`<br><span style="font-size:0.7rem;color:#94a3b8;font-weight:400;">${r.sub}</span>`:''}</span></div>`).join('');
     } else det.style.display='none';
     document.getElementById('modalOverlay').classList.remove('hidden');
+  }
+
+  function showVIPModal(p, fullName){
+    showModal('success','🎖️ VIP','ได้รับการยกเว้น (ไม่ต้องเช็คอิน)',fullName,[
+      {label:'ตำแหน่ง',val:p.dept||'-',style:'normal'},
+      {label:'หมายเหตุ',val:'หากต้องการสิ่งใดเพิ่มเติม ติดต่อ กองแผนงานและวิชาการ',style:'normal'}
+    ],'');
+  }
+  function showStaffExemptModal(p, fullName){
+    showModal('success','👥 Staff','ได้รับการยกเว้น (ไม่ต้องเช็คอิน)',fullName,[
+      {label:'ตำแหน่ง',val:p.participation_type||'-',style:'normal'},
+      {label:'หน่วยงาน',val:p.dept||'-',style:'normal'},
+      {label:'หมายเหตุ',val:'มีข้อสงสัยเพิ่มเติม ติดต่อ กองแผนงานและวิชาการ',style:'normal'}
+    ],'');
   }
 
   async function markShirtNow(pId, shirtSize, btn){
