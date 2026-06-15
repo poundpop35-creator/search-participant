@@ -240,6 +240,7 @@
   const EVENT_DATE_DAY = {'2026-06-24':1,'2026-06-25':2,'2026-06-26':3};
 
   if(sessionStorage.getItem('dmsc_auth')!=='ok') window.location.href='login.html';
+  if(sessionStorage.getItem('dmsc_role')==='staff') window.location.href='staff-menu.html';
   document.getElementById('userDisplay').textContent=sessionStorage.getItem('dmsc_user')||'';
 
   // ซ่อน/แสดง bag+shirt option และ auto-select วันงาน (ยกเว้น adminpound)

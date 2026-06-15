@@ -152,9 +152,8 @@
 
 <script>
 // Auth check — ต้อง login ก่อน
-if (sessionStorage.getItem('dmsc_auth') !== 'ok') {
-  window.location.href = 'login.html';
-}
+if (sessionStorage.getItem('dmsc_auth') !== 'ok') window.location.href = 'login.html';
+if (sessionStorage.getItem('dmsc_role') === 'staff') window.location.href = 'staff-menu.html';
 document.addEventListener('DOMContentLoaded', function() {
   var el = document.getElementById('userDisplay');
   if (el) el.textContent = sessionStorage.getItem('dmsc_user') || '';
@@ -775,9 +774,10 @@ const SB_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsIn
   setInterval(_hb,60000);
   document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible') _hb();});
   window.addEventListener('beforeunload',_del);
-  if(sessionStorage.getItem('dmsc_role')!=='admin')
+  const _role=sessionStorage.getItem('dmsc_role');
+  if(_role!=='admin')
     document.querySelectorAll('.clear-btn').forEach(el=>el.style.display='none');
-  if(sessionStorage.getItem('dmsc_role')==='admin'){
+  if(_role==='admin'||_role==='super_staff'){
     const cp=document.getElementById('adminControlBtn');
     if(cp) cp.style.display='inline-flex';
   }

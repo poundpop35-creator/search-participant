@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>เมนู Staff — กรมวิทยาศาสตร์การแพทย์</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:linear-gradient(rgba(232,240,254,0.60),rgba(232,240,254,0.60)),url('https://raw.githubusercontent.com/poundpop35-creator/search-participant/main/DNA.png') center/cover fixed;font-family:'Sarabun',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 16px;}
+    .card{background:#fff;border-radius:24px;box-shadow:0 4px 32px rgba(13,43,107,0.13);padding:36px 28px;width:100%;max-width:380px;text-align:center;}
+    .logos{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:18px;}
+    .logos img{height:44px;object-fit:contain;}
+    .title{font-size:1.15rem;font-weight:800;color:#0d2b6b;margin-bottom:4px;}
+    .subtitle{font-size:0.8rem;color:#94a3b8;margin-bottom:28px;}
+    .menu-btn{display:flex;align-items:center;gap:14px;width:100%;padding:18px 20px;border-radius:14px;border:none;cursor:pointer;font-family:'Sarabun',sans-serif;font-size:1rem;font-weight:700;text-decoration:none;margin-bottom:12px;transition:opacity .15s;}
+    .menu-btn:active{opacity:.8;}
+    .menu-btn-icon{font-size:1.5rem;flex-shrink:0;}
+    .menu-btn-text{text-align:left;}
+    .menu-btn-sub{font-size:0.75rem;font-weight:400;opacity:.8;display:block;margin-top:2px;}
+    .btn-live{background:#0d2b6b;color:#fff;}
+    .btn-qr{background:#16a34a;color:#fff;}
+    .logout-btn{margin-top:8px;background:none;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 20px;color:#64748b;font-family:'Sarabun',sans-serif;font-size:0.88rem;cursor:pointer;width:100%;}
+    .logout-btn:hover{background:#f8fafc;}
+    .user-badge{display:inline-block;background:#ede9fe;color:#4c1d95;border-radius:99px;padding:3px 12px;font-size:0.75rem;font-weight:700;margin-bottom:20px;}
+  </style>
+</head>
+<body>
+<div class="card">
+  <div class="logos">
+    <img src="https://raw.githubusercontent.com/poundpop35-creator/search-participant/main/logo-DMSc-MOPH%20(1)%20(2)_0.png" onerror="this.style.display='none'">
+    <img src="https://raw.githubusercontent.com/poundpop35-creator/search-participant/main/logo-%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B8%8A%E0%B8%B8%E0%B8%A1%E0%B8%A7%E0%B8%B4%E0%B8%8A%E0%B8%B2%E0%B8%81%E0%B8%B2%E0%B8%A3-34-Final_0.png" onerror="this.style.display='none'">
+  </div>
+  <div class="title">ระบบเช็คอิน งานประชุม</div>
+  <div class="subtitle">ประชุมวิชาการวิทยาศาสตร์การแพทย์ ครั้งที่ 34</div>
+  <div class="user-badge" id="userBadge">Staff</div>
+
+  <a href="public.html" class="menu-btn btn-live">
+    <span class="menu-btn-icon">📊</span>
+    <span class="menu-btn-text">
+      ดู Live Dashboard (สาธารณะ)
+      <span class="menu-btn-sub">ข้อมูลเช็คอินแบบ real-time</span>
+    </span>
+  </a>
+
+  <a href="qr-lookup.html" class="menu-btn btn-qr">
+    <span class="menu-btn-icon">🔍</span>
+    <span class="menu-btn-text">
+      ค้นหา QR Code ของคุณ
+      <span class="menu-btn-sub">ค้นหาผู้ลงทะเบียน / รายชื่อทั้งหมด</span>
+    </span>
+  </a>
+
+  <button class="logout-btn" onclick="doLogout()">ออกจากระบบ</button>
+</div>
+
+<script>
+const SB_URL = "https://gvxytnjfyepqhbkmcjms.supabase.co";
+const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2eHl0bmpmeWVwcWhia21jam1zIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3OTQzMTY0MCwiZXhwIjoyMDk1MDA3NjQwfQ.Hrfc0erkIatyVbmsOW2SU7piH3L65qbS2kdi2eYzbQk";
+
+if(sessionStorage.getItem('dmsc_auth')!=='ok') window.location.href='login.html';
+if(sessionStorage.getItem('dmsc_role')!=='staff') window.location.href='index.html';
+
+const _u = sessionStorage.getItem('dmsc_user')||'';
+document.getElementById('userBadge').textContent = _u ? '👤 ' + _u : 'Staff';
+
+async function doLogout(){
+  try{
+    await fetch(`${SB_URL}/rest/v1/staff_sessions?username=eq.${encodeURIComponent(_u)}`,
+      {method:'DELETE',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY},keepalive:true});
+  }catch(e){}
+  sessionStorage.removeItem('dmsc_auth');
+  sessionStorage.removeItem('dmsc_user');
+  sessionStorage.removeItem('dmsc_role');
+  window.location.href='login.html';
+}
+</script>
+</body>
+</html>
