@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>จำนวนผู้เข้าร่วมงาน ประชุมวิชาการวิทยาศาสตร์การแพทย์ ครั้งที่ 34</title>
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@100;300;400;600;700;800&family=Bebas+Neue&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <style>
@@ -1794,6 +1795,83 @@ setInterval(loadHeroBgFromSupabase, 30000);
 async function _loadPageBg(){try{const r=await fetch(SUPABASE_URL+'/rest/v1/app_settings?key=eq.public_bg&select=value',{headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}});const d=await r.json();if(Array.isArray(d)&&d.length){const v=d[0].value||'';sessionStorage.setItem('publicBgUrl',v);document.body.style.backgroundImage=v?`linear-gradient(rgba(232,240,254,0.55),rgba(232,240,254,0.55)),url('${v}')`:''}}catch(e){}}
 _loadPageBg();setInterval(_loadPageBg,30000);
 
+</script>
+
+<!-- ─── QR SHARE ─── -->
+<button onclick="openQRShare()" title="แชร์หน้านี้" style="position:fixed;bottom:24px;right:24px;z-index:8999;width:52px;height:52px;border-radius:50%;border:none;background:#0d2b6b;color:#fff;cursor:pointer;box-shadow:0 4px 18px rgba(0,0,0,0.28);display:flex;align-items:center;justify-content:center;padding:0;">
+  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/>
+    <rect x="5" y="5" width="3" height="3" fill="#fff" stroke="none"/><rect x="16" y="5" width="3" height="3" fill="#fff" stroke="none"/><rect x="5" y="16" width="3" height="3" fill="#fff" stroke="none"/>
+    <path d="M14 14h.01M17 14h3M14 17h3M20 17v3M14 20h3" stroke-width="2.2"/>
+  </svg>
+</button>
+
+<div id="qrShareOverlay" onclick="if(event.target===this)closeQRShare()" style="display:none;position:fixed;inset:0;z-index:9500;background:rgba(0,0,0,0.55);align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:22px;padding:28px 24px 22px;width:calc(100% - 48px);max-width:320px;text-align:center;box-shadow:0 12px 48px rgba(0,0,0,0.28);">
+    <div style="font-size:1.1rem;font-weight:700;color:#0d2b6b;margin-bottom:3px;">แชร์หน้านี้</div>
+    <div style="font-size:0.78rem;color:#64748b;margin-bottom:18px;">สแกน QR Code เพื่อเปิดหน้านี้</div>
+    <div id="qrShareCanvas" style="display:inline-flex;align-items:center;justify-content:center;padding:14px;background:#fff;border-radius:14px;border:1.5px solid #e2e8f0;margin-bottom:12px;"></div>
+    <div id="qrShareUrl" style="font-size:0.7rem;color:#64748b;background:#f8fafc;border-radius:8px;padding:8px 12px;margin-bottom:18px;word-break:break-all;line-height:1.5;"></div>
+    <div style="display:flex;gap:8px;">
+      <button onclick="doQRShare()" style="flex:1;padding:11px 6px;border-radius:10px;border:none;background:#0d2b6b;color:#fff;font-family:'Sarabun',sans-serif;font-size:0.86rem;font-weight:700;cursor:pointer;">📤 แชร์</button>
+      <button onclick="saveQRImage()" style="flex:1;padding:11px 6px;border-radius:10px;border:1.5px solid #e2e8f0;background:#fff;color:#334155;font-family:'Sarabun',sans-serif;font-size:0.86rem;cursor:pointer;">🖼 บันทึกรูป</button>
+      <button onclick="closeQRShare()" style="padding:11px 14px;border-radius:10px;border:1.5px solid #e2e8f0;background:#fff;color:#64748b;font-family:'Sarabun',sans-serif;font-size:0.86rem;cursor:pointer;">ปิด</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  let _qrInst = null;
+  window.openQRShare = function() {
+    const ol = document.getElementById('qrShareOverlay');
+    const wrap = document.getElementById('qrShareCanvas');
+    const urlEl = document.getElementById('qrShareUrl');
+    const url = location.href;
+    urlEl.textContent = url;
+    wrap.innerHTML = '';
+    _qrInst = new QRCode(wrap, { text: url, width: 200, height: 200, colorDark: '#0d2b6b', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.H });
+    ol.style.display = 'flex';
+  };
+  window.closeQRShare = function() {
+    document.getElementById('qrShareOverlay').style.display = 'none';
+  };
+  window.doQRShare = async function() {
+    const url = location.href;
+    if (navigator.share) {
+      try { await navigator.share({ title: document.title, url }); return; } catch(e) {}
+    }
+    try { await navigator.clipboard.writeText(url); alert('คัดลอก URL แล้ว!'); } catch(e) { prompt('คัดลอก URL:', url); }
+  };
+  window.saveQRImage = async function() {
+    const wrap = document.getElementById('qrShareCanvas');
+    const src = wrap.querySelector('canvas') || wrap.querySelector('img');
+    if (!src) return;
+    const pad = 28, titleH = 64, urlH = 44;
+    const size = 200;
+    const oc = document.createElement('canvas');
+    oc.width = size + pad * 2; oc.height = size + titleH + urlH + pad;
+    const ctx = oc.getContext('2d');
+    ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, oc.width, oc.height);
+    ctx.fillStyle = '#0d2b6b'; ctx.font = 'bold 17px sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText('สแกนเพื่อเปิดหน้านี้', oc.width / 2, 36);
+    ctx.fillStyle = '#64748b'; ctx.font = '11px sans-serif';
+    const url = location.href;
+    const maxLen = 60;
+    ctx.fillText(url.length > maxLen ? url.slice(0, maxLen - 3) + '…' : url, oc.width / 2, oc.height - 14);
+    if (src.tagName === 'CANVAS') {
+      ctx.drawImage(src, pad, titleH, size, size);
+    } else {
+      await new Promise(r => { const img = new Image(); img.onload = () => { ctx.drawImage(img, pad, titleH, size, size); r(); }; img.src = src.src; });
+    }
+    const blob = await new Promise(r => oc.toBlob(r, 'image/png'));
+    const file = new File([blob], 'qr-share.png', { type: 'image/png' });
+    if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+      try { await navigator.share({ files: [file], title: 'QR Code' }); return; } catch(e) {}
+    }
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'qr-share.png'; a.click(); URL.revokeObjectURL(a.href);
+  };
+})();
 </script>
 </body>
 </html>
