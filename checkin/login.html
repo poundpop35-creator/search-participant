@@ -174,10 +174,12 @@ const SB_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsIn
 const SB_KEY  = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2eHl0bmpmeWVwcWhia21jam1zIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3OTQzMTY0MCwiZXhwIjoyMDk1MDA3NjQwfQ.Hrfc0erkIatyVbmsOW2SU7piH3L65qbS2kdi2eYzbQk";
 const USERS = {
   'adminpound':'P@und0258',
+  'adminplan':'Pl@nDmsc',
   'staff01':'Dmsc@2569','staff02':'Dmsc@2569','staff03':'Dmsc@2569',
   'staff04':'Dmsc@2569','staff05':'Dmsc@2569','staff06':'Dmsc@2569',
   'staff07':'Dmsc@2569','staff08':'Dmsc@2569','staff09':'Dmsc@2569','staff10':'Dmsc@2569'
 };
+const ADMIN_USERS = new Set(['adminpound','adminplan']);
 const _next = new URLSearchParams(window.location.search).get('next') || 'index.html';
 if(sessionStorage.getItem('dmsc_auth')==='ok') window.location.href = _next;
 (function(){const c=localStorage.getItem('pageBgUrl');if(c)document.body.style.backgroundImage=`linear-gradient(rgba(232,240,254,0.55),rgba(232,240,254,0.55)),url('${c}')`;})();
@@ -212,7 +214,7 @@ async function _verifyLogin(u,p){
   }catch(e){}
   // Fallback: ใช้ hardcode (ก่อน initialize)
   if(!USERS[u]||USERS[u]!==p) return {ok:false,msg:'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง'};
-  return {ok:true,role:u==='adminpound'?'admin':'staff'};
+  return {ok:true,role:ADMIN_USERS.has(u)?'admin':'staff'};
 }
 
 async function doLogin(){

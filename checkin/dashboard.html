@@ -777,7 +777,7 @@ const SB_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsIn
   window.addEventListener('beforeunload',_del);
   if(sessionStorage.getItem('dmsc_role')!=='admin')
     document.querySelectorAll('.clear-btn').forEach(el=>el.style.display='none');
-  if(sessionStorage.getItem('dmsc_user')==='adminpound'){
+  if(sessionStorage.getItem('dmsc_role')==='admin'){
     const cp=document.getElementById('adminControlBtn');
     if(cp) cp.style.display='inline-flex';
   }

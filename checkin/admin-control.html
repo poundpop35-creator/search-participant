@@ -336,7 +336,7 @@ let vipList = [];
 let _syncTimer = null, _syncCountdown = null;
 
 // ─── AUTH ───
-if(sessionStorage.getItem('dmsc_auth')!=='ok'||sessionStorage.getItem('dmsc_user')!=='adminpound'){
+if(sessionStorage.getItem('dmsc_auth')!=='ok'||sessionStorage.getItem('dmsc_role')!=='admin'){
   window.location.href='login.html?next=admin-control.html';
 }
 function doLogout(){ sessionStorage.clear(); window.location.href='login.html'; }
@@ -663,7 +663,8 @@ async function doImport(mode){
 // ══════════════════════════════════════════
 
 const DEFAULT_STAFF=[
-  {username:'adminpound',display_name:'Admin',role:'admin',is_active:true},
+  {username:'adminpound',display_name:'Admin (Pound)',role:'admin',is_active:true},
+  {username:'adminplan',display_name:'Admin (Plan)',role:'admin',is_active:true},
   ...[1,2,3,4,5,6,7,8,9,10].map(n=>({username:`staff${String(n).padStart(2,'0')}`,display_name:`Staff ${String(n).padStart(2,'0')}`,role:'staff',is_active:true}))
 ];
 
@@ -708,7 +709,7 @@ async function initStaff(){
   const btn=document.getElementById('initBtn');
   btn.disabled=true; btn.innerHTML='<span class="sp"></span>กำลังสร้าง...';
   try{
-    const defaultPwd={'adminpound':'P@und0258'};
+    const defaultPwd={'adminpound':'P@und0258','adminplan':'Pl@nDmsc'};
     const accounts=await Promise.all(DEFAULT_STAFF.map(async s=>({
       ...s, password_hash: await sha256hex(defaultPwd[s.username]||'Dmsc@2569')
     })));
