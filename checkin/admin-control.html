@@ -368,11 +368,8 @@ let _syncTimer = null, _syncCountdown = null;
 
 // ─── AUTH ───
 const _aRole=sessionStorage.getItem('dmsc_role');
-if(sessionStorage.getItem('dmsc_auth')!=='ok'||(_aRole!=='admin'&&_aRole!=='super_staff')){
-  window.location.href='login.html?next=admin-control.html';
-}
-if(_aRole!=='admin'){
-  document.querySelectorAll('.danger-box').forEach(el=>el.style.display='none');
+if(sessionStorage.getItem('dmsc_auth')!=='ok'||_aRole!=='admin'){
+  window.location.href='login.html';
 }
 function doLogout(){ sessionStorage.clear(); window.location.href='login.html'; }
 
