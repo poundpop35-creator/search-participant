@@ -175,13 +175,13 @@ const SB_KEY  = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsIn
 const USERS = {
   'adminpound':'P@und0258',
   'adminplan':'Pl@nDmsc',
-  'supper.staff':'Pl@n04',
+  'super.staff':'Pl@n04',
   'staff01':'Dmsc@2569','staff02':'Dmsc@2569','staff03':'Dmsc@2569',
   'staff04':'Dmsc@2569','staff05':'Dmsc@2569','staff06':'Dmsc@2569',
   'staff07':'Dmsc@2569','staff08':'Dmsc@2569','staff09':'Dmsc@2569','staff10':'Dmsc@2569'
 };
 const ADMIN_USERS = new Set(['adminpound','adminplan']);
-const SUPER_STAFF_USERS = new Set(['supper.staff']);
+const SUPER_STAFF_USERS = new Set(['super.staff']);
 const _next = new URLSearchParams(window.location.search).get('next') || 'index.html';
 if(sessionStorage.getItem('dmsc_auth')==='ok') window.location.href = _next;
 (function(){const c=localStorage.getItem('pageBgUrl');if(c)document.body.style.backgroundImage=`linear-gradient(rgba(232,240,254,0.55),rgba(232,240,254,0.55)),url('${c}')`;})();
