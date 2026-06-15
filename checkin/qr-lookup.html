@@ -278,6 +278,23 @@ const SB_KEY  = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsIn
 async function _loadPageBg(){try{const r=await fetch(SB_URL+'/rest/v1/app_settings?key=eq.page_bg&select=value',{headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON}});const d=await r.json();if(Array.isArray(d)&&d.length){const v=d[0].value||'';localStorage.setItem('pageBgUrl',v);document.body.style.backgroundImage=v?`linear-gradient(rgba(232,240,254,0.55),rgba(232,240,254,0.55)),url('${v}')`:''}}catch(e){}}
 _loadPageBg();setInterval(_loadPageBg,30000);
 
+let activeYear = '2568';
+(async function initCounts() {
+  try {
+    const H = { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY };
+    const yearRes = await fetch(`${SB_URL}/rest/v1/app_settings?key=eq.event_year&select=value`, {headers: H});
+    const yearData = await yearRes.json();
+    if(yearData && yearData.length && yearData[0].value) activeYear = yearData[0].value;
+    const yr = encodeURIComponent(activeYear);
+    const [wiRes, ciRes] = await Promise.all([
+      fetch(`${SB_URL}/rest/v1/participants?is_walkin=eq.true&event_year=eq.${yr}&select=id&limit=1`, { headers: { ...H, 'Prefer': 'count=exact' } }),
+      fetch(`${SB_URL}/rest/v1/participants?is_walkin=eq.false&event_year=eq.${yr}&select=id&limit=1`, { headers: { ...H, 'Prefer': 'count=exact' } })
+    ]);
+    const wiCnt = wiRes.headers.get('content-range'); if(wiCnt){ const t=parseInt(wiCnt.split('/')[1])||0; document.getElementById('wiCount').textContent=`(${t.toLocaleString()} คน)`; }
+    const ciCnt = ciRes.headers.get('content-range'); if(ciCnt){ const t=parseInt(ciCnt.split('/')[1])||0; document.getElementById('ciCount').textContent=`(${t.toLocaleString()} คน)`; }
+  } catch(e) {}
+})();
+
 // ─── QR SEARCH ───
 let results = [];
 let selectedP = null;
@@ -286,10 +303,11 @@ let allNames = null;
 async function ensureNames() {
   if (allNames !== null) return;
   const headers = { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY };
+  const yr = encodeURIComponent(activeYear);
   let data = [], offset = 0;
   while(true) {
     const r = await fetch(
-      `${SB_URL}/rest/v1/participants?select=id,prefix,first_name,last_name,dept,ext_dept,internal_external&limit=1000&offset=${offset}&order=last_name.asc`,
+      `${SB_URL}/rest/v1/participants?event_year=eq.${yr}&select=id,prefix,first_name,last_name,dept,ext_dept,internal_external&limit=1000&offset=${offset}&order=last_name.asc`,
       { headers }
     );
     if (!r.ok) { const txt = await r.text().catch(()=>''); throw new Error('HTTP ' + r.status + ': ' + txt.slice(0,120)); }
@@ -411,10 +429,11 @@ function _buildName(p) {
 async function ensureCIData() {
   if (allCIData !== null) return;
   const H = { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY };
+  const yr = encodeURIComponent(activeYear);
   let data = [], from = 0;
   while(true) {
     const r = await fetch(
-      `${SB_URL}/rest/v1/participants?is_walkin=eq.false&select=prefix,first_name,last_name,dept,ext_dept,internal_external,province&order=last_name.asc&limit=1000&offset=${from}`,
+      `${SB_URL}/rest/v1/participants?is_walkin=eq.false&event_year=eq.${yr}&select=prefix,first_name,last_name,dept,ext_dept,internal_external,province&order=last_name.asc&limit=1000&offset=${from}`,
       { headers: H }
     );
     const d = await r.json();
@@ -508,10 +527,11 @@ const WI_PAGE = 10;
 async function ensureWIData() {
   if (allWIData !== null) return;
   const H = { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY };
+  const yr = encodeURIComponent(activeYear);
   let data = [], from = 0;
   while(true) {
     const r = await fetch(
-      `${SB_URL}/rest/v1/participants?is_walkin=eq.true&select=prefix,first_name,last_name,dept,ext_dept,internal_external,province&order=last_name.asc&limit=1000&offset=${from}`,
+      `${SB_URL}/rest/v1/participants?is_walkin=eq.true&event_year=eq.${yr}&select=prefix,first_name,last_name,dept,ext_dept,internal_external,province&order=last_name.asc&limit=1000&offset=${from}`,
       { headers: H }
     );
     const d = await r.json();
@@ -596,18 +616,6 @@ function exportWIExcel() {
   XLSX.writeFile(wb, `walkin_dmsc_${new Date().toISOString().slice(0,10)}.xlsx`);
 }
 
-// Also update wiCount on page load
-(async function initWICount() {
-  try {
-    const H = { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY };
-    const r = await fetch(`${SB_URL}/rest/v1/participants?is_walkin=eq.true&select=id&limit=1`, { headers: { ...H, 'Prefer': 'count=exact' } });
-    const cnt = r.headers.get('content-range');
-    if (cnt) {
-      const total = parseInt(cnt.split('/')[1]) || 0;
-      document.getElementById('wiCount').textContent = `(${total.toLocaleString()} คน)`;
-    }
-  } catch(e) {}
-})();
 
 // ─── MAP ───
 const HEALTH_ZONE={
@@ -684,9 +692,10 @@ async function loadMapData() {
   document.getElementById('zoneTableBody').innerHTML = '<tr><td colspan="3" style="padding:16px;text-align:center;color:#94a3b8;">กำลังโหลด...</td></tr>';
   try {
     const H = { 'apikey': SB_ANON, 'Authorization': 'Bearer ' + SB_ANON };
+    const yr = encodeURIComponent(activeYear);
     let data = [], from = 0;
     while(true) {
-      const r = await fetch(`${SB_URL}/rest/v1/participants?is_walkin=eq.false&select=province&limit=1000&offset=${from}`, { headers: H });
+      const r = await fetch(`${SB_URL}/rest/v1/participants?is_walkin=eq.false&event_year=eq.${yr}&select=province&limit=1000&offset=${from}`, { headers: H });
       const d = await r.json();
       if (!Array.isArray(d) || !d.length) break;
       data = data.concat(d);

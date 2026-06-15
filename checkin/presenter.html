@@ -151,8 +151,17 @@
 
   let isProcessing=false, modeCount=0, qrCode=null;
   let presenterMode='present', scanMode='scanner', scanBuffer='', scanTimer=null;
+  let activeYear = '2568';
 
-  window.addEventListener('load',()=>{ setScanMode('scanner'); loadCount(); });
+  async function loadActiveYear(){
+    try{
+      const r=await fetch(`${SB_URL}/rest/v1/app_settings?key=eq.event_year&select=value`,{headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON}});
+      const d=await r.json();
+      if(d&&d.length&&d[0].value) activeYear=d[0].value;
+    }catch(e){}
+  }
+
+  window.addEventListener('load', async ()=>{ await loadActiveYear(); setScanMode('scanner'); loadCount(); });
 
   function setPresenterMode(mode){
     presenterMode=mode;
@@ -224,7 +233,7 @@
     showModal('loading','กำลังดำเนินการ','กรุณารอสักครู่...','',null);
     try{
       const keyword=decodedText.trim();
-      const searchRes=await sbFetch(`/rest/v1/participants?or=(id_card.eq.${encodeURIComponent(keyword)},passport.eq.${encodeURIComponent(keyword)})&select=id,prefix,first_name,last_name,participation_type,dept`,'GET');
+      const searchRes=await sbFetch(`/rest/v1/participants?event_year=eq.${encodeURIComponent(activeYear)}&or=(id_card.eq.${encodeURIComponent(keyword)},passport.eq.${encodeURIComponent(keyword)})&select=id,prefix,first_name,last_name,participation_type,dept`,'GET');
       if(!searchRes.ok){showModal('error','ข้อผิดพลาด','ไม่สามารถค้นหาข้อมูลได้','',null);return;}
       const participants=await searchRes.json();
       if(!participants||participants.length===0){showModal('error','ไม่พบข้อมูล','ไม่พบข้อมูลในระบบ','',null);return;}

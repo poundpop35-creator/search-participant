@@ -227,6 +227,15 @@ async function fetchAll(path) {
   return res;
 }
 
+let activeYear = '2568';
+async function loadActiveYear(){
+  try{
+    const r=await fetch(`${SUPABASE_URL}/rest/v1/app_settings?key=eq.event_year&select=value`,{headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}});
+    const d=await r.json();
+    if(d&&d.length&&d[0].value) activeYear=d[0].value;
+  }catch(e){}
+}
+
 function num(v) {
   return v ? `<span class="num-cell">${v.toLocaleString()}</span>` : `<span class="zero">—</span>`;
 }
@@ -432,10 +441,12 @@ function renderExecChart() {
 }
 
 async function loadData() {
+  await loadActiveYear();
+  const yr = encodeURIComponent(activeYear);
   try {
     const [rows, planRows] = await Promise.all([
-      fetchAll('/rest/v1/checkins?select=day,checkin_time,participants(dept,internal_external,is_walkin)&order=checkin_time.desc'),
-      fetchAll('/rest/v1/participants?dept=eq.' + encodeURIComponent('กองแผนงานและวิชาการ') + '&is_walkin=eq.false&select=id')
+      fetchAll(`/rest/v1/checkins?event_year=eq.${yr}&select=day,checkin_time,participants(dept,internal_external,is_walkin)&order=checkin_time.desc`),
+      fetchAll('/rest/v1/participants?dept=eq.' + encodeURIComponent('กองแผนงานและวิชาการ') + `&is_walkin=eq.false&event_year=eq.${yr}&select=id`)
     ]);
     const planPreReg = planRows.length;
 

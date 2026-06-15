@@ -268,8 +268,17 @@
 
   let isProcessing=false, todayCount=0, staffCount=0, qrCode=null;
   let currentMode='scanner', scanBuffer='', scanTimer=null;
+  let activeYear = '2568';
 
-  window.addEventListener('load',()=>{ initDaySelect(); setMode('scanner'); loadTodayCount(); });
+  async function loadActiveYear(){
+    try{
+      const r=await fetch(`${SB_URL}/rest/v1/app_settings?key=eq.event_year&select=value`,{headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON}});
+      const d=await r.json();
+      if(d&&d.length&&d[0].value) activeYear=d[0].value;
+    }catch(e){}
+  }
+
+  window.addEventListener('load', async ()=>{ await loadActiveYear(); initDaySelect(); setMode('scanner'); loadTodayCount(); });
 
   function initDaySelect(){
     const now=new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Bangkok'}));
@@ -329,7 +338,7 @@
     } else if(day==='bag'){
       document.getElementById('counterLabel').textContent='รับกระเป๋าแล้ว';
       try{
-        const res=await fetch(`${SB_URL}/rest/v1/participants?bag_received=eq.true&select=id`,
+        const res=await fetch(`${SB_URL}/rest/v1/participants?bag_received=eq.true&event_year=eq.${encodeURIComponent(activeYear)}&select=id`,
           {headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON,'Prefer':'count=exact','Range':'0-0'}});
         const range=res.headers.get('Content-Range');
         let count=0;
@@ -345,9 +354,9 @@
       document.getElementById('counterLabel').textContent='เช็คอินสำเร็จวันนี้';
       try{
         const [totalRes,staffRes]=await Promise.all([
-          fetch(`${SB_URL}/rest/v1/checkins?day=eq.${day}&select=id`,
+          fetch(`${SB_URL}/rest/v1/checkins?day=eq.${day}&event_year=eq.${encodeURIComponent(activeYear)}&select=id`,
             {headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON,'Prefer':'count=exact','Range':'0-0'}}),
-          user?fetch(`${SB_URL}/rest/v1/checkins?day=eq.${day}&scanned_by=eq.${encodeURIComponent(user)}&select=id`,
+          user?fetch(`${SB_URL}/rest/v1/checkins?day=eq.${day}&scanned_by=eq.${encodeURIComponent(user)}&event_year=eq.${encodeURIComponent(activeYear)}&select=id`,
             {headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON,'Prefer':'count=exact','Range':'0-0'}}):null
         ]);
         const range=totalRes.headers.get('Content-Range');
@@ -424,7 +433,7 @@
     showModal('loading','กำลังดำเนินการ','กำลังบันทึกข้อมูล','',null);
     try{
       const keyword=decodedText.trim();
-      const searchRes=await sbFetch(`/rest/v1/participants?or=(id_card.eq.${encodeURIComponent(keyword)},passport.eq.${encodeURIComponent(keyword)})&select=id,prefix,first_name,last_name,tag,items,is_walkin,internal_external,participation_type,bag_received,bag_received_date,shirt_size,shirt_received,shirt_received_date,dept`,'GET');
+      const searchRes=await sbFetch(`/rest/v1/participants?event_year=eq.${encodeURIComponent(activeYear)}&or=(id_card.eq.${encodeURIComponent(keyword)},passport.eq.${encodeURIComponent(keyword)})&select=id,prefix,first_name,last_name,tag,items,is_walkin,internal_external,participation_type,bag_received,bag_received_date,shirt_size,shirt_received,shirt_received_date,dept`,'GET');
       if(!searchRes.ok){showModal('error','ข้อผิดพลาด','ไม่สามารถค้นหาข้อมูลได้','',null);return;}
       const participants=await searchRes.json();
       if(!participants||participants.length===0){
@@ -524,7 +533,7 @@
       }
 
       // โหมดเช็คอิน
-      const checkTodayRes=await sbFetch(`/rest/v1/checkins?participant_id=eq.${p.id}&day=eq.${day}&select=id,checkin_time,scanned_by`,'GET');
+      const checkTodayRes=await sbFetch(`/rest/v1/checkins?participant_id=eq.${p.id}&day=eq.${day}&event_year=eq.${encodeURIComponent(activeYear)}&select=id,checkin_time,scanned_by`,'GET');
       const existingToday=await checkTodayRes.json();
       if(existingToday&&existingToday.length>0){
         const rec=existingToday[0];
@@ -540,14 +549,15 @@
         return;
       }
 
-      const checkAllRes=await sbFetch(`/rest/v1/checkins?participant_id=eq.${p.id}&select=id`,'GET');
+      const checkAllRes=await sbFetch(`/rest/v1/checkins?participant_id=eq.${p.id}&event_year=eq.${encodeURIComponent(activeYear)}&select=id`,'GET');
       const allCheckins=await checkAllRes.json();
       const isFirst=!allCheckins||allCheckins.length===0;
 
       const insertRes=await sbFetch('/rest/v1/checkins','POST',{
         participant_id:p.id, day:parseInt(day),
         checkin_time:new Date().toISOString(),
-        scanned_by:sessionStorage.getItem('dmsc_user')||'unknown'
+        scanned_by:sessionStorage.getItem('dmsc_user')||'unknown',
+        event_year: activeYear
       });
 
       if(insertRes.ok||insertRes.status===201){

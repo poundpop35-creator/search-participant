@@ -317,6 +317,14 @@ document.getElementById('userDisplay').textContent = sessionStorage.getItem('dms
 })();
 
 let allData=[], filtered=[], curPage=1;
+let activeYear = '2568';
+async function loadActiveYear(){
+  try{
+    const r=await fetch(`${SB_URL}/rest/v1/app_settings?key=eq.event_year&select=value`,{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}});
+    const d=await r.json();
+    if(d&&d.length&&d[0].value) activeYear=d[0].value;
+  }catch(e){}
+}
 let allShirtData=[], shirtFiltered=[], shirtPage=1;
 let selPT=new Set(), selFDept=new Set(), selSfDept=new Set();
 
@@ -422,11 +430,12 @@ function fmtBagTime(v){
 }
 
 async function loadAll(){
+  await loadActiveYear();
   document.getElementById('tBody').innerHTML='<tr><td colspan="8" class="loading-td">กำลังโหลด...</td></tr>';
   try{
     let res=[], from=0;
     while(true){
-      const r=await fetch(`${SB_URL}/rest/v1/participants?select=id,prefix,first_name,last_name,dept,ext_dept,internal_external,participation_type,tag,items,bag_received,bag_received_date,shirt_size,shirt_received,shirt_received_date&order=last_name.asc`,{
+      const r=await fetch(`${SB_URL}/rest/v1/participants?event_year=eq.${encodeURIComponent(activeYear)}&select=id,prefix,first_name,last_name,dept,ext_dept,internal_external,participation_type,tag,items,bag_received,bag_received_date,shirt_size,shirt_received,shirt_received_date&order=last_name.asc`,{
         headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Range-Unit':'items','Range':`${from}-${from+999}`,'Prefer':'count=exact'}
       });
       if(!r.ok){

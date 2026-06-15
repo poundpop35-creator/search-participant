@@ -861,14 +861,25 @@ async function fetchAll(path,ps=1000){
   return res;
 }
 
+let activeYear = '2568';
+async function loadActiveYear(){
+  try{
+    const r=await fetch(`${SB_URL}/rest/v1/app_settings?key=eq.event_year&select=value`,{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}});
+    const d=await r.json();
+    if(d&&d.length&&d[0].value) activeYear=d[0].value;
+  }catch(e){}
+}
+
 async function loadAll(){
+  await loadActiveYear();
   document.getElementById('tBody').innerHTML='<tr><td colspan="9" class="loading-td">กำลังโหลด...</td></tr>';
   document.getElementById('dBody').innerHTML='<tr><td colspan="5" style="text-align:center;padding:30px;color:#94a3b8;">กำลังโหลด...</td></tr>';
 
+  const yr=encodeURIComponent(activeYear);
   const [rows, preRegRes, allRes]=await Promise.all([
-    fetchAll('/rest/v1/checkins?select=id,participant_id,day,checkin_time,scanned_by,participants(prefix,first_name,last_name,tag,dept,ext_dept,internal_external,participation_type,items,is_walkin,bag_received,bag_received_date,shirt_size,shirt_received,shirt_received_date,province)&order=checkin_time.desc'),
-    fetch(SB_URL+'/rest/v1/participants?is_walkin=not.is.true&select=id',{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'count=exact','Range':'0-0','Range-Unit':'items'}}),
-    fetch(SB_URL+'/rest/v1/participants?select=id',{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'count=exact','Range':'0-0','Range-Unit':'items'}})
+    fetchAll(`/rest/v1/checkins?event_year=eq.${yr}&select=id,participant_id,day,checkin_time,scanned_by,participants(prefix,first_name,last_name,tag,dept,ext_dept,internal_external,participation_type,items,is_walkin,bag_received,bag_received_date,shirt_size,shirt_received,shirt_received_date,province)&order=checkin_time.desc`),
+    fetch(SB_URL+`/rest/v1/participants?event_year=eq.${yr}&is_walkin=not.is.true&select=id`,{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'count=exact','Range':'0-0','Range-Unit':'items'}}),
+    fetch(SB_URL+`/rest/v1/participants?event_year=eq.${yr}&select=id`,{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'count=exact','Range':'0-0','Range-Unit':'items'}})
   ]);
   const cr=preRegRes.headers.get('Content-Range')||'';
   totalPreReg=parseInt(cr.split('/')[1])||0;
@@ -955,7 +966,8 @@ async function loadAll(){
 }
 
 async function loadParticipants(){
-  allParticipants=await fetchAll('/rest/v1/participants?select=id,prefix,first_name,last_name,dept,ext_dept,internal_external,participation_type,tag,province,is_walkin&order=last_name.asc');
+  const yr=encodeURIComponent(activeYear);
+  allParticipants=await fetchAll(`/rest/v1/participants?event_year=eq.${yr}&select=id,prefix,first_name,last_name,dept,ext_dept,internal_external,participation_type,tag,province,is_walkin&order=last_name.asc`);
   const preC=allParticipants.filter(p=>!p.is_walkin).length;
   const wiC=allParticipants.filter(p=>p.is_walkin===true).length;
   document.getElementById('pRegCount').textContent=`(ล่วงหน้า ${preC.toLocaleString()} | Walk-in ${wiC.toLocaleString()})`;
