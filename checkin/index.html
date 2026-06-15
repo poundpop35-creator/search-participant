@@ -296,8 +296,9 @@
     const confDays={24:1,25:2,26:3};
     const isBangkok2026June=y===2026&&m===6;
     const isAdmin=sessionStorage.getItem('dmsc_role')==='admin';
+    const isSuperStaff=sessionStorage.getItem('dmsc_role')==='super_staff';
     const isStaff=sessionStorage.getItem('dmsc_role')==='staff';
-    if(isAdmin) document.getElementById('adminPanelBtn').style.display='block';
+    if(isAdmin||isSuperStaff) document.getElementById('adminPanelBtn').style.display='block';
     if(isStaff){
       document.getElementById('dashboardBtn').style.display='none';
       document.getElementById('bagDashboardBtn').style.display='none';
