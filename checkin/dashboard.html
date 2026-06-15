@@ -153,7 +153,6 @@
 <script>
 // Auth check — ต้อง login ก่อน
 if (sessionStorage.getItem('dmsc_auth') !== 'ok') window.location.href = 'login.html';
-if (sessionStorage.getItem('dmsc_role') === 'staff') window.location.href = 'staff-menu.html';
 document.addEventListener('DOMContentLoaded', function() {
   var el = document.getElementById('userDisplay');
   if (el) el.textContent = sessionStorage.getItem('dmsc_user') || '';

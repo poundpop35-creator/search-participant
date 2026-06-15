@@ -221,8 +221,8 @@
   </div>
 
   <a id="adminPanelBtn" class="btn-nav secondary" href="admin-control.html" style="display:none;">⚙️ Control Panel</a>
-  <a class="btn-nav primary" href="dashboard.html">Dashboard (สำหรับ staff)</a>
-  <a class="btn-nav secondary" href="bag-dashboard.html">DashBoard ผู้มารับกระเป๋าหรือเสื้อ (ก่อนวันงาน)</a>
+  <a id="dashboardBtn" class="btn-nav primary" href="dashboard.html">Dashboard (สำหรับ staff)</a>
+  <a id="bagDashboardBtn" class="btn-nav secondary" href="bag-dashboard.html">DashBoard ผู้มารับกระเป๋าหรือเสื้อ (ก่อนวันงาน)</a>
   <a class="btn-nav secondary" href="public.html">ดู Live Dashboard (สาธารณะ)</a>
   <a class="btn-nav secondary" href="qr-lookup.html"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px;"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>ค้นหา QR Code ของคุณ</a>
   <button class="btn-nav secondary" onclick="doLogout()">ออกจากระบบ</button>
@@ -240,7 +240,6 @@
   const EVENT_DATE_DAY = {'2026-06-24':1,'2026-06-25':2,'2026-06-26':3};
 
   if(sessionStorage.getItem('dmsc_auth')!=='ok') window.location.href='login.html';
-  if(sessionStorage.getItem('dmsc_role')==='staff') window.location.href='staff-menu.html';
   document.getElementById('userDisplay').textContent=sessionStorage.getItem('dmsc_user')||'';
 
   // ซ่อน/แสดง bag+shirt option และ auto-select วันงาน (ยกเว้น adminpound)
@@ -297,7 +296,12 @@
     const confDays={24:1,25:2,26:3};
     const isBangkok2026June=y===2026&&m===6;
     const isAdmin=sessionStorage.getItem('dmsc_role')==='admin';
+    const isStaff=sessionStorage.getItem('dmsc_role')==='staff';
     if(isAdmin) document.getElementById('adminPanelBtn').style.display='block';
+    if(isStaff){
+      document.getElementById('dashboardBtn').style.display='none';
+      document.getElementById('bagDashboardBtn').style.display='none';
+    }
     const sel=document.getElementById('day');
     const bagOpt=sel.querySelector('option[value="bag"]');
     const shirtOpt=sel.querySelector('option[value="shirt"]');

@@ -277,7 +277,7 @@ async function doLogin(){
     sessionStorage.setItem('dmsc_user', u);
     const _role = verify.role==='admin'?'admin':verify.role==='super_staff'?'super_staff':'staff';
     sessionStorage.setItem('dmsc_role', _role);
-    window.location.href = _role==='staff' ? 'staff-menu.html' : _next;
+    window.location.href = _next;
   }catch(e){
     err.textContent='ไม่สามารถเชื่อมต่อได้ กรุณาลองใหม่';
     btn.textContent='เข้าสู่ระบบ'; btn.disabled=false;
