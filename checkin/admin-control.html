@@ -81,7 +81,17 @@
     /* VIP chip */
     .vip-chip{display:inline-flex;align-items:center;gap:6px;background:#ede9fe;color:#4c1d95;padding:5px 12px;border-radius:99px;font-size:0.82rem;font-weight:600;margin:3px;}
     .vip-chip button{background:none;border:none;cursor:pointer;color:#6d28d9;font-size:0.85rem;padding:0;line-height:1;}
+    /* Type selector */
+    .type-btn{padding:11px 22px;border-radius:12px;border:2px solid var(--border);font-family:'Sarabun',sans-serif;font-size:0.92rem;font-weight:700;cursor:pointer;background:white;color:#64748b;transition:all .15s;}
+    .type-btn.active{border-color:var(--blue);background:var(--blue-light);color:var(--blue);}
+    /* Sample table */
+    .sample-tbl{width:100%;border-collapse:collapse;font-size:0.8rem;}
+    .sample-tbl th{padding:8px 12px;background:#1e3a8a;color:white;white-space:nowrap;font-size:0.77rem;}
+    .sample-tbl td{padding:7px 12px;border-bottom:1px solid #f1f5f9;color:#334155;white-space:nowrap;}
+    .sample-tbl tr:last-child td{border-bottom:none;}
+    .sample-tbl .req{color:#fbbf24;font-size:0.65rem;vertical-align:super;}
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
 <body>
 
@@ -135,16 +145,40 @@
   <!-- ══════════ TAB: IMPORT ══════════ -->
   <div id="tc-import">
 
+    <!-- ── ประเภทข้อมูล ── -->
     <div class="card">
-      <div class="card-title">📥 นำเข้าข้อมูลจาก Google Sheets</div>
+      <div class="card-title">📋 เลือกประเภทข้อมูลที่จะนำเข้า</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <button class="type-btn active" id="typeBtn-pre" onclick="setImportType('pre')">
+          📋 ผู้ลงทะเบียนล่วงหน้า
+        </button>
+        <button class="type-btn" id="typeBtn-walkin" onclick="setImportType('walkin')">
+          🚶 Walk-in
+        </button>
+      </div>
+      <div id="typeDesc" style="margin-top:12px;font-size:0.83rem;color:#475569;line-height:1.7;"></div>
+    </div>
+
+    <!-- ── Template + Sample ── -->
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
+        <div class="card-title" style="margin-bottom:0;">📊 ตัวอย่างหัวตาราง (Template)</div>
+        <button class="btn btn-green btn-sm" onclick="downloadTemplate()">⬇ ดาวน์โหลด Template Excel</button>
+      </div>
+      <div class="tbl-wrap" id="sampleTableWrap"></div>
+      <p style="font-size:0.76rem;color:#94a3b8;margin-top:8px;">* ตัวอย่างข้อมูล — ไม่จำเป็นต้องใช้ชื่อหัวตารางเหมือนกันทุกตัวอักษร ระบบจะช่วยจับคู่ให้อัตโนมัติ</p>
+    </div>
+
+    <!-- ── URL + Fetch ── -->
+    <div class="card">
+      <div class="card-title">📥 นำเข้าจาก Google Sheets</div>
       <div class="alert alert-info">
-        <strong>วิธีเตรียม Google Sheet:</strong><br>
-        ไฟล์ → เผยแพร่ไปยังเว็บ → เลือกชีท → เลือกรูปแบบ <strong>CSV</strong> → คัดลอก URL แล้วนำมาวางด้านล่าง
+        <strong>วิธีเตรียม Google Sheet:</strong> ไฟล์ → เผยแพร่ไปยังเว็บ → เลือกชีท <span id="sheetHint" style="font-weight:700;color:#1d4ed8;"></span> → เลือกรูปแบบ <strong>CSV</strong> → คัดลอก URL
       </div>
       <div class="field">
-        <label>URL ของ Google Sheet (Publish as CSV)</label>
+        <label id="urlLabel">URL ผู้ลงทะเบียนล่วงหน้า (Publish as CSV)</label>
         <div style="display:flex;gap:8px;">
-          <input id="sheetUrl" type="url" placeholder="https://docs.google.com/spreadsheets/d/e/.../pub?output=csv">
+          <input id="sheetUrl" type="url" placeholder="https://docs.google.com/spreadsheets/d/e/.../pub?output=csv&gid=0">
           <button class="btn btn-primary" id="fetchBtn" onclick="fetchSheet()">ดึงข้อมูล</button>
         </div>
       </div>
@@ -313,6 +347,103 @@ async function doClear(target){
 }
 
 // ══════════════════════════════════════════
+// ─── IMPORT TYPE ───
+// ══════════════════════════════════════════
+let importType = 'pre'; // 'pre' | 'walkin'
+
+const TEMPLATES = {
+  pre: {
+    label: 'ผู้ลงทะเบียนล่วงหน้า',
+    sheetHint: 'Sheet ลงทะเบียนล่วงหน้า',
+    urlLabel: 'URL Google Sheet — ผู้ลงทะเบียนล่วงหน้า (Publish as CSV)',
+    desc: 'นำเข้ารายชื่อผู้เข้าร่วมงานที่ลงทะเบียนล่วงหน้าไว้แล้ว (is_walkin = false)\nหากมีหลาย Sheet ในไฟล์เดียว ให้ Publish แยก URL ตาม gid ของแต่ละ Sheet',
+    cols: [
+      {th:'คำนำหน้า',     ex:'นาย / นาง / นางสาว / ดร.',req:false},
+      {th:'ชื่อ',          ex:'สมชาย',                   req:true},
+      {th:'นามสกุล',       ex:'ใจดี',                    req:true},
+      {th:'หน่วยงาน',      ex:'สถาบันวิจัยวิทยาศาสตร์สาธารณสุข',req:false},
+      {th:'หน่วยงานภายนอก',ex:'บริษัท ABC จำกัด',        req:false},
+      {th:'ประเภทบุคคล',   ex:'บุคลากรภายใน / บุคคลภายนอก',req:false},
+      {th:'จังหวัด',       ex:'กรุงเทพมหานคร',           req:false},
+      {th:'เลขบัตรประชาชน',ex:'1234567890123',           req:false},
+      {th:'หมายเลขพาสปอร์ต',ex:'AB123456',              req:false},
+      {th:'อีเมล',         ex:'somchai@dmsc.moph.go.th', req:false},
+      {th:'เบอร์โทร',      ex:'0891234567',              req:false},
+      {th:'ของที่ระลึก',   ex:'กระเป๋า+ของ / กระเป๋า',  req:false},
+      {th:'ขนาดเสื้อ',     ex:'S / M / L / XL / XXL',  req:false},
+    ],
+    dbRows: [
+      ['นาย','สมชาย','ใจดี','สถาบันวิจัยวิทยาศาสตร์สาธารณสุข','','บุคลากรภายใน','กรุงเทพมหานคร','1234567890123','','somchai@dmsc.moph.go.th','0891234567','กระเป๋า+ของ','L'],
+      ['นางสาว','วรรณภา','รักงาน','','บริษัท ABC จำกัด','บุคคลภายนอก','เชียงใหม่','9876543210987','','wanna@company.com','0812345678','กระเป๋า','M'],
+      ['ดร.','ประสิทธิ์','วิชาการ','สำนักคุณภาพและความปลอดภัยอาหาร','','บุคลากรภายใน','นนทบุรี','1111111111111','','','0899999999','กระเป๋า+ของ','XL'],
+    ]
+  },
+  walkin: {
+    label: 'Walk-in',
+    sheetHint: 'Sheet Walk-in',
+    urlLabel: 'URL Google Sheet — Walk-in (Publish as CSV)',
+    desc: 'นำเข้ารายชื่อผู้เข้าร่วมงานที่ลงทะเบียน Walk-in ในวันงาน (is_walkin = true)\nหากอยู่คนละ Sheet ในไฟล์เดียว ให้เปลี่ยน gid ใน URL',
+    cols: [
+      {th:'คำนำหน้า',     ex:'นาย / นาง / นางสาว',     req:false},
+      {th:'ชื่อ',          ex:'สมหญิง',                  req:true},
+      {th:'นามสกุล',       ex:'รักดี',                   req:true},
+      {th:'หน่วยงาน',      ex:'กองบริหารทรัพยากรบุคคล', req:false},
+      {th:'หน่วยงานภายนอก',ex:'มหาวิทยาลัยมหิดล',       req:false},
+      {th:'ประเภทบุคคล',   ex:'บุคลากรภายใน / บุคคลภายนอก',req:false},
+      {th:'จังหวัด',       ex:'ขอนแก่น',                 req:false},
+      {th:'เลขบัตรประชาชน',ex:'1234567890123',           req:false},
+      {th:'หมายเลขพาสปอร์ต',ex:'',                      req:false},
+    ],
+    dbRows: [
+      ['นาย','สมหมาย','มาทีหลัง','','บริษัท XYZ','บุคคลภายนอก','ขอนแก่น','2222222222222',''],
+      ['นางสาว','สุดา','เที่ยวงาน','กองบริหารทรัพยากรบุคคล','','บุคลากรภายใน','นครราชสีมา','3333333333333',''],
+    ]
+  }
+};
+
+function setImportType(type) {
+  importType = type;
+  ['pre','walkin'].forEach(t => {
+    document.getElementById('typeBtn-'+t).classList.toggle('active', t===type);
+  });
+  const tmpl = TEMPLATES[type];
+  document.getElementById('typeDesc').innerHTML = tmpl.desc.replace(/\n/g,'<br>');
+  document.getElementById('sheetHint').textContent = tmpl.sheetHint;
+  document.getElementById('urlLabel').textContent = tmpl.urlLabel;
+  renderSampleTable(type);
+  // Reset import state
+  document.getElementById('mappingCard').style.display = 'none';
+  document.getElementById('sheetStatus').innerHTML = '';
+  document.getElementById('sheetUrl').value = '';
+  csvHeaders = []; csvRows = [];
+}
+
+function renderSampleTable(type) {
+  const tmpl = TEMPLATES[type];
+  const head = tmpl.cols.map(c=>`<th>${c.th}${c.req?'<span class="req">*</span>':''}</th>`).join('');
+  const rows = tmpl.dbRows.map(r=>`<tr>${r.map(v=>`<td>${v||'<span style="color:#cbd5e1;">-</span>'}</td>`).join('')}</tr>`).join('');
+  document.getElementById('sampleTableWrap').innerHTML =
+    `<table class="sample-tbl"><thead><tr>${head}</tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+function downloadTemplate() {
+  const tmpl = TEMPLATES[importType];
+  const headers = tmpl.cols.map(c => c.th);
+  const examples = tmpl.dbRows;
+  const data = [headers, ...examples];
+  const ws = XLSX.utils.aoa_to_sheet(data);
+  // Column widths
+  ws['!cols'] = headers.map(()=>({wch:22}));
+  // Header row style hint (XLSX doesn't support full styling without xlsx-style, just set the data)
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, tmpl.label);
+  XLSX.writeFile(wb, `template_${importType==='pre'?'pre_registered':'walkin'}_dmsc.xlsx`);
+}
+
+// Init on page load
+setImportType('pre');
+
+// ══════════════════════════════════════════
 // ─── GOOGLE SHEET IMPORT ───
 // ══════════════════════════════════════════
 let csvHeaders=[], csvRows=[];
@@ -457,7 +588,7 @@ async function doImport(mode){
         if(d.length<1000) break; from+=1000;
       }
     }
-    const mapped=csvRows.map(r=>getMapped(r)).filter(r=>r.first_name||r.last_name);
+    const mapped=csvRows.map(r=>({...getMapped(r), is_walkin: importType==='walkin'})).filter(r=>r.first_name||r.last_name);
     const BATCH=50;
     for(let i=0;i<mapped.length;i+=BATCH){
       setStatus('importStatus','info',`กำลังนำเข้า ${Math.min(i+BATCH,mapped.length).toLocaleString()}/${mapped.length.toLocaleString()}...`);
