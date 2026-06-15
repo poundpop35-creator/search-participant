@@ -290,7 +290,7 @@
     <!-- Walk-in Auto Sync -->
     <div class="card">
       <div class="card-title">🔄 Walk-in Auto-Sync</div>
-      <p style="font-size:0.82rem;color:#64748b;margin-bottom:12px;line-height:1.6;">บันทึก URL Google Sheet Walk-in ไว้ที่นี่ — กด "ซิงค์เดี๋ยวนี้" หรือเปิด Auto-sync ให้ดึงอัตโนมัติทุก 5 นาที</p>
+      <p style="font-size:0.82rem;color:#64748b;margin-bottom:12px;line-height:1.6;">บันทึก URL Google Sheet Walk-in ไว้ที่นี่ — กด "ซิงค์เดี๋ยวนี้" หรือเปิด Auto-sync ให้ดึงอัตโนมัติทุก 1 นาที</p>
       <div class="field">
         <label>URL Google Sheet Walk-in (Publish as CSV)</label>
         <div style="display:flex;gap:8px;">
@@ -300,7 +300,7 @@
       </div>
       <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:4px;">
         <button class="btn btn-green" id="syncNowBtn" onclick="syncWalkinNow()">🔄 ซิงค์เดี๋ยวนี้</button>
-        <button class="btn btn-ghost" id="autoSyncBtn" onclick="toggleAutoSync()">▶ เปิด Auto-sync (ทุก 5 นาที)</button>
+        <button class="btn btn-ghost" id="autoSyncBtn" onclick="toggleAutoSync()">▶ เปิด Auto-sync (ทุก 1 นาที)</button>
         <span id="syncCountdown" style="font-size:0.82rem;color:#64748b;"></span>
       </div>
       <div id="walkinSyncStatus" style="margin-top:10px;"></div>
@@ -985,15 +985,15 @@ function toggleAutoSync(){
   if(_syncTimer){
     clearInterval(_syncTimer); clearInterval(_syncCountdown);
     _syncTimer=null; _syncCountdown=null;
-    btn.textContent='▶ เปิด Auto-sync (ทุก 5 นาที)';
+    btn.textContent='▶ เปิด Auto-sync (ทุก 1 นาที)';
     btn.style.background='';
     document.getElementById('syncCountdown').textContent='';
   } else {
     syncWalkinNow();
-    let secs=300;
+    let secs=60;
     _syncCountdown=setInterval(()=>{
       secs--;
-      if(secs<=0){ secs=300; syncWalkinNow(); }
+      if(secs<=0){ secs=60; syncWalkinNow(); }
       const m=Math.floor(secs/60), s=secs%60;
       document.getElementById('syncCountdown').textContent=`ซิงค์ถัดไป: ${m}:${String(s).padStart(2,'0')}`;
     },1000);
