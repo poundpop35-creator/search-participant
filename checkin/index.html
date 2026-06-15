@@ -237,7 +237,6 @@
   const SB_URL  = "https://gvxytnjfyepqhbkmcjms.supabase.co";
   const SB_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2eHl0bmpmeWVwcWhia21jam1zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0MzE2NDAsImV4cCI6MjA5NTAwNzY0MH0.RAr_ehb4cxfNliDR0h5XcihUaP-0ltZTTGIAv2Fw1kk";
   const DAY_TH  = {1:'24 มิถุนายน 2569',2:'25 มิถุนายน 2569',3:'26 มิถุนายน 2569'};
-  const VIP_DEPTS = new Set(['อธิบดีกรมวิทยาศาสตร์การแพทย์','รองอธิบดีกรมวิทยาศาสตร์การแพทย์','กองแผนงานและวิชาการ']);
   const EVENT_DATE_DAY = {'2026-06-24':1,'2026-06-25':2,'2026-06-26':3};
 
   if(sessionStorage.getItem('dmsc_auth')!=='ok') window.location.href='login.html';
@@ -270,12 +269,18 @@
   let isProcessing=false, todayCount=0, staffCount=0, qrCode=null;
   let currentMode='scanner', scanBuffer='', scanTimer=null;
   let activeYear = '2568';
+  let VIP_DEPTS = new Set(['อธิบดีกรมวิทยาศาสตร์การแพทย์','รองอธิบดีกรมวิทยาศาสตร์การแพทย์','กองแผนงานและวิชาการ']);
 
   async function loadActiveYear(){
     try{
-      const r=await fetch(`${SB_URL}/rest/v1/app_settings?key=eq.event_year&select=value`,{headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON}});
-      const d=await r.json();
-      if(d&&d.length&&d[0].value) activeYear=d[0].value;
+      const [yearRes, vipRes] = await Promise.all([
+        fetch(`${SB_URL}/rest/v1/app_settings?key=eq.event_year&select=value`,{headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON}}),
+        fetch(`${SB_URL}/rest/v1/app_settings?key=eq.vip_depts&select=value`,{headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON}})
+      ]);
+      const yearData=await yearRes.json();
+      if(yearData&&yearData.length&&yearData[0].value) activeYear=yearData[0].value;
+      const vipData=await vipRes.json();
+      if(vipData&&vipData.length&&vipData[0].value) VIP_DEPTS=new Set(JSON.parse(vipData[0].value));
     }catch(e){}
   }
 
@@ -540,7 +545,7 @@
       if(existingToday&&existingToday.length>0){
         const rec=existingToday[0];
         const t=new Date(rec.checkin_time).toLocaleTimeString('th-TH',{timeZone:'Asia/Bangkok'});
-        if(VIP_DEPTS.has(p.dept)&&rec.scanned_by==='auto'){
+        if(VIP_DEPTS.has(p.dept)){
           showModal('success','เช็คอินแล้ว โดย admin',`ได้รับการยกเว้นการเช็คอิน`,fullName,[
             {label:'หน่วยงาน',val:p.dept,style:'normal'},
             {label:'สถานะ',val:'✅ เช็คอินแล้ว โดย admin',style:'done'},
@@ -555,9 +560,10 @@
       const allCheckins=await checkAllRes.json();
       const isFirst=!allCheckins||allCheckins.length===0;
 
+      const nowISO = new Date().toISOString();
       const insertRes=await sbFetch('/rest/v1/checkins','POST',{
         participant_id:p.id, day:parseInt(day),
-        checkin_time:new Date().toISOString(),
+        checkin_time: nowISO,
         scanned_by:sessionStorage.getItem('dmsc_user')||'unknown',
         event_year: activeYear
       });
@@ -567,7 +573,18 @@
         document.getElementById('count').textContent=todayCount.toLocaleString();
         staffCount++;
         document.getElementById('staffCount').textContent=staffCount.toLocaleString();
-        const timeNow=new Date().toLocaleTimeString('th-TH',{timeZone:'Asia/Bangkok'});
+        // Auto-mark bag/shirt received at check-in time
+        const items=p.items||'';
+        const hasBag=items.includes('กระเป๋า');
+        const hasShirt=(p.shirt_size||'').trim()!=='';
+        const autoReceive={};
+        if(hasBag&&!p.bag_received){autoReceive.bag_received=true;autoReceive.bag_received_date=nowISO;}
+        if(hasShirt&&!p.shirt_received){autoReceive.shirt_received=true;autoReceive.shirt_received_date=nowISO;}
+        if(Object.keys(autoReceive).length>0){
+          await sbFetch(`/rest/v1/participants?id=eq.${p.id}`,'PATCH',autoReceive).catch(()=>{});
+          Object.assign(p,autoReceive);
+        }
+        const timeNow=new Date(nowISO).toLocaleTimeString('th-TH',{timeZone:'Asia/Bangkok'});
         showModal('success','เช็คอินสำเร็จ',`วันที่ ${day} — ${DAY_TH[parseInt(day)]}`,fullName,buildSuccessRows(timeNow,p,isFirst,isWalkin),p.dept||'');
         setStatus('เช็คอินสำเร็จ');
       } else {
