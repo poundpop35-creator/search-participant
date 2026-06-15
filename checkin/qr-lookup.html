@@ -277,9 +277,9 @@
       <span style="font-size:0.98rem;font-weight:700;color:var(--blue);">แผนที่ผู้ลงทะเบียน Walk-in — แยกตามเขตสุขภาพ</span>
       <span id="wiMapCount" style="font-size:0.8rem;color:#64748b;margin-left:6px;font-weight:400;"></span>
     </div>
-    <button class="sec-btn" id="wiMapToggleBtn" onclick="toggleWIMap()">▼ ดูแผนที่</button>
+    <button class="sec-btn" id="wiMapToggleBtn" onclick="toggleWIMap()">▲ ซ่อน</button>
   </div>
-  <div id="wiMapBody" style="display:none;margin-top:14px;">
+  <div id="wiMapBody" style="display:block;margin-top:14px;">
     <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap;justify-content:center;">
       <div id="wiLookupMap" style="position:relative;flex:0 0 180px;min-width:140px;max-width:220px;">
         <div id="wiMapLabel" style="display:none;position:absolute;left:8px;top:8px;z-index:10;background:rgba(15,23,42,0.82);color:#fff;padding:5px 9px;border-radius:8px;font-size:0.72rem;line-height:1.5;pointer-events:none;font-family:Sarabun,sans-serif;"></div>
@@ -980,9 +980,11 @@ function toggleQrZone(id, arrow) {
   if (arrow) arrow.textContent = open ? '▶' : '▼';
 }
 
-// Auto-load map on page start (mapBody starts open)
+// Auto-load both maps on page start
 mapRendered = true;
 loadMapData();
+wiMapRendered = true;
+loadWIMapData();
 
 // ─── WI MAP ───
 let wiMapRendered = false;
