@@ -909,7 +909,7 @@ async function loadAll(){
       shirtSize:(p.shirt_size||'').trim(),
       shirtReceived:p.shirt_received===true||p.shirt_received===1||p.shirt_received==='true',
       shirtDate:fmtDate(p.shirt_received_date), shirtTime:fmtTime(p.shirt_received_date),
-      province:(p.province||'').trim()};
+      province:(p.province||'').trim()||(p.is_walkin===true&&isIn?'กรมวิทยาศาสตร์การแพทย์':'')};
   });
 
   // Add virtual rows for VIP/exempt dept members (เช็คอินโดย admin ทุกวัน)
