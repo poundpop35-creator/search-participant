@@ -1259,6 +1259,8 @@ function updateIntClearBtn(){
 }
 function clearZoneFilter(){
   if(selectedZonePub!==null) highlightZonePub(selectedZonePub);
+  document.querySelectorAll('#zoneBodyExt tr[id^="zext-"]').forEach(r=>{r.style.display='none';});
+  document.querySelectorAll('#zoneBodyExt .zarr').forEach(a=>{a.textContent='▶';});
 }
 function clearIntFilter(){
   if(selectedIntProv!==null) highlightIntProv(selectedIntProv);

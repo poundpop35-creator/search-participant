@@ -1497,6 +1497,10 @@ function resetDashMap(instKey) {
   const bodyId=`zoneBody${instKey==='pre'?'Pre':'Wi'}`;
   document.querySelectorAll(`#${bodyId} tr[data-zone]`).forEach(r=>{r.style.background='';r.style.fontWeight='';});
   document.querySelectorAll(`#${bodyId} tr[data-prov]`).forEach(r=>{r.style.background='';delete r.dataset.hl;});
+  document.querySelectorAll(`[id^="dz-${instKey}-"]`).forEach(r=>{r.style.display='none';});
+  document.querySelectorAll(`[id^="zProv-${instKey}-"]`).forEach(r=>{r.style.display='none';});
+  document.querySelectorAll(`#${bodyId} .dzArr`).forEach(a=>{a.textContent='▶';});
+  document.querySelectorAll(`#${bodyId} .zProvArrow`).forEach(a=>{a.textContent='▶';});
 }
 
 let pRegViewMode='list';

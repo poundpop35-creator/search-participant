@@ -987,6 +987,8 @@ function resetQrMap() {
   document.getElementById('qrMapClear').style.display = 'none';
   document.querySelectorAll('#zoneTableBody tr[data-zone]').forEach(r=>{r.style.background='';r.style.fontWeight='';});
   document.querySelectorAll('#zoneTableBody tr[data-prov]').forEach(r=>r.style.background='');
+  document.querySelectorAll('#zoneTableBody tr[id^="qrz-"]').forEach(r=>{r.style.display='none';});
+  document.querySelectorAll('#zoneTableBody .qrzArr').forEach(a=>{a.textContent='▶';});
 }
 
 function renderZoneTable() {
@@ -1277,6 +1279,8 @@ function resetWIMap() {
   document.getElementById('wiMapClear').style.display = 'none';
   document.querySelectorAll('#wiZoneTableBody tr[data-zone]').forEach(r=>{r.style.background='';r.style.fontWeight='';});
   document.querySelectorAll('#wiZoneTableBody tr[data-prov]').forEach(r=>r.style.background='');
+  document.querySelectorAll('#wiZoneTableBody tr[id^="wiz-"]').forEach(r=>{r.style.display='none';});
+  document.querySelectorAll('#wiZoneTableBody .wizArr').forEach(a=>{a.textContent='▶';});
 }
 
 function renderWIZoneTable() {
