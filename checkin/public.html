@@ -740,9 +740,8 @@ function zoomToProvExt(prov){
   }
   const cx=(x0+x1)/2,cy=(y0+y1)/2;
   if(x1-x0<mapWRef*0.18){x0=cx-mapWRef*0.09;x1=cx+mapWRef*0.09;}
-  if(y1-y0<mapHRef*0.18){y0=cy-mapHRef*0.09;y1=cy+mapHRef*0.09;}
-  const pad=22;
-  s=Math.min(7,0.88/Math.max((x1-x0+pad*2)/mapWRef,(y1-y0+pad*2)/mapHRef));
+  if(y1-y0<mapHRef*0.12){y0=cy-mapHRef*0.06;y1=cy+mapHRef*0.06;}
+  s=Math.min(mapWRef/(x1-x0),mapHRef/(y1-y0))*0.88;
   tx=mapWRef/2-s*(x0+x1)/2;
   ty=mapHRef/2-s*(y0+y1)/2;
   mapScaleRef=s;
@@ -1107,9 +1106,8 @@ function zoomToIntProv(prov){
     }
     const cx=(x0+x1)/2,cy=(y0+y1)/2;
     if(x1-x0<intMapWRef*0.18){x0=cx-intMapWRef*0.09;x1=cx+intMapWRef*0.09;}
-    if(y1-y0<intMapHRef*0.18){y0=cy-intMapHRef*0.09;y1=cy+intMapHRef*0.09;}
-    const pad=22;
-    s=Math.min(7,0.88/Math.max((x1-x0+pad*2)/intMapWRef,(y1-y0+pad*2)/intMapHRef));
+    if(y1-y0<intMapHRef*0.12){y0=cy-intMapHRef*0.06;y1=cy+intMapHRef*0.06;}
+    s=Math.min(intMapWRef/(x1-x0),intMapHRef/(y1-y0))*0.88;
     tx=intMapWRef/2-s*(x0+x1)/2;
     ty=intMapHRef/2-s*(y0+y1)/2;
   }
