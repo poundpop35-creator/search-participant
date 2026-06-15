@@ -1307,7 +1307,6 @@ loadWIMapData();
       if (!canvas) return;
       const ctx = canvas.getContext('2d');
       const logo = new Image();
-      logo.crossOrigin = 'anonymous';
       logo.onload = () => {
         const s = Math.round(canvas.width * 0.22);
         const cx = canvas.width / 2, cy = canvas.height / 2;
@@ -1319,7 +1318,7 @@ loadWIMapData();
         ctx.restore();
         ctx.drawImage(logo, cx - s / 2, cy - s / 2, s, s);
       };
-      logo.src = '../logo-DMSc-MOPH%20(1)%20(2)_0.png';
+      logo.src = new URL('../logo-DMSc-MOPH (1) (2)_0.png', location.href).href;
     }, 80);
   };
   window.closeQRShare = function() {
