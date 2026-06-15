@@ -209,8 +209,7 @@ async function _verifyLogin(u,p){
           if(hash===acc.password_hash) return {ok:true,role:acc.role||'staff'};
           return {ok:false,msg:'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง'};
         }
-        // ไม่พบใน dynamic list → ไม่อนุญาต
-        return {ok:false,msg:'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง'};
+        // ไม่พบใน dynamic list → fallback ไปที่ hardcode (admin/super.staff)
       }
     }
   }catch(e){}
