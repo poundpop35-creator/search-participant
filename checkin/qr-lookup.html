@@ -306,6 +306,7 @@ async function _loadPageBg(){try{const r=await fetch(SB_URL+'/rest/v1/app_settin
 _loadPageBg();setInterval(_loadPageBg,30000);
 
 let activeYear = '2568';
+let ciTotalLoaded = 0, wiTotalLoaded = 0;
 (async function initCounts() {
   try {
     const H = { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY };
@@ -317,8 +318,8 @@ let activeYear = '2568';
       fetch(`${SB_URL}/rest/v1/participants?is_walkin=eq.true&event_year=eq.${yr}&select=id&limit=1`, { headers: { ...H, 'Prefer': 'count=exact' } }),
       fetch(`${SB_URL}/rest/v1/participants?is_walkin=eq.false&event_year=eq.${yr}&select=id&limit=1`, { headers: { ...H, 'Prefer': 'count=exact' } })
     ]);
-    const wiCnt = wiRes.headers.get('content-range'); if(wiCnt){ const t=parseInt(wiCnt.split('/')[1])||0; document.getElementById('wiCount').textContent=`(${t.toLocaleString()} คน)`; }
-    const ciCnt = ciRes.headers.get('content-range'); if(ciCnt){ const t=parseInt(ciCnt.split('/')[1])||0; document.getElementById('ciCount').textContent=`(${t.toLocaleString()} คน)`; }
+    const wiCnt = wiRes.headers.get('content-range'); if(wiCnt){ wiTotalLoaded=parseInt(wiCnt.split('/')[1])||0; document.getElementById('wiCount').innerHTML=`<span style="color:#16a34a;font-weight:600;">✅ โหลดข้อมูลสำเร็จ ${wiTotalLoaded.toLocaleString()} คน</span>`; }
+    const ciCnt = ciRes.headers.get('content-range'); if(ciCnt){ ciTotalLoaded=parseInt(ciCnt.split('/')[1])||0; document.getElementById('ciCount').innerHTML=`<span style="color:#16a34a;font-weight:600;">✅ โหลดข้อมูลสำเร็จ ${ciTotalLoaded.toLocaleString()} คน</span>`; }
   } catch(e) {}
 })();
 
@@ -534,7 +535,10 @@ function ciApplyFilters() {
     const as = ad === -1 ? CI_DEPT_ORDER.length : ad, bs = bd === -1 ? CI_DEPT_ORDER.length : bd;
     return as !== bs ? as - bs : a.name.localeCompare(b.name, 'th');
   });
-  document.getElementById('ciCount').textContent = `(${ciFiltered.length.toLocaleString()} คน)`;
+  const q2 = (document.getElementById('ciSearch').value || '').trim();
+  document.getElementById('ciCount').innerHTML = q2
+    ? `<span style="color:#64748b;">(ค้นหาพบ ${ciFiltered.length.toLocaleString()} คน)</span>`
+    : `<span style="color:#16a34a;font-weight:600;">✅ โหลดข้อมูลสำเร็จ ${(ciTotalLoaded||ciFiltered.length).toLocaleString()} คน</span>`;
   ciPage = 1;
   renderCITable();
 }
@@ -635,7 +639,10 @@ function wiApplyFilters() {
   if (!allWIData) return;
   const q = (document.getElementById('wiSearch').value || '').toLowerCase();
   wiFiltered = allWIData.filter(r => !q || r.name.toLowerCase().includes(q) || r.dept.toLowerCase().includes(q) || r.province.toLowerCase().includes(q));
-  document.getElementById('wiCount').textContent = `(${wiFiltered.length.toLocaleString()} คน)`;
+  const qw = (document.getElementById('wiSearch').value || '').trim();
+  document.getElementById('wiCount').innerHTML = qw
+    ? `<span style="color:#64748b;">(ค้นหาพบ ${wiFiltered.length.toLocaleString()} คน)</span>`
+    : `<span style="color:#16a34a;font-weight:600;">✅ โหลดข้อมูลสำเร็จ ${(wiTotalLoaded||wiFiltered.length).toLocaleString()} คน</span>`;
   wiPage = 1;
   renderWITable();
 }
