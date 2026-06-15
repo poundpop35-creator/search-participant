@@ -51,6 +51,7 @@
     .help-page-body p:last-child{margin-bottom:0;}
     .help-tag{display:inline-block;padding:2px 8px;border-radius:6px;font-size:0.72rem;font-weight:700;margin-right:4px;}
     .tag-admin{background:#fef3c7;color:#92400e;}
+    .tag-super{background:#fce7f3;color:#9d174d;}
     .tag-staff{background:#ede9fe;color:#4c1d95;}
     .tag-all{background:#dcfce7;color:#166534;}
     .help-table{width:100%;border-collapse:collapse;margin-top:6px;font-size:0.82rem;}
@@ -219,9 +220,10 @@ document.addEventListener('DOMContentLoaded', function() {
         <div class="help-page-body">
           <p>หน้าเข้าสู่ระบบสำหรับเจ้าหน้าที่และ Admin เท่านั้น</p>
           <table class="help-table">
-            <tr><th>บัญชี</th><th>รหัสผ่าน</th><th>สิทธิ์</th></tr>
-            <tr><td><strong>adminpound</strong></td><td>••••••••</td><td><span class="help-tag tag-admin">Admin</span> login ซ้ำได้ทุกเวลา</td></tr>
-            <tr><td>staff01–staff10</td><td>••••••••</td><td><span class="help-tag tag-staff">Staff</span> ล็อกซ้ำไม่ได้ใน 5 นาที</td></tr>
+            <tr><th>บัญชี</th><th>สิทธิ์</th><th>หมายเหตุ</th></tr>
+            <tr><td><strong>adminpound, adminplan</strong></td><td><span class="help-tag tag-admin">Admin</span></td><td>ทุกหน้า + Control Panel + ล้างข้อมูล · login ซ้ำได้ทุกเวลา</td></tr>
+            <tr><td><strong>super.staff</strong></td><td><span class="help-tag tag-super">Super Staff</span></td><td>ทุกหน้า ยกเว้น Control Panel · ล็อกซ้ำไม่ได้ใน 5 นาที</td></tr>
+            <tr><td>staff01–staff10</td><td><span class="help-tag tag-staff">Staff</span></td><td>สแกน · Live Dashboard · QR lookup เท่านั้น · ล็อกซ้ำไม่ได้ใน 5 นาที</td></tr>
           </table>
         </div>
       </div>
@@ -233,7 +235,7 @@ document.addEventListener('DOMContentLoaded', function() {
           <span class="help-page-url">dashboard.html</span>
         </div>
         <div class="help-page-body">
-          <p><span class="help-tag tag-admin">Admin</span> ใช้งานได้เต็มรูปแบบ <span class="help-tag tag-staff">Staff</span> ดูได้แต่ไม่สามารถล้างข้อมูลได้</p>
+          <p><span class="help-tag tag-admin">Admin</span> + <span class="help-tag tag-super">Super Staff</span> เข้าใช้งานได้ · <span class="help-tag tag-admin">Admin</span> เท่านั้นที่ล้างข้อมูลได้</p>
           <p>ดูสถิติการเช็คอินแบบละเอียด กรองตามวัน / ประเภท / หน่วยงาน</p>
           <p>🎨 เปลี่ยนธีมสี — กดปุ่ม 🎨 มุมขวาล่าง เลือกได้ 5 โทนสี (ทุก device เห็นพร้อมกัน)</p>
           <p>📤 ส่งออกข้อมูลเป็น Excel หรือ CSV ได้จากตารางแต่ละตัว</p>
@@ -275,7 +277,7 @@ document.addEventListener('DOMContentLoaded', function() {
           <span class="help-page-url">bag-dashboard.html</span>
         </div>
         <div class="help-page-body">
-          <p><span class="help-tag tag-staff">Staff</span> ใช้ติดตามจำนวนผู้มารับกระเป๋าก่อนวันงาน</p>
+          <p><span class="help-tag tag-admin">Admin</span> + <span class="help-tag tag-super">Super Staff</span> เข้าใช้งานได้ · ติดตามจำนวนผู้มารับกระเป๋าก่อนวันงาน</p>
           <p>🔢 นับจำนวนและดูรายชื่อผู้ที่มารับกระเป๋าแล้ว</p>
         </div>
       </div>
@@ -287,7 +289,7 @@ document.addEventListener('DOMContentLoaded', function() {
           <span class="help-page-url">presenter-dashboard.html</span>
         </div>
         <div class="help-page-body">
-          <p><span class="help-tag tag-staff">Staff</span> ดูสรุปและสถิติผู้ที่ลงทะเบียนนำเสนอผลงาน</p>
+          <p><span class="help-tag tag-admin">Admin</span> + <span class="help-tag tag-super">Super Staff</span> เข้าใช้งานได้ · ดูสรุปและสถิติผู้ที่ลงทะเบียนนำเสนอผลงาน</p>
           <p>แยกตามประเภทการนำเสนอ ดูรายชื่อและสถานะเช็คอิน</p>
         </div>
       </div>
