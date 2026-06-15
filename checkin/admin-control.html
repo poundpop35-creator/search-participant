@@ -294,6 +294,18 @@
       <div id="walkinSyncStatus" style="margin-top:10px;"></div>
     </div>
 
+    <!-- สลับปีงาน -->
+    <div class="card">
+      <div class="card-title">📅 เปลี่ยนปีที่ Staff เห็น</div>
+      <p style="font-size:0.82rem;color:#64748b;margin-bottom:14px;line-height:1.6;">
+        Staff ทุกคนจะเห็นข้อมูลของปีที่เลือก — เปลี่ยนได้ทุกเมื่อโดยไม่ลบข้อมูล
+      </p>
+      <div id="yearPills" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;min-height:40px;">
+        <span style="color:#94a3b8;font-size:0.82rem;">กำลังโหลด...</span>
+      </div>
+      <div id="switchYearStatus"></div>
+    </div>
+
     <!-- สร้างงานใหม่ -->
     <div class="card">
       <div class="card-title">🎉 สร้างงานประชุมใหม่ (ปีถัดไป)</div>
@@ -829,6 +841,43 @@ async function loadSettings(){
   const walkinUrl=await sbGetSetting('walkin_sheet_url');
   if(walkinUrl) document.getElementById('walkinUrl').value=walkinUrl;
   loadCurrentEvent();
+  loadYears();
+}
+
+async function loadYears(){
+  const el = document.getElementById('yearPills');
+  if(!el) return;
+  try{
+    const [activeYear, rows] = await Promise.all([
+      sbGetSetting('event_year'),
+      fetch(`${SB_URL}/rest/v1/participants?select=event_year&order=event_year.desc&limit=5000`,{headers:H}).then(r=>r.json())
+    ]);
+    const years=[...new Set((rows||[]).map(r=>r.event_year).filter(Boolean))].sort((a,b)=>b.localeCompare(a));
+    if(!years.length){
+      el.innerHTML='<span style="color:#94a3b8;font-size:0.82rem;">ยังไม่มีข้อมูลในระบบ (นำเข้าข้อมูลก่อน)</span>';
+      return;
+    }
+    el.innerHTML=years.map(y=>{
+      const active=y===activeYear;
+      return `<button onclick="switchYear('${y}')" style="padding:10px 20px;border-radius:10px;border:2px solid ${active?'#0d2b6b':'#c7d7f5'};background:${active?'#0d2b6b':'#fff'};color:${active?'#fff':'#0d2b6b'};font-family:'Sarabun',sans-serif;font-size:0.95rem;font-weight:700;cursor:pointer;">
+        ${active?'✓ ':''}พ.ศ. ${y}${active?' <span style="font-size:0.72rem;font-weight:400;opacity:0.8;">(ใช้งานอยู่)</span>':''}
+      </button>`;
+    }).join('');
+  }catch(e){
+    el.innerHTML='<span style="color:#dc2626;font-size:0.82rem;">โหลดปีไม่ได้ กรุณารีเฟรช</span>';
+  }
+}
+
+async function switchYear(year){
+  setStatus('switchYearStatus','info','กำลังเปลี่ยนปี...');
+  try{
+    await sbSetSetting('event_year', year);
+    setStatus('switchYearStatus','ok',`✅ เปลี่ยนเป็น พ.ศ. ${year} แล้ว — Staff จะเห็นข้อมูลปีนี้ทันที`);
+    loadCurrentEvent();
+    loadYears();
+  }catch(e){
+    setStatus('switchYearStatus','error','เกิดข้อผิดพลาด กรุณาลองใหม่');
+  }
 }
 
 async function saveBg(){
@@ -976,6 +1025,7 @@ async function loadCurrentEvent(){
 
 // โหลด event banner ตอนเปิดหน้า
 loadCurrentEvent();
+loadYears();
 </script>
 </body>
 </html>
