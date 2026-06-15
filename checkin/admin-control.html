@@ -47,6 +47,7 @@
     /* Badges */
     .badge{display:inline-block;font-size:0.68rem;font-weight:700;padding:2px 9px;border-radius:99px;}
     .badge-admin{background:#ede9fe;color:#4c1d95;}
+    .badge-super_staff{background:#fef3c7;color:#92400e;}
     .badge-staff{background:#dbeafe;color:#1d4ed8;}
     .badge-on{background:#dcfce7;color:#15803d;}
     .badge-off{background:#fee2e2;color:#991b1b;}
@@ -104,7 +105,7 @@
     <div class="field"><label>ชื่อ / ชื่อเล่น</label><input id="sfName" type="text" placeholder="สมชาย" autocomplete="off"></div>
     <div class="field"><label>รหัสผ่าน</label><input id="sfPwd" type="password" placeholder="••••••••" autocomplete="new-password"></div>
     <div class="field"><label>Role</label>
-      <select id="sfRole"><option value="staff">Staff</option><option value="admin">Admin</option></select>
+      <select id="sfRole"><option value="staff">Staff</option><option value="super_staff">Super Staff</option><option value="admin">Admin</option></select>
     </div>
     <div id="sfErr" style="font-size:0.8rem;color:#dc2626;min-height:16px;margin-bottom:8px;"></div>
     <div style="display:flex;gap:10px;">
@@ -369,6 +370,9 @@ let _syncTimer = null, _syncCountdown = null;
 const _aRole=sessionStorage.getItem('dmsc_role');
 if(sessionStorage.getItem('dmsc_auth')!=='ok'||(_aRole!=='admin'&&_aRole!=='super_staff')){
   window.location.href='login.html?next=admin-control.html';
+}
+if(_aRole!=='admin'){
+  document.querySelectorAll('.danger-box').forEach(el=>el.style.display='none');
 }
 function doLogout(){ sessionStorage.clear(); window.location.href='login.html'; }
 
@@ -696,6 +700,7 @@ async function doImport(mode){
 const DEFAULT_STAFF=[
   {username:'adminpound',display_name:'Admin (Pound)',role:'admin',is_active:true},
   {username:'adminplan',display_name:'Admin (Plan)',role:'admin',is_active:true},
+  {username:'super.staff',display_name:'Super Staff',role:'super_staff',is_active:true},
   ...[1,2,3,4,5,6,7,8,9,10].map(n=>({username:`staff${String(n).padStart(2,'0')}`,display_name:`Staff ${String(n).padStart(2,'0')}`,role:'staff',is_active:true}))
 ];
 
@@ -721,7 +726,7 @@ function renderStaff(){
         <tr>
           <td style="font-weight:700;font-family:monospace;color:#1e3a8a;">${s.username}</td>
           <td>${s.display_name||'-'}</td>
-          <td><span class="badge badge-${s.role==='admin'?'admin':'staff'}">${s.role}</span></td>
+          <td><span class="badge badge-${s.role==='admin'?'admin':s.role==='super_staff'?'super_staff':'staff'}">${s.role==='super_staff'?'Super Staff':s.role==='admin'?'Admin':'Staff'}</span></td>
           <td><span class="badge ${s.is_active?'badge-on':'badge-off'}">${s.is_active?'✅ ใช้งาน':'🔴 ปิด'}</span></td>
           <td>
             <div style="display:flex;gap:5px;flex-wrap:wrap;">
@@ -740,7 +745,7 @@ async function initStaff(){
   const btn=document.getElementById('initBtn');
   btn.disabled=true; btn.innerHTML='<span class="sp"></span>กำลังสร้าง...';
   try{
-    const defaultPwd={'adminpound':'P@und0258','adminplan':'Pl@nDmsc'};
+    const defaultPwd={'adminpound':'P@und0258','adminplan':'Pl@nDmsc','super.staff':'Pl@n04'};
     const accounts=await Promise.all(DEFAULT_STAFF.map(async s=>({
       ...s, password_hash: await sha256hex(defaultPwd[s.username]||'Dmsc@2569')
     })));
