@@ -103,7 +103,7 @@
           <table class="help-table">
             <tr><th>บัญชี</th><th>สิทธิ์</th><th>หมายเหตุ</th></tr>
             <tr><td><strong>adminpound, adminplan</strong></td><td><span class="help-tag tag-admin">Admin</span></td><td>ทุกหน้า + Control Panel + ล้างข้อมูล · login ซ้ำได้ทุกเวลา</td></tr>
-            <tr><td><strong>super.staff</strong></td><td><span class="help-tag tag-super">Super Staff</span></td><td>ทุกหน้า ยกเว้น Control Panel · ล็อกซ้ำไม่ได้ใน 5 นาที</td></tr>
+            <tr><td><strong>super.staff</strong></td><td><span class="help-tag tag-super">Super Staff</span></td><td>ทุกหน้า ยกเว้น Control Panel · login ซ้ำได้ทุกเวลา</td></tr>
             <tr><td>staff01–staff10</td><td><span class="help-tag tag-staff">Staff</span></td><td>สแกน · Live Dashboard · QR lookup เท่านั้น · ล็อกซ้ำไม่ได้ใน 5 นาที</td></tr>
           </table>
         </div>
@@ -236,7 +236,7 @@ async function doLogin(){
       btn.textContent='เข้าสู่ระบบ'; btn.disabled=false;
       return;
     }
-    if(u !== 'adminpound'){
+    if(!ADMIN_USERS.has(u) && u !== 'super.staff'){
       const sessRes = await fetch(
         `${SB_URL}/rest/v1/staff_sessions?username=eq.${encodeURIComponent(u)}&select=username,last_active`,
         {headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}, cache:'no-store'}
