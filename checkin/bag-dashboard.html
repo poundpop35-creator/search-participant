@@ -141,6 +141,8 @@
       <div class="stat-card total"><div class="stat-label">มีสิทธิ์รับกระเป๋าทั้งหมด</div><div class="stat-num" id="sTotal">-</div><div class="stat-sub">ราย</div></div>
       <div class="stat-card received"><div class="stat-label">รับแล้ว</div><div class="stat-num" id="sReceived">-</div><div class="stat-sub" id="sReceivedPct">-</div></div>
       <div class="stat-card pending"><div class="stat-label">ยังไม่รับ</div><div class="stat-num" id="sPending">-</div><div class="stat-sub" id="sPendingPct">-</div></div>
+      <div class="stat-card" style="border-left:4px solid #16a34a;"><div class="stat-label">กระเป๋าอย่างเดียว 🟢</div><div class="stat-num" id="s1Item" style="color:#16a34a;">-</div><div class="stat-sub" id="s1ItemSub">ราย (รับแล้ว -)</div></div>
+      <div class="stat-card" style="border-left:4px solid #ea580c;"><div class="stat-label">กระเป๋า+ของระลึกอื่น 🟠</div><div class="stat-num" id="s2Item" style="color:#ea580c;">-</div><div class="stat-sub" id="s2ItemSub">ราย (รับแล้ว -)</div></div>
     </div>
     <div class="filter-bar">
       <div class="filter-group">
@@ -478,6 +480,16 @@ async function loadAll(){
     document.getElementById('sPending').textContent=pendingCount.toLocaleString();
     document.getElementById('sReceivedPct').textContent=total?`${Math.round(receivedCount/total*100)}% ของทั้งหมด`:'-';
     document.getElementById('sPendingPct').textContent=total?`${Math.round(pendingCount/total*100)}% ของทั้งหมด`:'-';
+
+    // สถิติของ 1 อย่าง vs 2 อย่าง (จากข้อมูลดิบก่อน filter)
+    const raw1=res.filter(p=>{const isIn=(p.internal_external||'').includes('ภายใน');const pt=p.participation_type||'';const eligible=isIn&&(pt.includes('ผู้เข้าร่วมงาน')||pt.includes('ผู้บริหาร')||pt==='ผู้ส่งผลงาน');if(!eligible)return false;const it=p.items||'';const hasBag=it.includes('กระเป๋า');const other=it.replace('กระเป๋า','').replace(/\+\+/g,'+').replace(/^\+|\+$/g,'').trim();return hasBag&&!other;});
+    const raw2=res.filter(p=>{const isIn=(p.internal_external||'').includes('ภายใน');const pt=p.participation_type||'';const eligible=isIn&&(pt.includes('ผู้เข้าร่วมงาน')||pt.includes('ผู้บริหาร')||pt==='ผู้ส่งผลงาน');if(!eligible)return false;const it=p.items||'';const hasBag=it.includes('กระเป๋า');const other=it.replace('กระเป๋า','').replace(/\+\+/g,'+').replace(/^\+|\+$/g,'').trim();return hasBag&&!!other;});
+    const rec1=raw1.filter(p=>p.bag_received===true||p.bag_received===1||p.bag_received==='true').length;
+    const rec2=raw2.filter(p=>p.bag_received===true||p.bag_received===1||p.bag_received==='true').length;
+    document.getElementById('s1Item').textContent=raw1.length.toLocaleString();
+    document.getElementById('s1ItemSub').textContent=`ราย (รับแล้ว ${rec1.toLocaleString()})`;
+    document.getElementById('s2Item').textContent=raw2.length.toLocaleString();
+    document.getElementById('s2ItemSub').textContent=`ราย (รับแล้ว ${rec2.toLocaleString()})`;
 
     // --- Shirt data ---
     allShirtData = res.filter(p => p.shirt_size && p.shirt_size.trim()).map(p => {
