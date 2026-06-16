@@ -480,7 +480,7 @@
         if(!isBagEligible){
           showModal('error','ไม่มีสิทธิ์','ท่านไม่มีสิทธิ์รับกระเป๋าก่อนวันงาน',fullName,[
             {label:'ประเภท',val:pType,style:'normal'}
-          ]);
+          ],p.dept||'');
           return;
         }
         if(p.bag_received===true){
@@ -488,7 +488,7 @@
             {label:'ประเภท',val:pType,style:'normal'},
             {label:'รับไปเมื่อ',val:fmtShort(p.bag_received_date)||(p.bag_received_date||'(ไม่ทราบวันที่)'),style:'done'},
             {label:'สถานะ',val:'❌ ไม่สามารถรับซ้ำได้',style:'warn'}
-          ]);
+          ],p.dept||'');
           return;
         }
         const today=new Date().toISOString();
@@ -505,14 +505,14 @@
             {label:'รับไปเมื่อ',val:fmtShort(today),style:'ok'},
             {label:'สถานะกระเป๋า',val:'✓ รับกระเป๋าสำเร็จ',style:'ok'}
           ];
-          if(_hasBag){const _bc=_otherItems?'#ea580c':'#16a34a';const _bt=_otherItems?'🟠(สีส้ม)':'🟢(สีเขียว)';bagRows.push({labelHtml:`ของที่ระลึก (1) <span style="color:${_bc};font-weight:700">กระเป๋า ${_bt}</span>`,label:`ของที่ระลึก (1) กระเป๋า ${_bt}`,val:'รับพร้อมกระเป๋า',style:'ok'});}
-          if(_otherItems) bagRows.push({labelHtml:`ของที่ระลึก (2) <span style="color:#2563eb;font-weight:700">${_otherItems}</span>`,label:`ของที่ระลึก (2) ${_otherItems}`,val:'อยู่ในกระเป๋า',style:'ok'});
-          if(_hasShirt) bagRows.push({labelHtml:`เสื้อแจ็คเก็ต <span style="color:#0891b2;font-weight:700">(${p.shirt_size})</span>`,label:`เสื้อ (${p.shirt_size})`,val:p.shirt_received===true?'รับไปแล้ว ✓':'ยังไม่ได้รับ',style:p.shirt_received===true?'done':'normal',sub:p.shirt_received===true?fmtShort(p.shirt_received_date):null});
+          if(_hasBag) bagRows.push({label:'ของที่ระลึก (1) กระเป๋า',val:'รับแล้ว ✓',style:'ok'});
+          if(_otherItems) bagRows.push({label:`ของที่ระลึก (2) ${_otherItems}`,val:'อยู่ในกระเป๋า',style:'ok'});
+          if(_hasShirt) bagRows.push({label:`ของที่ระลึก (3) เสื้อแจ็คเก็ต (${p.shirt_size})`,val:p.shirt_received===true?'รับไปแล้ว ✓':'ยังไม่ได้รับ',style:p.shirt_received===true?'done':'normal',sub:p.shirt_received===true?fmtShort(p.shirt_received_date):null});
           const _undoBag=async()=>{
             await sbFetch(`/rest/v1/participants?id=eq.${p.id}`,'PATCH',{bag_received:false,bag_received_date:null});
             todayCount=Math.max(0,todayCount-1);document.getElementById('count').textContent=todayCount.toLocaleString();
           };
-          showModal('success','รับกระเป๋าสำเร็จ','บันทึกการรับกระเป๋าเรียบร้อย',fullName,bagRows,null,_undoBag);
+          showModal('success','รับกระเป๋าสำเร็จ','บันทึกการรับกระเป๋าเรียบร้อย',fullName,bagRows,p.dept||'',_undoBag);
           if(p.shirt_size&&p.shirt_received!==true){
             const det=document.getElementById('modalDetail');
             det.style.display='block';
@@ -533,15 +533,15 @@
         if(!p.shirt_size||!p.shirt_size.trim()){
           showModal('error','ไม่มีสิทธิ์','ท่านไม่มีสิทธิ์รับเสื้อก่อนวันงาน',fullName,[
             {label:'ประเภท',val:pType,style:'normal'}
-          ]);
+          ],p.dept||'');
           return;
         }
         if(p.shirt_received===true){
           showModal('warning','รับเสื้อแล้ว','บุคคลนี้รับเสื้อไปแล้ว',fullName,[
-            {label:'ไซต์เสื้อ',val:p.shirt_size,style:'normal'},
+            {label:'ของที่ระลึก (3) เสื้อแจ็คเก็ต',val:p.shirt_size,style:'normal'},
             {label:'รับไปเมื่อ',val:fmtShort(p.shirt_received_date)||(p.shirt_received_date||'(ไม่ทราบวันที่)'),style:'done'},
             {label:'สถานะ',val:'❌ ไม่สามารถรับซ้ำได้',style:'warn'}
-          ]);
+          ],p.dept||'');
           return;
         }
         const today=new Date().toISOString();
@@ -550,15 +550,20 @@
         if(shirtRes.ok||shirtRes.status===204){
           todayCount++;
           document.getElementById('count').textContent=todayCount.toLocaleString();
+          const _sItems=p.items||'';
+          const _sHasBag=_sItems.includes('กระเป๋า');
+          const _sOther=_sItems.replace('กระเป๋า','').replace(/\+\+/g,'+').replace(/^\+|\+$/g,'').trim();
           const _undoShirt=async()=>{
             await sbFetch(`/rest/v1/participants?id=eq.${p.id}`,'PATCH',{shirt_received:false,shirt_received_date:null});
             todayCount=Math.max(0,todayCount-1);document.getElementById('count').textContent=todayCount.toLocaleString();
           };
-          showModal('success','รับเสื้อสำเร็จ','บันทึกการรับเสื้อเรียบร้อย',fullName,[
-            {label:'ไซต์เสื้อ',val:p.shirt_size,style:'ok'},
-            {label:'รับไปเมื่อ',val:fmtShort(today),style:'ok'},
-            {label:'สถานะเสื้อ',val:'✓ รับเสื้อสำเร็จ',style:'ok'}
-          ],null,_undoShirt);
+          const shirtRows=[
+            {label:'รับไปเมื่อ',val:fmtShort(today),style:'ok'}
+          ];
+          if(_sHasBag) shirtRows.push({label:'ของที่ระลึก (1) กระเป๋า',val:p.bag_received===true?'รับไปแล้ว ✓':'ยังไม่ได้รับ',style:p.bag_received===true?'done':'normal',sub:p.bag_received===true?fmtShort(p.bag_received_date):null});
+          if(_sOther) shirtRows.push({label:`ของที่ระลึก (2) ${_sOther}`,val:p.bag_received===true?'รับไปแล้ว ✓':'ยังไม่ได้รับ',style:p.bag_received===true?'done':'normal'});
+          shirtRows.push({label:`ของที่ระลึก (3) เสื้อแจ็คเก็ต (${p.shirt_size})`,val:'รับแล้ว ✓',style:'ok'});
+          showModal('success','รับเสื้อสำเร็จ','บันทึกการรับเสื้อเรียบร้อย',fullName,shirtRows,p.dept||'',_undoShirt);
           setStatus('รับเสื้อสำเร็จ');
         } else {
           showModal('error','เกิดข้อผิดพลาด','ไม่สามารถบันทึกได้','',null);
