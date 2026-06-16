@@ -63,7 +63,10 @@
     .detail-val.done{color:var(--red);}
     .detail-val.ok{color:var(--green);}
     .detail-val.warn{color:var(--yellow);}
-    .btn-ok{width:100%;padding:13px;border-radius:12px;border:none;font-family:'Sarabun',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;}
+    .modal-btns{display:flex;gap:10px;margin-top:0;}
+    .btn-ok{flex:1;padding:13px;border-radius:12px;border:none;font-family:'Sarabun',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;}
+    .btn-cancel{flex:0 0 auto;padding:13px 18px;border-radius:12px;border:1.5px solid #e2e8f0;background:white;font-family:'Sarabun',sans-serif;font-size:1rem;font-weight:600;cursor:pointer;color:#64748b;}
+    .btn-cancel:hover{background:#f8fafc;}
     .btn-ok.success{background:var(--green);color:white;}
     .btn-ok.warning{background:var(--yellow);color:white;}
     .btn-ok.error{background:var(--red);color:white;}
@@ -91,7 +94,10 @@
     <div class="modal-name"   id="modalName"></div>
     <div class="modal-dept"   id="modalDept"   style="display:none"></div>
     <div class="modal-detail" id="modalDetail" style="display:none"></div>
-    <button class="btn-ok" id="btnOk" onclick="closeModal()">ตกลง</button>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal()">ยกเลิก</button>
+      <button class="btn-ok" id="btnOk" onclick="closeModal()">ตกลง</button>
+    </div>
   </div>
 </div>
 
