@@ -95,7 +95,7 @@
     <div class="modal-dept"   id="modalDept"   style="display:none"></div>
     <div class="modal-detail" id="modalDetail" style="display:none"></div>
     <div class="modal-btns">
-      <button class="btn-cancel" onclick="closeModal()">ยกเลิก</button>
+      <button class="btn-cancel" onclick="cancelModal()" style="display:none;">ยกเลิก</button>
       <button class="btn-ok" id="btnOk" onclick="closeModal()">ตกลง</button>
     </div>
   </div>
@@ -508,7 +508,11 @@
           if(_hasBag){const _bc=_otherItems?'#ea580c':'#16a34a';const _bt=_otherItems?'🟠(สีส้ม)':'🟢(สีเขียว)';bagRows.push({labelHtml:`ของที่ระลึก (1) <span style="color:${_bc};font-weight:700">กระเป๋า ${_bt}</span>`,label:`ของที่ระลึก (1) กระเป๋า ${_bt}`,val:'รับพร้อมกระเป๋า',style:'ok'});}
           if(_otherItems) bagRows.push({labelHtml:`ของที่ระลึก (2) <span style="color:#2563eb;font-weight:700">${_otherItems}</span>`,label:`ของที่ระลึก (2) ${_otherItems}`,val:'อยู่ในกระเป๋า',style:'ok'});
           if(_hasShirt) bagRows.push({labelHtml:`เสื้อแจ็คเก็ต <span style="color:#0891b2;font-weight:700">(${p.shirt_size})</span>`,label:`เสื้อ (${p.shirt_size})`,val:p.shirt_received===true?'รับไปแล้ว ✓':'ยังไม่ได้รับ',style:p.shirt_received===true?'done':'normal',sub:p.shirt_received===true?fmtShort(p.shirt_received_date):null});
-          showModal('success','รับกระเป๋าสำเร็จ','บันทึกการรับกระเป๋าเรียบร้อย',fullName,bagRows);
+          const _undoBag=async()=>{
+            await sbFetch(`/rest/v1/participants?id=eq.${p.id}`,'PATCH',{bag_received:false,bag_received_date:null});
+            todayCount=Math.max(0,todayCount-1);document.getElementById('count').textContent=todayCount.toLocaleString();
+          };
+          showModal('success','รับกระเป๋าสำเร็จ','บันทึกการรับกระเป๋าเรียบร้อย',fullName,bagRows,null,_undoBag);
           if(p.shirt_size&&p.shirt_received!==true){
             const det=document.getElementById('modalDetail');
             det.style.display='block';
@@ -546,11 +550,15 @@
         if(shirtRes.ok||shirtRes.status===204){
           todayCount++;
           document.getElementById('count').textContent=todayCount.toLocaleString();
+          const _undoShirt=async()=>{
+            await sbFetch(`/rest/v1/participants?id=eq.${p.id}`,'PATCH',{shirt_received:false,shirt_received_date:null});
+            todayCount=Math.max(0,todayCount-1);document.getElementById('count').textContent=todayCount.toLocaleString();
+          };
           showModal('success','รับเสื้อสำเร็จ','บันทึกการรับเสื้อเรียบร้อย',fullName,[
             {label:'ไซต์เสื้อ',val:p.shirt_size,style:'ok'},
             {label:'รับไปเมื่อ',val:fmtShort(today),style:'ok'},
             {label:'สถานะเสื้อ',val:'✓ รับเสื้อสำเร็จ',style:'ok'}
-          ]);
+          ],null,_undoShirt);
           setStatus('รับเสื้อสำเร็จ');
         } else {
           showModal('error','เกิดข้อผิดพลาด','ไม่สามารถบันทึกได้','',null);
@@ -599,7 +607,14 @@
           Object.assign(p,autoReceive);
         }
         const timeNow=new Date(nowISO).toLocaleTimeString('th-TH',{timeZone:'Asia/Bangkok'});
-        showModal('success','เช็คอินสำเร็จ',`วันที่ ${day} — ${DAY_TH[parseInt(day)]}`,fullName,buildSuccessRows(timeNow,p,isFirst,isWalkin),p.dept||'');
+        const _undoCheckin=async()=>{
+          await sbFetch(`/rest/v1/checkins?participant_id=eq.${p.id}&day=eq.${day}&event_year=eq.${encodeURIComponent(activeYear)}`,'DELETE');
+          if(Object.keys(autoReceive).length>0){const rv={};if(autoReceive.bag_received){rv.bag_received=false;rv.bag_received_date=null;}if(autoReceive.shirt_received){rv.shirt_received=false;rv.shirt_received_date=null;}await sbFetch(`/rest/v1/participants?id=eq.${p.id}`,'PATCH',rv).catch(()=>{});}
+          todayCount=Math.max(0,todayCount-1);staffCount=Math.max(0,staffCount-1);
+          document.getElementById('count').textContent=todayCount.toLocaleString();
+          document.getElementById('staffCount').textContent=staffCount.toLocaleString();
+        };
+        showModal('success','เช็คอินสำเร็จ',`วันที่ ${day} — ${DAY_TH[parseInt(day)]}`,fullName,buildSuccessRows(timeNow,p,isFirst,isWalkin),p.dept||'',_undoCheckin);
         setStatus('เช็คอินสำเร็จ');
       } else {
         const err=await insertRes.json().catch(()=>({}));
@@ -665,7 +680,10 @@
     return rows;
   }
 
-  function showModal(type,status,title,name,rows,dept){
+  let pendingUndo=null;
+
+  function showModal(type,status,title,name,rows,dept,undoFn){
+    pendingUndo=undoFn||null;
     document.getElementById('modalStatus').textContent=status;
     document.getElementById('modalStatus').className='modal-status '+type;
     document.getElementById('modalTitle').textContent=title;
@@ -677,12 +695,27 @@
     else{deptEl.style.display='none';}
     document.getElementById('btnOk').className='btn-ok '+type;
     document.getElementById('btnOk').style.display=type==='loading'?'none':'block';
+    const cancelBtn=document.querySelector('.btn-cancel');
+    if(cancelBtn) cancelBtn.style.display=undoFn?'':'none';
     const det=document.getElementById('modalDetail');
     if(rows&&rows.length>0){
       det.style.display='block';
       det.innerHTML=rows.map(r=>`<div class="detail-row" style="${r.sub?'align-items:flex-start':''}"><span class="detail-label" style="${r.sub?'padding-top:2px':''}"><span>${r.labelHtml||r.label}</span></span><span style="text-align:right;"><span class="detail-val ${r.style==='done'?'done':r.style==='ok'?'ok':r.style==='warn'?'warn':''}">${r.val}</span>${r.sub?`<br><span style="font-size:0.7rem;color:#94a3b8;font-weight:400;">${r.sub}</span>`:''}</span></div>`).join('');
     } else det.style.display='none';
     document.getElementById('modalOverlay').classList.remove('hidden');
+  }
+
+  async function cancelModal(){
+    if(!pendingUndo){closeModal();return;}
+    const cancelBtn=document.querySelector('.btn-cancel');
+    const okBtn=document.getElementById('btnOk');
+    if(cancelBtn){cancelBtn.disabled=true;cancelBtn.textContent='⏳ กำลังยกเลิก...';}
+    if(okBtn) okBtn.disabled=true;
+    try{await pendingUndo();}catch(e){console.error('undo error',e);}
+    pendingUndo=null;
+    if(cancelBtn){cancelBtn.disabled=false;cancelBtn.textContent='ยกเลิก';}
+    if(okBtn) okBtn.disabled=false;
+    closeModal();
   }
 
   function showVIPModal(p, fullName){
