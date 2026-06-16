@@ -573,7 +573,22 @@
 
       // โหมดเช็คอิน
       if(VIP_DEPTS.has(p.dept)){ showVIPModal(p, fullName); return; }
-      if(EXEMPT_DEPTS.has(p.dept)){ showStaffExemptModal(p, fullName); return; }
+      if(EXEMPT_DEPTS.has(p.dept)){
+        if(isWalkin){
+          const _exTodayRes=await sbFetch(`/rest/v1/checkins?participant_id=eq.${p.id}&day=eq.${day}&event_year=eq.${encodeURIComponent(activeYear)}&select=id`,'GET');
+          const _exExisting=await _exTodayRes.json();
+          if(!_exExisting||_exExisting.length===0){
+            const _exNow=new Date().toISOString();
+            const _exIns=await sbFetch('/rest/v1/checkins','POST',{participant_id:p.id,day:parseInt(day),checkin_time:_exNow,scanned_by:sessionStorage.getItem('dmsc_user')||'unknown',event_year:activeYear});
+            if(_exIns.ok||_exIns.status===201){
+              todayCount++;staffCount++;
+              document.getElementById('count').textContent=todayCount.toLocaleString();
+              document.getElementById('staffCount').textContent=staffCount.toLocaleString();
+            }
+          }
+        }
+        showStaffExemptModal(p, fullName); return;
+      }
       const checkTodayRes=await sbFetch(`/rest/v1/checkins?participant_id=eq.${p.id}&day=eq.${day}&event_year=eq.${encodeURIComponent(activeYear)}&select=id,checkin_time,scanned_by`,'GET');
       const existingToday=await checkTodayRes.json();
       if(existingToday&&existingToday.length>0){
