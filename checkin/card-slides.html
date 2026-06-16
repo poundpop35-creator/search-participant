@@ -335,9 +335,9 @@ body::before{
   <h1 class="title-main">ตัวอย่างการ์ด<br>ทุกระบบ ทุกกรณี</h1>
   <p class="title-sub">คู่มืออ้างอิงสำหรับเจ้าหน้าที่ประจำจุด</p>
   <div class="title-pills">
-    <div class="title-pill tp-bag">🎒 ระบบรับกระเป๋า <b>8 กรณี</b></div>
-    <div class="title-pill tp-shirt">👕 ระบบรับเสื้อ <b>6 กรณี</b></div>
-    <div class="title-pill tp-checkin">📋 ระบบเช็คอิน <b>9 กรณี</b></div>
+    <div class="title-pill tp-checkin" style="cursor:pointer;" onclick="goToSys('checkin')">📋 ระบบเช็คอิน <b>9 กรณี</b></div>
+    <div class="title-pill tp-bag" style="cursor:pointer;" onclick="goToSys('bag')">🎒 ระบบรับกระเป๋า <b>8 กรณี</b></div>
+    <div class="title-pill tp-shirt" style="cursor:pointer;" onclick="goToSys('shirt')">👕 ระบบรับเสื้อ <b>6 กรณี</b></div>
   </div>
   <div class="title-hint">กด ← → หรือปุ่มด้านล่างเพื่อเลื่อนสไลด์</div>
 </div>
@@ -375,6 +375,248 @@ body::before{
     <tr><td>👥 กองแผนงาน (ลงทะเบียนล่วงหน้า)</td><td class="no">❌ ไม่นับ</td><td>การ์ด Staff สีน้ำเงิน</td></tr>
     <tr><td>👥 กองแผนงาน (Walk-in)</td><td class="yes">✅ นับ</td><td>การ์ด Staff สีน้ำเงิน</td></tr>
   </table></div>
+</div>
+</div>
+
+<!-- ════════ CHECK-IN SLIDES ════════ -->
+
+<!-- ci-1 -->
+<div class="slide" data-sys="checkin">
+<div class="card-wrap">
+  <div class="info-panel">
+    <div class="case-num"><span class="sys-dot sd-checkin"></span>ระบบเช็คอิน · 1/9</div>
+    <div class="info-title">🎖️ VIP<br>(อธิบดี / รองอธิบดี)</div>
+    <div class="info-desc">dept ตรงกับ VIP_DEPTS<br>ยกเว้นเสมอ ไม่นับในระบบ</div>
+    <div class="info-note">ไม่บันทึก DB<br>ไม่มีปุ่มยกเลิก</div>
+  </div>
+  <div class="modal-stage">
+    <div class="modal-box">
+      <div class="modal-head"><span class="mbadge mb-vip">🎖️ VIP</span></div>
+      <div class="modal-title">ได้รับการยกเว้น (ไม่ต้องเช็คอิน)</div>
+      <div class="modal-name">นพ. สุรพงษ์ วิเชียร</div>
+      <div class="modal-divider"></div>
+      <div class="modal-rows">
+        <div class="row"><span class="rl">ตำแหน่ง</span><span class="rv pur">อธิบดีกรมวิทยาศาสตร์การแพทย์</span></div>
+      </div>
+      <div class="modal-note mn-purple">หากต้องการสิ่งใดเพิ่มเติม<br>ติดต่อ กองแผนงานและวิชาการ</div>
+      <div class="modal-actions"><button class="mok vip">ตกลง</button></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ci-2 -->
+<div class="slide" data-sys="checkin">
+<div class="card-wrap">
+  <div class="info-panel">
+    <div class="case-num"><span class="sys-dot sd-checkin"></span>ระบบเช็คอิน · 2/9</div>
+    <div class="info-title">👥 กองแผนงาน<br>(ลงทะเบียนล่วงหน้า)</div>
+    <div class="info-desc">is_walkin = false<br>dept = กองแผนงานฯ<br>→ ขึ้นการ์ด Staff <b>แต่ไม่นับ</b></div>
+    <div class="info-note">ไม่บันทึก DB<br>ไม่มีปุ่มยกเลิก</div>
+  </div>
+  <div class="modal-stage">
+    <div class="modal-box">
+      <div class="modal-head"><span class="mbadge mb-staff">👥 Staff</span></div>
+      <div class="modal-title">ได้รับการยกเว้น (ไม่ต้องเช็คอิน)</div>
+      <div class="modal-name">นางสาว ปนัดดา สิงห์ชัย</div>
+      <div class="modal-divider"></div>
+      <div class="modal-rows">
+        <div class="row"><span class="rl">ตำแหน่ง</span><span class="rv nor">นักวิเคราะห์นโยบายและแผน</span></div>
+        <div class="row"><span class="rl">หน่วยงาน</span><span class="rv nor">กองแผนงานและวิชาการ</span></div>
+      </div>
+      <div class="modal-note mn-blue">มีข้อสงสัยเพิ่มเติม<br>ติดต่อ กองแผนงานและวิชาการ</div>
+      <div class="modal-actions"><button class="mok staff">ตกลง</button></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ci-3 -->
+<div class="slide" data-sys="checkin">
+<div class="card-wrap">
+  <div class="info-panel">
+    <div class="case-num"><span class="sys-dot sd-checkin"></span>ระบบเช็คอิน · 3/9</div>
+    <div class="info-title">👥 กองแผนงาน Walk-in<br>(การ์ดเหมือนกัน — แต่นับ)</div>
+    <div class="info-desc">is_walkin = true<br>dept = กองแผนงานฯ<br>→ บันทึก checkin + นับ count</div>
+    <div class="info-note">✅ บันทึก DB แล้ว<br>count เพิ่มขึ้น 1<br>ไม่มีปุ่มยกเลิก</div>
+  </div>
+  <div class="modal-stage">
+    <div class="modal-box">
+      <div class="modal-head"><span class="mbadge mb-staff">👥 Staff</span></div>
+      <div class="modal-title">ได้รับการยกเว้น (ไม่ต้องเช็คอิน)</div>
+      <div class="modal-name">นาย ชาติชาย พรมมา</div>
+      <div class="modal-divider"></div>
+      <div class="modal-rows">
+        <div class="row"><span class="rl">ตำแหน่ง</span><span class="rv nor">Walk-in</span></div>
+        <div class="row"><span class="rl">หน่วยงาน</span><span class="rv nor">กองแผนงานและวิชาการ</span></div>
+      </div>
+      <div class="modal-note mn-blue">มีข้อสงสัยเพิ่มเติม<br>ติดต่อ กองแผนงานและวิชาการ</div>
+      <div class="modal-note mn-green">✅ บันทึกและนับในระบบแล้ว</div>
+      <div class="modal-actions"><button class="mok staff">ตกลง</button></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ci-4 -->
+<div class="slide" data-sys="checkin">
+<div class="card-wrap">
+  <div class="info-panel">
+    <div class="case-num"><span class="sys-dot sd-checkin"></span>ระบบเช็คอิน · 4/9</div>
+    <div class="info-title">❌ ไม่พบในระบบ</div>
+    <div class="info-desc">ค้นหาด้วย id_card / passport ไม่พบใน participants เลย</div>
+    <div class="info-note">ไม่มีปุ่มยกเลิก</div>
+  </div>
+  <div class="modal-stage">
+    <div class="modal-box">
+      <div class="modal-head"><span class="mbadge mb-error">❌ ไม่พบข้อมูล</span></div>
+      <div class="modal-title">ไม่พบข้อมูลในระบบ</div>
+      <div style="height:12px;"></div>
+      <div class="modal-actions"><button class="mok error">ตกลง</button></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ci-5 -->
+<div class="slide" data-sys="checkin">
+<div class="card-wrap">
+  <div class="info-panel">
+    <div class="case-num"><span class="sys-dot sd-checkin"></span>ระบบเช็คอิน · 5/9</div>
+    <div class="info-title">✅ เช็คอินสำเร็จ<br>Walk-in</div>
+    <div class="info-desc">is_walkin = true<br>→ ไม่แสดงของที่ระลึก แค่ประเภท: Walk-in</div>
+    <div class="info-note">✅ มีปุ่มยกเลิก</div>
+  </div>
+  <div class="modal-stage">
+    <div class="modal-box">
+      <div class="modal-head"><span class="mbadge mb-success">✅ เช็คอินสำเร็จ</span></div>
+      <div class="modal-title">วันที่ 1 — วันที่หนึ่ง</div>
+      <div class="modal-name">นาย พงษ์พัฒน์ อินทร์สี</div>
+      <div class="modal-dept">กองบริหารทรัพยากร</div>
+      <div class="modal-divider"></div>
+      <div class="modal-rows">
+        <div class="row"><span class="rl">เวลา</span><span class="rv nor">14:30:25</span></div>
+        <div class="row"><span class="rl">คูปองอาหาร</span><span class="rv ok">รับได้ ✓</span></div>
+        <div class="row"><span class="rl">ประเภท</span><span class="rv nor">Walk-in</span></div>
+      </div>
+      <div class="modal-actions"><button class="mcancel">ยกเลิก</button><button class="mok success">ตกลง</button></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ci-6 -->
+<div class="slide" data-sys="checkin">
+<div class="card-wrap">
+  <div class="info-panel">
+    <div class="case-num"><span class="sys-dot sd-checkin"></span>ระบบเช็คอิน · 6/9</div>
+    <div class="info-title">✅ เช็คอินสำเร็จ<br>กระเป๋าอย่างเดียว ยังไม่รับ</div>
+    <div class="info-desc">items = "กระเป๋า"<br>bag_received = false<br>→ คูปองกระเป๋า <b style="color:#bbf7d0">สีเขียว</b> "รับได้"</div>
+    <div class="info-note">✅ มีปุ่มยกเลิก</div>
+  </div>
+  <div class="modal-stage">
+    <div class="modal-box">
+      <div class="modal-head"><span class="mbadge mb-success">✅ เช็คอินสำเร็จ</span></div>
+      <div class="modal-title">วันที่ 1 — วันที่หนึ่ง</div>
+      <div class="modal-name">นาง กาญจนา สุวรรณ</div>
+      <div class="modal-dept">กองชีวเคมีคลินิก</div>
+      <div class="modal-divider"></div>
+      <div class="modal-rows">
+        <div class="row"><span class="rl">เวลา</span><span class="rv nor">09:15:42</span></div>
+        <div class="row"><span class="rl">คูปองอาหาร</span><span class="rv ok">รับได้ ✓</span></div>
+        <div class="row"><span class="rl">ของที่ระลึก (1) <span style="color:#16a34a;font-weight:700">คูปองกระเป๋า (สีเขียว)</span></span><span class="rv ok">รับได้ ✓</span></div>
+        <div class="row"><span class="rl">ประเภท</span><span class="rv nor">participant</span></div>
+      </div>
+      <div class="modal-actions"><button class="mcancel">ยกเลิก</button><button class="mok success">ตกลง</button></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ci-7 -->
+<div class="slide" data-sys="checkin">
+<div class="card-wrap">
+  <div class="info-panel">
+    <div class="case-num"><span class="sys-dot sd-checkin"></span>ระบบเช็คอิน · 7/9</div>
+    <div class="info-title">✅ เช็คอินสำเร็จ<br>กระเป๋า+บทคัดย่อ+เสื้อ รับแล้วทั้งหมด</div>
+    <div class="info-desc">bag_received = true<br>shirt_received = true<br>→ ทุกอย่าง "รับไปแล้ว"</div>
+    <div class="info-note">คูปองสีส้ม<br>✅ มีปุ่มยกเลิก</div>
+  </div>
+  <div class="modal-stage">
+    <div class="modal-box">
+      <div class="modal-head"><span class="mbadge mb-success">✅ เช็คอินสำเร็จ</span></div>
+      <div class="modal-title">วันที่ 2 — วันที่สอง</div>
+      <div class="modal-name">ผศ. ปรีดา แสนดี</div>
+      <div class="modal-dept">กองภูมิคุ้มกันวิทยา</div>
+      <div class="modal-divider"></div>
+      <div class="modal-rows">
+        <div class="row"><span class="rl">เวลา</span><span class="rv nor">08:55:11</span></div>
+        <div class="row"><span class="rl">คูปองอาหาร</span><span class="rv ok">รับได้ ✓</span></div>
+        <div class="row" style="align-items:flex-start;"><span class="rl" style="padding-top:2px;">ของที่ระลึก (1) <span style="color:#ea580c;font-weight:700">คูปองกระเป๋า (สีส้ม)</span></span><span><span class="rv done">รับไปแล้ว ✓</span><span class="rsub">14 มิ.ย. เวลา 10:00 น.</span></span></div>
+        <div class="row"><span class="rl">ของที่ระลึก (2) <span style="color:#2563eb;font-weight:700">บทคัดย่อ</span></span><span class="rv done">รับไปแล้ว ✓</span></div>
+        <div class="row" style="align-items:flex-start;"><span class="rl" style="padding-top:2px;">ของที่ระลึก (3) <span style="color:#0891b2;font-weight:700">เสื้อแจ็คเก็ต (XL)</span></span><span><span class="rv done">รับไปแล้ว ✓</span><span class="rsub">15 มิ.ย. เวลา 14:30 น.</span></span></div>
+        <div class="row"><span class="rl">ประเภท</span><span class="rv nor">participant</span></div>
+      </div>
+      <div class="modal-actions"><button class="mcancel">ยกเลิก</button><button class="mok success">ตกลง</button></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ci-8 -->
+<div class="slide" data-sys="checkin">
+<div class="card-wrap">
+  <div class="info-panel">
+    <div class="case-num"><span class="sys-dot sd-checkin"></span>ระบบเช็คอิน · 8/9</div>
+    <div class="info-title">⚠️ เช็คอินซ้ำ<br>Walk-in</div>
+    <div class="info-desc">checkin วันนี้มีอยู่ใน DB แล้ว<br>is_walkin = true</div>
+    <div class="info-note">ไม่มีปุ่มยกเลิก</div>
+  </div>
+  <div class="modal-stage">
+    <div class="modal-box">
+      <div class="modal-head"><span class="mbadge mb-warning">⚠️ เคยเช็คอินแล้ว</span></div>
+      <div class="modal-title">เช็คอินวันที่ 1 ไปแล้ว</div>
+      <div class="modal-name">นาย สุริยา บุญมี</div>
+      <div class="modal-dept">-</div>
+      <div class="modal-divider"></div>
+      <div class="modal-rows">
+        <div class="row"><span class="rl">เวลาที่เช็คอิน</span><span class="rv nor">09:10:00</span></div>
+        <div class="row"><span class="rl">คูปองอาหาร</span><span class="rv done">รับไปแล้ว ✓</span></div>
+        <div class="row"><span class="rl">ประเภท</span><span class="rv nor">Walk-in</span></div>
+      </div>
+      <div class="modal-actions"><button class="mok warning">ตกลง</button></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ci-9 -->
+<div class="slide" data-sys="checkin">
+<div class="card-wrap">
+  <div class="info-panel">
+    <div class="case-num"><span class="sys-dot sd-checkin"></span>ระบบเช็คอิน · 9/9</div>
+    <div class="info-title">⚠️ เช็คอินซ้ำ<br>กระเป๋า+บทคัดย่อ+เสื้อ</div>
+    <div class="info-desc">บุคลากรภายในที่มีของครบ 3 อย่าง เช็คอินซ้ำในวันเดิม</div>
+    <div class="info-note">แสดงสถานะปัจจุบัน<br>ไม่มีปุ่มยกเลิก</div>
+  </div>
+  <div class="modal-stage">
+    <div class="modal-box">
+      <div class="modal-head"><span class="mbadge mb-warning">⚠️ เคยเช็คอินแล้ว</span></div>
+      <div class="modal-title">เช็คอินวันที่ 1 ไปแล้ว</div>
+      <div class="modal-name">นางสาว ศิริพร จันทร์ดี</div>
+      <div class="modal-dept">กองโรคติดต่อ</div>
+      <div class="modal-divider"></div>
+      <div class="modal-rows">
+        <div class="row"><span class="rl">เวลาที่เช็คอิน</span><span class="rv nor">08:47:33</span></div>
+        <div class="row"><span class="rl">คูปองอาหาร</span><span class="rv done">รับไปแล้ว ✓</span></div>
+        <div class="row" style="align-items:flex-start;"><span class="rl" style="padding-top:2px;">ของที่ระลึก (1) <span style="color:#ea580c;font-weight:700">คูปองกระเป๋า (สีส้ม)</span></span><span><span class="rv done">รับไปแล้ว ✓</span><span class="rsub">14 มิ.ย. เวลา 10:00 น.</span></span></div>
+        <div class="row"><span class="rl">ของที่ระลึก (2) <span style="color:#2563eb;font-weight:700">บทคัดย่อ</span></span><span class="rv done">รับไปแล้ว ✓</span></div>
+        <div class="row"><span class="rl">ของที่ระลึก (3) <span style="color:#0891b2;font-weight:700">เสื้อแจ็คเก็ต (M)</span></span><span class="rv done">รับไปแล้ว ✓</span></div>
+        <div class="row"><span class="rl">ประเภท</span><span class="rv nor">participant</span></div>
+      </div>
+      <div class="modal-actions"><button class="mok warning">ตกลง</button></div>
+    </div>
+  </div>
 </div>
 </div>
 
@@ -751,247 +993,6 @@ body::before{
 </div>
 </div>
 
-<!-- ════════ CHECK-IN SLIDES ════════ -->
-
-<!-- 16 -->
-<div class="slide" data-sys="checkin">
-<div class="card-wrap">
-  <div class="info-panel">
-    <div class="case-num"><span class="sys-dot sd-checkin"></span>ระบบเช็คอิน · 1/9</div>
-    <div class="info-title">🎖️ VIP<br>(อธิบดี / รองอธิบดี)</div>
-    <div class="info-desc">dept ตรงกับ VIP_DEPTS<br>ยกเว้นเสมอ ไม่นับในระบบ</div>
-    <div class="info-note">ไม่บันทึก DB<br>ไม่มีปุ่มยกเลิก</div>
-  </div>
-  <div class="modal-stage">
-    <div class="modal-box">
-      <div class="modal-head"><span class="mbadge mb-vip">🎖️ VIP</span></div>
-      <div class="modal-title">ได้รับการยกเว้น (ไม่ต้องเช็คอิน)</div>
-      <div class="modal-name">นพ. สุรพงษ์ วิเชียร</div>
-      <div class="modal-divider"></div>
-      <div class="modal-rows">
-        <div class="row"><span class="rl">ตำแหน่ง</span><span class="rv pur">อธิบดีกรมวิทยาศาสตร์การแพทย์</span></div>
-      </div>
-      <div class="modal-note mn-purple">หากต้องการสิ่งใดเพิ่มเติม<br>ติดต่อ กองแผนงานและวิชาการ</div>
-      <div class="modal-actions"><button class="mok vip">ตกลง</button></div>
-    </div>
-  </div>
-</div>
-</div>
-
-<!-- 17 -->
-<div class="slide" data-sys="checkin">
-<div class="card-wrap">
-  <div class="info-panel">
-    <div class="case-num"><span class="sys-dot sd-checkin"></span>ระบบเช็คอิน · 2/9</div>
-    <div class="info-title">👥 กองแผนงาน<br>(ลงทะเบียนล่วงหน้า)</div>
-    <div class="info-desc">is_walkin = false<br>dept = กองแผนงานฯ<br>→ ขึ้นการ์ด Staff <b>แต่ไม่นับ</b></div>
-    <div class="info-note">ไม่บันทึก DB<br>ไม่มีปุ่มยกเลิก</div>
-  </div>
-  <div class="modal-stage">
-    <div class="modal-box">
-      <div class="modal-head"><span class="mbadge mb-staff">👥 Staff</span></div>
-      <div class="modal-title">ได้รับการยกเว้น (ไม่ต้องเช็คอิน)</div>
-      <div class="modal-name">นางสาว ปนัดดา สิงห์ชัย</div>
-      <div class="modal-divider"></div>
-      <div class="modal-rows">
-        <div class="row"><span class="rl">ตำแหน่ง</span><span class="rv nor">นักวิเคราะห์นโยบายและแผน</span></div>
-        <div class="row"><span class="rl">หน่วยงาน</span><span class="rv nor">กองแผนงานและวิชาการ</span></div>
-      </div>
-      <div class="modal-note mn-blue">มีข้อสงสัยเพิ่มเติม<br>ติดต่อ กองแผนงานและวิชาการ</div>
-      <div class="modal-actions"><button class="mok staff">ตกลง</button></div>
-    </div>
-  </div>
-</div>
-</div>
-
-<!-- 18 -->
-<div class="slide" data-sys="checkin">
-<div class="card-wrap">
-  <div class="info-panel">
-    <div class="case-num"><span class="sys-dot sd-checkin"></span>ระบบเช็คอิน · 3/9</div>
-    <div class="info-title">👥 กองแผนงาน Walk-in<br>(การ์ดเหมือนกัน — แต่นับ)</div>
-    <div class="info-desc">is_walkin = true<br>dept = กองแผนงานฯ<br>→ บันทึก checkin + นับ count</div>
-    <div class="info-note">✅ บันทึก DB แล้ว<br>count เพิ่มขึ้น 1<br>ไม่มีปุ่มยกเลิก</div>
-  </div>
-  <div class="modal-stage">
-    <div class="modal-box">
-      <div class="modal-head"><span class="mbadge mb-staff">👥 Staff</span></div>
-      <div class="modal-title">ได้รับการยกเว้น (ไม่ต้องเช็คอิน)</div>
-      <div class="modal-name">นาย ชาติชาย พรมมา</div>
-      <div class="modal-divider"></div>
-      <div class="modal-rows">
-        <div class="row"><span class="rl">ตำแหน่ง</span><span class="rv nor">Walk-in</span></div>
-        <div class="row"><span class="rl">หน่วยงาน</span><span class="rv nor">กองแผนงานและวิชาการ</span></div>
-      </div>
-      <div class="modal-note mn-blue">มีข้อสงสัยเพิ่มเติม<br>ติดต่อ กองแผนงานและวิชาการ</div>
-      <div class="modal-note mn-green">✅ บันทึกและนับในระบบแล้ว</div>
-      <div class="modal-actions"><button class="mok staff">ตกลง</button></div>
-    </div>
-  </div>
-</div>
-</div>
-
-<!-- 19 -->
-<div class="slide" data-sys="checkin">
-<div class="card-wrap">
-  <div class="info-panel">
-    <div class="case-num"><span class="sys-dot sd-checkin"></span>ระบบเช็คอิน · 4/9</div>
-    <div class="info-title">❌ ไม่พบในระบบ</div>
-    <div class="info-desc">ค้นหาด้วย id_card / passport ไม่พบใน participants เลย</div>
-    <div class="info-note">ไม่มีปุ่มยกเลิก</div>
-  </div>
-  <div class="modal-stage">
-    <div class="modal-box">
-      <div class="modal-head"><span class="mbadge mb-error">❌ ไม่พบข้อมูล</span></div>
-      <div class="modal-title">ไม่พบข้อมูลในระบบ</div>
-      <div style="height:12px;"></div>
-      <div class="modal-actions"><button class="mok error">ตกลง</button></div>
-    </div>
-  </div>
-</div>
-</div>
-
-<!-- 20 -->
-<div class="slide" data-sys="checkin">
-<div class="card-wrap">
-  <div class="info-panel">
-    <div class="case-num"><span class="sys-dot sd-checkin"></span>ระบบเช็คอิน · 5/9</div>
-    <div class="info-title">✅ เช็คอินสำเร็จ<br>Walk-in</div>
-    <div class="info-desc">is_walkin = true<br>→ ไม่แสดงของที่ระลึก แค่ประเภท: Walk-in</div>
-    <div class="info-note">✅ มีปุ่มยกเลิก</div>
-  </div>
-  <div class="modal-stage">
-    <div class="modal-box">
-      <div class="modal-head"><span class="mbadge mb-success">✅ เช็คอินสำเร็จ</span></div>
-      <div class="modal-title">วันที่ 1 — วันที่หนึ่ง</div>
-      <div class="modal-name">นาย พงษ์พัฒน์ อินทร์สี</div>
-      <div class="modal-dept">กองบริหารทรัพยากร</div>
-      <div class="modal-divider"></div>
-      <div class="modal-rows">
-        <div class="row"><span class="rl">เวลา</span><span class="rv nor">14:30:25</span></div>
-        <div class="row"><span class="rl">คูปองอาหาร</span><span class="rv ok">รับได้ ✓</span></div>
-        <div class="row"><span class="rl">ประเภท</span><span class="rv nor">Walk-in</span></div>
-      </div>
-      <div class="modal-actions"><button class="mcancel">ยกเลิก</button><button class="mok success">ตกลง</button></div>
-    </div>
-  </div>
-</div>
-</div>
-
-<!-- 21 -->
-<div class="slide" data-sys="checkin">
-<div class="card-wrap">
-  <div class="info-panel">
-    <div class="case-num"><span class="sys-dot sd-checkin"></span>ระบบเช็คอิน · 6/9</div>
-    <div class="info-title">✅ เช็คอินสำเร็จ<br>กระเป๋าอย่างเดียว ยังไม่รับ</div>
-    <div class="info-desc">items = "กระเป๋า"<br>bag_received = false<br>→ คูปองกระเป๋า <b style="color:#bbf7d0">สีเขียว</b> "รับได้"</div>
-    <div class="info-note">✅ มีปุ่มยกเลิก</div>
-  </div>
-  <div class="modal-stage">
-    <div class="modal-box">
-      <div class="modal-head"><span class="mbadge mb-success">✅ เช็คอินสำเร็จ</span></div>
-      <div class="modal-title">วันที่ 1 — วันที่หนึ่ง</div>
-      <div class="modal-name">นาง กาญจนา สุวรรณ</div>
-      <div class="modal-dept">กองชีวเคมีคลินิก</div>
-      <div class="modal-divider"></div>
-      <div class="modal-rows">
-        <div class="row"><span class="rl">เวลา</span><span class="rv nor">09:15:42</span></div>
-        <div class="row"><span class="rl">คูปองอาหาร</span><span class="rv ok">รับได้ ✓</span></div>
-        <div class="row"><span class="rl">ของที่ระลึก (1) <span style="color:#16a34a;font-weight:700">คูปองกระเป๋า (สีเขียว)</span></span><span class="rv ok">รับได้ ✓</span></div>
-        <div class="row"><span class="rl">ประเภท</span><span class="rv nor">participant</span></div>
-      </div>
-      <div class="modal-actions"><button class="mcancel">ยกเลิก</button><button class="mok success">ตกลง</button></div>
-    </div>
-  </div>
-</div>
-</div>
-
-<!-- 22 -->
-<div class="slide" data-sys="checkin">
-<div class="card-wrap">
-  <div class="info-panel">
-    <div class="case-num"><span class="sys-dot sd-checkin"></span>ระบบเช็คอิน · 7/9</div>
-    <div class="info-title">✅ เช็คอินสำเร็จ<br>กระเป๋า+บทคัดย่อ+เสื้อ รับแล้วทั้งหมด</div>
-    <div class="info-desc">bag_received = true<br>shirt_received = true<br>→ ทุกอย่าง "รับไปแล้ว"</div>
-    <div class="info-note">คูปองสีส้ม<br>✅ มีปุ่มยกเลิก</div>
-  </div>
-  <div class="modal-stage">
-    <div class="modal-box">
-      <div class="modal-head"><span class="mbadge mb-success">✅ เช็คอินสำเร็จ</span></div>
-      <div class="modal-title">วันที่ 2 — วันที่สอง</div>
-      <div class="modal-name">ผศ. ปรีดา แสนดี</div>
-      <div class="modal-dept">กองภูมิคุ้มกันวิทยา</div>
-      <div class="modal-divider"></div>
-      <div class="modal-rows">
-        <div class="row"><span class="rl">เวลา</span><span class="rv nor">08:55:11</span></div>
-        <div class="row"><span class="rl">คูปองอาหาร</span><span class="rv ok">รับได้ ✓</span></div>
-        <div class="row" style="align-items:flex-start;"><span class="rl" style="padding-top:2px;">ของที่ระลึก (1) <span style="color:#ea580c;font-weight:700">คูปองกระเป๋า (สีส้ม)</span></span><span><span class="rv done">รับไปแล้ว ✓</span><span class="rsub">14 มิ.ย. เวลา 10:00 น.</span></span></div>
-        <div class="row"><span class="rl">ของที่ระลึก (2) <span style="color:#2563eb;font-weight:700">บทคัดย่อ</span></span><span class="rv done">รับไปแล้ว ✓</span></div>
-        <div class="row" style="align-items:flex-start;"><span class="rl" style="padding-top:2px;">ของที่ระลึก (3) <span style="color:#0891b2;font-weight:700">เสื้อแจ็คเก็ต (XL)</span></span><span><span class="rv done">รับไปแล้ว ✓</span><span class="rsub">15 มิ.ย. เวลา 14:30 น.</span></span></div>
-        <div class="row"><span class="rl">ประเภท</span><span class="rv nor">participant</span></div>
-      </div>
-      <div class="modal-actions"><button class="mcancel">ยกเลิก</button><button class="mok success">ตกลง</button></div>
-    </div>
-  </div>
-</div>
-</div>
-
-<!-- 23 -->
-<div class="slide" data-sys="checkin">
-<div class="card-wrap">
-  <div class="info-panel">
-    <div class="case-num"><span class="sys-dot sd-checkin"></span>ระบบเช็คอิน · 8/9</div>
-    <div class="info-title">⚠️ เช็คอินซ้ำ<br>Walk-in</div>
-    <div class="info-desc">checkin วันนี้มีอยู่ใน DB แล้ว<br>is_walkin = true</div>
-    <div class="info-note">ไม่มีปุ่มยกเลิก</div>
-  </div>
-  <div class="modal-stage">
-    <div class="modal-box">
-      <div class="modal-head"><span class="mbadge mb-warning">⚠️ เคยเช็คอินแล้ว</span></div>
-      <div class="modal-title">เช็คอินวันที่ 1 ไปแล้ว</div>
-      <div class="modal-name">นาย สุริยา บุญมี</div>
-      <div class="modal-dept">-</div>
-      <div class="modal-divider"></div>
-      <div class="modal-rows">
-        <div class="row"><span class="rl">เวลาที่เช็คอิน</span><span class="rv nor">09:10:00</span></div>
-        <div class="row"><span class="rl">คูปองอาหาร</span><span class="rv done">รับไปแล้ว ✓</span></div>
-        <div class="row"><span class="rl">ประเภท</span><span class="rv nor">Walk-in</span></div>
-      </div>
-      <div class="modal-actions"><button class="mok warning">ตกลง</button></div>
-    </div>
-  </div>
-</div>
-</div>
-
-<!-- 24 -->
-<div class="slide" data-sys="checkin">
-<div class="card-wrap">
-  <div class="info-panel">
-    <div class="case-num"><span class="sys-dot sd-checkin"></span>ระบบเช็คอิน · 9/9</div>
-    <div class="info-title">⚠️ เช็คอินซ้ำ<br>กระเป๋า+บทคัดย่อ+เสื้อ</div>
-    <div class="info-desc">บุคลากรภายในที่มีของครบ 3 อย่าง เช็คอินซ้ำในวันเดิม</div>
-    <div class="info-note">แสดงสถานะปัจจุบัน<br>ไม่มีปุ่มยกเลิก</div>
-  </div>
-  <div class="modal-stage">
-    <div class="modal-box">
-      <div class="modal-head"><span class="mbadge mb-warning">⚠️ เคยเช็คอินแล้ว</span></div>
-      <div class="modal-title">เช็คอินวันที่ 1 ไปแล้ว</div>
-      <div class="modal-name">นางสาว ศิริพร จันทร์ดี</div>
-      <div class="modal-dept">กองโรคติดต่อ</div>
-      <div class="modal-divider"></div>
-      <div class="modal-rows">
-        <div class="row"><span class="rl">เวลาที่เช็คอิน</span><span class="rv nor">08:47:33</span></div>
-        <div class="row"><span class="rl">คูปองอาหาร</span><span class="rv done">รับไปแล้ว ✓</span></div>
-        <div class="row" style="align-items:flex-start;"><span class="rl" style="padding-top:2px;">ของที่ระลึก (1) <span style="color:#ea580c;font-weight:700">คูปองกระเป๋า (สีส้ม)</span></span><span><span class="rv done">รับไปแล้ว ✓</span><span class="rsub">14 มิ.ย. เวลา 10:00 น.</span></span></div>
-        <div class="row"><span class="rl">ของที่ระลึก (2) <span style="color:#2563eb;font-weight:700">บทคัดย่อ</span></span><span class="rv done">รับไปแล้ว ✓</span></div>
-        <div class="row"><span class="rl">ของที่ระลึก (3) <span style="color:#0891b2;font-weight:700">เสื้อแจ็คเก็ต (M)</span></span><span class="rv done">รับไปแล้ว ✓</span></div>
-        <div class="row"><span class="rl">ประเภท</span><span class="rv nor">participant</span></div>
-      </div>
-      <div class="modal-actions"><button class="mok warning">ตกลง</button></div>
-    </div>
-  </div>
-</div>
-</div>
 
 </div><!-- /main -->
 
@@ -999,7 +1000,10 @@ body::before{
 <div id="bottomNav">
   <div class="nav-inner">
     <button class="nav-arrow" id="prevBtn" onclick="go(-1)">← ก่อนหน้า</button>
-    <div class="nav-dots" id="dots"></div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
+      <div class="nav-dots" id="dots"></div>
+      <button onclick="goTo(0)" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.5);border-radius:10px;padding:5px 16px;font-family:'Sarabun',sans-serif;font-size:0.76rem;cursor:pointer;letter-spacing:.03em;" title="กลับหน้าแรก">⌂ หน้าแรก</button>
+    </div>
     <button class="nav-arrow" id="nextBtn" onclick="go(1)">ถัดไป →</button>
   </div>
 </div>
@@ -1042,6 +1046,7 @@ function goTo(n){
   document.getElementById('nextBtn').disabled=cur===slides.length-1;
 }
 function go(d){goTo(cur+d);}
+function goToSys(sys){const i=slides.findIndex(s=>s.dataset.sys===sys);if(i>=0)goTo(i);}
 document.addEventListener('keydown',e=>{
   if(e.key==='ArrowRight'||e.key==='ArrowDown') go(1);
   if(e.key==='ArrowLeft'||e.key==='ArrowUp') go(-1);
