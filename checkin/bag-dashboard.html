@@ -205,6 +205,7 @@
         <div>
           <span class="ttitle">ผู้มีสิทธิ์รับกระเป๋า (ก่อนวันงาน)</span>
           <span class="tcount" id="tCount"></span>
+          <span id="bagAdminHint" style="display:none;font-size:0.75rem;color:#2563eb;background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:3px 10px;margin-left:8px;">✏️ Admin — แก้ไขได้โดยตรง บันทึกอัตโนมัติเมื่อคลิกออก (border เขียว = สำเร็จ)</span>
         </div>
         <div class="export-btns">
           <button class="btn-xl green" onclick="exportExcel()">⬇ Excel</button>
@@ -282,6 +283,7 @@
         <div>
           <span class="ttitle">ผู้มีสิทธิ์รับเสื้อ (ก่อนวันงาน)</span>
           <span class="tcount" id="stCount"></span>
+          <span id="shirtAdminHint" style="display:none;font-size:0.75rem;color:#2563eb;background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:3px 10px;margin-left:8px;">✏️ Admin — แก้ไขได้โดยตรง บันทึกอัตโนมัติเมื่อคลิกออก (border เขียว = สำเร็จ)</span>
         </div>
         <div class="export-btns">
           <button class="btn-xl green" onclick="exportShirtExcel()">⬇ Excel</button>
@@ -985,6 +987,8 @@ if(isAdmin){
     const el=document.getElementById(id);
     if(el) el.innerHTML+=' <span class="admin-edit-badge">✏️ แก้ไขได้</span>';
   });
+  const bh=document.getElementById('bagAdminHint');if(bh)bh.style.display='';
+  const sh=document.getElementById('shirtAdminHint');if(sh)sh.style.display='';
 }
 loadAll();
 (function(){const c=localStorage.getItem('pageBgUrl');if(c)document.body.style.backgroundImage=`linear-gradient(rgba(232,240,254,0.55),rgba(232,240,254,0.55)),url('${c}')`;})();
