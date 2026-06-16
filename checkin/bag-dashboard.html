@@ -612,11 +612,11 @@ function renderTable(){
     <td style="max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${r.dept}">${r.dept}</td>
     <td>${r.pt}</td>
     <td><span class="badge ${r.tag==='Staff'?'b-staff':'b-participant'}">${r.tag}</span></td>
-    <td><span class="badge ${r.received?'b-received':'b-pending'}">${r.received?'รับแล้ว':'ยังไม่รับ'}</span></td>
-    <td>${r.received?(isAdmin?`<input class="dt-input dt-date" type="date" value="${toInputDate(r.rawDate)}" data-id="${r.id}" data-field="bag_received_date" onblur="saveDatetime(this)">`:r.receivedDate):'-'}</td>
-    <td>${r.received?(isAdmin?`<input class="dt-input dt-time" type="time" value="${toInputTime(r.rawDate)}" data-id="${r.id}" data-field="bag_received_date" onblur="saveDatetime(this)">`:r.receivedTime):'-'}</td>
+    <td><span class="badge ${r.received?'b-received':'b-pending'} row-status">${r.received?'รับแล้ว':'ยังไม่รับ'}</span></td>
+    <td>${isAdmin?`<input class="dt-input dt-date" type="date" value="${toInputDate(r.rawDate)}" data-id="${r.id}" data-field="bag_received_date" onblur="saveDatetime(this)">`:(r.received?r.receivedDate:'-')}</td>
+    <td>${isAdmin?`<input class="dt-input dt-time" type="time" value="${toInputTime(r.rawDate)}" data-id="${r.id}" data-field="bag_received_date" onblur="saveDatetime(this)">`:(r.received?r.receivedTime:'-')}</td>
     <td style="font-size:0.82rem;color:#475569;">${r.received?(r.scannedBy||'-'):'-'}</td>
-    <td>${r.received?(isAdmin?`<input class="proxy-input" type="text" value="${(r.receivedBy||'').replace(/"/g,'&quot;')}" placeholder="ชื่อผู้รับแทน..." data-id="${r.id}" data-field="bag_received_by" onblur="saveProxy(this)">`:r.receivedBy||'-'):'-'}</td>
+    <td>${isAdmin?`<input class="proxy-input" type="text" value="${(r.receivedBy||'').replace(/"/g,'&quot;')}" placeholder="ชื่อผู้รับแทน..." data-id="${r.id}" data-field="bag_received_by" onblur="saveProxy(this)">`:(r.received?r.receivedBy||'-':'-')}</td>
   </tr>`).join('');
 }
 
@@ -686,11 +686,11 @@ function renderShirtTable(){
     <td>${r.name}</td>
     <td style="max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${r.dept}">${r.dept}</td>
     <td style="font-weight:700;text-align:center;">${r.shirtSize}</td>
-    <td><span class="badge ${r.received?'b-received':'b-pending'}">${r.received?'รับแล้ว':'ยังไม่รับ'}</span></td>
-    <td>${r.received?(isAdmin?`<input class="dt-input dt-date" type="date" value="${toInputDate(r.rawDate)}" data-id="${r.id}" data-field="shirt_received_date" onblur="saveDatetime(this)">`:r.receivedDate):'-'}</td>
-    <td>${r.received?(isAdmin?`<input class="dt-input dt-time" type="time" value="${toInputTime(r.rawDate)}" data-id="${r.id}" data-field="shirt_received_date" onblur="saveDatetime(this)">`:r.receivedTime):'-'}</td>
+    <td><span class="badge ${r.received?'b-received':'b-pending'} row-status">${r.received?'รับแล้ว':'ยังไม่รับ'}</span></td>
+    <td>${isAdmin?`<input class="dt-input dt-date" type="date" value="${toInputDate(r.rawDate)}" data-id="${r.id}" data-field="shirt_received_date" onblur="saveDatetime(this)">`:(r.received?r.receivedDate:'-')}</td>
+    <td>${isAdmin?`<input class="dt-input dt-time" type="time" value="${toInputTime(r.rawDate)}" data-id="${r.id}" data-field="shirt_received_date" onblur="saveDatetime(this)">`:(r.received?r.receivedTime:'-')}</td>
     <td style="font-size:0.82rem;color:#475569;">${r.received?(r.scannedBy||'-'):'-'}</td>
-    <td>${r.received?(isAdmin?`<input class="proxy-input" type="text" value="${(r.shirtReceivedBy||'').replace(/"/g,'&quot;')}" placeholder="ชื่อผู้รับแทน..." data-id="${r.id}" data-field="shirt_received_by" onblur="saveProxy(this)">`:r.shirtReceivedBy||'-'):'-'}</td>
+    <td>${isAdmin?`<input class="proxy-input" type="text" value="${(r.shirtReceivedBy||'').replace(/"/g,'&quot;')}" placeholder="ชื่อผู้รับแทน..." data-id="${r.id}" data-field="shirt_received_by" onblur="saveProxy(this)">`:(r.received?r.shirtReceivedBy||'-':'-')}</td>
   </tr>`).join('');
 }
 
@@ -799,11 +799,24 @@ async function saveDatetime(input){
   const row=input.closest('tr');
   const dateEl=row.querySelector('.dt-date');
   const timeEl=row.querySelector('.dt-time');
-  if(!dateEl||!timeEl||!dateEl.value||!timeEl.value) return;
+  if(!dateEl||!timeEl) return;
   const id=input.dataset.id;
-  const field=input.dataset.field;
-  const iso=bkkToISO(dateEl.value,timeEl.value);
-  const patch={};patch[field]=iso;
+  const field=input.dataset.field; // bag_received_date or shirt_received_date
+  const isBag=field==='bag_received_date';
+  const recvField=isBag?'bag_received':'shirt_received';
+  const scanField=isBag?'bag_scanned_by':'shirt_scanned_by';
+  const dateVal=dateEl.value;
+  const timeVal=timeEl.value||'08:00';
+  const patch={};
+  if(dateVal){
+    patch[field]=bkkToISO(dateVal,timeVal);
+    patch[recvField]=true;
+    patch[scanField]=sessionStorage.getItem('dmsc_user')||'admin';
+  } else {
+    patch[field]=null;
+    patch[recvField]=false;
+    patch[scanField]=null;
+  }
   [dateEl,timeEl].forEach(el=>el.style.borderColor='#94a3b8');
   try{
     const r=await fetch(`${SB_URL}/rest/v1/participants?id=eq.${id}`,{
@@ -813,7 +826,15 @@ async function saveDatetime(input){
     });
     const ok=r.ok||r.status===204;
     [dateEl,timeEl].forEach(el=>el.style.borderColor=ok?'#16a34a':'#dc2626');
-    if(ok) setTimeout(()=>{[dateEl,timeEl].forEach(el=>el.style.borderColor='');},1500);
+    if(ok){
+      const badge=row.querySelector('.row-status');
+      if(badge){
+        const nowRec=!!patch[recvField];
+        badge.textContent=nowRec?'รับแล้ว':'ยังไม่รับ';
+        badge.className=`badge ${nowRec?'b-received':'b-pending'} row-status`;
+      }
+      setTimeout(()=>{[dateEl,timeEl].forEach(el=>el.style.borderColor='');},1500);
+    }
   }catch(e){[dateEl,timeEl].forEach(el=>el.style.borderColor='#dc2626');}
 }
 
