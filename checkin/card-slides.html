@@ -274,11 +274,43 @@ body::before{
 .sbadge.checkin{background:rgba(74,222,128,.18);color:#bbf7d0;border:1px solid rgba(74,222,128,.3);}
 
 /* responsive */
-@media(max-width:600px){
-  .card-wrap{flex-direction:column;}
-  .info-panel{flex:none;width:100%;align-self:auto;}
-  .title-main{font-size:1.7rem;}
-  .modal-stage{padding:16px 10px;}
+@media(max-width:640px){
+  html,body{overflow:auto;}
+  #main{padding:56px 12px 110px;align-items:flex-start;}
+  .slide{max-width:100%;}
+
+  /* title */
+  .title-main{font-size:1.6rem;}
+  .title-pills{flex-direction:column;align-items:center;}
+  .title-pill{width:100%;max-width:280px;justify-content:center;}
+
+  /* summary — scroll horizontally */
+  .summary-wrap{padding:20px 14px;}
+  .sum-title{font-size:1rem;}
+  .sum-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 -14px;padding:0 14px;}
+  .sum-table{font-size:0.78rem;min-width:480px;}
+  .sum-note{font-size:0.76rem;}
+
+  /* card slide — stack vertically */
+  .card-wrap{flex-direction:column;gap:14px;}
+  .info-panel{
+    flex:none;width:100%;align-self:auto;
+    flex-direction:row;flex-wrap:wrap;gap:10px;
+    padding:14px;
+  }
+  .case-num{width:100%;}
+  .info-title{font-size:0.95rem;width:100%;margin-bottom:6px;}
+  .info-desc{font-size:0.78rem;flex:1 1 55%;}
+  .info-note{flex:1 1 40%;margin-top:0;font-size:0.74rem;}
+
+  /* modal stage */
+  .modal-stage{padding:14px 8px;min-height:auto;border-radius:16px;}
+  .modal-box{max-width:100%;}
+
+  /* nav dots — smaller on mobile */
+  .nav-dots{gap:4px;}
+  .dot{width:6px;height:6px;}
+  .nav-arrow{padding:10px 14px;font-size:0.82rem;}
 }
 </style>
 </head>
@@ -315,7 +347,7 @@ body::before{
 <div class="slide" data-sys="all">
 <div class="summary-wrap">
   <div class="sum-title">ภาพรวม — ความแตกต่างระหว่างระบบ</div>
-  <table class="sum-table">
+  <div class="sum-table-wrap"><table class="sum-table">
     <tr><th>ระบบ</th><th>ป้ายของที่ระลึก</th><th>คำว่า "คูปอง"</th><th>ปุ่มยกเลิก</th></tr>
     <tr>
       <td><span class="sbadge bag">🎒 รับกระเป๋า</span></td>
@@ -335,14 +367,14 @@ body::before{
       <td class="yes">✅ มี</td>
       <td class="yes">✅ สำเร็จเท่านั้น</td>
     </tr>
-  </table>
-  <div class="sum-note" style="margin-top:16px;">Walk-in ทุกระบบ → ไม่แสดงรายการของที่ระลึก แสดงแค่ประเภท: Walk-in</div>
-  <table class="sum-table" style="margin-top:12px;">
+  </table></div>
+  <div class="sum-note" style="margin-top:12px;">Walk-in ทุกระบบ → ไม่แสดงรายการของที่ระลึก แสดงแค่ประเภท: Walk-in</div>
+  <div class="sum-table-wrap" style="margin-top:10px;"><table class="sum-table">
     <tr><th>กรณีพิเศษ (เช็คอินเท่านั้น)</th><th>นับในระบบ?</th><th>การ์ดที่แสดง</th></tr>
     <tr><td>🎖️ VIP (อธิบดี / รองอธิบดี)</td><td class="no">❌ ไม่นับ</td><td>การ์ด VIP สีม่วง</td></tr>
     <tr><td>👥 กองแผนงาน (ลงทะเบียนล่วงหน้า)</td><td class="no">❌ ไม่นับ</td><td>การ์ด Staff สีน้ำเงิน</td></tr>
     <tr><td>👥 กองแผนงาน (Walk-in)</td><td class="yes">✅ นับ</td><td>การ์ด Staff สีน้ำเงิน</td></tr>
-  </table>
+  </table></div>
 </div>
 </div>
 
