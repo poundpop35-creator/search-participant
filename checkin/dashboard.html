@@ -981,7 +981,7 @@ async function loadAll(){
     intDeptEl.appendChild(lbl);
   });
   // หน่วยงานภายนอก = จากข้อมูลจริง ที่ไม่ใช่ DEPTS
-  const extDepts=[...new Set(allData.filter(r=>!r.isIn).map(r=>r.dept).filter(d=>d&&d!=='-'))].sort();
+  const extDepts=[...new Set(allData.filter(r=>!r.isIn).map(r=>r.dept).filter(d=>d&&d!=='-'))].sort((a,b)=>a.localeCompare(b,'th'));
   extDepts.forEach(d=>{
     const lbl=document.createElement('label');
     lbl.innerHTML=`<input type="checkbox" class="fDeptCb" value="${d}" checked> ${d}`;
@@ -1006,10 +1006,12 @@ async function loadParticipants(){
   document.getElementById('pPreCount').textContent=`(${preC.toLocaleString()})`;
   document.getElementById('pWiCount').textContent=`(${wiC.toLocaleString()})`;
   // Build dynamic filter checkboxes
-  const depts=[...new Set(allParticipants.map(p=>{
+  const _pDeptRaw=[...new Set(allParticipants.map(p=>{
     const isIn=(p.internal_external||'').includes('ภายใน');
     return (isIn?(p.dept||''):(p.ext_dept||p.dept||'')).trim();
-  }).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'th'));
+  }).filter(Boolean))];
+  const _pDeptSet=new Set(DEPTS);
+  const depts=[...DEPTS.filter(d=>_pDeptRaw.includes(d)),..._pDeptRaw.filter(d=>!_pDeptSet.has(d)).sort((a,b)=>a.localeCompare(b,'th'))];
   const tags=[...new Set(allParticipants.map(p=>(p.tag||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'th'));
   const ptypes=[...new Set(allParticipants.map(p=>(p.participation_type||'').replace(/\s+/g,' ').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'th'));
   function buildPFCB(ddId,allId,cbClass,onAllFn,onChangeFn,vals){
