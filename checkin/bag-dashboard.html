@@ -70,6 +70,9 @@
     .loading-td{text-align:center;padding:40px;color:#94a3b8;}
     .proxy-input{width:130px;padding:5px 8px;border:1.5px solid #e2e8f0;border-radius:7px;font-family:'Sarabun',sans-serif;font-size:0.83rem;color:#1e293b;outline:none;transition:border-color 0.2s;}
     .proxy-input:focus{border-color:#0d2b6b;}
+    .dt-input{padding:4px 6px;border:1.5px solid #e2e8f0;border-radius:7px;font-family:'Sarabun',sans-serif;font-size:0.82rem;color:#1e293b;outline:none;transition:border-color 0.2s;}
+    .dt-input:focus{border-color:#0d2b6b;}
+    .dt-date{width:120px;}.dt-time{width:80px;}
     /* Pager */
     .pager{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-top:1px solid var(--border);font-size:0.83rem;color:#64748b;flex-wrap:wrap;gap:8px;}
     .pbtn{padding:5px 12px;border-radius:6px;border:1.5px solid var(--border);background:var(--white);cursor:pointer;font-size:0.8rem;}
@@ -312,6 +315,7 @@
 const SB_URL = "https://gvxytnjfyepqhbkmcjms.supabase.co";
 const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2eHl0bmpmeWVwcWhia21jam1zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0MzE2NDAsImV4cCI6MjA5NTAwNzY0MH0.RAr_ehb4cxfNliDR0h5XcihUaP-0ltZTTGIAv2Fw1kk";
 const PAGE = 10;
+const isAdmin = sessionStorage.getItem('dmsc_role')==='admin';
 const DEPTS = ['อธิบดีกรมวิทยาศาสตร์การแพทย์','รองอธิบดีกรมวิทยาศาสตร์การแพทย์','สำนักผู้ทรงคุณวุฒิกรมวิทยาศาสตร์การแพทย์','กองแผนงานและวิชาการ','กองทดสอบความชำนาญ','กลุ่มพัฒนาระบบบริหาร','กลุ่มตรวจสอบภายใน','กลุ่มงานจริยธรรม','สำนักงานเลขานุการกรม','สถาบันชีววัตถุ','สถาบันวิจัยวิทยาศาสตร์สาธารณสุข','สถาบันวิจัยสมุนไพร','สถาบันชีววิทยาศาสตร์ทางการแพทย์','สำนักคุณภาพและความปลอดภัยอาหาร','สำนักเครื่องสำอางและวัตถุอันตราย','สำนักรังสีและเครื่องมือแพทย์','สำนักมาตรฐานห้องปฏิบัติการ','สำนักยาและวัตถุเสพติด','ศูนย์รวมบริการ','ศูนย์เทคโนโลยีสารสนเทศและการสื่อสาร','กองความร่วมมือระหว่างประเทศ','กองบริหารทรัพยากรบุคคล','กองบริหารการคลัง','กองประชาสัมพันธ์และสื่อสารสาธารณะ','ศูนย์ตอบโต้เหตุฉุกเฉินด้านห้องปฏิบัติการและรังสี','ศูนย์วิทยาศาสตร์การแพทย์ที่ 1 เชียงใหม่','ศูนย์วิทยาศาสตร์การแพทย์ที่ 1/1 เชียงราย','ศูนย์วิทยาศาสตร์การแพทย์ที่ 2 พิษณุโลก','ศูนย์วิทยาศาสตร์การแพทย์ที่ 3 นครสวรรค์','ศูนย์วิทยาศาสตร์การแพทย์ที่ 4 สระบุรี','ศูนย์วิทยาศาสตร์การแพทย์ที่ 5 สมุทรสงคราม','ศูนย์วิทยาศาสตร์การแพทย์ที่ 6 ชลบุรี','ศูนย์วิทยาศาสตร์การแพทย์ที่ 7 ขอนแก่น','ศูนย์วิทยาศาสตร์การแพทย์ที่ 8 อุดรธานี','ศูนย์วิทยาศาสตร์การแพทย์ที่ 9 นครราชสีมา','ศูนย์วิทยาศาสตร์การแพทย์ที่ 10 อุบลราชธานี','ศูนย์วิทยาศาสตร์การแพทย์ที่ 11 สุราษฎร์ธานี','ศูนย์วิทยาศาสตร์การแพทย์ที่ 11/1 ภูเก็ต','ศูนย์วิทยาศาสตร์การแพทย์ที่ 12 สงขลา','ศูนย์วิทยาศาสตร์การแพทย์ที่ 12/1 ตรัง'];
 
 // Auth check
@@ -427,6 +431,19 @@ function onSfDeptChange(){
   updateBtnDD('sfDeptBtn',selSfDept,'หน่วยงาน');applyShirtFilters();
 }
 
+function toInputDate(utcIso){
+  if(!utcIso) return '';
+  const bkk=new Date(new Date(utcIso).getTime()+7*3600000);
+  return bkk.toISOString().slice(0,10);
+}
+function toInputTime(utcIso){
+  if(!utcIso) return '';
+  const bkk=new Date(new Date(utcIso).getTime()+7*3600000);
+  return bkk.toISOString().slice(11,16);
+}
+function bkkToISO(dateStr,timeStr){
+  return new Date(`${dateStr}T${timeStr}:00+07:00`).toISOString();
+}
 function fmtBagDate(v){
   if(!v||v==='-') return '-';
   if(v.includes('T')){
@@ -478,6 +495,7 @@ async function loadAll(){
         dept, pt:p.participation_type||'-', tag:p.tag||'-',
         items:_it, itemType:(_hasBag&&_other)?'2':'1',
         received:p.bag_received===true||p.bag_received===1||p.bag_received==='true',
+        rawDate:p.bag_received_date||null,
         receivedDate:fmtBagDate(p.bag_received_date),
         receivedTime:fmtBagTime(p.bag_received_date),
         receivedBy:p.bag_received_by||''
@@ -513,6 +531,7 @@ async function loadAll(){
         name:`${(p.prefix||'').replace(/\s*\([^)]*\)/g,'').trim()} ${p.first_name||''} ${p.last_name||''}`.trim().replace(/\s+/g,' '),
         dept, shirtSize:(p.shirt_size||'-').trim(),
         received:p.shirt_received===true||p.shirt_received===1||p.shirt_received==='true',
+        rawDate:p.shirt_received_date||null,
         receivedDate:fmtBagDate(p.shirt_received_date),
         receivedTime:fmtBagTime(p.shirt_received_date),
         shirtReceivedBy:p.shirt_received_by||''
@@ -591,9 +610,9 @@ function renderTable(){
     <td>${r.pt}</td>
     <td><span class="badge ${r.tag==='Staff'?'b-staff':'b-participant'}">${r.tag}</span></td>
     <td><span class="badge ${r.received?'b-received':'b-pending'}">${r.received?'รับแล้ว':'ยังไม่รับ'}</span></td>
-    <td>${r.received?r.receivedDate:'-'}</td>
-    <td>${r.received?r.receivedTime:'-'}</td>
-    <td>${r.received?`<input class="proxy-input" type="text" value="${(r.receivedBy||'').replace(/"/g,'&quot;')}" placeholder="ชื่อผู้รับแทน..." data-id="${r.id}" data-field="bag_received_by" onblur="saveProxy(this)">`:'-'}</td>
+    <td>${r.received?(isAdmin?`<input class="dt-input dt-date" type="date" value="${toInputDate(r.rawDate)}" data-id="${r.id}" data-field="bag_received_date" onblur="saveDatetime(this)">`:r.receivedDate):'-'}</td>
+    <td>${r.received?(isAdmin?`<input class="dt-input dt-time" type="time" value="${toInputTime(r.rawDate)}" data-id="${r.id}" data-field="bag_received_date" onblur="saveDatetime(this)">`:r.receivedTime):'-'}</td>
+    <td>${r.received?(isAdmin?`<input class="proxy-input" type="text" value="${(r.receivedBy||'').replace(/"/g,'&quot;')}" placeholder="ชื่อผู้รับแทน..." data-id="${r.id}" data-field="bag_received_by" onblur="saveProxy(this)">`:r.receivedBy||'-'):'-'}</td>
   </tr>`).join('');
 }
 
@@ -664,9 +683,9 @@ function renderShirtTable(){
     <td style="max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${r.dept}">${r.dept}</td>
     <td style="font-weight:700;text-align:center;">${r.shirtSize}</td>
     <td><span class="badge ${r.received?'b-received':'b-pending'}">${r.received?'รับแล้ว':'ยังไม่รับ'}</span></td>
-    <td>${r.received?r.receivedDate:'-'}</td>
-    <td>${r.received?r.receivedTime:'-'}</td>
-    <td>${r.received?`<input class="proxy-input" type="text" value="${(r.shirtReceivedBy||'').replace(/"/g,'&quot;')}" placeholder="ชื่อผู้รับแทน..." data-id="${r.id}" data-field="shirt_received_by" onblur="saveProxy(this)">`:'-'}</td>
+    <td>${r.received?(isAdmin?`<input class="dt-input dt-date" type="date" value="${toInputDate(r.rawDate)}" data-id="${r.id}" data-field="shirt_received_date" onblur="saveDatetime(this)">`:r.receivedDate):'-'}</td>
+    <td>${r.received?(isAdmin?`<input class="dt-input dt-time" type="time" value="${toInputTime(r.rawDate)}" data-id="${r.id}" data-field="shirt_received_date" onblur="saveDatetime(this)">`:r.receivedTime):'-'}</td>
+    <td>${r.received?(isAdmin?`<input class="proxy-input" type="text" value="${(r.shirtReceivedBy||'').replace(/"/g,'&quot;')}" placeholder="ชื่อผู้รับแทน..." data-id="${r.id}" data-field="shirt_received_by" onblur="saveProxy(this)">`:r.shirtReceivedBy||'-'):'-'}</td>
   </tr>`).join('');
 }
 
@@ -767,6 +786,28 @@ function getRows(){
     'วันที่รับ':r.received?r.receivedDate:'-',
     'เวลา':r.received?r.receivedTime:'-',
     'ผู้มารับแทน':r.receivedBy||'-'}));
+}
+
+async function saveDatetime(input){
+  const row=input.closest('tr');
+  const dateEl=row.querySelector('.dt-date');
+  const timeEl=row.querySelector('.dt-time');
+  if(!dateEl||!timeEl||!dateEl.value||!timeEl.value) return;
+  const id=input.dataset.id;
+  const field=input.dataset.field;
+  const iso=bkkToISO(dateEl.value,timeEl.value);
+  const patch={};patch[field]=iso;
+  [dateEl,timeEl].forEach(el=>el.style.borderColor='#94a3b8');
+  try{
+    const r=await fetch(`${SB_URL}/rest/v1/participants?id=eq.${id}`,{
+      method:'PATCH',
+      headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify(patch)
+    });
+    const ok=r.ok||r.status===204;
+    [dateEl,timeEl].forEach(el=>el.style.borderColor=ok?'#16a34a':'#dc2626');
+    if(ok) setTimeout(()=>{[dateEl,timeEl].forEach(el=>el.style.borderColor='');},1500);
+  }catch(e){[dateEl,timeEl].forEach(el=>el.style.borderColor='#dc2626');}
 }
 
 async function saveProxy(input){
