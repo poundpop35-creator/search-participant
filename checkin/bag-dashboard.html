@@ -73,7 +73,11 @@
     .dt-input{padding:4px 6px;border:1.5px solid #bfdbfe;border-radius:7px;font-family:'Sarabun',sans-serif;font-size:0.82rem;color:#1e293b;outline:none;transition:border-color 0.2s;background:#eff6ff;}
     .dt-input:focus{border-color:#2563eb;background:#fff;}
     .dt-date{width:120px;}.dt-time{width:80px;}
-    .admin-edit-badge{display:inline-flex;align-items:center;gap:5px;background:#dbeafe;color:#1d4ed8;font-size:0.73rem;font-weight:700;padding:3px 10px;border-radius:20px;border:1px solid #bfdbfe;margin-left:10px;}
+    .btn-edit-row{padding:3px 9px;border-radius:6px;border:1.5px solid #bfdbfe;background:#eff6ff;color:#2563eb;font-family:'Sarabun',sans-serif;font-size:0.78rem;cursor:pointer;font-weight:700;white-space:nowrap;}
+    .btn-edit-row:hover{background:#dbeafe;border-color:#93c5fd;}
+    .btn-save-row{padding:3px 9px;border-radius:6px;border:none;background:#16a34a;color:white;font-family:'Sarabun',sans-serif;font-size:0.78rem;cursor:pointer;font-weight:700;margin-right:3px;}
+    .btn-save-row:disabled{opacity:0.6;cursor:not-allowed;}
+    .btn-cancel-row{padding:3px 9px;border-radius:6px;border:1.5px solid #e2e8f0;background:white;color:#64748b;font-family:'Sarabun',sans-serif;font-size:0.78rem;cursor:pointer;}
     /* Pager */
     .pager{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-top:1px solid var(--border);font-size:0.83rem;color:#64748b;flex-wrap:wrap;gap:8px;}
     .pbtn{padding:5px 12px;border-radius:6px;border:1.5px solid var(--border);background:var(--white);cursor:pointer;font-size:0.8rem;}
@@ -205,7 +209,6 @@
         <div>
           <span class="ttitle">ผู้มีสิทธิ์รับกระเป๋า (ก่อนวันงาน)</span>
           <span class="tcount" id="tCount"></span>
-          <span id="bagAdminHint" style="display:none;font-size:0.75rem;color:#2563eb;background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:3px 10px;margin-left:8px;">✏️ Admin — แก้ไขได้โดยตรง บันทึกอัตโนมัติเมื่อคลิกออก (border เขียว = สำเร็จ)</span>
         </div>
         <div class="export-btns">
           <button class="btn-xl green" onclick="exportExcel()">⬇ Excel</button>
@@ -218,10 +221,11 @@
             <tr>
               <th>#</th><th>ชื่อ-นามสกุล</th><th>หน่วยงาน</th>
               <th>ประเภทการเข้าร่วม</th><th>TAG</th>
-              <th>สถานะกระเป๋า</th><th id="thBagDate">วันที่รับ</th><th id="thBagTime">เวลา</th><th>สแกนโดย</th><th id="thBagProxy">ผู้มารับแทน</th>
+              <th>สถานะกระเป๋า</th><th>วันที่รับ</th><th>เวลา</th><th>สแกนโดย</th><th>ผู้มารับแทน</th>
+              <th id="thBagAction" style="display:none;width:88px;"></th>
             </tr>
           </thead>
-          <tbody id="tBody"><tr><td colspan="10" class="loading-td">กำลังโหลด...</td></tr></tbody>
+          <tbody id="tBody"><tr><td colspan="11" class="loading-td">กำลังโหลด...</td></tr></tbody>
         </table>
       </div>
       <div class="pager">
@@ -283,7 +287,6 @@
         <div>
           <span class="ttitle">ผู้มีสิทธิ์รับเสื้อ (ก่อนวันงาน)</span>
           <span class="tcount" id="stCount"></span>
-          <span id="shirtAdminHint" style="display:none;font-size:0.75rem;color:#2563eb;background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:3px 10px;margin-left:8px;">✏️ Admin — แก้ไขได้โดยตรง บันทึกอัตโนมัติเมื่อคลิกออก (border เขียว = สำเร็จ)</span>
         </div>
         <div class="export-btns">
           <button class="btn-xl green" onclick="exportShirtExcel()">⬇ Excel</button>
@@ -297,10 +300,12 @@
             <tr>
               <th>#</th><th>ชื่อ-นามสกุล</th><th>หน่วยงาน</th>
               <th>ไซต์เสื้อ</th>
-              <th>สถานะเสื้อ</th><th id="thShirtDate">วันที่รับ</th><th id="thShirtTime">เวลา</th><th>สแกนโดย</th><th id="thShirtProxy">ผู้มารับแทน</th>
+              <th>สถานะเสื้อ</th><th>วันที่รับ</th><th>เวลา</th><th>สแกนโดย</th><th>ผู้มารับแทน</th>
+              <th id="thShirtAction" style="display:none;width:88px;"></th>
             </tr>
           </thead>
           <tbody id="stBody"><tr><td colspan="10" class="loading-td">กำลังโหลด...</td></tr></tbody>
+
         </table>
       </div>
       <div class="pager">
@@ -463,7 +468,7 @@ function fmtBagTime(v){
 
 async function loadAll(){
   await loadActiveYear();
-  document.getElementById('tBody').innerHTML='<tr><td colspan="10" class="loading-td">กำลังโหลด...</td></tr>';
+  document.getElementById('tBody').innerHTML=`<tr><td colspan="${isAdmin?11:10}" class="loading-td">กำลังโหลด...</td></tr>`;
   try{
     let res=[], from=0;
     while(true){
@@ -607,19 +612,28 @@ function renderTable(){
   document.getElementById('pInfo').textContent=`แสดง ${tot===0?0:start+1}–${Math.min(start+PAGE,tot)} จาก ${tot.toLocaleString()} รายการ`;
   document.getElementById('bPrev').disabled=curPage<=1;
   document.getElementById('bNext').disabled=curPage>=totPages;
-  if(!page.length){document.getElementById('tBody').innerHTML='<tr><td colspan="10" class="loading-td">ไม่พบข้อมูล</td></tr>';return;}
-  document.getElementById('tBody').innerHTML=page.map((r,i)=>`<tr>
-    <td>${start+i+1}</td>
-    <td>${r.name}</td>
-    <td style="max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${r.dept}">${r.dept}</td>
-    <td>${r.pt}</td>
-    <td><span class="badge ${r.tag==='Staff'?'b-staff':'b-participant'}">${r.tag}</span></td>
-    <td><span class="badge ${r.received?'b-received':'b-pending'} row-status">${r.received?'รับแล้ว':'ยังไม่รับ'}</span></td>
-    <td>${isAdmin?`<input class="dt-input dt-date" type="date" value="${toInputDate(r.rawDate)}" data-id="${r.id}" data-field="bag_received_date" onblur="saveDatetime(this)">`:(r.received?r.receivedDate:'-')}</td>
-    <td>${isAdmin?`<input class="dt-input dt-time" type="time" value="${toInputTime(r.rawDate)}" data-id="${r.id}" data-field="bag_received_date" onblur="saveDatetime(this)">`:(r.received?r.receivedTime:'-')}</td>
-    <td style="font-size:0.82rem;color:#475569;">${r.received?(r.scannedBy||'-'):'-'}</td>
-    <td>${isAdmin?`<input class="proxy-input" type="text" value="${(r.receivedBy||'').replace(/"/g,'&quot;')}" placeholder="ชื่อผู้รับแทน..." data-id="${r.id}" data-field="bag_received_by" onblur="saveProxy(this)">`:(r.received?r.receivedBy||'-':'-')}</td>
-  </tr>`).join('');
+  if(!page.length){document.getElementById('tBody').innerHTML=`<tr><td colspan="${isAdmin?11:10}" class="loading-td">ไม่พบข้อมูล</td></tr>`;return;}
+  document.getElementById('tBody').innerHTML=page.map((r,i)=>{
+    const dT=r.received?r.receivedDate:'-';
+    const tT=r.received?r.receivedTime:'-';
+    const sT=r.received?(r.scannedBy||'-'):'-';
+    const pT=r.received?(r.receivedBy||'-'):'-';
+    const adminAttrs=isAdmin?` data-id="${r.id}" data-raw-date="${r.rawDate||''}" data-received-by="${(r.receivedBy||'').replace(/"/g,'&quot;')}" data-received="${r.received}" data-field="bag_received_date" data-scan-by="${(r.scannedBy||'').replace(/"/g,'&quot;')}" data-editing="0"`:'';
+    const actionCell=isAdmin?`<td style="white-space:nowrap;"><button class="btn-edit-row" onclick="startEdit(this)">✏️ แก้ไข</button></td>`:'';
+    return `<tr${adminAttrs}>
+      <td>${start+i+1}</td>
+      <td>${r.name}</td>
+      <td style="max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${r.dept}">${r.dept}</td>
+      <td>${r.pt}</td>
+      <td><span class="badge ${r.tag==='Staff'?'b-staff':'b-participant'}">${r.tag}</span></td>
+      <td><span class="badge ${r.received?'b-received':'b-pending'} row-status">${r.received?'รับแล้ว':'ยังไม่รับ'}</span></td>
+      <td class="cell-date">${dT}</td>
+      <td class="cell-time">${tT}</td>
+      <td class="cell-scanned" style="font-size:0.82rem;color:#475569;">${sT}</td>
+      <td class="cell-proxy">${pT}</td>
+      ${actionCell}
+    </tr>`;
+  }).join('');
 }
 
 function changePage(d){curPage+=d;renderTable();window.scrollTo({top:0,behavior:'smooth'});}
@@ -682,18 +696,27 @@ function renderShirtTable(){
   document.getElementById('spInfo').textContent=`แสดง ${tot===0?0:start+1}–${Math.min(start+PAGE,tot)} จาก ${tot.toLocaleString()} รายการ`;
   document.getElementById('sbPrev').disabled=shirtPage<=1;
   document.getElementById('sbNext').disabled=shirtPage>=totPages;
-  if(!page.length){document.getElementById('stBody').innerHTML='<tr><td colspan="9" class="loading-td">ไม่พบข้อมูล</td></tr>';return;}
-  document.getElementById('stBody').innerHTML=page.map((r,i)=>`<tr>
-    <td>${start+i+1}</td>
-    <td>${r.name}</td>
-    <td style="max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${r.dept}">${r.dept}</td>
-    <td style="font-weight:700;text-align:center;">${r.shirtSize}</td>
-    <td><span class="badge ${r.received?'b-received':'b-pending'} row-status">${r.received?'รับแล้ว':'ยังไม่รับ'}</span></td>
-    <td>${isAdmin?`<input class="dt-input dt-date" type="date" value="${toInputDate(r.rawDate)}" data-id="${r.id}" data-field="shirt_received_date" onblur="saveDatetime(this)">`:(r.received?r.receivedDate:'-')}</td>
-    <td>${isAdmin?`<input class="dt-input dt-time" type="time" value="${toInputTime(r.rawDate)}" data-id="${r.id}" data-field="shirt_received_date" onblur="saveDatetime(this)">`:(r.received?r.receivedTime:'-')}</td>
-    <td style="font-size:0.82rem;color:#475569;">${r.received?(r.scannedBy||'-'):'-'}</td>
-    <td>${isAdmin?`<input class="proxy-input" type="text" value="${(r.shirtReceivedBy||'').replace(/"/g,'&quot;')}" placeholder="ชื่อผู้รับแทน..." data-id="${r.id}" data-field="shirt_received_by" onblur="saveProxy(this)">`:(r.received?r.shirtReceivedBy||'-':'-')}</td>
-  </tr>`).join('');
+  if(!page.length){document.getElementById('stBody').innerHTML=`<tr><td colspan="${isAdmin?10:9}" class="loading-td">ไม่พบข้อมูล</td></tr>`;return;}
+  document.getElementById('stBody').innerHTML=page.map((r,i)=>{
+    const dT=r.received?r.receivedDate:'-';
+    const tT=r.received?r.receivedTime:'-';
+    const sT=r.received?(r.scannedBy||'-'):'-';
+    const pT=r.received?(r.shirtReceivedBy||'-'):'-';
+    const adminAttrs=isAdmin?` data-id="${r.id}" data-raw-date="${r.rawDate||''}" data-received-by="${(r.shirtReceivedBy||'').replace(/"/g,'&quot;')}" data-received="${r.received}" data-field="shirt_received_date" data-scan-by="${(r.scannedBy||'').replace(/"/g,'&quot;')}" data-editing="0"`:'';
+    const actionCell=isAdmin?`<td style="white-space:nowrap;"><button class="btn-edit-row" onclick="startEdit(this)">✏️ แก้ไข</button></td>`:'';
+    return `<tr${adminAttrs}>
+      <td>${start+i+1}</td>
+      <td>${r.name}</td>
+      <td style="max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${r.dept}">${r.dept}</td>
+      <td style="font-weight:700;text-align:center;">${r.shirtSize}</td>
+      <td><span class="badge ${r.received?'b-received':'b-pending'} row-status">${r.received?'รับแล้ว':'ยังไม่รับ'}</span></td>
+      <td class="cell-date">${dT}</td>
+      <td class="cell-time">${tT}</td>
+      <td class="cell-scanned" style="font-size:0.82rem;color:#475569;">${sT}</td>
+      <td class="cell-proxy">${pT}</td>
+      ${actionCell}
+    </tr>`;
+  }).join('');
 }
 
 function changeShirtPage(d){shirtPage+=d;renderShirtTable();window.scrollTo({top:0,behavior:'smooth'});}
@@ -797,90 +820,97 @@ function getRows(){
     'ผู้มารับแทน':r.receivedBy||'-'}));
 }
 
-async function saveDatetime(input){
-  const row=input.closest('tr');
-  const dateEl=row.querySelector('.dt-date');
-  const timeEl=row.querySelector('.dt-time');
-  if(!dateEl||!timeEl) return;
-  const id=input.dataset.id;
-  const field=input.dataset.field; // bag_received_date or shirt_received_date
+function startEdit(btn){
+  const row=btn.closest('tr');
+  if(row.dataset.editing==='1') return;
+  row.dataset.editing='1';
+  const rawDate=row.dataset.rawDate||'';
+  const receivedBy=row.dataset.receivedBy||'';
+  row.querySelector('.cell-date').innerHTML=`<input class="dt-input dt-date" type="date" value="${toInputDate(rawDate)}">`;
+  row.querySelector('.cell-time').innerHTML=`<input class="dt-input dt-time" type="time" value="${toInputTime(rawDate)}">`;
+  row.querySelector('.cell-proxy').innerHTML=`<input class="proxy-input" type="text" value="${receivedBy.replace(/"/g,'&quot;')}" placeholder="ชื่อผู้รับแทน...">`;
+  btn.closest('td').innerHTML=`<button class="btn-save-row" onclick="commitEdit(this)">ตกลง</button><button class="btn-cancel-row" onclick="cancelEdit(this)">ยกเลิก</button>`;
+}
+
+async function commitEdit(btn){
+  const row=btn.closest('tr');
+  const id=row.dataset.id;
+  const field=row.dataset.field;
   const isBag=field==='bag_received_date';
   const recvField=isBag?'bag_received':'shirt_received';
+  const proxyField=isBag?'bag_received_by':'shirt_received_by';
   const scanField=isBag?'bag_scanned_by':'shirt_scanned_by';
-  const dateVal=dateEl.value;
-  const timeVal=timeEl.value||'08:00';
+  const wasReceived=row.dataset.received==='true';
+  const dateEl=row.querySelector('.dt-date');
+  const timeEl=row.querySelector('.dt-time');
+  const proxyEl=row.querySelector('.proxy-input');
+  const dateVal=dateEl?dateEl.value:'';
+  const timeVal=(timeEl?timeEl.value:'')||'08:00';
+  const proxyVal=proxyEl?proxyEl.value.trim():'';
   const patch={};
+  let nowRec;
   if(dateVal){
     patch[field]=bkkToISO(dateVal,timeVal);
     patch[recvField]=true;
-    patch[scanField]=sessionStorage.getItem('dmsc_user')||'admin';
+    if(!wasReceived) patch[scanField]=sessionStorage.getItem('dmsc_user')||'admin';
+    nowRec=true;
+  } else if(proxyVal){
+    const nowIso=new Date().toISOString();
+    patch[field]=nowIso;
+    patch[recvField]=true;
+    if(!wasReceived) patch[scanField]=sessionStorage.getItem('dmsc_user')||'admin';
+    nowRec=true;
   } else {
     patch[field]=null;
     patch[recvField]=false;
     patch[scanField]=null;
+    nowRec=false;
   }
-  [dateEl,timeEl].forEach(el=>el.style.borderColor='#94a3b8');
+  patch[proxyField]=proxyVal||null;
+  btn.disabled=true;btn.textContent='⏳';
   try{
-    const r=await fetch(`${SB_URL}/rest/v1/participants?id=eq.${id}`,{
+    const res=await fetch(`${SB_URL}/rest/v1/participants?id=eq.${id}`,{
       method:'PATCH',
       headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},
       body:JSON.stringify(patch)
     });
-    const ok=r.ok||r.status===204;
-    [dateEl,timeEl].forEach(el=>el.style.borderColor=ok?'#16a34a':'#dc2626');
-    if(ok){
+    if(res.ok||res.status===204){
+      const newRawDate=patch[field]||'';
+      row.dataset.rawDate=newRawDate;
+      row.dataset.receivedBy=proxyVal;
+      row.dataset.received=String(nowRec);
+      if(patch[scanField]) row.dataset.scanBy=patch[scanField];
+      else if(!nowRec) row.dataset.scanBy='';
       const badge=row.querySelector('.row-status');
-      if(badge){
-        const nowRec=!!patch[recvField];
-        badge.textContent=nowRec?'รับแล้ว':'ยังไม่รับ';
-        badge.className=`badge ${nowRec?'b-received':'b-pending'} row-status`;
-      }
-      setTimeout(()=>{[dateEl,timeEl].forEach(el=>el.style.borderColor='');},1500);
+      if(badge){badge.textContent=nowRec?'รับแล้ว':'ยังไม่รับ';badge.className=`badge ${nowRec?'b-received':'b-pending'} row-status`;}
+      const dT=nowRec?fmtBagDate(newRawDate):'-';
+      const tT=nowRec?fmtBagTime(newRawDate):'-';
+      const displayScan=!nowRec?'-':(!wasReceived?(patch[scanField]||'-'):(row.dataset.scanBy||'-'));
+      row.querySelector('.cell-date').textContent=dT;
+      row.querySelector('.cell-time').textContent=tT;
+      row.querySelector('.cell-scanned').textContent=displayScan;
+      row.querySelector('.cell-proxy').textContent=nowRec?(proxyVal||'-'):'-';
+      btn.closest('td').innerHTML=`<button class="btn-edit-row" onclick="startEdit(this)">✏️ แก้ไข</button>`;
+      row.dataset.editing='0';
+    } else {
+      btn.disabled=false;btn.textContent='ตกลง';
+      alert('บันทึกไม่สำเร็จ: '+res.status);
     }
-  }catch(e){[dateEl,timeEl].forEach(el=>el.style.borderColor='#dc2626');}
+  }catch(e){btn.disabled=false;btn.textContent='ตกลง';alert('เกิดข้อผิดพลาด: '+e.message);}
 }
 
-async function saveProxy(input){
-  const id=input.dataset.id;
-  const field=input.dataset.field; // bag_received_by or shirt_received_by
-  const val=input.value.trim();
-  const isBag=field==='bag_received_by';
-  const recvField=isBag?'bag_received':'shirt_received';
-  const dateField=isBag?'bag_received_date':'shirt_received_date';
-  const scanField=isBag?'bag_scanned_by':'shirt_scanned_by';
-  const row=input.closest('tr');
-  const badge=row?.querySelector('.row-status');
-  const alreadyReceived=badge?.classList.contains('b-received');
-  const patch={};
-  patch[field]=val||null;
-  if(val&&!alreadyReceived){
-    const dateEl=row?.querySelector('.dt-date');
-    const timeEl=row?.querySelector('.dt-time');
-    const dateVal=dateEl?.value;
-    const timeVal=timeEl?.value||'08:00';
-    const nowIso=dateVal?bkkToISO(dateVal,timeVal):new Date().toISOString();
-    patch[dateField]=nowIso;
-    patch[recvField]=true;
-    patch[scanField]=sessionStorage.getItem('dmsc_user')||'admin';
-    if(dateEl&&!dateEl.value){dateEl.value=toInputDate(nowIso);}
-    if(timeEl&&!timeEl.value){timeEl.value=toInputTime(nowIso);}
-  }
-  input.style.borderColor='#94a3b8';
-  try{
-    const r=await fetch(`${SB_URL}/rest/v1/participants?id=eq.${id}`,{
-      method:'PATCH',
-      headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},
-      body:JSON.stringify(patch)
-    });
-    if(r.ok||r.status===204){
-      input.style.borderColor='#16a34a';
-      if(badge&&patch[recvField]!==undefined){
-        badge.textContent='รับแล้ว';
-        badge.className='badge b-received row-status';
-      }
-      setTimeout(()=>{input.style.borderColor='';},1500);
-    } else { input.style.borderColor='#dc2626'; }
-  }catch(e){ input.style.borderColor='#dc2626'; }
+function cancelEdit(btn){
+  const row=btn.closest('tr');
+  const rawDate=row.dataset.rawDate||'';
+  const receivedBy=row.dataset.receivedBy||'';
+  const received=row.dataset.received==='true';
+  const scannedBy=row.dataset.scanBy||'';
+  row.querySelector('.cell-date').textContent=received?fmtBagDate(rawDate):'-';
+  row.querySelector('.cell-time').textContent=received?fmtBagTime(rawDate):'-';
+  row.querySelector('.cell-scanned').textContent=received?(scannedBy||'-'):'-';
+  row.querySelector('.cell-proxy').textContent=received?(receivedBy||'-'):'-';
+  btn.closest('td').innerHTML=`<button class="btn-edit-row" onclick="startEdit(this)">✏️ แก้ไข</button>`;
+  row.dataset.editing='0';
 }
 
 async function doLogout(){
@@ -983,12 +1013,8 @@ document.getElementById('clearOverlay').addEventListener('click',function(e){
 });
 
 if(isAdmin){
-  ['thBagDate','thBagTime','thBagProxy','thShirtDate','thShirtTime','thShirtProxy'].forEach(id=>{
-    const el=document.getElementById(id);
-    if(el) el.innerHTML+=' <span class="admin-edit-badge">✏️ แก้ไขได้</span>';
-  });
-  const bh=document.getElementById('bagAdminHint');if(bh)bh.style.display='';
-  const sh=document.getElementById('shirtAdminHint');if(sh)sh.style.display='';
+  const ta=document.getElementById('thBagAction');if(ta)ta.style.display='';
+  const tsa=document.getElementById('thShirtAction');if(tsa)tsa.style.display='';
 }
 loadAll();
 (function(){const c=localStorage.getItem('pageBgUrl');if(c)document.body.style.backgroundImage=`linear-gradient(rgba(232,240,254,0.55),rgba(232,240,254,0.55)),url('${c}')`;})();
