@@ -510,6 +510,8 @@ async function loadAll(){
         scannedBy:p.bag_scanned_by||''
       };
     });
+    const _dIdx=Object.fromEntries(DEPTS.map((d,i)=>[d,i]));
+    allData.sort((a,b)=>{const ia=_dIdx[a.dept]??Infinity,ib=_dIdx[b.dept]??Infinity;if(ia!==ib)return ia-ib;return a.name.localeCompare(b.name,'th');});
     initBagDeptFilter(allData);
 
     const total=allData.length;
@@ -547,6 +549,7 @@ async function loadAll(){
         scannedBy:p.shirt_scanned_by||''
       };
     });
+    allShirtData.sort((a,b)=>{const ia=_dIdx[a.dept]??Infinity,ib=_dIdx[b.dept]??Infinity;if(ia!==ib)return ia-ib;return a.name.localeCompare(b.name,'th');});
     // Populate shirt dept dropdown
     const allShirtDepts=[...new Set(allShirtData.map(r=>r.dept))];
     const sortedShirtDepts=[...DEPTS.filter(d=>allShirtDepts.includes(d)),...allShirtDepts.filter(d=>!DEPTS.includes(d)).sort((a,b)=>a.localeCompare(b,'th'))];
