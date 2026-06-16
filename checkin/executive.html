@@ -454,7 +454,7 @@ async function loadData() {
     // Lock exact headcount per day — remove actual scans, replace with virtual records
     const LOCKED = {'อธิบดีกรมวิทยาศาสตร์การแพทย์':1,'รองอธิบดีกรมวิทยาศาสตร์การแพทย์':3,'กองแผนงานและวิชาการ':planPreReg};
     const LSET = new Set(Object.keys(LOCKED));
-    const cleanRows = rows.filter(r=>!LSET.has(r.participants?.dept));
+    const cleanRows = rows.filter(r=>!LSET.has(r.participants?.dept)||r.participants?.is_walkin===true);
     const DT = ['2026-06-23T23:30:00Z','2026-06-24T23:30:00Z','2026-06-25T23:30:00Z'];
     let vpid = -1;
     for(const [dept,locked] of Object.entries(LOCKED)){
