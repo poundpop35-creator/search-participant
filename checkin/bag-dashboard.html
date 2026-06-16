@@ -840,9 +840,29 @@ async function saveDatetime(input){
 
 async function saveProxy(input){
   const id=input.dataset.id;
-  const field=input.dataset.field;
+  const field=input.dataset.field; // bag_received_by or shirt_received_by
   const val=input.value.trim();
-  const patch={};patch[field]=val||null;
+  const isBag=field==='bag_received_by';
+  const recvField=isBag?'bag_received':'shirt_received';
+  const dateField=isBag?'bag_received_date':'shirt_received_date';
+  const scanField=isBag?'bag_scanned_by':'shirt_scanned_by';
+  const row=input.closest('tr');
+  const badge=row?.querySelector('.row-status');
+  const alreadyReceived=badge?.classList.contains('b-received');
+  const patch={};
+  patch[field]=val||null;
+  if(val&&!alreadyReceived){
+    const dateEl=row?.querySelector('.dt-date');
+    const timeEl=row?.querySelector('.dt-time');
+    const dateVal=dateEl?.value;
+    const timeVal=timeEl?.value||'08:00';
+    const nowIso=dateVal?bkkToISO(dateVal,timeVal):new Date().toISOString();
+    patch[dateField]=nowIso;
+    patch[recvField]=true;
+    patch[scanField]=sessionStorage.getItem('dmsc_user')||'admin';
+    if(dateEl&&!dateEl.value){dateEl.value=toInputDate(nowIso);}
+    if(timeEl&&!timeEl.value){timeEl.value=toInputTime(nowIso);}
+  }
   input.style.borderColor='#94a3b8';
   try{
     const r=await fetch(`${SB_URL}/rest/v1/participants?id=eq.${id}`,{
@@ -852,6 +872,10 @@ async function saveProxy(input){
     });
     if(r.ok||r.status===204){
       input.style.borderColor='#16a34a';
+      if(badge&&patch[recvField]!==undefined){
+        badge.textContent='รับแล้ว';
+        badge.className='badge b-received row-status';
+      }
       setTimeout(()=>{input.style.borderColor='';},1500);
     } else { input.style.borderColor='#dc2626'; }
   }catch(e){ input.style.borderColor='#dc2626'; }
