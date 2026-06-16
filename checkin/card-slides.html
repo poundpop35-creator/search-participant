@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ตัวอย่างการ์ดทุกระบบ — DMSC Check-in</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700;800&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Sarabun',sans-serif;background:#0d2b6b;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px;}
+
+/* Deck */
+.deck{width:100%;max-width:860px;}
+.deck-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:8px;}
+.slide-counter{color:rgba(255,255,255,0.65);font-size:0.82rem;font-weight:600;letter-spacing:.04em;}
+.system-badge{padding:4px 14px;border-radius:20px;font-size:0.78rem;font-weight:700;letter-spacing:.03em;}
+.sys-bag{background:#fef9c3;color:#92400e;}
+.sys-shirt{background:#dbeafe;color:#1e40af;}
+.sys-checkin{background:#dcfce7;color:#166534;}
+.sys-all{background:#f3e8ff;color:#6b21a8;}
+
+/* Slide */
+.slide{display:none;animation:fadeIn .25s ease;}
+.slide.active{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+
+/* Title slide */
+.title-slide{background:linear-gradient(135deg,#1e3a8a,#0d2b6b);border-radius:24px;padding:56px 40px;text-align:center;color:white;box-shadow:0 8px 40px rgba(0,0,0,.4);}
+.title-slide h1{font-size:1.9rem;font-weight:800;line-height:1.3;margin-bottom:12px;}
+.title-slide .sub{font-size:1rem;color:rgba(255,255,255,.7);margin-bottom:32px;}
+.title-slide .sys-pills{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
+.title-pill{padding:8px 20px;border-radius:12px;font-size:0.9rem;font-weight:700;}
+
+/* Summary slide */
+.summary-slide{background:white;border-radius:24px;padding:36px 32px;box-shadow:0 8px 40px rgba(0,0,0,.3);}
+.summary-slide h2{font-size:1.25rem;font-weight:800;color:#0d2b6b;margin-bottom:20px;text-align:center;}
+.sum-table{width:100%;border-collapse:collapse;font-size:0.88rem;}
+.sum-table th{background:#f1f5f9;color:#475569;font-weight:700;padding:9px 12px;text-align:left;border-bottom:2px solid #e2e8f0;}
+.sum-table td{padding:9px 12px;border-bottom:1px solid #f1f5f9;vertical-align:top;}
+.sum-table tr:last-child td{border-bottom:none;}
+.yes{color:#16a34a;font-weight:700;}
+.no{color:#dc2626;font-weight:700;}
+
+/* Card slide */
+.card-slide{display:flex;gap:24px;align-items:flex-start;}
+.card-info{flex:0 0 220px;color:white;}
+.card-info .case-num{font-size:0.72rem;font-weight:700;letter-spacing:.06em;color:rgba(255,255,255,.5);text-transform:uppercase;margin-bottom:6px;}
+.card-info h3{font-size:1rem;font-weight:800;line-height:1.4;margin-bottom:8px;}
+.card-info .desc{font-size:0.82rem;color:rgba(255,255,255,.7);line-height:1.6;}
+.card-info .note{margin-top:12px;background:rgba(255,255,255,.1);border-radius:10px;padding:10px 12px;font-size:0.78rem;color:rgba(255,255,255,.85);line-height:1.6;}
+
+/* Mock modal */
+.modal-mock{flex:1;background:rgba(0,0,0,.45);border-radius:20px;padding:16px;display:flex;align-items:center;justify-content:center;}
+.modal-box{background:white;border-radius:18px;width:100%;max-width:340px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.35);}
+.modal-status-bar{padding:12px 18px 10px;text-align:center;}
+.modal-status-bar .badge{display:inline-block;padding:4px 18px;border-radius:20px;font-size:0.88rem;font-weight:700;letter-spacing:.02em;}
+.badge.success{background:#dcfce7;color:#166534;}
+.badge.warning{background:#fef9c3;color:#92400e;}
+.badge.error{background:#fee2e2;color:#991b1b;}
+.badge.vip{background:#f3e8ff;color:#6b21a8;}
+.badge.staff{background:#dbeafe;color:#1e40af;}
+
+.modal-title{text-align:center;font-size:0.95rem;font-weight:700;color:#1e293b;padding:0 18px 4px;}
+.modal-name{text-align:center;font-size:1.1rem;font-weight:800;color:#0d2b6b;padding:4px 18px 2px;}
+.modal-dept{text-align:center;font-size:0.8rem;color:#64748b;padding:0 18px 10px;}
+
+.modal-detail{padding:0 14px 4px;}
+.detail-row{display:flex;align-items:baseline;justify-content:space-between;padding:7px 8px;border-radius:8px;margin-bottom:3px;background:#f8fafc;gap:8px;}
+.detail-label{font-size:0.78rem;color:#64748b;font-weight:600;flex:0 0 auto;max-width:52%;line-height:1.35;}
+.detail-val{font-size:0.8rem;font-weight:700;text-align:right;}
+.detail-val.ok{color:#16a34a;}
+.detail-val.done{color:#0891b2;}
+.detail-val.warn{color:#dc2626;}
+.detail-val.normal{color:#334155;}
+.detail-val.purple{color:#7c3aed;}
+.detail-sub{font-size:0.68rem;color:#94a3b8;font-weight:400;display:block;text-align:right;margin-top:1px;}
+
+.modal-note{margin:6px 14px;padding:8px 10px;border-radius:8px;text-align:center;font-size:0.77rem;line-height:1.55;}
+.modal-note.purple{background:#f3e8ff;color:#7c3aed;border-top:1px solid #ede9fe;}
+.modal-note.blue{background:#dbeafe;color:#1d4ed8;border-top:1px solid #bfdbfe;}
+
+.modal-shirt-btn{margin:8px 14px;background:#0891b2;color:white;border:none;border-radius:10px;padding:10px;width:calc(100% - 28px);font-family:'Sarabun',sans-serif;font-size:0.88rem;font-weight:700;cursor:pointer;display:block;text-align:center;}
+
+.modal-actions{display:flex;gap:8px;padding:10px 14px 14px;}
+.btn-ok{flex:1;padding:11px;border-radius:10px;border:none;font-family:'Sarabun',sans-serif;font-size:0.92rem;font-weight:700;cursor:pointer;}
+.btn-ok.success{background:#16a34a;color:white;}
+.btn-ok.warning{background:#f59e0b;color:white;}
+.btn-ok.error{background:#dc2626;color:white;}
+.btn-ok.vip,.btn-ok.staff{background:#6d28d9;color:white;}
+.btn-cancel{flex:0 0 auto;padding:11px 18px;border-radius:10px;border:1.5px solid #cbd5e1;background:white;font-family:'Sarabun',sans-serif;font-size:0.88rem;color:#64748b;cursor:pointer;}
+
+/* Nav */
+.nav{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:18px;}
+.nav-btn{background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.25);color:white;border-radius:12px;padding:10px 24px;font-family:'Sarabun',sans-serif;font-size:0.88rem;font-weight:700;cursor:pointer;transition:background .15s;}
+.nav-btn:hover:not(:disabled){background:rgba(255,255,255,.28);}
+.nav-btn:disabled{opacity:.3;cursor:default;}
+.nav-dots{display:flex;gap:6px;align-items:center;}
+.dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.25);cursor:pointer;transition:background .15s,transform .15s;}
+.dot.active{background:white;transform:scale(1.25);}
+.dot.sys-dot-bag{background:rgba(251,191,36,.5);}
+.dot.sys-dot-bag.active{background:#fbbf24;}
+.dot.sys-dot-shirt{background:rgba(96,165,250,.5);}
+.dot.sys-dot-shirt.active{background:#60a5fa;}
+.dot.sys-dot-checkin{background:rgba(74,222,128,.5);}
+.dot.sys-dot-checkin.active{background:#4ade80;}
+
+/* Section label */
+.section-label{text-align:center;color:rgba(255,255,255,.4);font-size:0.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px;}
+
+/* Responsive */
+@media(max-width:640px){
+  .card-slide{flex-direction:column;}
+  .card-info{flex:none;width:100%;}
+  .modal-box{max-width:100%;}
+}
+</style>
+</head>
+<body>
+
+<div class="deck">
+
+<!-- SLIDE 0: Title -->
+<div class="slide active" data-sys="all">
+  <div class="title-slide">
+    <div style="font-family:'Dancing Script',cursive;font-size:1.1rem;color:rgba(255,255,255,.55);margin-bottom:10px;">DMSC · DMSc</div>
+    <h1>ตัวอย่างการ์ดทุกระบบ<br>ทุกกรณี</h1>
+    <div class="sub">ระบบ Check-in / รับกระเป๋า / รับเสื้อ</div>
+    <div class="sys-pills">
+      <span class="title-pill" style="background:#fef9c3;color:#92400e;">🎒 ระบบรับกระเป๋า  8 กรณี</span>
+      <span class="title-pill" style="background:#dbeafe;color:#1e40af;">👕 ระบบรับเสื้อ  6 กรณี</span>
+      <span class="title-pill" style="background:#dcfce7;color:#166534;">📋 ระบบเช็คอิน  9 กรณี</span>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 1: Summary table -->
+<div class="slide" data-sys="all">
+  <div class="summary-slide">
+    <h2>ภาพรวม — ความแตกต่างระหว่างระบบ</h2>
+    <table class="sum-table">
+      <tr><th>ระบบ</th><th>ป้ายของที่ระลึก</th><th>คำว่า "คูปอง"</th><th>ปุ่มยกเลิก</th></tr>
+      <tr>
+        <td><span class="system-badge sys-bag">🎒 ระบบรับกระเป๋า</span></td>
+        <td>ของที่ระลึก (1)/(2)/(3) ตรงๆ</td>
+        <td class="no">❌ ไม่มี</td>
+        <td class="yes">✅ กรณีสำเร็จ</td>
+      </tr>
+      <tr>
+        <td><span class="system-badge sys-shirt">👕 ระบบรับเสื้อ</span></td>
+        <td>ของที่ระลึก (1)/(2)/(3) ตรงๆ</td>
+        <td class="no">❌ ไม่มี</td>
+        <td class="yes">✅ กรณีสำเร็จ</td>
+      </tr>
+      <tr>
+        <td><span class="system-badge sys-checkin">📋 ระบบเช็คอิน</span></td>
+        <td><b>คูปองกระเป๋า</b> (สีเขียว/ส้ม)</td>
+        <td class="yes">✅ มี</td>
+        <td class="yes">✅ กรณีสำเร็จ</td>
+      </tr>
+      <tr>
+        <td colspan="4" style="background:#f8fafc;color:#64748b;font-size:0.8rem;padding:8px 12px;">Walk-in ทุกระบบ → ไม่แสดงรายการของที่ระลึก, แสดงแค่ประเภท: Walk-in</td>
+      </tr>
+    </table>
+    <div style="margin-top:16px;">
+      <table class="sum-table">
+        <tr><th>หมวดพิเศษ (เช็คอินเท่านั้น)</th><th>นับในระบบ?</th><th>การ์ดที่แสดง</th></tr>
+        <tr><td>🎖️ VIP (อธิบดี/รองอธิบดี)</td><td class="no">❌ ไม่นับ</td><td>การ์ด VIP (ม่วง)</td></tr>
+        <tr><td>👥 กองแผนงาน (ลงทะเบียนล่วงหน้า)</td><td class="no">❌ ไม่นับ</td><td>การ์ด Staff (น้ำเงิน)</td></tr>
+        <tr><td>👥 กองแผนงาน (Walk-in)</td><td class="yes">✅ นับ</td><td>การ์ด Staff (น้ำเงิน)</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ===== BAG SLIDES ===== -->
+
+<!-- SLIDE 2 -->
+<div class="slide" data-sys="bag">
+  <div class="card-slide">
+    <div class="card-info">
+      <div class="case-num">ระบบรับกระเป๋า · กรณีที่ 1/8</div>
+      <h3>❌ ไม่พบในระบบ</h3>
+      <p class="desc">สแกน QR/บัตร แล้วไม่พบชื่อในฐานข้อมูลเลย หรือ event_year ไม่ตรง</p>
+      <div class="note">⚠️ ไม่มีชื่อ ไม่มีหน่วยงาน<br>ไม่มีปุ่มยกเลิก</div>
+    </div>
+    <div class="modal-mock">
+      <div class="modal-box">
+        <div class="modal-status-bar"><span class="badge error">❌ ไม่มีสิทธิ์</span></div>
+        <div class="modal-title">ท่านไม่มีสิทธิ์รับกระเป๋าก่อนวันงาน</div>
+        <div style="height:10px;"></div>
+        <div class="modal-actions">
+          <button class="btn-ok error">ตกลง</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 3 -->
+<div class="slide" data-sys="bag">
+  <div class="card-slide">
+    <div class="card-info">
+      <div class="case-num">ระบบรับกระเป๋า · กรณีที่ 2/8</div>
+      <h3>❌ ไม่มีสิทธิ์<br>(พบในระบบแต่ไม่ผ่านเงื่อนไข)</h3>
+      <p class="desc">เช่น เป็น Staff, บุคคลภายนอก, หรือประเภทการเข้าร่วมไม่ใช่ผู้เข้าร่วมงาน/ผู้บริหาร/ผู้ส่งผลงาน</p>
+      <div class="note">มีชื่อและหน่วยงาน<br>มีแถว "ประเภท"<br>ไม่มีปุ่มยกเลิก</div>
+    </div>
+    <div class="modal-mock">
+      <div class="modal-box">
+        <div class="modal-status-bar"><span class="badge error">❌ ไม่มีสิทธิ์</span></div>
+        <div class="modal-title">ท่านไม่มีสิทธิ์รับกระเป๋าก่อนวันงาน</div>
+        <div class="modal-name">นาย สมชาย ใจดี</div>
+        <div class="modal-dept">กองระบาดวิทยา</div>
+        <div class="modal-detail">
+          <div class="detail-row"><span class="detail-label">ประเภท</span><span class="detail-val normal">Walk-in</span></div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn-ok error">ตกลง</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 4 -->
+<div class="slide" data-sys="bag">
+  <div class="card-slide">
+    <div class="card-info">
+      <div class="case-num">ระบบรับกระเป๋า · กรณีที่ 3/8</div>
+      <h3>⚠️ รับกระเป๋าไปแล้ว (ซ้ำ)</h3>
+      <p class="desc">bag_received = true แล้ว สแกนซ้ำ ระบบห้ามรับซ้ำ</p>
+      <div class="note">ไม่มีปุ่มยกเลิก</div>
+    </div>
+    <div class="modal-mock">
+      <div class="modal-box">
+        <div class="modal-status-bar"><span class="badge warning">⚠️ รับกระเป๋าแล้ว</span></div>
+        <div class="modal-title">บุคคลนี้รับกระเป๋าไปแล้ว</div>
+        <div class="modal-name">นาง สุดา มีสุข</div>
+        <div class="modal-dept">กองแบคทีเรียและเชื้อรา</div>
+        <div class="modal-detail">
+          <div class="detail-row"><span class="detail-label">ประเภท</span><span class="detail-val normal">บุคลากรภายใน</span></div>
+          <div class="detail-row"><span class="detail-label">รับไปเมื่อ</span><span class="detail-val done">14 มิ.ย. เวลา 09:15 น.</span></div>
+          <div class="detail-row"><span class="detail-label">สถานะ</span><span class="detail-val warn">❌ ไม่สามารถรับซ้ำได้</span></div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn-ok warning">ตกลง</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 5 -->
+<div class="slide" data-sys="bag">
+  <div class="card-slide">
+    <div class="card-info">
+      <div class="case-num">ระบบรับกระเป๋า · กรณีที่ 4/8</div>
+      <h3>✅ รับกระเป๋าสำเร็จ<br>กระเป๋าอย่างเดียว ไม่มีเสื้อ</h3>
+      <p class="desc">items = "กระเป๋า", shirt_size = ว่าง</p>
+      <div class="note">มีปุ่มยกเลิก<br>ไม่มีปุ่มรับเสื้อ</div>
+    </div>
+    <div class="modal-mock">
+      <div class="modal-box">
+        <div class="modal-status-bar"><span class="badge success">✅ รับกระเป๋าสำเร็จ</span></div>
+        <div class="modal-title">บันทึกการรับกระเป๋าเรียบร้อย</div>
+        <div class="modal-name">ดร. วิภาวี รุ่งเรือง</div>
+        <div class="modal-dept">กองวิทยาศาสตร์การแพทย์ชุมชน</div>
+        <div class="modal-detail">
+          <div class="detail-row"><span class="detail-label">ประเภท</span><span class="detail-val normal">บุคลากรภายใน</span></div>
+          <div class="detail-row"><span class="detail-label">รับไปเมื่อ</span><span class="detail-val ok">16 มิ.ย. เวลา 10:05 น.</span></div>
+          <div class="detail-row"><span class="detail-label">สถานะกระเป๋า</span><span class="detail-val ok">✓ รับกระเป๋าสำเร็จ</span></div>
+          <div class="detail-row"><span class="detail-label">ของที่ระลึก (1) กระเป๋า</span><span class="detail-val ok">รับแล้ว ✓</span></div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn-cancel">ยกเลิก</button>
+          <button class="btn-ok success">ตกลง</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 6 -->
+<div class="slide" data-sys="bag">
+  <div class="card-slide">
+    <div class="card-info">
+      <div class="case-num">ระบบรับกระเป๋า · กรณีที่ 5/8</div>
+      <h3>✅ รับกระเป๋าสำเร็จ<br>กระเป๋า+บทคัดย่อ ไม่มีเสื้อ</h3>
+      <p class="desc">items = "กระเป๋า+บทคัดย่อ", shirt_size = ว่าง</p>
+      <div class="note">บทคัดย่อแสดง "อยู่ในกระเป๋า"<br>ไม่ใช่ "อยู่ในกระเป๋า" อีกต่อไปแล้ว<br>→ แค่ชื่อ + สถานะ</div>
+    </div>
+    <div class="modal-mock">
+      <div class="modal-box">
+        <div class="modal-status-bar"><span class="badge success">✅ รับกระเป๋าสำเร็จ</span></div>
+        <div class="modal-title">บันทึกการรับกระเป๋าเรียบร้อย</div>
+        <div class="modal-name">นาย ธนพล สุขสวัสดิ์</div>
+        <div class="modal-dept">กองชีววิทยาคลินิก</div>
+        <div class="modal-detail">
+          <div class="detail-row"><span class="detail-label">ประเภท</span><span class="detail-val normal">บุคลากรภายใน</span></div>
+          <div class="detail-row"><span class="detail-label">รับไปเมื่อ</span><span class="detail-val ok">16 มิ.ย. เวลา 10:07 น.</span></div>
+          <div class="detail-row"><span class="detail-label">สถานะกระเป๋า</span><span class="detail-val ok">✓ รับกระเป๋าสำเร็จ</span></div>
+          <div class="detail-row"><span class="detail-label">ของที่ระลึก (1) กระเป๋า</span><span class="detail-val ok">รับแล้ว ✓</span></div>
+          <div class="detail-row"><span class="detail-label">ของที่ระลึก (2) บทคัดย่อ</span><span class="detail-val ok">อยู่ในกระเป๋า</span></div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn-cancel">ยกเลิก</button>
+          <button class="btn-ok success">ตกลง</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 7 -->
+<div class="slide" data-sys="bag">
+  <div class="card-slide">
+    <div class="card-info">
+      <div class="case-num">ระบบรับกระเป๋า · กรณีที่ 6/8</div>
+      <h3>✅ รับกระเป๋าสำเร็จ<br>มีเสื้อ ยังไม่ได้รับเสื้อ</h3>
+      <p class="desc">shirt_size = XL, shirt_received = false<br>→ ปุ่ม "รับเสื้อพร้อมกันด้วย" ปรากฏ</p>
+      <div class="note">กดปุ่มฟ้าได้เลย<br>ไม่ต้องไปสแกนซ้ำที่ระบบเสื้อ</div>
+    </div>
+    <div class="modal-mock">
+      <div class="modal-box">
+        <div class="modal-status-bar"><span class="badge success">✅ รับกระเป๋าสำเร็จ</span></div>
+        <div class="modal-title">บันทึกการรับกระเป๋าเรียบร้อย</div>
+        <div class="modal-name">นางสาว พิมพ์ชนก วงค์ไพร</div>
+        <div class="modal-dept">สถาบันชีววัตถุ</div>
+        <div class="modal-detail">
+          <div class="detail-row"><span class="detail-label">ประเภท</span><span class="detail-val normal">บุคลากรภายใน</span></div>
+          <div class="detail-row"><span class="detail-label">รับไปเมื่อ</span><span class="detail-val ok">16 มิ.ย. เวลา 10:12 น.</span></div>
+          <div class="detail-row"><span class="detail-label">สถานะกระเป๋า</span><span class="detail-val ok">✓ รับกระเป๋าสำเร็จ</span></div>
+          <div class="detail-row"><span class="detail-label">ของที่ระลึก (1) กระเป๋า</span><span class="detail-val ok">รับแล้ว ✓</span></div>
+          <div class="detail-row"><span class="detail-label">ของที่ระลึก (2) บทคัดย่อ</span><span class="detail-val ok">อยู่ในกระเป๋า</span></div>
+          <div class="detail-row"><span class="detail-label">ของที่ระลึก (3) เสื้อแจ็คเก็ต (XL)</span><span class="detail-val normal">ยังไม่ได้รับ</span></div>
+        </div>
+        <div style="border-top:1px solid #e2e8f0;margin:6px 14px 0;padding-top:8px;text-align:center;font-size:0.77rem;color:#64748b;padding-bottom:4px;">มีเสื้อไซต์ <b>XL</b> — ยังไม่ได้รับ</div>
+        <button class="modal-shirt-btn">👕 รับเสื้อพร้อมกันด้วย</button>
+        <div class="modal-actions">
+          <button class="btn-cancel">ยกเลิก</button>
+          <button class="btn-ok success">ตกลง</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 8 -->
+<div class="slide" data-sys="bag">
+  <div class="card-slide">
+    <div class="card-info">
+      <div class="case-num">ระบบรับกระเป๋า · กรณีที่ 7/8</div>
+      <h3>✅ รับกระเป๋าสำเร็จ<br>มีเสื้อ รับเสื้อแล้วก่อนหน้า</h3>
+      <p class="desc">shirt_received = true แล้ว → ขึ้น "รับไปแล้ว ✓" ไม่มีปุ่มเสื้อ</p>
+      <div class="note">ไม่ปรากฏปุ่ม 👕</div>
+    </div>
+    <div class="modal-mock">
+      <div class="modal-box">
+        <div class="modal-status-bar"><span class="badge success">✅ รับกระเป๋าสำเร็จ</span></div>
+        <div class="modal-title">บันทึกการรับกระเป๋าเรียบร้อย</div>
+        <div class="modal-name">ผศ.ดร. รัตนา บุญส่ง</div>
+        <div class="modal-dept">กองมาตรฐานห้องปฏิบัติการ</div>
+        <div class="modal-detail">
+          <div class="detail-row"><span class="detail-label">ประเภท</span><span class="detail-val normal">บุคลากรภายใน</span></div>
+          <div class="detail-row"><span class="detail-label">รับไปเมื่อ</span><span class="detail-val ok">16 มิ.ย. เวลา 10:20 น.</span></div>
+          <div class="detail-row"><span class="detail-label">สถานะกระเป๋า</span><span class="detail-val ok">✓ รับกระเป๋าสำเร็จ</span></div>
+          <div class="detail-row"><span class="detail-label">ของที่ระลึก (1) กระเป๋า</span><span class="detail-val ok">รับแล้ว ✓</span></div>
+          <div class="detail-row" style="align-items:flex-start;"><span class="detail-label" style="padding-top:2px;">ของที่ระลึก (3) เสื้อแจ็คเก็ต (XL)</span><span><span class="detail-val done">รับไปแล้ว ✓</span><span class="detail-sub">14 มิ.ย. เวลา 15:30 น.</span></span></div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn-cancel">ยกเลิก</button>
+          <button class="btn-ok success">ตกลง</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 9 -->
+<div class="slide" data-sys="bag">
+  <div class="card-slide">
+    <div class="card-info">
+      <div class="case-num">ระบบรับกระเป๋า · กรณีที่ 8/8</div>
+      <h3>❌ บันทึกไม่สำเร็จ<br>(server error)</h3>
+      <p class="desc">PATCH ไปที่ Supabase แล้วได้ status ที่ไม่ใช่ 200/204</p>
+      <div class="note">ไม่มีปุ่มยกเลิก</div>
+    </div>
+    <div class="modal-mock">
+      <div class="modal-box">
+        <div class="modal-status-bar"><span class="badge error">❌ เกิดข้อผิดพลาด</span></div>
+        <div class="modal-title">ไม่สามารถบันทึกได้</div>
+        <div style="height:10px;"></div>
+        <div class="modal-actions">
+          <button class="btn-ok error">ตกลง</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SHIRT SLIDES ===== -->
+
+<!-- SLIDE 10 -->
+<div class="slide" data-sys="shirt">
+  <div class="card-slide">
+    <div class="card-info">
+      <div class="case-num">ระบบรับเสื้อ · กรณีที่ 1/6</div>
+      <h3>❌ ไม่มีสิทธิ์รับเสื้อ<br>(ไม่มี shirt_size)</h3>
+      <p class="desc">พบในระบบแต่ shirt_size ว่าง</p>
+      <div class="note">ไม่มีปุ่มยกเลิก</div>
+    </div>
+    <div class="modal-mock">
+      <div class="modal-box">
+        <div class="modal-status-bar"><span class="badge error">❌ ไม่มีสิทธิ์</span></div>
+        <div class="modal-title">ท่านไม่มีสิทธิ์รับเสื้อก่อนวันงาน</div>
+        <div class="modal-name">นาย ประเสริฐ ดีงาม</div>
+        <div class="modal-dept">กองพยาธิวิทยาคลินิก</div>
+        <div class="modal-detail">
+          <div class="detail-row"><span class="detail-label">ประเภท</span><span class="detail-val normal">บุคลากรภายใน</span></div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn-ok error">ตกลง</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 11 -->
+<div class="slide" data-sys="shirt">
+  <div class="card-slide">
+    <div class="card-info">
+      <div class="case-num">ระบบรับเสื้อ · กรณีที่ 2/6</div>
+      <h3>⚠️ รับเสื้อไปแล้ว (ซ้ำ)</h3>
+      <p class="desc">shirt_received = true แล้ว สแกนซ้ำ</p>
+      <div class="note">ไม่มีปุ่มยกเลิก</div>
+    </div>
+    <div class="modal-mock">
+      <div class="modal-box">
+        <div class="modal-status-bar"><span class="badge warning">⚠️ รับเสื้อแล้ว</span></div>
+        <div class="modal-title">บุคคลนี้รับเสื้อไปแล้ว</div>
+        <div class="modal-name">นางสาว จินตนา ศรีสุข</div>
+        <div class="modal-dept">ศูนย์วิทยาศาสตร์การแพทย์เชียงใหม่</div>
+        <div class="modal-detail">
+          <div class="detail-row"><span class="detail-label">ของที่ระลึก (3) เสื้อแจ็คเก็ต</span><span class="detail-val normal">M</span></div>
+          <div class="detail-row"><span class="detail-label">รับไปเมื่อ</span><span class="detail-val done">15 มิ.ย. เวลา 13:22 น.</span></div>
+          <div class="detail-row"><span class="detail-label">สถานะ</span><span class="detail-val warn">❌ ไม่สามารถรับซ้ำได้</span></div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn-ok warning">ตกลง</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 12 -->
+<div class="slide" data-sys="shirt">
+  <div class="card-slide">
+    <div class="card-info">
+      <div class="case-num">ระบบรับเสื้อ · กรณีที่ 3/6</div>
+      <h3>✅ รับเสื้อสำเร็จ<br>ไม่มีกระเป๋า</h3>
+      <p class="desc">items ไม่มี "กระเป๋า", shirt_size = L</p>
+    </div>
+    <div class="modal-mock">
+      <div class="modal-box">
+        <div class="modal-status-bar"><span class="badge success">✅ รับเสื้อสำเร็จ</span></div>
+        <div class="modal-title">บันทึกการรับเสื้อเรียบร้อย</div>
+        <div class="modal-name">นาย วีระ แก้วใส</div>
+        <div class="modal-dept">กองไวรัสวิทยา</div>
+        <div class="modal-detail">
+          <div class="detail-row"><span class="detail-label">รับไปเมื่อ</span><span class="detail-val ok">16 มิ.ย. เวลา 11:05 น.</span></div>
+          <div class="detail-row"><span class="detail-label">ของที่ระลึก (3) เสื้อแจ็คเก็ต (L)</span><span class="detail-val ok">รับแล้ว ✓</span></div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn-cancel">ยกเลิก</button>
+          <button class="btn-ok success">ตกลง</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 13 -->
+<div class="slide" data-sys="shirt">
+  <div class="card-slide">
+    <div class="card-info">
+      <div class="case-num">ระบบรับเสื้อ · กรณีที่ 4/6</div>
+      <h3>✅ รับเสื้อสำเร็จ<br>มีกระเป๋า ยังไม่รับกระเป๋า</h3>
+      <p class="desc">items = "กระเป๋า", bag_received = false</p>
+    </div>
+    <div class="modal-mock">
+      <div class="modal-box">
+        <div class="modal-status-bar"><span class="badge success">✅ รับเสื้อสำเร็จ</span></div>
+        <div class="modal-title">บันทึกการรับเสื้อเรียบร้อย</div>
+        <div class="modal-name">นางสาว อารีย์ เพ็งจันทร์</div>
+        <div class="modal-dept">กองสาธารณสุขฉุกเฉิน</div>
+        <div class="modal-detail">
+          <div class="detail-row"><span class="detail-label">รับไปเมื่อ</span><span class="detail-val ok">16 มิ.ย. เวลา 11:18 น.</span></div>
+          <div class="detail-row"><span class="detail-label">ของที่ระลึก (1) กระเป๋า</span><span class="detail-val normal">ยังไม่ได้รับ</span></div>
+          <div class="detail-row"><span class="detail-label">ของที่ระลึก (3) เสื้อแจ็คเก็ต (XL)</span><span class="detail-val ok">รับแล้ว ✓</span></div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn-cancel">ยกเลิก</button>
+          <button class="btn-ok success">ตกลง</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 14 -->
+<div class="slide" data-sys="shirt">
+  <div class="card-slide">
+    <div class="card-info">
+      <div class="case-num">ระบบรับเสื้อ · กรณีที่ 5/6</div>
+      <h3>✅ รับเสื้อสำเร็จ<br>กระเป๋า+บทคัดย่อ ยังไม่รับกระเป๋า</h3>
+      <p class="desc">items = "กระเป๋า+บทคัดย่อ", bag_received = false</p>
+    </div>
+    <div class="modal-mock">
+      <div class="modal-box">
+        <div class="modal-status-bar"><span class="badge success">✅ รับเสื้อสำเร็จ</span></div>
+        <div class="modal-title">บันทึกการรับเสื้อเรียบร้อย</div>
+        <div class="modal-name">นาย กิตติพงษ์ มั่นคง</div>
+        <div class="modal-dept">กองระบาดวิทยา</div>
+        <div class="modal-detail">
+          <div class="detail-row"><span class="detail-label">รับไปเมื่อ</span><span class="detail-val ok">16 มิ.ย. เวลา 11:25 น.</span></div>
+          <div class="detail-row"><span class="detail-label">ของที่ระลึก (1) กระเป๋า</span><span class="detail-val normal">ยังไม่ได้รับ</span></div>
+          <div class="detail-row"><span class="detail-label">ของที่ระลึก (2) บทคัดย่อ</span><span class="detail-val normal">ยังไม่ได้รับ</span></div>
+          <div class="detail-row"><span class="detail-label">ของที่ระลึก (3) เสื้อแจ็คเก็ต (S)</span><span class="detail-val ok">รับแล้ว ✓</span></div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn-cancel">ยกเลิก</button>
+          <button class="btn-ok success">ตกลง</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 15 -->
+<div class="slide" data-sys="shirt">
+  <div class="card-slide">
+    <div class="card-info">
+      <div class="case-num">ระบบรับเสื้อ · กรณีที่ 6/6</div>
+      <h3>✅ รับเสื้อสำเร็จ<br>กระเป๋า+บทคัดย่อ รับกระเป๋าแล้ว</h3>
+      <p class="desc">items = "กระเป๋า+บทคัดย่อ", bag_received = true</p>
+    </div>
+    <div class="modal-mock">
+      <div class="modal-box">
+        <div class="modal-status-bar"><span class="badge success">✅ รับเสื้อสำเร็จ</span></div>
+        <div class="modal-title">บันทึกการรับเสื้อเรียบร้อย</div>
+        <div class="modal-name">นาง ลักษมี ทองสุข</div>
+        <div class="modal-dept">สำนักมาตรฐานห้องปฏิบัติการ</div>
+        <div class="modal-detail">
+          <div class="detail-row"><span class="detail-label">รับไปเมื่อ</span><span class="detail-val ok">16 มิ.ย. เวลา 11:40 น.</span></div>
+          <div class="detail-row" style="align-items:flex-start;"><span class="detail-label" style="padding-top:2px;">ของที่ระลึก (1) กระเป๋า</span><span><span class="detail-val done">รับไปแล้ว ✓</span><span class="detail-sub">14 มิ.ย. เวลา 09:55 น.</span></span></div>
+          <div class="detail-row"><span class="detail-label">ของที่ระลึก (2) บทคัดย่อ</span><span class="detail-val done">รับไปแล้ว ✓</span></div>
+          <div class="detail-row"><span class="detail-label">ของที่ระลึก (3) เสื้อแจ็คเก็ต (M)</span><span class="detail-val ok">รับแล้ว ✓</span></div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn-cancel">ยกเลิก</button>
+          <button class="btn-ok success">ตกลง</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== CHECK-IN SLIDES ===== -->
+
+<!-- SLIDE 16 -->
+<div class="slide" data-sys="checkin">
+  <div class="card-slide">
+    <div class="card-info">
+      <div class="case-num">ระบบเช็คอิน · กรณีที่ 1/9</div>
+      <h3>🎖️ VIP<br>(อธิบดี/รองอธิบดี)</h3>
+      <p class="desc">dept ตรงกับ VIP_DEPTS — ยกเว้นเสมอ ไม่นับ</p>
+      <div class="note">ไม่มีปุ่มยกเลิก<br>ไม่บันทึก DB</div>
+    </div>
+    <div class="modal-mock">
+      <div class="modal-box">
+        <div class="modal-status-bar"><span class="badge vip">🎖️ VIP</span></div>
+        <div class="modal-title">ได้รับการยกเว้น (ไม่ต้องเช็คอิน)</div>
+        <div class="modal-name">นพ. สุรพงษ์ วิเชียร</div>
+        <div class="modal-detail">
+          <div class="detail-row"><span class="detail-label">ตำแหน่ง</span><span class="detail-val purple">อธิบดีกรมวิทยาศาสตร์การแพทย์</span></div>
+        </div>
+        <div class="modal-note purple">หากต้องการสิ่งใดเพิ่มเติม<br>ติดต่อ กองแผนงานและวิชาการ</div>
+        <div class="modal-actions">
+          <button class="btn-ok vip">ตกลง</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 17 -->
+<div class="slide" data-sys="checkin">
+  <div class="card-slide">
+    <div class="card-info">
+      <div class="case-num">ระบบเช็คอิน · กรณีที่ 2/9</div>
+      <h3>👥 กองแผนงาน<br>(ลงทะเบียนล่วงหน้า)</h3>
+      <p class="desc">is_walkin = false, dept = กองแผนงานฯ → ขึ้นการ์ด Staff แต่<b>ไม่นับ</b></p>
+      <div class="note">ไม่มีปุ่มยกเลิก<br>ไม่บันทึก DB</div>
+    </div>
+    <div class="modal-mock">
+      <div class="modal-box">
+        <div class="modal-status-bar"><span class="badge staff">👥 Staff</span></div>
+        <div class="modal-title">ได้รับการยกเว้น (ไม่ต้องเช็คอิน)</div>
+        <div class="modal-name">นางสาว ปนัดดา สิงห์ชัย</div>
+        <div class="modal-detail">
+          <div class="detail-row"><span class="detail-label">ตำแหน่ง</span><span class="detail-val normal">นักวิเคราะห์นโยบายและแผน</span></div>
+          <div class="detail-row"><span class="detail-label">หน่วยงาน</span><span class="detail-val normal">กองแผนงานและวิชาการ</span></div>
+        </div>
+        <div class="modal-note blue">มีข้อสงสัยเพิ่มเติม<br>ติดต่อ กองแผนงานและวิชาการ</div>
+        <div class="modal-actions">
+          <button class="btn-ok staff">ตกลง</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 18 -->
+<div class="slide" data-sys="checkin">
+  <div class="card-slide">
+    <div class="card-info">
+      <div class="case-num">ระบบเช็คอิน · กรณีที่ 3/9</div>
+      <h3>👥 กองแผนงาน Walk-in<br>(การ์ดเหมือนกัน แต่นับ)</h3>
+      <p class="desc">is_walkin = true, dept = กองแผนงานฯ → บันทึก checkin + นับ + แสดงการ์ด Staff</p>
+      <div class="note">การ์ดหน้าตาเหมือนกรณีที่ 2<br>แต่ระหว่างนั้น DB บันทึกแล้ว<br>count เพิ่มขึ้น 1</div>
+    </div>
+    <div class="modal-mock">
+      <div class="modal-box">
+        <div class="modal-status-bar"><span class="badge staff">👥 Staff</span></div>
+        <div class="modal-title">ได้รับการยกเว้น (ไม่ต้องเช็คอิน)</div>
+        <div class="modal-name">นาย ชาติชาย พรมมา</div>
+        <div class="modal-detail">
+          <div class="detail-row"><span class="detail-label">ตำแหน่ง</span><span class="detail-val normal">Walk-in</span></div>
+          <div class="detail-row"><span class="detail-label">หน่วยงาน</span><span class="detail-val normal">กองแผนงานและวิชาการ</span></div>
+        </div>
+        <div class="modal-note blue">มีข้อสงสัยเพิ่มเติม<br>ติดต่อ กองแผนงานและวิชาการ</div>
+        <div style="background:#dcfce7;margin:0 14px 8px;border-radius:8px;padding:6px 10px;font-size:0.75rem;color:#166534;text-align:center;font-weight:700;">✅ บันทึกและนับในระบบแล้ว</div>
+        <div class="modal-actions">
+          <button class="btn-ok staff">ตกลง</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 19 -->
+<div class="slide" data-sys="checkin">
+  <div class="card-slide">
+    <div class="card-info">
+      <div class="case-num">ระบบเช็คอิน · กรณีที่ 4/9</div>
+      <h3>❌ ไม่พบในระบบ</h3>
+      <p class="desc">ค้นหาด้วย id_card/passport ไม่พบใน participants</p>
+      <div class="note">ไม่มีปุ่มยกเลิก</div>
+    </div>
+    <div class="modal-mock">
+      <div class="modal-box">
+        <div class="modal-status-bar"><span class="badge error">❌ ไม่พบข้อมูล</span></div>
+        <div class="modal-title">ไม่พบข้อมูลในระบบ</div>
+        <div style="height:10px;"></div>
+        <div class="modal-actions">
+          <button class="btn-ok error">ตกลง</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 20 -->
+<div class="slide" data-sys="checkin">
+  <div class="card-slide">
+    <div class="card-info">
+      <div class="case-num">ระบบเช็คอิน · กรณีที่ 5/9</div>
+      <h3>✅ เช็คอินสำเร็จ<br>Walk-in</h3>
+      <p class="desc">is_walkin = true → ไม่แสดงของที่ระลึกเลย แค่ประเภท: Walk-in</p>
+      <div class="note">มีปุ่มยกเลิก</div>
+    </div>
+    <div class="modal-mock">
+      <div class="modal-box">
+        <div class="modal-status-bar"><span class="badge success">✅ เช็คอินสำเร็จ</span></div>
+        <div class="modal-title">วันที่ 1 — วันที่หนึ่ง</div>
+        <div class="modal-name">นาย พงษ์พัฒน์ อินทร์สี</div>
+        <div class="modal-dept">กองบริหารทรัพยากร</div>
+        <div class="modal-detail">
+          <div class="detail-row"><span class="detail-label">เวลา</span><span class="detail-val normal">14:30:25</span></div>
+          <div class="detail-row"><span class="detail-label">คูปองอาหาร</span><span class="detail-val ok">รับได้ ✓</span></div>
+          <div class="detail-row"><span class="detail-label">ประเภท</span><span class="detail-val normal">Walk-in</span></div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn-cancel">ยกเลิก</button>
+          <button class="btn-ok success">ตกลง</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 21 -->
+<div class="slide" data-sys="checkin">
+  <div class="card-slide">
+    <div class="card-info">
+      <div class="case-num">ระบบเช็คอิน · กรณีที่ 6/9</div>
+      <h3>✅ เช็คอินสำเร็จ<br>กระเป๋าอย่างเดียว ยังไม่รับกระเป๋า</h3>
+      <p class="desc">items = "กระเป๋า", bag_received = false → คูปองสีเขียว "รับได้"</p>
+      <div class="note">มีปุ่มยกเลิก</div>
+    </div>
+    <div class="modal-mock">
+      <div class="modal-box">
+        <div class="modal-status-bar"><span class="badge success">✅ เช็คอินสำเร็จ</span></div>
+        <div class="modal-title">วันที่ 1 — วันที่หนึ่ง</div>
+        <div class="modal-name">นาง กาญจนา สุวรรณ</div>
+        <div class="modal-dept">กองชีวเคมีคลินิก</div>
+        <div class="modal-detail">
+          <div class="detail-row"><span class="detail-label">เวลา</span><span class="detail-val normal">09:15:42</span></div>
+          <div class="detail-row"><span class="detail-label">คูปองอาหาร</span><span class="detail-val ok">รับได้ ✓</span></div>
+          <div class="detail-row"><span class="detail-label">ของที่ระลึก (1) <span style="color:#16a34a;font-weight:700">คูปองกระเป๋า (สีเขียว)</span></span><span class="detail-val ok">รับได้ ✓</span></div>
+          <div class="detail-row"><span class="detail-label">ประเภท</span><span class="detail-val normal">participant</span></div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn-cancel">ยกเลิก</button>
+          <button class="btn-ok success">ตกลง</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 22 -->
+<div class="slide" data-sys="checkin">
+  <div class="card-slide">
+    <div class="card-info">
+      <div class="case-num">ระบบเช็คอิน · กรณีที่ 7/9</div>
+      <h3>✅ เช็คอินสำเร็จ<br>กระเป๋า+บทคัดย่อ+เสื้อ รับแล้วทั้งหมด</h3>
+      <p class="desc">items = "กระเป๋า+บทคัดย่อ", bag_received = true, shirt_received = true → ทุกอย่าง "รับไปแล้ว"</p>
+      <div class="note">มีปุ่มยกเลิก<br>คูปองสีส้ม</div>
+    </div>
+    <div class="modal-mock">
+      <div class="modal-box">
+        <div class="modal-status-bar"><span class="badge success">✅ เช็คอินสำเร็จ</span></div>
+        <div class="modal-title">วันที่ 2 — วันที่สอง</div>
+        <div class="modal-name">ผศ. ปรีดา แสนดี</div>
+        <div class="modal-dept">กองภูมิคุ้มกันวิทยา</div>
+        <div class="modal-detail">
+          <div class="detail-row"><span class="detail-label">เวลา</span><span class="detail-val normal">08:55:11</span></div>
+          <div class="detail-row"><span class="detail-label">คูปองอาหาร</span><span class="detail-val ok">รับได้ ✓</span></div>
+          <div class="detail-row" style="align-items:flex-start;"><span class="detail-label" style="padding-top:2px;">ของที่ระลึก (1) <span style="color:#ea580c;font-weight:700">คูปองกระเป๋า (สีส้ม)</span></span><span><span class="detail-val done">รับไปแล้ว ✓</span><span class="detail-sub">14 มิ.ย. เวลา 10:00 น.</span></span></div>
+          <div class="detail-row"><span class="detail-label">ของที่ระลึก (2) <span style="color:#2563eb;font-weight:700">บทคัดย่อ</span></span><span class="detail-val done">รับไปแล้ว ✓</span></div>
+          <div class="detail-row" style="align-items:flex-start;"><span class="detail-label" style="padding-top:2px;">ของที่ระลึก (3) <span style="color:#0891b2;font-weight:700">เสื้อแจ็คเก็ต (XL)</span></span><span><span class="detail-val done">รับไปแล้ว ✓</span><span class="detail-sub">15 มิ.ย. เวลา 14:30 น.</span></span></div>
+          <div class="detail-row"><span class="detail-label">ประเภท</span><span class="detail-val normal">participant</span></div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn-cancel">ยกเลิก</button>
+          <button class="btn-ok success">ตกลง</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 23 -->
+<div class="slide" data-sys="checkin">
+  <div class="card-slide">
+    <div class="card-info">
+      <div class="case-num">ระบบเช็คอิน · กรณีที่ 8/9</div>
+      <h3>⚠️ เช็คอินซ้ำ — Walk-in</h3>
+      <p class="desc">checkin วันนี้มีอยู่แล้วใน DB</p>
+      <div class="note">ไม่มีปุ่มยกเลิก</div>
+    </div>
+    <div class="modal-mock">
+      <div class="modal-box">
+        <div class="modal-status-bar"><span class="badge warning">⚠️ เคยเช็คอินแล้ว</span></div>
+        <div class="modal-title">เช็คอินวันที่ 1 ไปแล้ว</div>
+        <div class="modal-name">นาย สุริยา บุญมี</div>
+        <div class="modal-dept">-</div>
+        <div class="modal-detail">
+          <div class="detail-row"><span class="detail-label">เวลาที่เช็คอิน</span><span class="detail-val normal">09:10:00</span></div>
+          <div class="detail-row"><span class="detail-label">คูปองอาหาร</span><span class="detail-val done">รับไปแล้ว ✓</span></div>
+          <div class="detail-row"><span class="detail-label">ประเภท</span><span class="detail-val normal">Walk-in</span></div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn-ok warning">ตกลง</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 24 -->
+<div class="slide" data-sys="checkin">
+  <div class="card-slide">
+    <div class="card-info">
+      <div class="case-num">ระบบเช็คอิน · กรณีที่ 9/9</div>
+      <h3>⚠️ เช็คอินซ้ำ — กระเป๋า+บทคัดย่อ+เสื้อ</h3>
+      <p class="desc">บุคลากรภายใน ที่มีของครบ 3 อย่าง เช็คอินซ้ำ</p>
+      <div class="note">ไม่มีปุ่มยกเลิก<br>แสดงสถานะของที่ระลึกปัจจุบัน</div>
+    </div>
+    <div class="modal-mock">
+      <div class="modal-box">
+        <div class="modal-status-bar"><span class="badge warning">⚠️ เคยเช็คอินแล้ว</span></div>
+        <div class="modal-title">เช็คอินวันที่ 1 ไปแล้ว</div>
+        <div class="modal-name">นางสาว ศิริพร จันทร์ดี</div>
+        <div class="modal-dept">กองโรคติดต่อ</div>
+        <div class="modal-detail">
+          <div class="detail-row"><span class="detail-label">เวลาที่เช็คอิน</span><span class="detail-val normal">08:47:33</span></div>
+          <div class="detail-row"><span class="detail-label">คูปองอาหาร</span><span class="detail-val done">รับไปแล้ว ✓</span></div>
+          <div class="detail-row" style="align-items:flex-start;"><span class="detail-label" style="padding-top:2px;">ของที่ระลึก (1) <span style="color:#ea580c;font-weight:700">คูปองกระเป๋า (สีส้ม)</span></span><span><span class="detail-val done">รับไปแล้ว ✓</span><span class="detail-sub">14 มิ.ย. เวลา 10:00 น.</span></span></div>
+          <div class="detail-row"><span class="detail-label">ของที่ระลึก (2) <span style="color:#2563eb;font-weight:700">บทคัดย่อ</span></span><span class="detail-val done">รับไปแล้ว ✓</span></div>
+          <div class="detail-row"><span class="detail-label">ของที่ระลึก (3) <span style="color:#0891b2;font-weight:700">เสื้อแจ็คเก็ต (M)</span></span><span class="detail-val done">รับไปแล้ว ✓</span></div>
+          <div class="detail-row"><span class="detail-label">ประเภท</span><span class="detail-val normal">participant</span></div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn-ok warning">ตกลง</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== NAV ===== -->
+<div class="deck-header" id="deckHeader" style="display:none;">
+  <div class="slide-counter" id="slideCounter"></div>
+  <span class="system-badge" id="sysBadge"></span>
+</div>
+<div class="nav">
+  <button class="nav-btn" id="prevBtn" onclick="changeSlide(-1)">← ก่อนหน้า</button>
+  <div class="nav-dots" id="navDots"></div>
+  <button class="nav-btn" id="nextBtn" onclick="changeSlide(1)">ถัดไป →</button>
+</div>
+
+</div><!-- /deck -->
+
+<script>
+const slides=document.querySelectorAll('.slide');
+const dotsEl=document.getElementById('navDots');
+const sysBadge=document.getElementById('sysBadge');
+const header=document.getElementById('deckHeader');
+let cur=0;
+const sysLabel={all:'ภาพรวม',bag:'🎒 ระบบรับกระเป๋า',shirt:'👕 ระบบรับเสื้อ',checkin:'📋 ระบบเช็คอิน'};
+const sysCls={all:'sys-all',bag:'sys-bag',shirt:'sys-shirt',checkin:'sys-checkin'};
+const sysDot={all:'',bag:'sys-dot-bag',shirt:'sys-dot-shirt',checkin:'sys-dot-checkin'};
+
+// Build dots
+slides.forEach((_,i)=>{
+  const d=document.createElement('span');
+  const s=slides[i].dataset.sys;
+  d.className='dot '+(sysDot[s]||'');
+  d.onclick=()=>goTo(i);
+  dotsEl.appendChild(d);
+});
+
+function goTo(n){
+  slides[cur].classList.remove('active');
+  dotsEl.children[cur].classList.remove('active');
+  cur=Math.max(0,Math.min(n,slides.length-1));
+  slides[cur].classList.add('active');
+  dotsEl.children[cur].classList.add('active');
+  const s=slides[cur].dataset.sys;
+  document.getElementById('slideCounter').textContent=`สไลด์ ${cur+1} / ${slides.length}`;
+  sysBadge.textContent=sysLabel[s]||s;
+  sysBadge.className='system-badge '+(sysCls[s]||'');
+  header.style.display='flex';
+  document.getElementById('prevBtn').disabled=cur===0;
+  document.getElementById('nextBtn').disabled=cur===slides.length-1;
+}
+function changeSlide(d){goTo(cur+d);}
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key==='ArrowDown') changeSlide(1);
+  if(e.key==='ArrowLeft'||e.key==='ArrowUp') changeSlide(-1);
+});
+goTo(0);
+</script>
+</body>
+</html>
