@@ -216,10 +216,10 @@
             <tr>
               <th>#</th><th>ชื่อ-นามสกุล</th><th>หน่วยงาน</th>
               <th>ประเภทการเข้าร่วม</th><th>TAG</th>
-              <th>สถานะกระเป๋า</th><th>วันที่รับ</th><th>เวลา</th><th>ผู้มารับแทน</th>
+              <th>สถานะกระเป๋า</th><th>วันที่รับ</th><th>เวลา</th><th>สแกนโดย</th><th>ผู้มารับแทน</th>
             </tr>
           </thead>
-          <tbody id="tBody"><tr><td colspan="9" class="loading-td">กำลังโหลด...</td></tr></tbody>
+          <tbody id="tBody"><tr><td colspan="10" class="loading-td">กำลังโหลด...</td></tr></tbody>
         </table>
       </div>
       <div class="pager">
@@ -294,10 +294,10 @@
             <tr>
               <th>#</th><th>ชื่อ-นามสกุล</th><th>หน่วยงาน</th>
               <th>ไซต์เสื้อ</th>
-              <th>สถานะเสื้อ</th><th>วันที่รับ</th><th>เวลา</th><th>ผู้มารับแทน</th>
+              <th>สถานะเสื้อ</th><th>วันที่รับ</th><th>เวลา</th><th>สแกนโดย</th><th>ผู้มารับแทน</th>
             </tr>
           </thead>
-          <tbody id="stBody"><tr><td colspan="9" class="loading-td">กำลังโหลด...</td></tr></tbody>
+          <tbody id="stBody"><tr><td colspan="10" class="loading-td">กำลังโหลด...</td></tr></tbody>
         </table>
       </div>
       <div class="pager">
@@ -460,21 +460,21 @@ function fmtBagTime(v){
 
 async function loadAll(){
   await loadActiveYear();
-  document.getElementById('tBody').innerHTML='<tr><td colspan="9" class="loading-td">กำลังโหลด...</td></tr>';
+  document.getElementById('tBody').innerHTML='<tr><td colspan="10" class="loading-td">กำลังโหลด...</td></tr>';
   try{
     let res=[], from=0;
     while(true){
-      const r=await fetch(`${SB_URL}/rest/v1/participants?event_year=eq.${encodeURIComponent(activeYear)}&select=id,prefix,first_name,last_name,dept,ext_dept,internal_external,participation_type,tag,items,bag_received,bag_received_date,bag_received_by,shirt_size,shirt_received,shirt_received_date,shirt_received_by&order=last_name.asc`,{
+      const r=await fetch(`${SB_URL}/rest/v1/participants?event_year=eq.${encodeURIComponent(activeYear)}&select=id,prefix,first_name,last_name,dept,ext_dept,internal_external,participation_type,tag,items,bag_received,bag_received_date,bag_received_by,bag_scanned_by,shirt_size,shirt_received,shirt_received_date,shirt_received_by,shirt_scanned_by&order=last_name.asc`,{
         headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Range-Unit':'items','Range':`${from}-${from+999}`,'Prefer':'count=exact'}
       });
       if(!r.ok){
         const errText=await r.text();
-        document.getElementById('tBody').innerHTML=`<tr><td colspan="9" class="loading-td" style="color:#dc2626;">API Error ${r.status}: ${errText}</td></tr>`;
+        document.getElementById('tBody').innerHTML=`<tr><td colspan="10" class="loading-td" style="color:#dc2626;">API Error ${r.status}: ${errText}</td></tr>`;
         return;
       }
       const d=await r.json();
       if(!Array.isArray(d)){
-        document.getElementById('tBody').innerHTML=`<tr><td colspan="9" class="loading-td" style="color:#dc2626;">API Error: ${JSON.stringify(d)}</td></tr>`;
+        document.getElementById('tBody').innerHTML=`<tr><td colspan="10" class="loading-td" style="color:#dc2626;">API Error: ${JSON.stringify(d)}</td></tr>`;
         return;
       }
       if(d.length===0) break;
@@ -498,7 +498,8 @@ async function loadAll(){
         rawDate:p.bag_received_date||null,
         receivedDate:fmtBagDate(p.bag_received_date),
         receivedTime:fmtBagTime(p.bag_received_date),
-        receivedBy:p.bag_received_by||''
+        receivedBy:p.bag_received_by||'',
+        scannedBy:p.bag_scanned_by||''
       };
     });
     initBagDeptFilter(allData);
@@ -534,7 +535,8 @@ async function loadAll(){
         rawDate:p.shirt_received_date||null,
         receivedDate:fmtBagDate(p.shirt_received_date),
         receivedTime:fmtBagTime(p.shirt_received_date),
-        shirtReceivedBy:p.shirt_received_by||''
+        shirtReceivedBy:p.shirt_received_by||'',
+        scannedBy:p.shirt_scanned_by||''
       };
     });
     // Populate shirt dept dropdown
@@ -564,7 +566,7 @@ async function loadAll(){
     applyFilters();
     applyShirtFilters();
   }catch(e){
-    document.getElementById('tBody').innerHTML='<tr><td colspan="9" class="loading-td">โหลดไม่สำเร็จ</td></tr>';
+    document.getElementById('tBody').innerHTML='<tr><td colspan="10" class="loading-td">โหลดไม่สำเร็จ</td></tr>';
   }
 }
 
@@ -602,7 +604,7 @@ function renderTable(){
   document.getElementById('pInfo').textContent=`แสดง ${tot===0?0:start+1}–${Math.min(start+PAGE,tot)} จาก ${tot.toLocaleString()} รายการ`;
   document.getElementById('bPrev').disabled=curPage<=1;
   document.getElementById('bNext').disabled=curPage>=totPages;
-  if(!page.length){document.getElementById('tBody').innerHTML='<tr><td colspan="9" class="loading-td">ไม่พบข้อมูล</td></tr>';return;}
+  if(!page.length){document.getElementById('tBody').innerHTML='<tr><td colspan="10" class="loading-td">ไม่พบข้อมูล</td></tr>';return;}
   document.getElementById('tBody').innerHTML=page.map((r,i)=>`<tr>
     <td>${start+i+1}</td>
     <td>${r.name}</td>
@@ -612,6 +614,7 @@ function renderTable(){
     <td><span class="badge ${r.received?'b-received':'b-pending'}">${r.received?'รับแล้ว':'ยังไม่รับ'}</span></td>
     <td>${r.received?(isAdmin?`<input class="dt-input dt-date" type="date" value="${toInputDate(r.rawDate)}" data-id="${r.id}" data-field="bag_received_date" onblur="saveDatetime(this)">`:r.receivedDate):'-'}</td>
     <td>${r.received?(isAdmin?`<input class="dt-input dt-time" type="time" value="${toInputTime(r.rawDate)}" data-id="${r.id}" data-field="bag_received_date" onblur="saveDatetime(this)">`:r.receivedTime):'-'}</td>
+    <td style="font-size:0.82rem;color:#475569;">${r.received?(r.scannedBy||'-'):'-'}</td>
     <td>${r.received?(isAdmin?`<input class="proxy-input" type="text" value="${(r.receivedBy||'').replace(/"/g,'&quot;')}" placeholder="ชื่อผู้รับแทน..." data-id="${r.id}" data-field="bag_received_by" onblur="saveProxy(this)">`:r.receivedBy||'-'):'-'}</td>
   </tr>`).join('');
 }
@@ -676,7 +679,7 @@ function renderShirtTable(){
   document.getElementById('spInfo').textContent=`แสดง ${tot===0?0:start+1}–${Math.min(start+PAGE,tot)} จาก ${tot.toLocaleString()} รายการ`;
   document.getElementById('sbPrev').disabled=shirtPage<=1;
   document.getElementById('sbNext').disabled=shirtPage>=totPages;
-  if(!page.length){document.getElementById('stBody').innerHTML='<tr><td colspan="8" class="loading-td">ไม่พบข้อมูล</td></tr>';return;}
+  if(!page.length){document.getElementById('stBody').innerHTML='<tr><td colspan="9" class="loading-td">ไม่พบข้อมูล</td></tr>';return;}
   document.getElementById('stBody').innerHTML=page.map((r,i)=>`<tr>
     <td>${start+i+1}</td>
     <td>${r.name}</td>
@@ -685,6 +688,7 @@ function renderShirtTable(){
     <td><span class="badge ${r.received?'b-received':'b-pending'}">${r.received?'รับแล้ว':'ยังไม่รับ'}</span></td>
     <td>${r.received?(isAdmin?`<input class="dt-input dt-date" type="date" value="${toInputDate(r.rawDate)}" data-id="${r.id}" data-field="shirt_received_date" onblur="saveDatetime(this)">`:r.receivedDate):'-'}</td>
     <td>${r.received?(isAdmin?`<input class="dt-input dt-time" type="time" value="${toInputTime(r.rawDate)}" data-id="${r.id}" data-field="shirt_received_date" onblur="saveDatetime(this)">`:r.receivedTime):'-'}</td>
+    <td style="font-size:0.82rem;color:#475569;">${r.received?(r.scannedBy||'-'):'-'}</td>
     <td>${r.received?(isAdmin?`<input class="proxy-input" type="text" value="${(r.shirtReceivedBy||'').replace(/"/g,'&quot;')}" placeholder="ชื่อผู้รับแทน..." data-id="${r.id}" data-field="shirt_received_by" onblur="saveProxy(this)">`:r.shirtReceivedBy||'-'):'-'}</td>
   </tr>`).join('');
 }
@@ -719,6 +723,7 @@ function getShirtRows(){
     'สถานะเสื้อ':r.received?'รับแล้ว':'ยังไม่รับ',
     'วันที่รับ':r.received?r.receivedDate:'-',
     'เวลา':r.received?r.receivedTime:'-',
+    'สแกนโดย':r.received?r.scannedBy||'-':'-',
     'ผู้มารับแทน':r.shirtReceivedBy||'-'}));
 }
 
@@ -785,6 +790,7 @@ function getRows(){
     'สถานะกระเป๋า':r.received?'รับแล้ว':'ยังไม่รับ',
     'วันที่รับ':r.received?r.receivedDate:'-',
     'เวลา':r.received?r.receivedTime:'-',
+    'สแกนโดย':r.received?r.scannedBy||'-':'-',
     'ผู้มารับแทน':r.receivedBy||'-'}));
 }
 

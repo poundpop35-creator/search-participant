@@ -493,7 +493,8 @@
           return;
         }
         const today=new Date().toISOString();
-        const bagRes=await sbFetch(`/rest/v1/participants?id=eq.${p.id}`,'PATCH',{bag_received:true,bag_received_date:today});
+        const _bagScanner=sessionStorage.getItem('dmsc_user')||'unknown';
+        const bagRes=await sbFetch(`/rest/v1/participants?id=eq.${p.id}`,'PATCH',{bag_received:true,bag_received_date:today,bag_scanned_by:_bagScanner});
         if(bagRes.ok||bagRes.status===204){
           todayCount++;
           document.getElementById('count').textContent=todayCount.toLocaleString();
@@ -510,7 +511,7 @@
           if(_otherItems) bagRows.push({label:`ของที่ระลึก (2) ${_otherItems}`,val:'อยู่ในกระเป๋า',style:'ok'});
           if(_hasShirt) bagRows.push({label:`ของที่ระลึก (3) เสื้อแจ็คเก็ต (${p.shirt_size})`,val:p.shirt_received===true?'รับไปแล้ว ✓':'ยังไม่ได้รับ',style:p.shirt_received===true?'done':'normal',sub:p.shirt_received===true?fmtShort(p.shirt_received_date):null});
           const _undoBag=async()=>{
-            await sbFetch(`/rest/v1/participants?id=eq.${p.id}`,'PATCH',{bag_received:false,bag_received_date:null});
+            await sbFetch(`/rest/v1/participants?id=eq.${p.id}`,'PATCH',{bag_received:false,bag_received_date:null,bag_scanned_by:null});
             todayCount=Math.max(0,todayCount-1);document.getElementById('count').textContent=todayCount.toLocaleString();
           };
           showModal('success','รับกระเป๋าสำเร็จ','บันทึกการรับกระเป๋าเรียบร้อย',fullName,bagRows,p.dept||'',_undoBag);
@@ -546,7 +547,8 @@
           return;
         }
         const today=new Date().toISOString();
-        const shirtRes=await sbFetch(`/rest/v1/participants?id=eq.${p.id}`,'PATCH',{shirt_received:true,shirt_received_date:today});
+        const _shirtScanner=sessionStorage.getItem('dmsc_user')||'unknown';
+        const shirtRes=await sbFetch(`/rest/v1/participants?id=eq.${p.id}`,'PATCH',{shirt_received:true,shirt_received_date:today,shirt_scanned_by:_shirtScanner});
         if(!shirtRes.ok&&shirtRes.status!==204){const errTxt=await shirtRes.text().catch(()=>''); console.error('shirt PATCH failed',shirtRes.status,errTxt);}
         if(shirtRes.ok||shirtRes.status===204){
           todayCount++;
@@ -555,7 +557,7 @@
           const _sHasBag=_sItems.includes('กระเป๋า');
           const _sOther=_sItems.replace('กระเป๋า','').replace(/\+\+/g,'+').replace(/^\+|\+$/g,'').trim();
           const _undoShirt=async()=>{
-            await sbFetch(`/rest/v1/participants?id=eq.${p.id}`,'PATCH',{shirt_received:false,shirt_received_date:null});
+            await sbFetch(`/rest/v1/participants?id=eq.${p.id}`,'PATCH',{shirt_received:false,shirt_received_date:null,shirt_scanned_by:null});
             todayCount=Math.max(0,todayCount-1);document.getElementById('count').textContent=todayCount.toLocaleString();
           };
           const shirtRows=[
