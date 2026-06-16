@@ -499,7 +499,7 @@
             {label:'รับไปเมื่อ',val:fmtShort(today),style:'ok'},
             {label:'สถานะกระเป๋า',val:'✓ รับกระเป๋าสำเร็จ',style:'ok'}
           ];
-          if(_hasBag){const _bc=_otherItems?'#ea580c':'#16a34a';const _bt=_otherItems?'(สีส้ม)':'(สีเขียว)';bagRows.push({labelHtml:`ของที่ระลึก (1) <span style="color:${_bc};font-weight:700">คูปองกระเป๋า ${_bt}</span>`,label:`ของที่ระลึก (1) คูปองกระเป๋า ${_bt}`,val:'รับพร้อมกระเป๋า',style:'ok'});}
+          if(_hasBag){const _bc=_otherItems?'#ea580c':'#16a34a';const _bt=_otherItems?'🟠(สีส้ม)':'🟢(สีเขียว)';bagRows.push({labelHtml:`ของที่ระลึก (1) <span style="color:${_bc};font-weight:700">กระเป๋า ${_bt}</span>`,label:`ของที่ระลึก (1) กระเป๋า ${_bt}`,val:'รับพร้อมกระเป๋า',style:'ok'});}
           if(_otherItems) bagRows.push({labelHtml:`ของที่ระลึก (2) <span style="color:#2563eb;font-weight:700">${_otherItems} (อยู่ในกระเป๋า)</span>`,label:`ของที่ระลึก (2) ${_otherItems}`,val:'อยู่ในกระเป๋า',style:'ok'});
           if(_hasShirt) bagRows.push({labelHtml:`เสื้อแจ็คเก็ต <span style="color:#0891b2;font-weight:700">(${p.shirt_size})</span>`,label:`เสื้อ (${p.shirt_size})`,val:p.shirt_received===true?'รับไปแล้ว ✓':'ยังไม่ได้รับ',style:p.shirt_received===true?'done':'normal',sub:p.shirt_received===true?fmtShort(p.shirt_received_date):null});
           showModal('success','รับกระเป๋าสำเร็จ','บันทึกการรับกระเป๋าเรียบร้อย',fullName,bagRows);
