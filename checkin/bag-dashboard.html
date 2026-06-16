@@ -68,11 +68,12 @@
     .b-participant{background:#dbeafe;color:#1e40af;}
     .b-staff{background:#fef9c3;color:#92400e;}
     .loading-td{text-align:center;padding:40px;color:#94a3b8;}
-    .proxy-input{width:130px;padding:5px 8px;border:1.5px solid #e2e8f0;border-radius:7px;font-family:'Sarabun',sans-serif;font-size:0.83rem;color:#1e293b;outline:none;transition:border-color 0.2s;}
-    .proxy-input:focus{border-color:#0d2b6b;}
-    .dt-input{padding:4px 6px;border:1.5px solid #e2e8f0;border-radius:7px;font-family:'Sarabun',sans-serif;font-size:0.82rem;color:#1e293b;outline:none;transition:border-color 0.2s;}
-    .dt-input:focus{border-color:#0d2b6b;}
+    .proxy-input{width:130px;padding:5px 8px;border:1.5px solid #bfdbfe;border-radius:7px;font-family:'Sarabun',sans-serif;font-size:0.83rem;color:#1e293b;outline:none;transition:border-color 0.2s;background:#eff6ff;}
+    .proxy-input:focus{border-color:#2563eb;background:#fff;}
+    .dt-input{padding:4px 6px;border:1.5px solid #bfdbfe;border-radius:7px;font-family:'Sarabun',sans-serif;font-size:0.82rem;color:#1e293b;outline:none;transition:border-color 0.2s;background:#eff6ff;}
+    .dt-input:focus{border-color:#2563eb;background:#fff;}
     .dt-date{width:120px;}.dt-time{width:80px;}
+    .admin-edit-badge{display:inline-flex;align-items:center;gap:5px;background:#dbeafe;color:#1d4ed8;font-size:0.73rem;font-weight:700;padding:3px 10px;border-radius:20px;border:1px solid #bfdbfe;margin-left:10px;}
     /* Pager */
     .pager{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-top:1px solid var(--border);font-size:0.83rem;color:#64748b;flex-wrap:wrap;gap:8px;}
     .pbtn{padding:5px 12px;border-radius:6px;border:1.5px solid var(--border);background:var(--white);cursor:pointer;font-size:0.8rem;}
@@ -216,7 +217,7 @@
             <tr>
               <th>#</th><th>ชื่อ-นามสกุล</th><th>หน่วยงาน</th>
               <th>ประเภทการเข้าร่วม</th><th>TAG</th>
-              <th>สถานะกระเป๋า</th><th>วันที่รับ</th><th>เวลา</th><th>สแกนโดย</th><th>ผู้มารับแทน</th>
+              <th>สถานะกระเป๋า</th><th id="thBagDate">วันที่รับ</th><th id="thBagTime">เวลา</th><th>สแกนโดย</th><th id="thBagProxy">ผู้มารับแทน</th>
             </tr>
           </thead>
           <tbody id="tBody"><tr><td colspan="10" class="loading-td">กำลังโหลด...</td></tr></tbody>
@@ -294,7 +295,7 @@
             <tr>
               <th>#</th><th>ชื่อ-นามสกุล</th><th>หน่วยงาน</th>
               <th>ไซต์เสื้อ</th>
-              <th>สถานะเสื้อ</th><th>วันที่รับ</th><th>เวลา</th><th>สแกนโดย</th><th>ผู้มารับแทน</th>
+              <th>สถานะเสื้อ</th><th id="thShirtDate">วันที่รับ</th><th id="thShirtTime">เวลา</th><th>สแกนโดย</th><th id="thShirtProxy">ผู้มารับแทน</th>
             </tr>
           </thead>
           <tbody id="stBody"><tr><td colspan="10" class="loading-td">กำลังโหลด...</td></tr></tbody>
@@ -934,6 +935,12 @@ document.getElementById('clearOverlay').addEventListener('click',function(e){
   if(e.target===this) closeClearModal();
 });
 
+if(isAdmin){
+  ['thBagDate','thBagTime','thBagProxy','thShirtDate','thShirtTime','thShirtProxy'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.innerHTML+=' <span class="admin-edit-badge">✏️ แก้ไขได้</span>';
+  });
+}
 loadAll();
 (function(){const c=localStorage.getItem('pageBgUrl');if(c)document.body.style.backgroundImage=`linear-gradient(rgba(232,240,254,0.55),rgba(232,240,254,0.55)),url('${c}')`;})();
 async function _loadPageBg(){try{const r=await fetch(SB_URL+'/rest/v1/app_settings?key=eq.page_bg&select=value',{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}});const d=await r.json();if(Array.isArray(d)&&d.length){const v=d[0].value||'';localStorage.setItem('pageBgUrl',v);document.body.style.backgroundImage=v?`linear-gradient(rgba(232,240,254,0.55),rgba(232,240,254,0.55)),url('${v}')`:''}}catch(e){}}
