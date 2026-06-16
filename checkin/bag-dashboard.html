@@ -68,6 +68,8 @@
     .b-participant{background:#dbeafe;color:#1e40af;}
     .b-staff{background:#fef9c3;color:#92400e;}
     .loading-td{text-align:center;padding:40px;color:#94a3b8;}
+    .proxy-input{width:130px;padding:5px 8px;border:1.5px solid #e2e8f0;border-radius:7px;font-family:'Sarabun',sans-serif;font-size:0.83rem;color:#1e293b;outline:none;transition:border-color 0.2s;}
+    .proxy-input:focus{border-color:#0d2b6b;}
     /* Pager */
     .pager{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-top:1px solid var(--border);font-size:0.83rem;color:#64748b;flex-wrap:wrap;gap:8px;}
     .pbtn{padding:5px 12px;border-radius:6px;border:1.5px solid var(--border);background:var(--white);cursor:pointer;font-size:0.8rem;}
@@ -211,10 +213,10 @@
             <tr>
               <th>#</th><th>ชื่อ-นามสกุล</th><th>หน่วยงาน</th>
               <th>ประเภทการเข้าร่วม</th><th>TAG</th>
-              <th>สถานะกระเป๋า</th><th>วันที่รับ</th><th>เวลา</th>
+              <th>สถานะกระเป๋า</th><th>วันที่รับ</th><th>เวลา</th><th>ผู้มารับแทน</th>
             </tr>
           </thead>
-          <tbody id="tBody"><tr><td colspan="8" class="loading-td">กำลังโหลด...</td></tr></tbody>
+          <tbody id="tBody"><tr><td colspan="9" class="loading-td">กำลังโหลด...</td></tr></tbody>
         </table>
       </div>
       <div class="pager">
@@ -289,10 +291,10 @@
             <tr>
               <th>#</th><th>ชื่อ-นามสกุล</th><th>หน่วยงาน</th>
               <th>ไซต์เสื้อ</th>
-              <th>สถานะเสื้อ</th><th>วันที่รับ</th><th>เวลา</th>
+              <th>สถานะเสื้อ</th><th>วันที่รับ</th><th>เวลา</th><th>ผู้มารับแทน</th>
             </tr>
           </thead>
-          <tbody id="stBody"><tr><td colspan="7" class="loading-td">กำลังโหลด...</td></tr></tbody>
+          <tbody id="stBody"><tr><td colspan="9" class="loading-td">กำลังโหลด...</td></tr></tbody>
         </table>
       </div>
       <div class="pager">
@@ -441,21 +443,21 @@ function fmtBagTime(v){
 
 async function loadAll(){
   await loadActiveYear();
-  document.getElementById('tBody').innerHTML='<tr><td colspan="8" class="loading-td">กำลังโหลด...</td></tr>';
+  document.getElementById('tBody').innerHTML='<tr><td colspan="9" class="loading-td">กำลังโหลด...</td></tr>';
   try{
     let res=[], from=0;
     while(true){
-      const r=await fetch(`${SB_URL}/rest/v1/participants?event_year=eq.${encodeURIComponent(activeYear)}&select=id,prefix,first_name,last_name,dept,ext_dept,internal_external,participation_type,tag,items,bag_received,bag_received_date,shirt_size,shirt_received,shirt_received_date&order=last_name.asc`,{
+      const r=await fetch(`${SB_URL}/rest/v1/participants?event_year=eq.${encodeURIComponent(activeYear)}&select=id,prefix,first_name,last_name,dept,ext_dept,internal_external,participation_type,tag,items,bag_received,bag_received_date,bag_received_by,shirt_size,shirt_received,shirt_received_date,shirt_received_by&order=last_name.asc`,{
         headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Range-Unit':'items','Range':`${from}-${from+999}`,'Prefer':'count=exact'}
       });
       if(!r.ok){
         const errText=await r.text();
-        document.getElementById('tBody').innerHTML=`<tr><td colspan="8" class="loading-td" style="color:#dc2626;">API Error ${r.status}: ${errText}</td></tr>`;
+        document.getElementById('tBody').innerHTML=`<tr><td colspan="9" class="loading-td" style="color:#dc2626;">API Error ${r.status}: ${errText}</td></tr>`;
         return;
       }
       const d=await r.json();
       if(!Array.isArray(d)){
-        document.getElementById('tBody').innerHTML=`<tr><td colspan="8" class="loading-td" style="color:#dc2626;">API Error: ${JSON.stringify(d)}</td></tr>`;
+        document.getElementById('tBody').innerHTML=`<tr><td colspan="9" class="loading-td" style="color:#dc2626;">API Error: ${JSON.stringify(d)}</td></tr>`;
         return;
       }
       if(d.length===0) break;
@@ -471,12 +473,14 @@ async function loadAll(){
       const dept=isIn?(p.dept||'-'):(p.ext_dept||p.dept||'-');
       const _it=p.items||'';const _hasBag=_it.includes('กระเป๋า');const _other=_it.replace('กระเป๋า','').replace(/\+\+/g,'+').replace(/^\+|\+$/g,'').trim();
       return{
+        id:p.id,
         name:`${(p.prefix||'').replace(/\s*\([^)]*\)/g,'').trim()} ${p.first_name||''} ${p.last_name||''}`.trim().replace(/\s+/g,' '),
         dept, pt:p.participation_type||'-', tag:p.tag||'-',
         items:_it, itemType:(_hasBag&&_other)?'2':'1',
         received:p.bag_received===true||p.bag_received===1||p.bag_received==='true',
         receivedDate:fmtBagDate(p.bag_received_date),
-        receivedTime:fmtBagTime(p.bag_received_date)
+        receivedTime:fmtBagTime(p.bag_received_date),
+        receivedBy:p.bag_received_by||''
       };
     });
     initBagDeptFilter(allData);
@@ -505,11 +509,13 @@ async function loadAll(){
       const isIn=(p.internal_external||'').includes('ภายใน');
       const dept=isIn?(p.dept||'-'):(p.ext_dept||p.dept||'-');
       return{
+        id:p.id,
         name:`${(p.prefix||'').replace(/\s*\([^)]*\)/g,'').trim()} ${p.first_name||''} ${p.last_name||''}`.trim().replace(/\s+/g,' '),
         dept, shirtSize:(p.shirt_size||'-').trim(),
         received:p.shirt_received===true||p.shirt_received===1||p.shirt_received==='true',
         receivedDate:fmtBagDate(p.shirt_received_date),
-        receivedTime:fmtBagTime(p.shirt_received_date)
+        receivedTime:fmtBagTime(p.shirt_received_date),
+        shirtReceivedBy:p.shirt_received_by||''
       };
     });
     // Populate shirt dept dropdown
@@ -539,7 +545,7 @@ async function loadAll(){
     applyFilters();
     applyShirtFilters();
   }catch(e){
-    document.getElementById('tBody').innerHTML='<tr><td colspan="8" class="loading-td">โหลดไม่สำเร็จ</td></tr>';
+    document.getElementById('tBody').innerHTML='<tr><td colspan="9" class="loading-td">โหลดไม่สำเร็จ</td></tr>';
   }
 }
 
@@ -577,7 +583,7 @@ function renderTable(){
   document.getElementById('pInfo').textContent=`แสดง ${tot===0?0:start+1}–${Math.min(start+PAGE,tot)} จาก ${tot.toLocaleString()} รายการ`;
   document.getElementById('bPrev').disabled=curPage<=1;
   document.getElementById('bNext').disabled=curPage>=totPages;
-  if(!page.length){document.getElementById('tBody').innerHTML='<tr><td colspan="8" class="loading-td">ไม่พบข้อมูล</td></tr>';return;}
+  if(!page.length){document.getElementById('tBody').innerHTML='<tr><td colspan="9" class="loading-td">ไม่พบข้อมูล</td></tr>';return;}
   document.getElementById('tBody').innerHTML=page.map((r,i)=>`<tr>
     <td>${start+i+1}</td>
     <td>${r.name}</td>
@@ -587,6 +593,7 @@ function renderTable(){
     <td><span class="badge ${r.received?'b-received':'b-pending'}">${r.received?'รับแล้ว':'ยังไม่รับ'}</span></td>
     <td>${r.received?r.receivedDate:'-'}</td>
     <td>${r.received?r.receivedTime:'-'}</td>
+    <td>${r.received?`<input class="proxy-input" type="text" value="${(r.receivedBy||'').replace(/"/g,'&quot;')}" placeholder="ชื่อผู้รับแทน..." data-id="${r.id}" data-field="bag_received_by" onblur="saveProxy(this)">`:'-'}</td>
   </tr>`).join('');
 }
 
@@ -650,7 +657,7 @@ function renderShirtTable(){
   document.getElementById('spInfo').textContent=`แสดง ${tot===0?0:start+1}–${Math.min(start+PAGE,tot)} จาก ${tot.toLocaleString()} รายการ`;
   document.getElementById('sbPrev').disabled=shirtPage<=1;
   document.getElementById('sbNext').disabled=shirtPage>=totPages;
-  if(!page.length){document.getElementById('stBody').innerHTML='<tr><td colspan="7" class="loading-td">ไม่พบข้อมูล</td></tr>';return;}
+  if(!page.length){document.getElementById('stBody').innerHTML='<tr><td colspan="8" class="loading-td">ไม่พบข้อมูล</td></tr>';return;}
   document.getElementById('stBody').innerHTML=page.map((r,i)=>`<tr>
     <td>${start+i+1}</td>
     <td>${r.name}</td>
@@ -659,6 +666,7 @@ function renderShirtTable(){
     <td><span class="badge ${r.received?'b-received':'b-pending'}">${r.received?'รับแล้ว':'ยังไม่รับ'}</span></td>
     <td>${r.received?r.receivedDate:'-'}</td>
     <td>${r.received?r.receivedTime:'-'}</td>
+    <td>${r.received?`<input class="proxy-input" type="text" value="${(r.shirtReceivedBy||'').replace(/"/g,'&quot;')}" placeholder="ชื่อผู้รับแทน..." data-id="${r.id}" data-field="shirt_received_by" onblur="saveProxy(this)">`:'-'}</td>
   </tr>`).join('');
 }
 
@@ -691,7 +699,8 @@ function getShirtRows(){
     'ไซต์เสื้อ':r.shirtSize,
     'สถานะเสื้อ':r.received?'รับแล้ว':'ยังไม่รับ',
     'วันที่รับ':r.received?r.receivedDate:'-',
-    'เวลา':r.received?r.receivedTime:'-'}));
+    'เวลา':r.received?r.receivedTime:'-',
+    'ผู้มารับแทน':r.shirtReceivedBy||'-'}));
 }
 
 function exportShirtStickers(){
@@ -756,7 +765,27 @@ function getRows(){
     'ประเภทการเข้าร่วม':r.pt,'TAG':r.tag,
     'สถานะกระเป๋า':r.received?'รับแล้ว':'ยังไม่รับ',
     'วันที่รับ':r.received?r.receivedDate:'-',
-    'เวลา':r.received?r.receivedTime:'-'}));
+    'เวลา':r.received?r.receivedTime:'-',
+    'ผู้มารับแทน':r.receivedBy||'-'}));
+}
+
+async function saveProxy(input){
+  const id=input.dataset.id;
+  const field=input.dataset.field;
+  const val=input.value.trim();
+  const patch={};patch[field]=val||null;
+  input.style.borderColor='#94a3b8';
+  try{
+    const r=await fetch(`${SB_URL}/rest/v1/participants?id=eq.${id}`,{
+      method:'PATCH',
+      headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify(patch)
+    });
+    if(r.ok||r.status===204){
+      input.style.borderColor='#16a34a';
+      setTimeout(()=>{input.style.borderColor='';},1500);
+    } else { input.style.borderColor='#dc2626'; }
+  }catch(e){ input.style.borderColor='#dc2626'; }
 }
 
 async function doLogout(){
