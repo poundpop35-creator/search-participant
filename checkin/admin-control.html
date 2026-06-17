@@ -632,18 +632,14 @@ async function loadYears(){
     // pre-fill manual input with expected BE year
     const mi = document.getElementById('manualYearInput');
     if(mi && !mi.value) mi.value = expectedYear;
-    // show mismatch banner if DB year != expected year
-    const banner = document.getElementById('yearMismatchBanner');
-    if(banner){
-      if(activeYear && activeYear !== expectedYear){
-        document.getElementById('yearBannerActive').textContent = 'พ.ศ. '+activeYear;
-        document.getElementById('yearBannerExpected').textContent = 'พ.ศ. '+expectedYear;
-        document.getElementById('yearBannerBtn').textContent = expectedYear;
-        banner.style.display='block';
-      } else {
-        banner.style.display='none';
-      }
+    // auto-fix year if DB year != current BE year
+    if(activeYear && activeYear !== expectedYear){
+      await sbSetSetting('event_year', expectedYear);
+      setStatus('switchYearStatus','ok',`✅ ปรับปีอัตโนมัติจาก ${activeYear} → ${expectedYear}`);
+      loadCurrentEvent();
     }
+    const banner = document.getElementById('yearMismatchBanner');
+    if(banner) banner.style.display='none';
     const yearSet=new Set((rows||[]).map(r=>r.event_year).filter(Boolean));
     if(activeYear) yearSet.add(activeYear);
     yearSet.add(expectedYear); // always show current BE year
