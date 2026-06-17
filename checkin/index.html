@@ -388,16 +388,16 @@
     document.getElementById('staffCounterName').textContent=user||'—';
     document.getElementById('staffCounterBox').style.display=day==='bag'?'none':'flex';
     if(day==='bag'){
-      document.getElementById('counterLabel').textContent='รับกระเป๋าแล้ว';
+      document.getElementById('counterLabel').textContent='รับกระเป๋า/เสื้อแล้ว';
       try{
-        const res=await fetch(`${SB_URL}/rest/v1/participants?bag_received=eq.true&event_year=eq.${encodeURIComponent(activeYear)}&select=id`,
+        const res=await fetch(`${SB_URL}/rest/v1/participants?event_year=eq.${encodeURIComponent(activeYear)}&or=(bag_received.eq.true,shirt_received.eq.true)&select=id`,
           {headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON,'Prefer':'count=exact','Range':'0-0'}});
         const range=res.headers.get('Content-Range');
         let count=0;
         if(range){const m=range.match(/\/(\d+)/);if(m)count=parseInt(m[1]);}
         todayCount=count;
         document.getElementById('count').textContent=count.toLocaleString();
-        document.getElementById('counterSub').textContent='ราย (รับกระเป๋าแล้ว)';
+        document.getElementById('counterSub').textContent='ราย (รับกระเป๋าหรือเสื้อแล้ว)';
       }catch(e){
         document.getElementById('count').textContent='?';
         document.getElementById('counterSub').textContent='โหลดไม่สำเร็จ';
