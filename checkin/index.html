@@ -63,6 +63,7 @@
     .detail-val.done{color:var(--red);}
     .detail-val.ok{color:var(--green);}
     .detail-val.warn{color:var(--yellow);}
+    .detail-val.muted{color:#94a3b8;font-weight:500;}
     .modal-btns{display:flex;gap:10px;margin-top:0;}
     .btn-ok{flex:1;padding:13px;border-radius:12px;border:none;font-family:'Sarabun',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;}
     .btn-cancel{flex:0 0 auto;padding:13px 18px;border-radius:12px;border:1.5px solid #e2e8f0;background:white;font-family:'Sarabun',sans-serif;font-size:1rem;font-weight:600;cursor:pointer;color:#64748b;}
@@ -555,7 +556,11 @@
           ];
           if(_hasBag) bagRows.push({label:'ของที่ระลึก (1) กระเป๋า',val:'รับแล้ว ✓',style:'ok'});
           if(_otherItems) bagRows.push({label:`ของที่ระลึก (2) ${_otherItems}`,val:'อยู่ในกระเป๋า',style:'ok'});
-          if(_hasShirt) bagRows.push({label:`ของที่ระลึก (3) เสื้อแจ็คเก็ต (${p.shirt_size})`,val:p.shirt_received===true?'รับไปแล้ว ✓':'ยังไม่ได้รับ',style:p.shirt_received===true?'done':'normal',sub:p.shirt_received===true?fmtShort(p.shirt_received_date):null});
+          if(_hasShirt){
+            bagRows.push({label:`เสื้อแจ็คเก็ต (${p.shirt_size})`,val:p.shirt_received===true?'รับไปแล้ว ✓':'ยังไม่ได้รับ',style:p.shirt_received===true?'done':'warn',sub:p.shirt_received===true?fmtShort(p.shirt_received_date):null});
+          } else {
+            bagRows.push({label:'เสื้อแจ็คเก็ต',val:'— ไม่มีสิทธิ์รับเสื้อ',style:'muted'});
+          }
           const _undoBag=async()=>{
             await sbFetch(`/rest/v1/participants?id=eq.${p.id}`,'PATCH',{bag_received:false,bag_received_date:null,bag_scanned_by:null});
             todayCount=Math.max(0,todayCount-1);document.getElementById('count').textContent=todayCount.toLocaleString();
@@ -773,7 +778,7 @@
     const det=document.getElementById('modalDetail');
     if(rows&&rows.length>0){
       det.style.display='block';
-      det.innerHTML=rows.map(r=>`<div class="detail-row" style="${r.sub?'align-items:flex-start':''}"><span class="detail-label" style="${r.sub?'padding-top:2px':''}"><span>${r.labelHtml||r.label}</span></span><span style="text-align:right;"><span class="detail-val ${r.style==='done'?'done':r.style==='ok'?'ok':r.style==='warn'?'warn':''}">${r.val}</span>${r.sub?`<br><span style="font-size:0.7rem;color:#94a3b8;font-weight:400;">${r.sub}</span>`:''}</span></div>`).join('');
+      det.innerHTML=rows.map(r=>`<div class="detail-row" style="${r.sub?'align-items:flex-start':''}"><span class="detail-label" style="${r.sub?'padding-top:2px':''}"><span>${r.labelHtml||r.label}</span></span><span style="text-align:right;"><span class="detail-val ${r.style==='done'?'done':r.style==='ok'?'ok':r.style==='warn'?'warn':r.style==='muted'||r.style==='none'?'muted':''}">${r.val}</span>${r.sub?`<br><span style="font-size:0.7rem;color:#94a3b8;font-weight:400;">${r.sub}</span>`:''}</span></div>`).join('');
     } else det.style.display='none';
     document.getElementById('modalOverlay').classList.remove('hidden');
   }
