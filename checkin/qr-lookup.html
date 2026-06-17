@@ -303,7 +303,7 @@ const SB_KEY  = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsIn
 async function _loadPageBg(){try{const r=await fetch(SB_URL+'/rest/v1/app_settings?key=eq.page_bg&select=value',{headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON}});const d=await r.json();if(Array.isArray(d)&&d.length){const v=d[0].value||'';localStorage.setItem('pageBgUrl',v);document.body.style.backgroundImage=v?`linear-gradient(rgba(232,240,254,0.55),rgba(232,240,254,0.55)),url('${v}')`:''}}catch(e){}}
 _loadPageBg();setInterval(_loadPageBg,30000);
 
-let activeYear = '2568';
+let activeYear = '2569';
 let ciTotalLoaded = 0, wiTotalLoaded = 0;
 (async function initCounts() {
   try {

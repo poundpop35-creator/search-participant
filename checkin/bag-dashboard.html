@@ -520,7 +520,7 @@ function toggleNavDD(e){
 document.addEventListener('click',()=>document.getElementById('navDD')?.classList.remove('open'));
 
 let allData=[], filtered=[], curPage=1;
-let activeYear = '2568';
+let activeYear = '2569';
 async function loadActiveYear(){
   try{
     const r=await fetch(`${SB_URL}/rest/v1/app_settings?key=eq.event_year&select=value`,{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}});

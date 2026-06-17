@@ -228,7 +228,7 @@ async function fetchAll(path) {
   return res;
 }
 
-let activeYear = '2568';
+let activeYear = '2569';
 async function loadActiveYear(){
   try{
     const r=await fetch(`${SUPABASE_URL}/rest/v1/app_settings?key=eq.event_year&select=value`,{headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}});
