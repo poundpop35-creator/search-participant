@@ -32,7 +32,7 @@
     .nav-dd-label{font-size:0.65rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.05em;padding:6px 12px 2px;}
     .nav-dd-item{display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:8px;font-size:0.88rem;color:#1e293b;text-decoration:none;transition:background 0.1s;}
     .nav-dd-item:hover{background:#f1f5f9;color:#0d2b6b;}
-    @media(max-width:640px){.nav-dd{position:fixed!important;top:auto!important;bottom:0!important;left:0!important;right:0!important;border-radius:20px 20px 0 0!important;min-width:unset!important;max-height:70vh;overflow-y:auto;box-shadow:0 -4px 28px rgba(0,0,0,0.18)!important;padding-bottom:env(safe-area-inset-bottom,12px)!important;}}
+    @media(max-width:640px){.nav-dd{position:fixed!important;top:auto!important;bottom:0!important;left:0!important;right:0!important;border-radius:20px 20px 0 0!important;min-width:unset!important;max-height:75vh;overflow-y:auto;box-shadow:0 -4px 28px rgba(0,0,0,0.18)!important;padding-bottom:env(safe-area-inset-bottom,12px)!important;}.nav-dd::before{content:'';display:block;width:36px;height:4px;background:#d1d5db;border-radius:2px;margin:10px auto 4px;}}
     .nav-dd-sep{height:1px;background:#e2e8f0;margin:5px 0;}
   </style>
 </head>
@@ -86,7 +86,7 @@
 </div>
 
 <script>
-function toggleNavDD(e){e.stopPropagation();document.getElementById('navDD').classList.toggle('open');}
+function toggleNavDD(e){e.stopPropagation();const dd=document.getElementById('navDD');dd.classList.toggle('open');if(dd.classList.contains('open'))dd.scrollTop=0;}
 document.addEventListener('click',()=>document.getElementById('navDD')?.classList.remove('open'));
 const SB_URL = localStorage.getItem('dmsc_sb_url') || "https://gvxytnjfyepqhbkmcjms.supabase.co";
 const SB_KEY = localStorage.getItem('dmsc_sb_key') || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2eHl0bmpmeWVwcWhia21jam1zIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3OTQzMTY0MCwiZXhwIjoyMDk1MDA3NjQwfQ.Hrfc0erkIatyVbmsOW2SU7piH3L65qbS2kdi2eYzbQk";
