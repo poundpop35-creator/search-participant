@@ -290,7 +290,7 @@
 </div>
 
 <script>
-  function toggleNavDD(e){e.stopPropagation();const dd=document.getElementById('navDD');dd.classList.toggle('open');if(dd.classList.contains('open'))dd.scrollTop=0;}
+  function toggleNavDD(e){e.stopPropagation();const dd=document.getElementById('navDD');if(window.innerWidth<=640&&dd.parentElement!==document.body)document.body.appendChild(dd);dd.classList.toggle('open');if(dd.classList.contains('open'))dd.scrollTop=0;}
   document.addEventListener('click',()=>document.getElementById('navDD')?.classList.remove('open'));
   const SB_URL  = localStorage.getItem('dmsc_sb_url')  || "https://gvxytnjfyepqhbkmcjms.supabase.co";
   const SB_ANON = localStorage.getItem('dmsc_sb_anon') || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2eHl0bmpmeWVwcWhia21jam1zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0MzE2NDAsImV4cCI6MjA5NTAwNzY0MH0.RAr_ehb4cxfNliDR0h5XcihUaP-0ltZTTGIAv2Fw1kk";

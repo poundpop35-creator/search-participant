@@ -517,6 +517,7 @@ document.getElementById('userDisplay').textContent = sessionStorage.getItem('dms
 function toggleNavDD(e){
   e.stopPropagation();
   const dd=document.getElementById('navDD');
+  if(window.innerWidth<=640&&dd.parentElement!==document.body)document.body.appendChild(dd);
   dd.classList.toggle('open');
   if(dd.classList.contains('open')) dd.scrollTop=0;
 }
