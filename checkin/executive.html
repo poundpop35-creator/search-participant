@@ -27,8 +27,9 @@
     .hero::before{content:'';position:absolute;inset:0;background:rgba(31,53,64,0.75);z-index:0;}
     .hero > *{position:relative;z-index:1;}
     .hero-badge{display:inline-block;background:rgba(168,210,232,0.20);border:1px solid rgba(168,210,232,0.50);border-radius:20px;padding:4px 16px;font-size:0.8rem;margin-bottom:14px;color:#B8D8EE;}
-    .hero h1{font-size:clamp(1rem,4vw,1.4rem);font-weight:800;line-height:1.5;margin-bottom:6px;color:#ffffff;text-shadow:0 2px 14px rgba(0,0,0,0.95),0 0 32px rgba(0,0,0,0.7);}
-    .hero p{font-size:0.85rem;color:rgba(255,255,255,0.88);text-shadow:0 1px 8px rgba(0,0,0,0.95);}
+    .hero h1{font-size:clamp(1.45rem,5vw,2.4rem);font-weight:800;line-height:1.35;margin-bottom:10px;color:#ffffff;letter-spacing:-0.01em;text-shadow:0 2px 16px rgba(0,0,0,0.9),0 0 40px rgba(0,0,0,0.6);}
+    .hero-title-line{display:block;width:52px;height:4px;border-radius:4px;background:linear-gradient(90deg,#fbbf24,#f59e0b);margin:0 auto 12px;}
+    .hero p{font-size:0.88rem;color:rgba(255,255,255,0.88);text-shadow:0 1px 8px rgba(0,0,0,0.95);letter-spacing:0.01em;}
     .hero-btn{display:inline-block;margin-top:20px;margin-right:8px;padding:10px 24px;border-radius:20px;background:rgba(8,20,32,0.90);border:1.5px solid rgba(255,255,255,0.20);color:#ffffff;font-family:'Sarabun',sans-serif;font-size:0.88rem;font-weight:600;text-decoration:none;cursor:pointer;transition:all .15s;}
     .hero-btn:hover{background:rgba(8,20,32,1);border-color:rgba(255,255,255,0.40);}
 
@@ -90,7 +91,8 @@
     <img src="https://raw.githubusercontent.com/poundpop35-creator/search-participant/main/logo-DMSc-MOPH%20(1)%20(2)_0.png" style="height:60px;object-fit:contain;" alt="DMSc">
   </div>
   <div class="hero-badge">Dashboard ผู้บริหาร</div>
-  <h1>ประชุมวิชาการ<br>วิทยาศาสตร์การแพทย์<br>ครั้งที่ 34</h1>
+  <h1 id="heroEventTitle">งานประชุมวิชาการวิทยาศาสตร์การแพทย์ ครั้งที่ 34</h1>
+  <div class="hero-title-line"></div>
   <p>กรมวิทยาศาสตร์การแพทย์ กระทรวงสาธารณสุข</p>
   <div style="margin-top:20px;">
     <a class="hero-btn" href="public.html">← Live Dashboard</a>
@@ -231,9 +233,18 @@ async function fetchAll(path) {
 let activeYear = '2569';
 async function loadActiveYear(){
   try{
-    const r=await fetch(`${SUPABASE_URL}/rest/v1/app_settings?key=eq.event_year&select=value`,{headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}});
+    const [r,nr]=await Promise.all([
+      fetch(`${SUPABASE_URL}/rest/v1/app_settings?key=eq.event_year&select=value`,{headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}}),
+      fetch(`${SUPABASE_URL}/rest/v1/app_settings?key=eq.event_name&select=value`,{headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}})
+    ]);
     const d=await r.json();
     if(d&&d.length&&d[0].value) activeYear=d[0].value;
+    const nd=await nr.json();
+    if(nd&&nd.length&&nd[0].value){
+      const titleEl=document.getElementById('heroEventTitle');
+      if(titleEl) titleEl.textContent=nd[0].value;
+      document.title='Dashboard ผู้บริหาร — '+nd[0].value;
+    }
   }catch(e){}
 }
 
