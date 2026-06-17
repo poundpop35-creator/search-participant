@@ -327,6 +327,8 @@
     <div class="stats-grid" style="grid-template-columns:repeat(auto-fit,minmax(140px,1fr));">
       <div class="stat-card total" style="border-top:4px solid #16a34a;">
         <div class="stat-label">ผู้มีสิทธิ์รับของทั้งหมด</div><div class="stat-num" id="ovStatTotal" style="color:#16a34a;">-</div><div class="stat-sub" id="ovSubTotal">-</div></div>
+      <div class="stat-card received" style="border-top:4px solid #0891b2;">
+        <div class="stat-label">รับของครบแล้ว</div><div class="stat-num" id="ovStatDone" style="color:#0891b2;">-</div><div class="stat-sub" id="ovSubDone">-</div></div>
       <div class="stat-card total" style="border-top:4px solid #0d2b6b;cursor:pointer;" onclick="document.getElementById('ovBundle').value='all';applyOvFilters()">
         <div class="stat-label">🎒📚👕 ได้ทุกอย่าง</div><div class="stat-num" id="ovStatAll" style="color:#0d2b6b;">-</div><div class="stat-sub" id="ovSubAll">-</div></div>
       <div class="stat-card total" style="border-top:4px solid #0891b2;cursor:pointer;" onclick="document.getElementById('ovBundle').value='bag-bkd';applyOvFilters()">
@@ -901,8 +903,17 @@ function buildOverviewData(res){
   const depts=[...new Set(allOverviewData.map(r=>r.dept))];
   const deptsSorted=[...DEPTS.filter(d=>depts.includes(d)),...depts.filter(d=>!DEPTS.includes(d)).sort((a,b)=>a.localeCompare(b,'th'))];
   ovDeptSel.innerHTML='<option value="">ทั้งหมด</option>'+deptsSorted.map(d=>`<option value="${d.replace(/"/g,'&quot;')}">${d}</option>`).join('');
-  document.getElementById('ovStatTotal').textContent=allOverviewData.length.toLocaleString();
+  const ovTotal=allOverviewData.length;
+  const ovDone=allOverviewData.filter(r=>{
+    const bkdRec=r.bagElig?r.bagRec:r.shirtRec;
+    const total=[r.bagElig,r.hasBkd,r.hasShirt].filter(Boolean).length;
+    const rec=[r.bagElig&&r.bagRec,r.hasBkd&&bkdRec,r.hasShirt&&r.shirtRec].filter(Boolean).length;
+    return total>0&&rec>=total;
+  }).length;
+  document.getElementById('ovStatTotal').textContent=ovTotal.toLocaleString();
   document.getElementById('ovSubTotal').textContent='ราย';
+  document.getElementById('ovStatDone').textContent=ovDone.toLocaleString();
+  document.getElementById('ovSubDone').textContent=`${ovTotal?Math.round(ovDone/ovTotal*100):0}% ของทั้งหมด`;
   const bundles=['all','bag-bkd','bag-only','shirt-bkd'];
   const ids=[['ovStatAll','ovSubAll'],['ovStatBagBkd','ovSubBagBkd'],['ovStatBagOnly','ovSubBagOnly'],['ovStatShirtBkd','ovSubShirtBkd']];
   bundles.forEach((bk,i)=>{
