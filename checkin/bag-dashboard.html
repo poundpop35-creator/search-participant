@@ -146,6 +146,7 @@
   <div class="main-tabs">
     <button class="mtab active" id="tabBag" onclick="switchMainTab('bag')">🎒 กระเป๋า</button>
     <button class="mtab" id="tabShirt" onclick="switchMainTab('shirt')">👕 เสื้อ</button>
+    <button class="mtab" id="tabOverview" onclick="switchMainTab('overview')">📋 ภาพรวม</button>
   </div>
 
   <!-- ===== BAG SECTION ===== -->
@@ -320,6 +321,66 @@
       </div>
     </div>
   </div>
+
+  <!-- ===== OVERVIEW SECTION ===== -->
+  <div id="sectionOverview" style="display:none;">
+    <div class="stats-grid">
+      <div class="stat-card total"><div class="stat-label">กระเป๋า (รับแล้ว/มีสิทธิ์)</div><div class="stat-num" id="ovBagStat" style="color:#0d2b6b;">-</div><div class="stat-sub" id="ovBagSub">-</div></div>
+      <div class="stat-card total"><div class="stat-label">บทคัดย่อ (รับแล้ว/มีสิทธิ์)</div><div class="stat-num" id="ovBkdStat" style="color:#ea580c;">-</div><div class="stat-sub" id="ovBkdSub">-</div></div>
+      <div class="stat-card total"><div class="stat-label">เสื้อ (รับแล้ว/มีสิทธิ์)</div><div class="stat-num" id="ovShirtStat" style="color:#7c3aed;">-</div><div class="stat-sub" id="ovShirtSub">-</div></div>
+    </div>
+    <div class="filter-bar">
+      <div class="filter-group">
+        <div class="filter-label">ค้นหา</div>
+        <input class="sbox" id="ovSearch" placeholder="ชื่อ / หน่วยงาน..." oninput="applyOvFilters()">
+      </div>
+      <div class="filter-group">
+        <div class="filter-label">หน่วยงาน</div>
+        <select class="filter-select" id="ovDept" onchange="applyOvFilters()">
+          <option value="">ทั้งหมด</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <div class="filter-label">สถานะ</div>
+        <select class="filter-select" id="ovStatus" onchange="applyOvFilters()">
+          <option value="">ทั้งหมด</option>
+          <option value="all-received">รับครบทุกอย่างแล้ว</option>
+          <option value="partial">รับบางอย่าง</option>
+          <option value="none">ยังไม่รับเลย</option>
+          <option value="pending">ยังมีที่ค้างรับ</option>
+        </select>
+      </div>
+      <button class="btn-reset" onclick="resetOvFilters()">✕ ล้าง</button>
+    </div>
+    <div class="tcard">
+      <div class="thead-row">
+        <div><span class="ttitle">ภาพรวมการรับของ</span><span class="tcount" id="ovCount"></span></div>
+        <div class="export-btns">
+          <button class="btn-xl green" onclick="exportOvExcel()">⬇ Excel</button>
+        </div>
+      </div>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th><th>ชื่อ-นามสกุล</th><th>หน่วยงาน</th>
+              <th style="text-align:center;">🎒 กระเป๋า</th>
+              <th style="text-align:center;">📚 บทคัดย่อ</th>
+              <th style="text-align:center;">👕 เสื้อ</th>
+            </tr>
+          </thead>
+          <tbody id="ovBody"><tr><td colspan="6" class="loading-td">กำลังโหลด...</td></tr></tbody>
+        </table>
+      </div>
+      <div class="pager">
+        <span id="ovInfo">-</span>
+        <div style="display:flex;gap:6px;">
+          <button class="pbtn" id="ovPrev" onclick="changeOvPage(-1)">← ก่อนหน้า</button>
+          <button class="pbtn" id="ovNext" onclick="changeOvPage(1)">ถัดไป →</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -369,10 +430,12 @@ document.addEventListener('click',e=>{
 });
 
 function switchMainTab(tab){
-  document.getElementById('sectionBag').style.display   = tab==='bag'   ? '' : 'none';
-  document.getElementById('sectionShirt').style.display = tab==='shirt' ? '' : 'none';
-  document.getElementById('tabBag').classList.toggle('active',   tab==='bag');
-  document.getElementById('tabShirt').classList.toggle('active', tab==='shirt');
+  document.getElementById('sectionBag').style.display      = tab==='bag'      ? '' : 'none';
+  document.getElementById('sectionShirt').style.display    = tab==='shirt'    ? '' : 'none';
+  document.getElementById('sectionOverview').style.display = tab==='overview' ? '' : 'none';
+  document.getElementById('tabBag').classList.toggle('active',      tab==='bag');
+  document.getElementById('tabShirt').classList.toggle('active',    tab==='shirt');
+  document.getElementById('tabOverview').classList.toggle('active', tab==='overview');
 }
 
 // Init participation type checkboxes
@@ -587,6 +650,7 @@ async function loadAll(){
 
     document.getElementById('lastUpdate').textContent='อัปเดต: '+new Date().toLocaleTimeString('th-TH',{timeZone:'Asia/Bangkok'});
 
+    buildOverviewData(res);
     applyFilters();
     applyShirtFilters();
   }catch(e){
@@ -769,6 +833,105 @@ function getShirtRows(){
     'เวลา':r.received?r.receivedTime:'-',
     'สแกนโดย':r.received?r.scannedBy||'-':'-',
     'ผู้มารับแทน':r.shirtReceivedBy||'-'}));
+}
+
+// ===== OVERVIEW =====
+let allOverviewData=[],ovFiltered=[],ovPage=1;
+function buildOverviewData(res){
+  const _dIdx=Object.fromEntries(DEPTS.map((d,i)=>[d,i]));
+  allOverviewData=res.filter(p=>{
+    const isIn=(p.internal_external||'').includes('ภายใน');
+    const pt=p.participation_type||'';
+    const bagElig=isIn&&(pt.includes('ผู้เข้าร่วมงาน')||pt.includes('ผู้บริหาร')||pt==='ผู้ส่งผลงาน');
+    return bagElig||!!(p.shirt_size&&p.shirt_size.trim());
+  }).map(p=>{
+    const isIn=(p.internal_external||'').includes('ภายใน');
+    const dept=isIn?(p.dept||'-'):(p.ext_dept||p.dept||'-');
+    const pt=p.participation_type||'';
+    const bagElig=isIn&&(pt.includes('ผู้เข้าร่วมงาน')||pt.includes('ผู้บริหาร')||pt==='ผู้ส่งผลงาน');
+    const _it=p.items||'';
+    const hasBkd=bagElig&&_it.includes('บทคัดย่อ');
+    const hasShirt=!!(p.shirt_size&&p.shirt_size.trim());
+    const bagRec=p.bag_received===true||p.bag_received===1||p.bag_received==='true';
+    const shirtRec=p.shirt_received===true||p.shirt_received===1||p.shirt_received==='true';
+    return{id:p.id,name:`${(p.prefix||'').replace(/\s*\([^)]*\)/g,'').trim()} ${p.first_name||''} ${p.last_name||''}`.trim().replace(/\s+/g,' '),dept,bagElig,hasBkd,hasShirt,bagRec,shirtRec};
+  });
+  allOverviewData.sort((a,b)=>{const ia=_dIdx[a.dept]??Infinity,ib=_dIdx[b.dept]??Infinity;if(ia!==ib)return ia-ib;return a.name.localeCompare(b.name,'th');});
+  const ovDeptSel=document.getElementById('ovDept');
+  const depts=[...new Set(allOverviewData.map(r=>r.dept))];
+  const deptsSorted=[...DEPTS.filter(d=>depts.includes(d)),...depts.filter(d=>!DEPTS.includes(d)).sort((a,b)=>a.localeCompare(b,'th'))];
+  ovDeptSel.innerHTML='<option value="">ทั้งหมด</option>'+deptsSorted.map(d=>`<option value="${d.replace(/"/g,'&quot;')}">${d}</option>`).join('');
+  const bagTotal=allOverviewData.filter(r=>r.bagElig).length;
+  const bagRec=allOverviewData.filter(r=>r.bagElig&&r.bagRec).length;
+  const bkdTotal=allOverviewData.filter(r=>r.hasBkd).length;
+  const bkdRec=allOverviewData.filter(r=>r.hasBkd&&r.bagRec).length;
+  const shirtTotal=allOverviewData.filter(r=>r.hasShirt).length;
+  const shirtRec=allOverviewData.filter(r=>r.hasShirt&&r.shirtRec).length;
+  document.getElementById('ovBagStat').textContent=`${bagRec}/${bagTotal}`;
+  document.getElementById('ovBagSub').textContent=`รับแล้ว (${bagTotal?Math.round(bagRec/bagTotal*100):0}%)`;
+  document.getElementById('ovBkdStat').textContent=`${bkdRec}/${bkdTotal}`;
+  document.getElementById('ovBkdSub').textContent=`รับแล้ว (${bkdTotal?Math.round(bkdRec/bkdTotal*100):0}%)`;
+  document.getElementById('ovShirtStat').textContent=`${shirtRec}/${shirtTotal}`;
+  document.getElementById('ovShirtSub').textContent=`รับแล้ว (${shirtTotal?Math.round(shirtRec/shirtTotal*100):0}%)`;
+  applyOvFilters();
+}
+function applyOvFilters(){
+  const q=(document.getElementById('ovSearch').value||'').trim().toLowerCase();
+  const dept=document.getElementById('ovDept').value;
+  const status=document.getElementById('ovStatus').value;
+  ovFiltered=allOverviewData.filter(r=>{
+    if(dept&&r.dept!==dept)return false;
+    if(q&&!r.name.toLowerCase().includes(q)&&!r.dept.toLowerCase().includes(q))return false;
+    if(status){
+      const total=[r.bagElig,r.hasBkd,r.hasShirt].filter(Boolean).length;
+      const rec=[r.bagElig&&r.bagRec,r.hasBkd&&r.bagRec,r.hasShirt&&r.shirtRec].filter(Boolean).length;
+      if(status==='all-received'&&rec<total)return false;
+      if(status==='partial'&&(rec===0||rec>=total))return false;
+      if(status==='none'&&rec>0)return false;
+      if(status==='pending'&&rec>=total)return false;
+    }
+    return true;
+  });
+  ovPage=1;
+  document.getElementById('ovCount').textContent=`(${ovFiltered.length.toLocaleString()} รายการ)`;
+  renderOverviewTable();
+}
+function resetOvFilters(){document.getElementById('ovSearch').value='';document.getElementById('ovDept').value='';document.getElementById('ovStatus').value='';applyOvFilters();}
+function changeOvPage(d){ovPage+=d;renderOverviewTable();window.scrollTo({top:0,behavior:'smooth'});}
+function renderOverviewTable(){
+  const start=(ovPage-1)*PAGE;
+  const page=ovFiltered.slice(start,start+PAGE);
+  const tot=ovFiltered.length;
+  const totPages=Math.ceil(tot/PAGE)||1;
+  document.getElementById('ovInfo').textContent=`แสดง ${tot===0?0:start+1}–${Math.min(start+PAGE,tot)} จาก ${tot.toLocaleString()} รายการ`;
+  document.getElementById('ovPrev').disabled=ovPage<=1;
+  document.getElementById('ovNext').disabled=ovPage>=totPages;
+  if(!page.length){document.getElementById('ovBody').innerHTML='<tr><td colspan="6" class="loading-td">ไม่พบข้อมูล</td></tr>';return;}
+  function itemCell(eligible,received){
+    if(!eligible)return`<td style="text-align:center;color:#cbd5e1;font-size:1.1rem;">—</td>`;
+    return received?`<td style="text-align:center;"><span class="badge b-received">✓ รับแล้ว</span></td>`:`<td style="text-align:center;"><span class="badge b-pending">✗ ยังไม่รับ</span></td>`;
+  }
+  document.getElementById('ovBody').innerHTML=page.map((r,i)=>`<tr>
+    <td>${start+i+1}</td>
+    <td>${r.name}</td>
+    <td style="max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${r.dept}">${r.dept}</td>
+    ${itemCell(r.bagElig,r.bagRec)}
+    ${itemCell(r.hasBkd,r.bagRec)}
+    ${itemCell(r.hasShirt,r.shirtRec)}
+  </tr>`).join('');
+}
+function exportOvExcel(){
+  if(!ovFiltered.length)return;
+  const wb=XLSX.utils.book_new();
+  const ws=XLSX.utils.aoa_to_sheet([
+    ['#','ชื่อ-นามสกุล','หน่วยงาน','กระเป๋า','บทคัดย่อ','เสื้อ'],
+    ...ovFiltered.map((r,i)=>[i+1,r.name,r.dept,
+      r.bagElig?(r.bagRec?'รับแล้ว':'ยังไม่รับ'):'ไม่มีสิทธิ์',
+      r.hasBkd?(r.bagRec?'รับแล้ว':'ยังไม่รับ'):'ไม่มีสิทธิ์',
+      r.hasShirt?(r.shirtRec?'รับแล้ว':'ยังไม่รับ'):'ไม่มีสิทธิ์'])
+  ]);
+  XLSX.utils.book_append_sheet(wb,ws,'ภาพรวม');
+  XLSX.writeFile(wb,`overview_${activeYear}.xlsx`);
 }
 
 function exportShirtStickers(){
