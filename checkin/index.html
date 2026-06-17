@@ -43,41 +43,45 @@
     @keyframes spin{to{transform:rotate(360deg)}}
     .err-msg{color:#fff;text-align:center;font-size:0.85rem;padding:16px;}
     .retry-btn{display:block;margin:8px auto 16px;padding:8px 20px;border-radius:20px;background:#1a4eb8;color:white;border:none;font-family:'Sarabun',sans-serif;font-size:0.9rem;cursor:pointer;}
-    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.55);display:flex;align-items:center;justify-content:center;z-index:999;padding:20px;}
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:999;padding:20px;}
     .modal-overlay.hidden{display:none;}
-    .modal{background:white;border-radius:20px;padding:24px 22px 20px;width:100%;max-width:360px;box-shadow:0 8px 40px rgba(0,0,0,0.25);animation:slideUp .25s cubic-bezier(.34,1.56,.64,1);text-align:center;}
-    @keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
-    .modal-status{font-size:0.82rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:6px;}
-    .modal-status.success{color:var(--green);}
-    .modal-status.warning{color:var(--yellow);}
-    .modal-status.error{color:var(--red);}
-    .modal-status.loading{color:#64748b;}
-    .modal-title{font-size:1.15rem;font-weight:700;color:#1e293b;margin-bottom:4px;}
-    .modal-name{font-size:1rem;font-weight:600;color:var(--blue);margin-bottom:2px;}
-    .modal-dept{font-size:0.88rem;font-weight:600;color:#1e293b;margin-bottom:14px;}
-    .modal-detail{background:#f8fafc;border-radius:12px;padding:12px 14px;margin-bottom:16px;text-align:left;border:1px solid #e2e8f0;}
-    .detail-row{display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #f1f5f9;font-size:0.88rem;}
+    .modal{background:white;border-radius:22px;overflow:hidden;width:100%;max-width:370px;box-shadow:0 16px 56px rgba(0,0,0,0.32);animation:slideUp .28s cubic-bezier(.34,1.56,.64,1);}
+    @keyframes slideUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+    .modal-header{padding:24px 22px 18px;text-align:center;color:white;}
+    .modal-header.success{background:linear-gradient(140deg,#15803d,#22c55e);}
+    .modal-header.warning{background:linear-gradient(140deg,#92400e,#f59e0b);}
+    .modal-header.error{background:linear-gradient(140deg,#991b1b,#ef4444);}
+    .modal-header.loading{background:linear-gradient(140deg,#334155,#64748b);}
+    .modal-header.vip{background:linear-gradient(140deg,#5b21b6,#a855f7);}
+    .modal-header.staff-ex{background:linear-gradient(140deg,#9a3412,#f97316);}
+    .modal-header.network{background:linear-gradient(140deg,#0e7490,#22d3ee);}
+    .modal-icon{font-size:2.4rem;line-height:1;margin-bottom:6px;}
+    .modal-status{font-size:0.72rem;font-weight:700;letter-spacing:0.09em;text-transform:uppercase;opacity:0.9;margin-bottom:5px;}
+    .modal-title{font-size:1.1rem;font-weight:800;line-height:1.35;}
+    .modal-body{padding:16px 20px 4px;text-align:center;}
+    .modal-name{font-size:1.05rem;font-weight:700;color:#0d2b6b;margin-bottom:2px;}
+    .modal-dept{font-size:0.88rem;color:#64748b;margin-bottom:12px;font-weight:500;}
+    .modal-detail{background:#f8fafc;border-radius:12px;padding:12px 14px;margin-bottom:14px;text-align:left;border:1px solid #e2e8f0;}
+    .detail-row{display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #f1f5f9;font-size:0.88rem;}
     .detail-row:last-child{border-bottom:none;}
-    .detail-label{color:#111827;word-break:break-word;}
+    .detail-label{color:#374151;word-break:break-word;}
     .detail-val{color:#1e293b;font-weight:600;text-align:right;}
-    .detail-val.done{color:var(--red);}
-    .detail-val.ok{color:var(--green);}
-    .detail-val.warn{color:var(--yellow);}
-    .detail-val.muted{color:#94a3b8;font-weight:500;}
-    .modal-btns{display:flex;gap:10px;margin-top:0;}
-    .btn-ok{flex:1;padding:13px;border-radius:12px;border:none;font-family:'Sarabun',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;}
+    .detail-val.done{color:#6b7280;font-weight:500;}
+    .detail-val.ok{color:#16a34a;}
+    .detail-val.warn{color:#d97706;}
+    .detail-val.muted{color:#94a3b8;font-weight:400;}
+    .modal-btns{display:flex;gap:10px;padding:0 20px 20px;}
+    .btn-ok{flex:1;padding:13px;border-radius:12px;border:none;font-family:'Sarabun',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;transition:opacity .15s;}
+    .btn-ok:active{opacity:0.85;}
     .btn-cancel{flex:0 0 auto;padding:13px 18px;border-radius:12px;border:1.5px solid #e2e8f0;background:white;font-family:'Sarabun',sans-serif;font-size:1rem;font-weight:600;cursor:pointer;color:#64748b;}
     .btn-cancel:hover{background:#f8fafc;}
-    .btn-ok.success{background:var(--green);color:white;}
-    .btn-ok.warning{background:var(--yellow);color:white;}
-    .btn-ok.error{background:var(--red);color:white;}
+    .btn-ok.success{background:linear-gradient(135deg,#15803d,#16a34a);color:white;}
+    .btn-ok.warning{background:linear-gradient(135deg,#92400e,#d97706);color:white;}
+    .btn-ok.error{background:linear-gradient(135deg,#991b1b,#dc2626);color:white;}
     .btn-ok.loading{background:#94a3b8;color:white;pointer-events:none;}
-    .modal-status.vip{color:#7c3aed;}
-    .modal-status.staff-ex{color:#ea580c;}
-    .modal-status.network{color:#0891b2;}
-    .btn-ok.vip{background:#7c3aed;color:white;}
-    .btn-ok.staff-ex{background:#ea580c;color:white;}
-    .btn-ok.network{background:#0891b2;color:white;}
+    .btn-ok.vip{background:linear-gradient(135deg,#5b21b6,#7c3aed);color:white;}
+    .btn-ok.staff-ex{background:linear-gradient(135deg,#9a3412,#ea580c);color:white;}
+    .btn-ok.network{background:linear-gradient(135deg,#0e7490,#0891b2);color:white;}
     .help-btn{position:absolute;top:16px;right:16px;width:32px;height:32px;border-radius:50%;border:2px solid #c7d7f5;background:white;font-family:'Sarabun',sans-serif;font-size:1rem;font-weight:700;color:var(--blue);cursor:pointer;display:flex;align-items:center;justify-content:center;}
     .help-btn:hover{background:var(--blue-light);}
     .help-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.55);display:flex;align-items:center;justify-content:center;z-index:1000;padding:20px;}
@@ -129,14 +133,19 @@
 </div>
 <div class="modal-overlay hidden" id="modalOverlay">
   <div class="modal">
-    <div class="modal-status" id="modalStatus"></div>
-    <div class="modal-title"  id="modalTitle"></div>
-    <div class="modal-name"   id="modalName"></div>
-    <div class="modal-dept"   id="modalDept"   style="display:none"></div>
-    <div class="modal-detail" id="modalDetail" style="display:none"></div>
+    <div class="modal-header loading" id="modalHeader">
+      <div class="modal-icon" id="modalIcon">⏳</div>
+      <div class="modal-status" id="modalStatus"></div>
+      <div class="modal-title" id="modalTitle"></div>
+    </div>
+    <div class="modal-body">
+      <div class="modal-name" id="modalName"></div>
+      <div class="modal-dept" id="modalDept" style="display:none"></div>
+      <div class="modal-detail" id="modalDetail" style="display:none"></div>
+    </div>
     <div class="modal-btns">
       <button class="btn-cancel" onclick="cancelModal()" style="display:none;">ยกเลิก</button>
-      <button class="btn-ok" id="btnOk" onclick="closeModal()">ตกลง</button>
+      <button class="btn-ok loading" id="btnOk" onclick="closeModal()">ตกลง</button>
     </div>
   </div>
 </div>
@@ -740,10 +749,17 @@
 
   let pendingUndo=null;
 
+  const MODAL_META={
+    success:{icon:'✅',cls:'success'},warning:{icon:'⚠️',cls:'warning'},
+    error:{icon:'❌',cls:'error'},loading:{icon:'⏳',cls:'loading'},
+    vip:{icon:'🎖️',cls:'vip'},'staff-ex':{icon:'👥',cls:'staff-ex'},network:{icon:'🤝',cls:'network'},
+  };
   function showModal(type,status,title,name,rows,dept,undoFn){
     pendingUndo=undoFn||null;
+    const m=MODAL_META[type]||MODAL_META.loading;
+    document.getElementById('modalIcon').textContent=m.icon;
+    document.getElementById('modalHeader').className='modal-header '+m.cls;
     document.getElementById('modalStatus').textContent=status;
-    document.getElementById('modalStatus').className='modal-status '+type;
     document.getElementById('modalTitle').textContent=title;
     const nameEl=document.getElementById('modalName');
     if(name){nameEl.style.display='';nameEl.textContent=name;}
@@ -751,14 +767,21 @@
     const deptEl=document.getElementById('modalDept');
     if(dept){deptEl.style.display='';deptEl.textContent=dept;}
     else{deptEl.style.display='none';}
-    document.getElementById('btnOk').className='btn-ok '+type;
-    document.getElementById('btnOk').style.display=type==='loading'?'none':'block';
+    const okBtn=document.getElementById('btnOk');
+    okBtn.className='btn-ok '+m.cls;
+    okBtn.style.display=type==='loading'?'none':'block';
     const cancelBtn=document.querySelector('.btn-cancel');
     if(cancelBtn) cancelBtn.style.display=undoFn?'':'none';
     const det=document.getElementById('modalDetail');
     if(rows&&rows.length>0){
       det.style.display='block';
-      det.innerHTML=rows.map(r=>`<div class="detail-row" style="${r.sub?'align-items:flex-start':''}"><span class="detail-label" style="${r.sub?'padding-top:2px':''}"><span>${r.labelHtml||r.label}</span></span><span style="text-align:right;"><span class="detail-val ${r.style==='done'?'done':r.style==='ok'?'ok':r.style==='warn'?'warn':r.style==='muted'||r.style==='none'?'muted':''}">${r.val}</span>${r.sub?`<br><span style="font-size:0.7rem;color:#94a3b8;font-weight:400;">${r.sub}</span>`:''}</span></div>`).join('');
+      det.innerHTML=rows.map(r=>{
+        const vc=r.style==='done'?'done':r.style==='ok'?'ok':r.style==='warn'?'warn':r.style==='muted'||r.style==='none'?'muted':'';
+        return `<div class="detail-row" style="${r.sub?'align-items:flex-start':''}">
+          <span class="detail-label" style="${r.sub?'padding-top:2px':''}">${r.labelHtml||r.label}</span>
+          <span style="text-align:right;"><span class="detail-val ${vc}">${r.val}</span>${r.sub?`<br><span style="font-size:0.7rem;color:#94a3b8;font-weight:400;">${r.sub}</span>`:''}</span>
+        </div>`;
+      }).join('');
     } else det.style.display='none';
     document.getElementById('modalOverlay').classList.remove('hidden');
   }
@@ -776,40 +799,35 @@
     closeModal();
   }
 
-  function showVIPModal(p, fullName){
-    document.getElementById('modalStatus').textContent='🎖️ VIP';
-    document.getElementById('modalStatus').className='modal-status vip';
-    document.getElementById('modalTitle').textContent='ได้รับการยกเว้น (ไม่ต้องเช็คอิน)';
+  function _setModalHeader(cls,icon,status,title,name,btnCls){
+    document.getElementById('modalHeader').className='modal-header '+cls;
+    document.getElementById('modalIcon').textContent=icon;
+    document.getElementById('modalStatus').textContent=status;
+    document.getElementById('modalTitle').textContent=title;
     const nameEl=document.getElementById('modalName');
-    nameEl.style.display=''; nameEl.textContent=fullName;
+    if(name){nameEl.style.display='';nameEl.textContent=name;}
+    else nameEl.style.display='none';
     document.getElementById('modalDept').style.display='none';
-    document.getElementById('btnOk').className='btn-ok vip';
-    document.getElementById('btnOk').style.display='block';
+    const ok=document.getElementById('btnOk');
+    ok.className='btn-ok '+(btnCls||cls); ok.style.display='block';
+    document.querySelector('.btn-cancel').style.display='none';
+  }
+  function showVIPModal(p, fullName){
+    _setModalHeader('vip','🎖️','VIP','ได้รับการยกเว้น (ไม่ต้องเช็คอิน)',fullName);
     const det=document.getElementById('modalDetail');
     det.style.display='block';
-    det.innerHTML=`<div class="detail-row"><span class="detail-label">ตำแหน่ง</span><span class="detail-val" style="color:#6d28d9;">${p.dept||'-'}</span></div>
-      <div style="margin-top:10px;padding-top:10px;border-top:1px solid #ede9fe;text-align:center;font-size:0.85rem;color:#7c3aed;line-height:1.8;">
-        หากต้องการสิ่งใดเพิ่มเติม<br>ติดต่อ กองแผนงานและวิชาการ
-      </div>`;
+    det.innerHTML=`<div class="detail-row"><span class="detail-label">ตำแหน่ง/หน่วยงาน</span><span class="detail-val" style="color:#7c3aed;">${p.dept||'-'}</span></div>
+      <div style="margin-top:10px;padding-top:10px;border-top:1px solid #ede9fe;text-align:center;font-size:0.84rem;color:#7c3aed;line-height:1.9;">หากต้องการสิ่งใดเพิ่มเติม<br>ติดต่อ กองแผนงานและวิชาการ</div>`;
     document.getElementById('modalOverlay').classList.remove('hidden');
   }
   function showNetworkSuccessModal(p, fullName, time, undoFn){
-    document.getElementById('modalStatus').textContent='🤝 เครือข่ายกรม';
-    document.getElementById('modalStatus').className='modal-status network';
-    document.getElementById('modalTitle').textContent='เช็คอินสำเร็จ';
-    const nameEl=document.getElementById('modalName');
-    nameEl.style.display=''; nameEl.textContent=fullName;
-    document.getElementById('modalDept').style.display='none';
-    const btnOk=document.getElementById('btnOk');
-    btnOk.className='btn-ok network'; btnOk.style.display='block';
+    _setModalHeader('network','🤝','เครือข่ายกรม','เช็คอินสำเร็จ',fullName);
     const det=document.getElementById('modalDetail');
     det.style.display='block';
-    det.innerHTML=`<div class="detail-row"><span class="detail-label">เวลา</span><span class="detail-val">${time}</span></div>
-      <div class="detail-row"><span class="detail-label">คูปองอาหาร</span><span class="detail-val ok">รับได้</span></div>
+    det.innerHTML=`<div class="detail-row"><span class="detail-label">เวลาเช็คอิน</span><span class="detail-val">${time}</span></div>
+      <div class="detail-row"><span class="detail-label">🍱 คูปองอาหาร</span><span class="detail-val ok">รับได้ ✓</span></div>
       <div class="detail-row"><span class="detail-label">หน่วยงาน</span><span class="detail-val" style="color:#0891b2;">${p.dept||'-'}</span></div>
-      <div style="margin-top:10px;padding-top:10px;border-top:1px solid #cffafe;text-align:center;font-size:0.85rem;color:#0891b2;line-height:1.8;">
-        หากต้องการสิ่งใดเพิ่มเติม<br>ติดต่อ กองแผนงานและวิชาการ
-      </div>`;
+      <div style="margin-top:10px;padding-top:10px;border-top:1px solid #cffafe;text-align:center;font-size:0.84rem;color:#0891b2;line-height:1.9;">หากต้องการสิ่งใดเพิ่มเติม<br>ติดต่อ กองแผนงานและวิชาการ</div>`;
     if(undoFn){
       const cancel=document.querySelector('.btn-cancel');
       if(cancel){cancel.style.display='block';cancel.textContent='ยกเลิกเช็คอิน';cancel.onclick=()=>{undoFn();closeModal();};}
@@ -817,21 +835,12 @@
     document.getElementById('modalOverlay').classList.remove('hidden');
   }
   function showStaffExemptModal(p, fullName){
-    document.getElementById('modalStatus').textContent='👥 Staff';
-    document.getElementById('modalStatus').className='modal-status staff-ex';
-    document.getElementById('modalTitle').textContent='ได้รับการยกเว้น (ไม่ต้องเช็คอิน)';
-    const nameEl=document.getElementById('modalName');
-    nameEl.style.display=''; nameEl.textContent=fullName;
-    document.getElementById('modalDept').style.display='none';
-    document.getElementById('btnOk').className='btn-ok staff-ex';
-    document.getElementById('btnOk').style.display='block';
+    _setModalHeader('staff-ex','👥','Staff','ได้รับการยกเว้น (ไม่ต้องเช็คอิน)',fullName);
     const det=document.getElementById('modalDetail');
     det.style.display='block';
-    det.innerHTML=`<div class="detail-row"><span class="detail-label">ตำแหน่ง</span><span class="detail-val">${p.participation_type||'-'}</span></div>
-      <div class="detail-row"><span class="detail-label">หน่วยงาน</span><span class="detail-val">${p.dept||'-'}</span></div>
-      <div style="margin-top:10px;padding-top:10px;border-top:1px solid #ffedd5;text-align:center;font-size:0.85rem;color:#ea580c;line-height:1.8;">
-        มีข้อสงสัยเพิ่มเติม<br>ติดต่อ กองแผนงานและวิชาการ
-      </div>`;
+    det.innerHTML=`<div class="detail-row"><span class="detail-label">ประเภท</span><span class="detail-val">${p.participation_type||'-'}</span></div>
+      <div class="detail-row"><span class="detail-label">หน่วยงาน</span><span class="detail-val" style="color:#ea580c;">${p.dept||'-'}</span></div>
+      <div style="margin-top:10px;padding-top:10px;border-top:1px solid #ffedd5;text-align:center;font-size:0.84rem;color:#ea580c;line-height:1.9;">มีข้อสงสัยเพิ่มเติม<br>ติดต่อ กองแผนงานและวิชาการ</div>`;
     document.getElementById('modalOverlay').classList.remove('hidden');
   }
 
