@@ -423,6 +423,24 @@
       <div id="bgStatus"></div>
     </div>
 
+    <!-- ธีมสี -->
+    <div class="card">
+      <div class="card-title">🎨 ธีมสีหน้าบอร์ดสาธารณะ</div>
+      <p class="card-desc">เลือกโทนสีที่แสดงบน Dashboard สาธารณะและ Dashboard ผู้บริหาร</p>
+      <div id="themeSwatches" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;"></div>
+      <div id="themeStatus"></div>
+      <div style="border-top:1px solid var(--border);margin:16px 0;"></div>
+      <div class="card-title" style="font-size:0.88rem;margin-bottom:6px;">🖊️ สีตัวอักษรหลัก (custom)</div>
+      <p class="card-desc" style="margin-bottom:10px;">กำหนดสีตัวอักษร/สีเน้นหลักเอง (ถ้าไม่ต้องการให้ใช้สีจากธีม ให้กด รีเซ็ต)</p>
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:6px;">
+        <input id="textColorInput" type="color" value="#6A8694" style="width:48px;height:40px;border:1.5px solid var(--border);border-radius:8px;padding:2px;cursor:pointer;">
+        <span id="textColorHex" style="font-size:0.82rem;color:#64748b;min-width:70px;">#6A8694</span>
+        <button class="btn btn-primary btn-sm" onclick="saveTextColor()">💾 บันทึก</button>
+        <button class="btn btn-ghost btn-sm" onclick="clearTextColor()">รีเซ็ต</button>
+      </div>
+      <div id="textColorStatus"></div>
+    </div>
+
     <!-- VIP -->
     <div class="card">
       <div class="card-title">🎖️ หน่วยงาน VIP</div>
@@ -1330,9 +1348,65 @@ async function forceLogout(u){
 // ─── SETTINGS ───
 // ══════════════════════════════════════════
 
+const ADMIN_THEMES={
+  1:{name:'โทนสีชมพู',sw:'#D9BAA4',sw2:'#9C7564'},
+  2:{name:'โทนสีเขียว',sw:'#97A397',sw2:'#2D3B2E'},
+  3:{name:'โทนสีน้ำเงิน',sw:'#6A8694',sw2:'#1F3540'},
+  4:{name:'โทนสีม่วง',sw:'#A0808B',sw2:'#4D4A5B'},
+  5:{name:'โทนสีน้ำตาล',sw:'#BE7E4E',sw2:'#4B1B0D'},
+};
+let activeThemeId=3;
+
+function renderThemeSwatches(current){
+  activeThemeId=current||3;
+  const wrap=document.getElementById('themeSwatches');
+  wrap.innerHTML=Object.entries(ADMIN_THEMES).map(([id,t])=>`
+    <button onclick="saveTheme(${id})" title="${t.name}" style="
+      display:flex;flex-direction:column;align-items:center;gap:6px;
+      background:none;border:none;cursor:pointer;padding:0;
+    ">
+      <div style="
+        width:48px;height:48px;border-radius:50%;
+        background:linear-gradient(135deg,${t.sw2},${t.sw});
+        border:3px solid ${Number(id)===Number(activeThemeId)?'#0d2b6b':'#e2e8f0'};
+        box-shadow:${Number(id)===Number(activeThemeId)?'0 0 0 2px #0d2b6b':'none'};
+        transition:all .15s;
+      "></div>
+      <span style="font-size:0.72rem;color:${Number(id)===Number(activeThemeId)?'#0d2b6b':'#64748b'};font-weight:${Number(id)===Number(activeThemeId)?'700':'400'};font-family:'Sarabun',sans-serif;">${t.name}</span>
+    </button>
+  `).join('');
+}
+
+async function saveTheme(id){
+  await sbSetSetting('theme',String(id));
+  renderThemeSwatches(id);
+  setStatus('themeStatus','ok','✅ บันทึกธีมแล้ว — หน้าบอร์ดจะอัปเดตใน 30 วิ');
+}
+
+async function saveTextColor(){
+  const v=document.getElementById('textColorInput').value;
+  await sbSetSetting('text_color',v);
+  setStatus('textColorStatus','ok','✅ บันทึกสีตัวอักษรแล้ว');
+}
+
+async function clearTextColor(){
+  await sbSetSetting('text_color','');
+  setStatus('textColorStatus','ok','✅ รีเซ็ตแล้ว — จะใช้สีจากธีม');
+}
+
 async function loadSettings(){
   const bg=await sbGetSetting('page_bg');
   if(bg) document.getElementById('bgUrl').value=bg;
+  const themeId=await sbGetSetting('theme');
+  renderThemeSwatches(parseInt(themeId)||3);
+  const tc=await sbGetSetting('text_color');
+  if(tc){
+    document.getElementById('textColorInput').value=tc;
+    document.getElementById('textColorHex').textContent=tc;
+  }
+  document.getElementById('textColorInput').addEventListener('input',function(){
+    document.getElementById('textColorHex').textContent=this.value;
+  });
   const vip=await sbGetSetting('vip_depts');
   vipList=vip?JSON.parse(vip):['อธิบดีกรมวิทยาศาสตร์การแพทย์','รองอธิบดีกรมวิทยาศาสตร์การแพทย์'];
   renderVip();
