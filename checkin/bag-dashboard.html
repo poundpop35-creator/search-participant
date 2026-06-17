@@ -342,6 +342,12 @@
         <input class="sbox" id="ovSearch" placeholder="ชื่อ / หน่วยงาน..." oninput="applyOvFilters()">
       </div>
       <div class="filter-group">
+        <div class="filter-label">ประเภทการเข้าร่วม</div>
+        <select class="filter-select" id="ovPT" onchange="applyOvFilters()">
+          <option value="">ทั้งหมด</option>
+        </select>
+      </div>
+      <div class="filter-group">
         <div class="filter-label">หน่วยงาน</div>
         <select class="filter-select" id="ovDept" onchange="applyOvFilters()">
           <option value="">ทั้งหมด</option>
@@ -380,7 +386,7 @@
         <table>
           <thead>
             <tr>
-              <th>#</th><th>ชื่อ-นามสกุล</th><th>หน่วยงาน</th>
+              <th>#</th><th>ชื่อ-นามสกุล</th><th>หน่วยงาน</th><th>ประเภท</th>
               <th style="text-align:center;min-width:100px;">🎒<br>กระเป๋า</th>
               <th style="text-align:center;min-width:100px;">📚<br>บทคัดย่อ</th>
               <th style="text-align:center;min-width:100px;">👕<br>เสื้อ</th>
@@ -878,7 +884,7 @@ function buildOverviewData(res){
     const bagRec=p.bag_received===true||p.bag_received===1||p.bag_received==='true';
     const shirtRec=p.shirt_received===true||p.shirt_received===1||p.shirt_received==='true';
     const bKey=getBundleKey(bagElig,hasBkd,hasShirt);
-    return{id:p.id,name:`${(p.prefix||'').replace(/\s*\([^)]*\)/g,'').trim()} ${p.first_name||''} ${p.last_name||''}`.trim().replace(/\s+/g,' '),dept,bagElig,hasBkd,hasShirt,bagRec,shirtRec,bagRecDate:p.bag_received_date||null,shirtRecDate:p.shirt_received_date||null,bundle:bKey};
+    return{id:p.id,name:`${(p.prefix||'').replace(/\s*\([^)]*\)/g,'').trim()} ${p.first_name||''} ${p.last_name||''}`.trim().replace(/\s+/g,' '),dept,pt:p.participation_type||'-',bagElig,hasBkd,hasShirt,bagRec,shirtRec,bagRecDate:p.bag_received_date||null,shirtRecDate:p.shirt_received_date||null,bundle:bKey};
   });
   allOverviewData.sort((a,b)=>{
     const bo=BUNDLE_ORDER;
@@ -888,6 +894,9 @@ function buildOverviewData(res){
     if(ia!==ib)return ia-ib;
     return a.name.localeCompare(b.name,'th');
   });
+  const ovPTSel=document.getElementById('ovPT');
+  const pts=[...new Set(allOverviewData.map(r=>r.pt).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'th'));
+  ovPTSel.innerHTML='<option value="">ทั้งหมด</option>'+pts.map(p=>`<option value="${p.replace(/"/g,'&quot;')}">${p}</option>`).join('');
   const ovDeptSel=document.getElementById('ovDept');
   const depts=[...new Set(allOverviewData.map(r=>r.dept))];
   const deptsSorted=[...DEPTS.filter(d=>depts.includes(d)),...depts.filter(d=>!DEPTS.includes(d)).sort((a,b)=>a.localeCompare(b,'th'))];
@@ -908,10 +917,12 @@ function buildOverviewData(res){
 function matchBundle(r,bundle){return !bundle||r.bundle===bundle;}
 function applyOvFilters(){
   const q=(document.getElementById('ovSearch').value||'').trim().toLowerCase();
+  const pt=document.getElementById('ovPT').value;
   const dept=document.getElementById('ovDept').value;
   const bundle=document.getElementById('ovBundle').value;
   const status=document.getElementById('ovStatus').value;
   ovFiltered=allOverviewData.filter(r=>{
+    if(pt&&r.pt!==pt)return false;
     if(dept&&r.dept!==dept)return false;
     if(q&&!r.name.toLowerCase().includes(q)&&!r.dept.toLowerCase().includes(q))return false;
     if(!matchBundle(r,bundle))return false;
@@ -930,7 +941,7 @@ function applyOvFilters(){
   document.getElementById('ovCount').textContent=`(${ovFiltered.length.toLocaleString()} รายการ)`;
   renderOverviewTable();
 }
-function resetOvFilters(){document.getElementById('ovSearch').value='';document.getElementById('ovDept').value='';document.getElementById('ovBundle').value='';document.getElementById('ovStatus').value='';applyOvFilters();}
+function resetOvFilters(){document.getElementById('ovSearch').value='';document.getElementById('ovPT').value='';document.getElementById('ovDept').value='';document.getElementById('ovBundle').value='';document.getElementById('ovStatus').value='';applyOvFilters();}
 function changeOvPage(d){ovPage+=d;renderOverviewTable();window.scrollTo({top:0,behavior:'smooth'});}
 function renderOverviewTable(){
   const start=(ovPage-1)*PAGE;
@@ -940,7 +951,7 @@ function renderOverviewTable(){
   document.getElementById('ovInfo').textContent=`แสดง ${tot===0?0:start+1}–${Math.min(start+PAGE,tot)} จาก ${tot.toLocaleString()} รายการ`;
   document.getElementById('ovPrev').disabled=ovPage<=1;
   document.getElementById('ovNext').disabled=ovPage>=totPages;
-  if(!page.length){document.getElementById('ovBody').innerHTML='<tr><td colspan="7" class="loading-td">ไม่พบข้อมูล</td></tr>';return;}
+  if(!page.length){document.getElementById('ovBody').innerHTML='<tr><td colspan="8" class="loading-td">ไม่พบข้อมูล</td></tr>';return;}
   function itemCell(eligible,received){
     if(!eligible)return`<td style="background:#f1f5f9;text-align:center;color:#94a3b8;font-size:0.82rem;padding:10px 6px;">—</td>`;
     if(received)return`<td style="background:#dcfce7;text-align:center;color:#166534;font-weight:700;font-size:0.85rem;padding:10px 6px;">✓ รับแล้ว</td>`;
@@ -950,7 +961,7 @@ function renderOverviewTable(){
   page.forEach((r,i)=>{
     if(r.bundle!==lastBundle){
       lastBundle=r.bundle;
-      rows+=`<tr><td colspan="7" style="background:#e8f0fe;color:#0d2b6b;font-weight:700;font-size:0.78rem;padding:7px 14px;letter-spacing:0.04em;">${BUNDLE_LABELS[r.bundle]||r.bundle}</td></tr>`;
+      rows+=`<tr><td colspan="8" style="background:#e8f0fe;color:#0d2b6b;font-weight:700;font-size:0.78rem;padding:7px 14px;letter-spacing:0.04em;">${BUNDLE_LABELS[r.bundle]||r.bundle}</td></tr>`;
     }
     const bkdRec=r.bagElig?r.bagRec:r.shirtRec;
     const times=[];
@@ -961,7 +972,8 @@ function renderOverviewTable(){
     rows+=`<tr>
       <td>${start+i+1}</td>
       <td style="font-weight:600;">${r.name}</td>
-      <td style="max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#64748b;font-size:0.83rem;" title="${r.dept}">${r.dept}</td>
+      <td style="max-width:150px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#64748b;font-size:0.83rem;" title="${r.dept}">${r.dept}</td>
+      <td style="font-size:0.8rem;color:#475569;white-space:nowrap;">${r.pt}</td>
       ${itemCell(r.bagElig,r.bagRec)}
       ${itemCell(r.hasBkd,bkdRec)}
       ${itemCell(r.hasShirt,r.shirtRec)}
