@@ -78,6 +78,9 @@
     .btn-save-row{padding:3px 9px;border-radius:6px;border:none;background:#16a34a;color:white;font-family:'Sarabun',sans-serif;font-size:0.78rem;cursor:pointer;font-weight:700;margin-right:3px;}
     .btn-save-row:disabled{opacity:0.6;cursor:not-allowed;}
     .btn-cancel-row{padding:3px 9px;border-radius:6px;border:1.5px solid #e2e8f0;background:white;color:#64748b;font-family:'Sarabun',sans-serif;font-size:0.78rem;cursor:pointer;}
+    .b-cross-received{background:#d1fae5;color:#065f46;}
+    .b-cross-pending{background:#fef3c7;color:#92400e;}
+    .b-cross-none{background:#f1f5f9;color:#94a3b8;font-style:italic;}
     /* Pager */
     .pager{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-top:1px solid var(--border);font-size:0.83rem;color:#64748b;flex-wrap:wrap;gap:8px;}
     .pbtn{padding:5px 12px;border-radius:6px;border:1.5px solid var(--border);background:var(--white);cursor:pointer;font-size:0.8rem;}
@@ -497,6 +500,8 @@ async function loadAll(){
       const isIn=(p.internal_external||'').includes('ภายใน');
       const dept=isIn?(p.dept||'-'):(p.ext_dept||p.dept||'-');
       const _it=p.items||'';const _hasBag=_it.includes('กระเป๋า');const _other=_it.replace('กระเป๋า','').replace(/\+\+/g,'+').replace(/^\+|\+$/g,'').trim();
+      const _hasShirt=!!(p.shirt_size&&p.shirt_size.trim());
+      const _shirtRec=p.shirt_received===true||p.shirt_received===1||p.shirt_received==='true';
       return{
         id:p.id,
         name:`${(p.prefix||'').replace(/\s*\([^)]*\)/g,'').trim()} ${p.first_name||''} ${p.last_name||''}`.trim().replace(/\s+/g,' '),
@@ -507,7 +512,8 @@ async function loadAll(){
         receivedDate:fmtBagDate(p.bag_received_date),
         receivedTime:fmtBagTime(p.bag_received_date),
         receivedBy:p.bag_received_by||'',
-        scannedBy:p.bag_scanned_by||''
+        scannedBy:p.bag_scanned_by||'',
+        shirtStatus:_hasShirt?(_shirtRec?'received':'pending'):'none'
       };
     });
     const _dIdx=Object.fromEntries(DEPTS.map((d,i)=>[d,i]));
@@ -537,6 +543,11 @@ async function loadAll(){
     allShirtData = res.filter(p => p.shirt_size && p.shirt_size.trim()).map(p => {
       const isIn=(p.internal_external||'').includes('ภายใน');
       const dept=isIn?(p.dept||'-'):(p.ext_dept||p.dept||'-');
+      const _pt2=p.participation_type||'';
+      const _bagElig=isIn&&(_pt2.includes('ผู้เข้าร่วมงาน')||_pt2.includes('ผู้บริหาร')||_pt2==='ผู้ส่งผลงาน');
+      const _it2=p.items||'';
+      const _hasBkd=_it2.includes('บทคัดย่อ');
+      const _bagRec=p.bag_received===true||p.bag_received===1||p.bag_received==='true';
       return{
         id:p.id,
         name:`${(p.prefix||'').replace(/\s*\([^)]*\)/g,'').trim()} ${p.first_name||''} ${p.last_name||''}`.trim().replace(/\s+/g,' '),
@@ -546,7 +557,9 @@ async function loadAll(){
         receivedDate:fmtBagDate(p.shirt_received_date),
         receivedTime:fmtBagTime(p.shirt_received_date),
         shirtReceivedBy:p.shirt_received_by||'',
-        scannedBy:p.shirt_scanned_by||''
+        scannedBy:p.shirt_scanned_by||'',
+        bagStatus:_bagElig?(_bagRec?'received':'pending'):'none',
+        bagLabel:(_bagElig&&_hasBkd)?'กระเป๋า+บทคัดย่อ':'กระเป๋า'
       };
     });
     allShirtData.sort((a,b)=>{const ia=_dIdx[a.dept]??Infinity,ib=_dIdx[b.dept]??Infinity;if(ia!==ib)return ia-ib;return a.name.localeCompare(b.name,'th');});
@@ -623,13 +636,14 @@ function renderTable(){
     const pT=r.received?(r.receivedBy||'-'):'-';
     const adminAttrs=isAdmin?` data-id="${r.id}" data-raw-date="${r.rawDate||''}" data-received-by="${(r.receivedBy||'').replace(/"/g,'&quot;')}" data-received="${r.received}" data-field="bag_received_date" data-scan-by="${(r.scannedBy||'').replace(/"/g,'&quot;')}" data-editing="0"`:'';
     const actionCell=isAdmin?`<td style="white-space:nowrap;"><button class="btn-edit-row" onclick="startEdit(this)">✏️ แก้ไข</button></td>`:'';
+    const shirtBadge=r.shirtStatus==='received'?`<span class="badge b-cross-received">เสื้อ: รับแล้ว</span>`:r.shirtStatus==='pending'?`<span class="badge b-cross-pending">เสื้อ: ยังไม่รับ</span>`:`<span class="badge b-cross-none">ไม่มีสิทธิ์รับเสื้อ</span>`;
     return `<tr${adminAttrs}>
       <td>${start+i+1}</td>
       <td>${r.name}</td>
       <td style="max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${r.dept}">${r.dept}</td>
       <td>${r.pt}</td>
       <td><span class="badge ${r.tag==='Staff'?'b-staff':'b-participant'}">${r.tag}</span></td>
-      <td><span class="badge ${r.received?'b-received':'b-pending'} row-status">${r.received?'รับแล้ว':'ยังไม่รับ'}</span></td>
+      <td><span class="badge ${r.received?'b-received':'b-pending'} row-status">${r.received?'รับแล้ว':'ยังไม่รับ'}</span><br><span style="margin-top:3px;display:inline-block;">${shirtBadge}</span></td>
       <td class="cell-date">${dT}</td>
       <td class="cell-time">${tT}</td>
       <td class="cell-scanned" style="font-size:0.82rem;color:#475569;">${sT}</td>
@@ -707,12 +721,13 @@ function renderShirtTable(){
     const pT=r.received?(r.shirtReceivedBy||'-'):'-';
     const adminAttrs=isAdmin?` data-id="${r.id}" data-raw-date="${r.rawDate||''}" data-received-by="${(r.shirtReceivedBy||'').replace(/"/g,'&quot;')}" data-received="${r.received}" data-field="shirt_received_date" data-scan-by="${(r.scannedBy||'').replace(/"/g,'&quot;')}" data-editing="0"`:'';
     const actionCell=isAdmin?`<td style="white-space:nowrap;"><button class="btn-edit-row" onclick="startEdit(this)">✏️ แก้ไข</button></td>`:'';
+    const bagBadge=r.bagStatus==='received'?`<span class="badge b-cross-received">${r.bagLabel}: รับแล้ว</span>`:r.bagStatus==='pending'?`<span class="badge b-cross-pending">${r.bagLabel}: ยังไม่รับ</span>`:`<span class="badge b-cross-none">ไม่มีสิทธิ์รับกระเป๋า</span>`;
     return `<tr${adminAttrs}>
       <td>${start+i+1}</td>
       <td>${r.name}</td>
       <td style="max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${r.dept}">${r.dept}</td>
       <td style="font-weight:700;text-align:center;">${r.shirtSize}</td>
-      <td><span class="badge ${r.received?'b-received':'b-pending'} row-status">${r.received?'รับแล้ว':'ยังไม่รับ'}</span></td>
+      <td><span class="badge ${r.received?'b-received':'b-pending'} row-status">${r.received?'รับแล้ว':'ยังไม่รับ'}</span><br><span style="margin-top:3px;display:inline-block;">${bagBadge}</span></td>
       <td class="cell-date">${dT}</td>
       <td class="cell-time">${tT}</td>
       <td class="cell-scanned" style="font-size:0.82rem;color:#475569;">${sT}</td>
