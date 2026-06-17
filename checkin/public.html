@@ -512,11 +512,21 @@ const EN_TO_TH={
 };
 const IS_DEMO = new URLSearchParams(location.search).has('demo');
 let activeYear = '2568';
+let VIP_DEPTS_PUB = new Set(['อธิบดีกรมวิทยาศาสตร์การแพทย์','รองอธิบดีกรมวิทยาศาสตร์การแพทย์']);
+let EXEMPT_DEPTS_PUB = new Set(['กองแผนงานและวิชาการ']);
 async function loadActiveYear(){
   try{
-    const r=await fetch(`${SUPABASE_URL}/rest/v1/app_settings?key=eq.event_year&select=value`,{headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}});
+    const [r,vr,er]=await Promise.all([
+      fetch(`${SUPABASE_URL}/rest/v1/app_settings?key=eq.event_year&select=value`,{headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}}),
+      fetch(`${SUPABASE_URL}/rest/v1/app_settings?key=eq.vip_depts&select=value`,{headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}}),
+      fetch(`${SUPABASE_URL}/rest/v1/app_settings?key=eq.exempt_depts&select=value`,{headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}})
+    ]);
     const d=await r.json();
     if(d&&d.length&&d[0].value) activeYear=d[0].value;
+    const vd=await vr.json();
+    if(vd&&vd.length&&vd[0].value) VIP_DEPTS_PUB=new Set(JSON.parse(vd[0].value));
+    const ed=await er.json();
+    if(ed&&ed.length&&ed[0].value) EXEMPT_DEPTS_PUB=new Set(JSON.parse(ed[0].value));
   }catch(e){}
 }
 let thaiGeoCache=null;
@@ -1569,16 +1579,19 @@ async function loadData() {
     return;
   }
   try {
-    const [_ci, _planRows] = await Promise.all([
+    const allSpecialDepts=[...VIP_DEPTS_PUB,...EXEMPT_DEPTS_PUB];
+    const specialFetches=allSpecialDepts.map(d=>fetchAll(`/rest/v1/participants?dept=eq.${encodeURIComponent(d)}&event_year=eq.${yr}&is_walkin=eq.false&select=id`));
+    const [_ci,..._deptRows]=await Promise.all([
       fetchAll(`/rest/v1/checkins?event_year=eq.${yr}&select=participant_id,day,checkin_time,participants(dept,ext_dept,internal_external,is_walkin,province)&order=checkin_time.desc`),
-      fetchAll('/rest/v1/participants?dept=eq.' + encodeURIComponent('กองแผนงานและวิชาการ') + `&event_year=eq.${yr}&select=id`)
+      ...specialFetches
     ]);
     allCheckins = _ci;
-    planPreRegCount = _planRows.length;
-    // Lock exact headcount per day — remove actual scans, replace with virtual records
-    const _LOCKED = {'อธิบดีกรมวิทยาศาสตร์การแพทย์':1,'รองอธิบดีกรมวิทยาศาสตร์การแพทย์':3,'กองแผนงานและวิชาการ':planPreRegCount};
-    const _LSET = new Set(Object.keys(_LOCKED));
-    allCheckins = allCheckins.filter(r=>!_LSET.has(r.participants?.dept)||r.participants?.is_walkin===true);
+    // Build _LOCKED dynamically from VIP + exempt dept participant counts
+    const _LOCKED={};
+    allSpecialDepts.forEach((dept,i)=>{if(_deptRows[i]&&_deptRows[i].length>0)_LOCKED[dept]=_deptRows[i].length;});
+    planPreRegCount=(EXEMPT_DEPTS_PUB.size>0?_deptRows.slice(VIP_DEPTS_PUB.size).reduce((s,r)=>s+r.length,0):0);
+    const _LSET=new Set(Object.keys(_LOCKED));
+    allCheckins=allCheckins.filter(r=>!_LSET.has(r.participants?.dept)||r.participants?.is_walkin===true);
     const _DT=['2026-06-23T23:30:00Z','2026-06-24T23:30:00Z','2026-06-25T23:30:00Z'];
     let _vpid=-1;
     for(const [dept,locked] of Object.entries(_LOCKED)){
