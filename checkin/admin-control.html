@@ -96,6 +96,22 @@
     /* Section divider label */
     .sec-divider{display:flex;align-items:center;gap:10px;margin:22px 0 14px;color:#94a3b8;font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;}
     .sec-divider::before,.sec-divider::after{content:'';flex:1;height:1px;background:#e2e8f0;}
+    @media (max-width:640px){
+      .topbar{padding:8px 12px;}
+      .topbar-title{font-size:0.85rem;}
+      .back-btn{padding:5px 10px;font-size:0.76rem;}
+      .logout-btn{padding:5px 10px;font-size:0.76rem;}
+      .container{padding:14px 10px 40px;}
+      .tabs{padding:4px;gap:3px;}
+      .tab-btn{min-width:0;padding:7px 8px;font-size:0.76rem;}
+      .card{padding:16px;}
+      .card-title{font-size:0.9rem;}
+      .btn{padding:7px 12px;font-size:0.82rem;}
+      .btn-sm{padding:4px 9px;font-size:0.72rem;}
+      .type-btn{padding:8px 14px;font-size:0.82rem;}
+      .tbl th,.tbl td{font-size:0.76rem;padding:7px 8px;}
+      .field input,.field select{font-size:0.84rem;padding:8px 10px;}
+    }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>

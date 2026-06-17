@@ -108,6 +108,30 @@
     .multi-dd label:hover{background:#f8fafc;}
     .multi-dd input[type=checkbox]{accent-color:var(--blue);width:15px;height:15px;cursor:pointer;flex-shrink:0;}
     .multi-dd .all-label{border-bottom:1px solid var(--border);font-weight:700;color:var(--blue);}
+    @media (max-width:640px){
+      .topbar{padding:8px 12px;gap:4px;}
+      .topbar h1{font-size:0.78rem;}
+      .topbar img{height:24px!important;}
+      .tb-sep{display:none!important;}
+      .tb-mob-hide{display:none!important;}
+      .tbtn,.clear-btn{padding:4px 8px!important;font-size:0.72rem!important;}
+      .topbar-btns{gap:4px;}
+      .tb-label{display:none!important;}
+      .main{padding:10px 8px;}
+      .main-tabs{gap:3px;margin-bottom:12px;}
+      .mtab{padding:7px 10px;font-size:0.78rem;flex:1;}
+      .stats-grid{grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;}
+      .stat-card{padding:12px;}
+      .stat-num{font-size:1.5rem;}
+      .stat-label{font-size:0.65rem;}
+      .filter-bar{padding:10px;gap:8px;}
+      .sbox{width:100%!important;}
+      .filter-select,.filter-group select{font-size:0.8rem;padding:6px 8px;}
+      th{font-size:0.65rem;padding:6px 8px;}
+      td{font-size:0.76rem;padding:6px 8px;}
+      .badge{font-size:0.65rem;padding:2px 6px;}
+      .pager{padding:8px 12px;font-size:0.76rem;}
+    }
   </style>
 <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
 </head>
@@ -128,8 +152,8 @@
     <span class="tb-sep"></span>
     <!-- นำทาง -->
     <div class="tb-group">
-      <a class="tbtn" href="index.html" title="ไปหน้าสแกน QR เช็คอิน">📷 สแกนเช็คอิน</a>
-      <a class="tbtn" href="dashboard.html" title="ไปหน้า Dashboard ภาพรวมเช็คอิน">📊 Dashboard</a>
+      <a class="tbtn tb-mob-hide" href="index.html" title="ไปหน้าสแกน QR เช็คอิน">📷 สแกนเช็คอิน</a>
+      <a class="tbtn tb-mob-hide" href="dashboard.html" title="ไปหน้า Dashboard ภาพรวมเช็คอิน">📊 Dashboard</a>
       <button class="tbtn" onclick="loadAll()" title="โหลดข้อมูลใหม่จากฐานข้อมูล">🔄 รีเฟรช</button>
     </div>
     <span class="tb-sep"></span>
@@ -140,7 +164,7 @@
     </div>
     <span class="tb-sep"></span>
     <!-- ลบข้อมูล (อันตราย) -->
-    <div class="tb-group">
+    <div class="tb-group tb-mob-hide">
       <span class="tb-label">ล้างข้อมูล:</span>
       <button class="clear-btn" onclick="openClearModal('bag')" title="รีเซ็ตสถานะรับกระเป๋าทั้งหมด — ใช้ระวัง">🗑️ กระเป๋า</button>
       <button class="clear-btn" onclick="openClearModal('shirt')" style="background:#7c3aed;" title="รีเซ็ตสถานะรับเสื้อทั้งหมด — ใช้ระวัง">🗑️ เสื้อ</button>
