@@ -331,10 +331,8 @@
         <div class="stat-label">🎒📚 กระเป๋า+บทคัดย่อ</div><div class="stat-num" id="ovStatBagBkd" style="color:#0891b2;">-</div><div class="stat-sub" id="ovSubBagBkd">-</div></div>
       <div class="stat-card total" style="border-top:4px solid #64748b;cursor:pointer;" onclick="document.getElementById('ovBundle').value='bag-only';applyOvFilters()">
         <div class="stat-label">🎒 กระเป๋าอย่างเดียว</div><div class="stat-num" id="ovStatBagOnly" style="color:#64748b;">-</div><div class="stat-sub" id="ovSubBagOnly">-</div></div>
-      <div class="stat-card total" style="border-top:4px solid #7c3aed;cursor:pointer;" onclick="document.getElementById('ovBundle').value='shirt-only';applyOvFilters()">
-        <div class="stat-label">👕 เสื้ออย่างเดียว</div><div class="stat-num" id="ovStatShirtOnly" style="color:#7c3aed;">-</div><div class="stat-sub" id="ovSubShirtOnly">-</div></div>
-      <div class="stat-card total" style="border-top:4px solid #ea580c;cursor:pointer;" onclick="document.getElementById('ovBundle').value='bkd-only';applyOvFilters()">
-        <div class="stat-label">📚 บทคัดย่ออย่างเดียว</div><div class="stat-num" id="ovStatBkdOnly" style="color:#ea580c;">-</div><div class="stat-sub" id="ovSubBkdOnly">-</div></div>
+      <div class="stat-card total" style="border-top:4px solid #7c3aed;cursor:pointer;" onclick="document.getElementById('ovBundle').value='shirt-bkd';applyOvFilters()">
+        <div class="stat-label">👕📚 เสื้อ+บทคัดย่อ</div><div class="stat-num" id="ovStatShirtBkd" style="color:#7c3aed;">-</div><div class="stat-sub" id="ovSubShirtBkd">-</div></div>
     </div>
     <div class="filter-bar">
       <div class="filter-group">
@@ -351,11 +349,10 @@
         <div class="filter-label">ชุดสิทธิ์</div>
         <select class="filter-select" id="ovBundle" onchange="applyOvFilters()">
           <option value="">ทั้งหมด</option>
-          <option value="shirt-only">เสื้ออย่างเดียว</option>
+          <option value="all">ได้ทุกอย่าง</option>
           <option value="bag-bkd">กระเป๋า + บทคัดย่อ</option>
           <option value="bag-only">กระเป๋าอย่างเดียว</option>
-          <option value="bkd-only">บทคัดย่ออย่างเดียว</option>
-          <option value="all">ได้ทุกอย่าง</option>
+          <option value="shirt-bkd">เสื้อ + บทคัดย่อ</option>
         </select>
       </div>
       <div class="filter-group">
@@ -856,9 +853,9 @@ function getShirtRows(){
 
 // ===== OVERVIEW =====
 let allOverviewData=[],ovFiltered=[],ovPage=1;
-const BUNDLE_LABELS={'all':'🎒📚👕 ได้ทุกอย่าง','bag-bkd':'🎒📚 กระเป๋า+บทคัดย่อ','bag-only':'🎒 กระเป๋าอย่างเดียว','shirt-only':'👕 เสื้ออย่างเดียว','bkd-only':'📚 บทคัดย่ออย่างเดียว','other':'อื่นๆ'};
-const BUNDLE_ORDER={'all':0,'bag-bkd':1,'bag-only':2,'shirt-only':3,'bkd-only':4,'other':5};
-function getBundleKey(b,k,s){if(b&&k&&s)return'all';if(b&&k&&!s)return'bag-bkd';if(b&&!k&&!s)return'bag-only';if(!b&&!k&&s)return'shirt-only';if(!b&&k&&!s)return'bkd-only';return'other';}
+const BUNDLE_LABELS={'all':'🎒📚👕 ได้ทุกอย่าง','bag-bkd':'🎒📚 กระเป๋า+บทคัดย่อ','bag-only':'🎒 กระเป๋าอย่างเดียว','shirt-bkd':'👕📚 เสื้อ+บทคัดย่อ','other':'อื่นๆ'};
+const BUNDLE_ORDER={'all':0,'bag-bkd':1,'bag-only':2,'shirt-bkd':3,'other':4};
+function getBundleKey(b,k,s){if(b&&k&&s)return'all';if(b&&k&&!s)return'bag-bkd';if(b&&!k&&!s)return'bag-only';if(!b&&k&&s)return'shirt-bkd';return'other';}
 function buildOverviewData(res){
   const _dIdx=Object.fromEntries(DEPTS.map((d,i)=>[d,i]));
   allOverviewData=res.filter(p=>{
@@ -893,8 +890,8 @@ function buildOverviewData(res){
   const depts=[...new Set(allOverviewData.map(r=>r.dept))];
   const deptsSorted=[...DEPTS.filter(d=>depts.includes(d)),...depts.filter(d=>!DEPTS.includes(d)).sort((a,b)=>a.localeCompare(b,'th'))];
   ovDeptSel.innerHTML='<option value="">ทั้งหมด</option>'+deptsSorted.map(d=>`<option value="${d.replace(/"/g,'&quot;')}">${d}</option>`).join('');
-  const bundles=['all','bag-bkd','bag-only','shirt-only','bkd-only'];
-  const ids=[['ovStatAll','ovSubAll'],['ovStatBagBkd','ovSubBagBkd'],['ovStatBagOnly','ovSubBagOnly'],['ovStatShirtOnly','ovSubShirtOnly'],['ovStatBkdOnly','ovSubBkdOnly']];
+  const bundles=['all','bag-bkd','bag-only','shirt-bkd'];
+  const ids=[['ovStatAll','ovSubAll'],['ovStatBagBkd','ovSubBagBkd'],['ovStatBagOnly','ovSubBagOnly'],['ovStatShirtBkd','ovSubShirtBkd']];
   bundles.forEach((bk,i)=>{
     const grp=allOverviewData.filter(r=>r.bundle===bk);
     const tot=grp.length;
