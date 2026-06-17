@@ -701,7 +701,7 @@
     if(v.includes('T')){
       const d=new Date(v);
       if(isNaN(d)) return null;
-      return d.toLocaleDateString('th-TH',{timeZone:'Asia/Bangkok',day:'numeric',month:'short'})+' เวลา '+d.toLocaleTimeString('th-TH',{timeZone:'Asia/Bangkok',hour:'2-digit',minute:'2-digit'})+' น.';
+      return d.toLocaleDateString('th-TH',{timeZone:'Asia/Bangkok',day:'numeric',month:'short'});
     }
     const pts=v.split('-');
     if(pts.length===3){const d=new Date(Number(pts[0]),Number(pts[1])-1,Number(pts[2]));if(!isNaN(d))return d.toLocaleDateString('th-TH',{day:'numeric',month:'short'});}
