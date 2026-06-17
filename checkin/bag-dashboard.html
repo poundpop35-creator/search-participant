@@ -144,13 +144,13 @@
 
 <div class="main">
   <div class="main-tabs">
-    <button class="mtab active" id="tabBag" onclick="switchMainTab('bag')">🎒 กระเป๋า</button>
+    <button class="mtab active" id="tabOverview" onclick="switchMainTab('overview')">📋 ภาพรวม</button>
+    <button class="mtab" id="tabBag" onclick="switchMainTab('bag')">🎒 กระเป๋า</button>
     <button class="mtab" id="tabShirt" onclick="switchMainTab('shirt')">👕 เสื้อ</button>
-    <button class="mtab" id="tabOverview" onclick="switchMainTab('overview')">📋 ภาพรวม</button>
   </div>
 
   <!-- ===== BAG SECTION ===== -->
-  <div id="sectionBag">
+  <div id="sectionBag" style="display:none;">
     <div class="stats-grid">
       <div class="stat-card total"><div class="stat-label">มีสิทธิ์รับกระเป๋าทั้งหมด</div><div class="stat-num" id="sTotal">-</div><div class="stat-sub">ราย</div></div>
       <div class="stat-card received"><div class="stat-label">รับแล้ว</div><div class="stat-num" id="sReceived">-</div><div class="stat-sub" id="sReceivedPct">-</div></div>
@@ -323,7 +323,7 @@
   </div>
 
   <!-- ===== OVERVIEW SECTION ===== -->
-  <div id="sectionOverview" style="display:none;">
+  <div id="sectionOverview">
     <div class="stats-grid">
       <div class="stat-card total"><div class="stat-label">กระเป๋า (รับแล้ว/มีสิทธิ์)</div><div class="stat-num" id="ovBagStat" style="color:#0d2b6b;">-</div><div class="stat-sub" id="ovBagSub">-</div></div>
       <div class="stat-card total"><div class="stat-label">บทคัดย่อ (รับแล้ว/มีสิทธิ์)</div><div class="stat-num" id="ovBkdStat" style="color:#ea580c;">-</div><div class="stat-sub" id="ovBkdSub">-</div></div>
