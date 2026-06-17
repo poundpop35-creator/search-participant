@@ -225,8 +225,8 @@
     <option value="1">วันที่ 1 — 24 มิถุนายน 2569</option>
     <option value="2">วันที่ 2 — 25 มิถุนายน 2569</option>
     <option value="3">วันที่ 3 — 26 มิถุนายน 2569</option>
-    <option value="bag">รับกระเป๋า (ก่อนวันงาน) </option>
-    <option value="shirt">รับเสื้อ (ก่อนวันงาน)</option>
+    <option value="bag">🎒👕 รับกระเป๋า + เสื้อ (ก่อนวันงาน)</option>
+    <option value="shirt">👕 รับเสื้อเพิ่มเติม (เฉพาะเสื้อ)</option>
   </select>
 
   <div class="row-label">เลือกวิธีสแกน</div>
@@ -541,40 +541,40 @@
         }
         const today=new Date().toISOString();
         const _bagScanner=sessionStorage.getItem('dmsc_user')||'unknown';
-        const bagRes=await sbFetch(`/rest/v1/participants?id=eq.${p.id}`,'PATCH',{bag_received:true,bag_received_date:today,bag_scanned_by:_bagScanner});
+        const _items=p.items||'';
+        const _hasBag=_items.includes('กระเป๋า');
+        const _otherItems=_items.replace('กระเป๋า','').replace(/\+\+/g,'+').replace(/^\+|\+$/g,'').trim();
+        const _hasShirt=(p.shirt_size||'').trim()!=='';
+        const _shirtPending=_hasShirt&&p.shirt_received!==true;
+        // PATCH bag + shirt พร้อมกันในครั้งเดียว
+        const patchData={bag_received:true,bag_received_date:today,bag_scanned_by:_bagScanner};
+        if(_shirtPending){ patchData.shirt_received=true; patchData.shirt_received_date=today; patchData.shirt_scanned_by=_bagScanner; }
+        const bagRes=await sbFetch(`/rest/v1/participants?id=eq.${p.id}`,'PATCH',patchData);
         if(bagRes.ok||bagRes.status===204){
           todayCount++;
           document.getElementById('count').textContent=todayCount.toLocaleString();
-          const _items=p.items||'';
-          const _hasBag=_items.includes('กระเป๋า');
-          const _otherItems=_items.replace('กระเป๋า','').replace(/\+\+/g,'+').replace(/^\+|\+$/g,'').trim();
-          const _hasShirt=(p.shirt_size||'').trim()!=='';
           const bagRows=[
             {label:'ประเภท',val:pType,style:'normal'},
             {label:'รับไปเมื่อ',val:fmtShort(today),style:'ok'},
-            {label:'สถานะกระเป๋า',val:'✓ รับกระเป๋าสำเร็จ',style:'ok'}
           ];
-          if(_hasBag) bagRows.push({label:'ของที่ระลึก (1) กระเป๋า',val:'รับแล้ว ✓',style:'ok'});
-          if(_otherItems) bagRows.push({label:`ของที่ระลึก (2) ${_otherItems}`,val:'อยู่ในกระเป๋า',style:'ok'});
+          if(_hasBag) bagRows.push({label:'🎒 กระเป๋า',val:'รับแล้ว ✓',style:'ok'});
+          if(_otherItems) bagRows.push({label:`ของที่ระลึก ${_otherItems}`,val:'อยู่ในกระเป๋า',style:'ok'});
           if(_hasShirt){
-            bagRows.push({label:`เสื้อแจ็คเก็ต (${p.shirt_size})`,val:p.shirt_received===true?'รับไปแล้ว ✓':'ยังไม่ได้รับ',style:p.shirt_received===true?'done':'warn',sub:p.shirt_received===true?fmtShort(p.shirt_received_date):null});
+            const alreadyHad=!_shirtPending;
+            bagRows.push({label:`👕 เสื้อแจ็คเก็ต (${p.shirt_size})`,val:alreadyHad?'รับไปก่อนหน้าแล้ว ✓':'รับแล้ว ✓',style:alreadyHad?'done':'ok',sub:alreadyHad?fmtShort(p.shirt_received_date):fmtShort(today)});
           } else {
-            bagRows.push({label:'เสื้อแจ็คเก็ต',val:'— ไม่มีสิทธิ์รับเสื้อ',style:'muted'});
+            bagRows.push({label:'👕 เสื้อแจ็คเก็ต',val:'ไม่มีสิทธิ์รับเสื้อ',style:'muted'});
           }
           const _undoBag=async()=>{
-            await sbFetch(`/rest/v1/participants?id=eq.${p.id}`,'PATCH',{bag_received:false,bag_received_date:null,bag_scanned_by:null});
+            const rv={bag_received:false,bag_received_date:null,bag_scanned_by:null};
+            if(_shirtPending){rv.shirt_received=false;rv.shirt_received_date=null;rv.shirt_scanned_by=null;}
+            await sbFetch(`/rest/v1/participants?id=eq.${p.id}`,'PATCH',rv);
             todayCount=Math.max(0,todayCount-1);document.getElementById('count').textContent=todayCount.toLocaleString();
           };
-          showModal('success','รับกระเป๋าสำเร็จ','บันทึกการรับกระเป๋าเรียบร้อย',fullName,bagRows,p.dept||'',_undoBag);
-          if(p.shirt_size&&p.shirt_received!==true){
-            const det=document.getElementById('modalDetail');
-            det.style.display='block';
-            det.innerHTML+=`<div style="border-top:1px solid #e2e8f0;margin-top:10px;padding-top:10px;text-align:center;">
-              <div style="font-size:0.78rem;color:#64748b;margin-bottom:8px;">มีเสื้อไซต์ <b>${p.shirt_size}</b> — ยังไม่ได้รับ</div>
-              <button id="shirtBtn_${p.id}" onclick="markShirtNow(${p.id},'${p.shirt_size}',this)" style="width:100%;padding:11px;border-radius:10px;border:none;background:#0891b2;color:white;font-family:'Sarabun',sans-serif;font-size:0.92rem;font-weight:700;cursor:pointer;">👕 รับเสื้อพร้อมกันด้วย</button>
-            </div>`;
-          }
-          setStatus('รับกระเป๋าสำเร็จ');
+          const modalTitle=_shirtPending?'รับกระเป๋า + เสื้อสำเร็จ':'รับกระเป๋าสำเร็จ';
+          const modalSub=_shirtPending?'บันทึกกระเป๋าและเสื้อเรียบร้อย':'บันทึกการรับกระเป๋าเรียบร้อย';
+          showModal('success',modalTitle,modalSub,fullName,bagRows,p.dept||'',_undoBag);
+          setStatus(_shirtPending?'รับกระเป๋า+เสื้อสำเร็จ':'รับกระเป๋าสำเร็จ');
         } else {
           showModal('error','เกิดข้อผิดพลาด','ไม่สามารถบันทึกได้','',null);
         }
