@@ -124,6 +124,7 @@
     <a class="tbtn" href="index.html">← ระบบสแกนเช็คอิน</a>
     <button class="clear-btn" onclick="openClearModal('bag')">🗑️ ล้างข้อมูลกระเป๋า</button>
     <button class="clear-btn" onclick="openClearModal('shirt')" style="background:#7c3aed;">🗑️ ล้างข้อมูลเสื้อ</button>
+    <button class="tbtn" onclick="markDirectorsReceived()" style="background:#f59e0b;color:white;border-color:#f59e0b;font-weight:700;" title="บันทึกว่าอธิบดี+รองอธิบดีรับของแล้ว">👑 บันทึกผู้บริหาร</button>
     <button class="tbtn" onclick="doLogout()" style="background:#dc2626;color:white;border-color:#dc2626;font-weight:600;">ออกจากระบบ</button>
   </div>
 </div>
@@ -1171,6 +1172,26 @@ function cancelEdit(btn){
   row.querySelector('.cell-proxy').textContent=received?(receivedBy||'-'):'-';
   btn.closest('td').innerHTML=`<button class="btn-edit-row" onclick="startEdit(this)">✏️ แก้ไข</button>`;
   row.dataset.editing='0';
+}
+
+async function markDirectorsReceived(){
+  if(!isAdmin){alert('เฉพาะแอดมินเท่านั้น');return;}
+  if(!confirm('บันทึกว่าอธิบดีและรองอธิบดีรับกระเป๋า+เสื้อ+บทคัดย่อไปแล้ว?\n(scanned_by = แอดมิน)')){return;}
+  const nowISO=new Date(Date.now()+7*3600000).toISOString().replace('Z','+07:00');
+  const depts=['อธิบดีกรมวิทยาศาสตร์การแพทย์','รองอธิบดีกรมวิทยาศาตร์การแพทย์','รองอธิบดีกรมวิทยาศาสตร์การแพทย์'];
+  const deptsQ=depts.map(d=>`dept.eq.${encodeURIComponent(d)}`).join(',');
+  const getRes=await fetch(`${SB_URL}/rest/v1/participants?select=id,prefix,first_name,last_name,dept&event_year=eq.${activeYear}&or=(${deptsQ})`,{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}});
+  if(!getRes.ok){alert('ไม่สามารถดึงข้อมูลผู้บริหารได้: '+getRes.status);return;}
+  const people=await getRes.json();
+  if(!people.length){alert('ไม่พบข้อมูลอธิบดี/รองอธิบดีในระบบ');return;}
+  const patch={bag_received:true,bag_received_date:nowISO,bag_scanned_by:'แอดมิน',shirt_received:true,shirt_received_date:nowISO,shirt_scanned_by:'แอดมิน'};
+  let ok=0,fail=0;
+  for(const p of people){
+    const r=await fetch(`${SB_URL}/rest/v1/participants?id=eq.${p.id}`,{method:'PATCH',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(patch)});
+    if(r.ok)ok++;else fail++;
+  }
+  alert(`บันทึกเรียบร้อย: ${ok} คน${fail?` (ผิดพลาด ${fail} คน)`:''}\n${people.map(p=>`• ${p.prefix||''}${p.first_name} ${p.last_name} — ${p.dept}`).join('\n')}`);
+  await loadAll();
 }
 
 async function doLogout(){
