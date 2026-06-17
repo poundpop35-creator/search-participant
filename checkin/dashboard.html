@@ -19,6 +19,13 @@
     .clear-btn{padding:7px 16px;border-radius:8px;border:none;background:#dc2626;color:white;font-family:'Sarabun',sans-serif;font-size:0.85rem;cursor:pointer;font-weight:600;}
     .clear-btn:hover{background:#b91c1c;}
     .last-update{font-size:0.75rem;color:#64748b;}
+    .nav-wrap{position:relative;display:inline-block;}
+    .nav-dd{position:absolute;top:calc(100% + 8px);right:0;z-index:9999;background:white;border:1.5px solid #e2e8f0;border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,0.15);min-width:220px;padding:8px;display:none;}
+    .nav-dd.open{display:block;}
+    .nav-dd-label{font-size:0.65rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.05em;padding:6px 12px 2px;}
+    .nav-dd-item{display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:8px;font-size:0.88rem;color:#1e293b;text-decoration:none;transition:background 0.1s;}
+    .nav-dd-item:hover{background:#f1f5f9;color:#0d2b6b;}
+    .nav-dd-sep{height:1px;background:#e2e8f0;margin:5px 0;}
     /* Clear modal */
     .clear-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.65);display:flex;align-items:center;justify-content:center;z-index:9999;padding:24px;}
     .clear-overlay.hidden{display:none;}
@@ -205,12 +212,30 @@ document.addEventListener('DOMContentLoaded', function() {
     </select>
     <button class="refresh-btn" onclick="loadAll()">รีเฟรช</button>
     <button class="clear-btn mob-hide" onclick="openClearModal()">ล้างข้อมูล</button>
-    <a href="index.html" class="refresh-btn mob-hide" style="text-decoration:none;">← ระบบสแกนเช็คอิน</a>
-    <a href="bag-dashboard.html" class="refresh-btn mob-hide" style="text-decoration:none;">จำนวนผู้มารับกระเป๋า</a>
-    <a href="public.html" class="refresh-btn mob-hide" style="text-decoration:none;">Live Dashboard</a>
+    <div class="nav-wrap">
+      <button class="refresh-btn" onclick="toggleNavDD(event)">🔗 ระบบอื่นๆ ▾</button>
+      <div class="nav-dd" id="navDD">
+        <div class="nav-dd-label">เช็คอิน</div>
+        <a class="nav-dd-item" href="index.html">📷 สแกนเช็คอิน</a>
+        <a class="nav-dd-item" href="bag-dashboard.html">👜 ระบบรับของ</a>
+        <a class="nav-dd-item" href="executive.html">👑 Dashboard ผู้บริหาร</a>
+        <div class="nav-dd-sep"></div>
+        <div class="nav-dd-label">ผู้ส่งผลงาน</div>
+        <a class="nav-dd-item" href="presenter.html">🎙️ สแกนผู้ส่งผลงาน</a>
+        <a class="nav-dd-item" href="presenter-dashboard.html">📋 Dashboard ผู้ส่งผลงาน</a>
+        <div class="nav-dd-sep"></div>
+        <div class="nav-dd-label">ค้นหา & สาธารณะ</div>
+        <a class="nav-dd-item" href="qr-lookup.html">🔍 ค้นหา QR Code</a>
+        <a class="nav-dd-item" href="public.html">🌐 จำนวนผู้เข้าร่วม</a>
+        <div class="nav-dd-sep"></div>
+        <div class="nav-dd-label">แอดมิน</div>
+        <a class="nav-dd-item" href="admin-control.html">⚙️ Control Panel</a>
+        <a class="nav-dd-item" href="staff-menu.html">👥 เมนู Staff</a>
+      </div>
+    </div>
     <div id="activeSessions" style="font-size:0.78rem;color:#16a34a;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:5px 10px;display:none;">🟢 <span id="activeList"></span></div>
     <button class="refresh-btn" onclick="doLogout()" style="background:#dc2626;color:white;border-color:#dc2626;font-weight:600;">ออกจากระบบ</button>
-    <a href="admin-control.html" class="refresh-btn mob-hide" id="adminControlBtn" style="text-decoration:none;background:#4c1d95;color:white;border-color:#4c1d95;display:none;">⚙️ Control Panel</a>
+    <span id="adminControlBtn" style="display:none;"></span>
     <button class="refresh-btn" onclick="document.getElementById('helpOverlay').classList.remove('hidden')" style="font-weight:700;">❓ คู่มือ</button>
   </div>
 </div>
@@ -780,6 +805,8 @@ document.addEventListener('DOMContentLoaded', function() {
 </div>
 
 <script>
+function toggleNavDD(e){e.stopPropagation();document.getElementById('navDD').classList.toggle('open');}
+document.addEventListener('click',()=>document.getElementById('navDD')?.classList.remove('open'));
 const SB_URL = "https://gvxytnjfyepqhbkmcjms.supabase.co";
 const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2eHl0bmpmeWVwcWhia21jam1zIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3OTQzMTY0MCwiZXhwIjoyMDk1MDA3NjQwfQ.Hrfc0erkIatyVbmsOW2SU7piH3L65qbS2kdi2eYzbQk";
 const SB_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2eHl0bmpmeWVwcWhia21jam1zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0MzE2NDAsImV4cCI6MjA5NTAwNzY0MH0.RAr_ehb4cxfNliDR0h5XcihUaP-0ltZTTGIAv2Fw1kk";
@@ -931,8 +958,8 @@ async function loadAll(){
       province:(p.province||'').trim()||(p.is_walkin===true&&isIn?'กรมวิทยาศาสตร์การแพทย์':'')};
   });
 
-  // Add virtual rows for VIP/exempt/network dept members (เช็คอินโดย admin ทุกวัน)
-  const allExemptDepts=[...VIP_DEPTS,...EXEMPT_DEPTS,...NETWORK_DEPTS];
+  // Add virtual rows for VIP/exempt dept members (เช็คอินโดย admin ทุกวัน)
+  const allExemptDepts=[...VIP_DEPTS,...EXEMPT_DEPTS];
   if(allExemptDepts.length>0){
     try{
       const orFilter=allExemptDepts.map(d=>`dept.eq.${encodeURIComponent(d)}`).join(',');
@@ -940,7 +967,7 @@ async function loadAll(){
       const checkedIds=new Set(allData.map(r=>r.participantId));
       exemptPeople.forEach(p=>{
         if(checkedIds.has(p.id)) return;
-        const exemptType=VIP_DEPTS.has(p.dept)?'vip':NETWORK_DEPTS.has(p.dept)?'network':'staff';
+        const exemptType=VIP_DEPTS.has(p.dept)?'vip':'staff';
         allData.unshift({id:`exempt_${p.id}`,participantId:p.id,day:0,time:null,scannedBy:'admin',
           name:buildName(p),dept:p.dept||'-',isIn:true,tag:p.tag||'-',items:'',
           pt:p.participation_type||'-',isWalkin:false,

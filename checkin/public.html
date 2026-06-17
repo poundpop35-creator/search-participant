@@ -146,6 +146,13 @@
     .dot-live{width:8px;height:8px;border-radius:50%;background:#16a34a;animation:pulse 2s infinite;}
     @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
     .loading{text-align:center;padding:60px;color:var(--big-sub-c);font-size:1rem;}
+    .nav-wrap{position:relative;display:inline-block;}
+    .nav-dd{position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%);z-index:9999;background:white;border:1.5px solid #e2e8f0;border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,0.15);min-width:220px;padding:8px;display:none;text-align:left;}
+    .nav-dd.open{display:block;}
+    .nav-dd-label{font-size:0.65rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.05em;padding:6px 12px 2px;}
+    .nav-dd-item{display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:8px;font-size:0.88rem;color:#1e293b;text-decoration:none;transition:background 0.1s;}
+    .nav-dd-item:hover{background:#f1f5f9;color:#0d2b6b;}
+    .nav-dd-sep{height:1px;background:#e2e8f0;margin:5px 0;}
   </style>
 <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
 </head>
@@ -165,6 +172,26 @@
   <p>กรมวิทยาศาสตร์การแพทย์ กระทรวงสาธารณสุข</p>
   <a class="hero-staff-btn" href="executive.html">Dashboard ผู้บริหาร</a>
   <a class="hero-staff-btn" href="login.html">สำหรับเจ้าหน้าที่</a>
+  <div class="nav-wrap" style="display:inline-block;vertical-align:middle;">
+    <button class="hero-staff-btn" onclick="toggleNavDD(event)" style="border:none;cursor:pointer;">🔗 ระบบอื่นๆ ▾</button>
+    <div class="nav-dd" id="navDD">
+      <div class="nav-dd-label">เช็คอิน</div>
+      <a class="nav-dd-item" href="index.html">📷 สแกนเช็คอิน</a>
+      <a class="nav-dd-item" href="dashboard.html">📊 Dashboard เช็คอิน</a>
+      <a class="nav-dd-item" href="bag-dashboard.html">👜 ระบบรับของ</a>
+      <div class="nav-dd-sep"></div>
+      <div class="nav-dd-label">ผู้ส่งผลงาน</div>
+      <a class="nav-dd-item" href="presenter.html">🎙️ สแกนผู้ส่งผลงาน</a>
+      <a class="nav-dd-item" href="presenter-dashboard.html">📋 Dashboard ผู้ส่งผลงาน</a>
+      <div class="nav-dd-sep"></div>
+      <div class="nav-dd-label">ค้นหา</div>
+      <a class="nav-dd-item" href="qr-lookup.html">🔍 ค้นหา QR Code</a>
+      <div class="nav-dd-sep"></div>
+      <div class="nav-dd-label">แอดมิน</div>
+      <a class="nav-dd-item" href="admin-control.html">⚙️ Control Panel</a>
+      <a class="nav-dd-item" href="staff-menu.html">👥 เมนู Staff</a>
+    </div>
+  </div>
   <a class="hero-staff-btn" href="public.html?demo=1" style="background:rgba(245,158,11,0.15);border-color:rgba(245,158,11,0.5);color:#92400e;">⚡ Demo</a>
   <a class="hero-staff-btn" href="qr-lookup.html"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px;"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>ค้นหา QR Code ของคุณ</a>
 </div>
@@ -428,6 +455,8 @@
 </div>
 
 <script>
+function toggleNavDD(e){e.stopPropagation();document.getElementById('navDD').classList.toggle('open');}
+document.addEventListener('click',()=>document.getElementById('navDD')?.classList.remove('open'));
 const SUPABASE_URL  = "https://gvxytnjfyepqhbkmcjms.supabase.co";
 const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2eHl0bmpmeWVwcWhia21jam1zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0MzE2NDAsImV4cCI6MjA5NTAwNzY0MH0.RAr_ehb4cxfNliDR0h5XcihUaP-0ltZTTGIAv2Fw1kk";
 

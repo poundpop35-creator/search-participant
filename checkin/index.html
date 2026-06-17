@@ -88,11 +88,44 @@
     .help-text{font-size:0.9rem;color:#1e293b;line-height:1.7;}
     .help-text li{margin-left:16px;margin-bottom:2px;}
     .help-close{width:100%;padding:12px;border-radius:12px;border:none;background:var(--blue);color:white;font-family:'Sarabun',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;margin-top:16px;}
+    .float-nav{position:fixed;top:12px;right:12px;z-index:9998;}
+    .float-nav-btn{padding:7px 14px;border-radius:10px;border:1.5px solid rgba(255,255,255,0.5);background:rgba(13,43,107,0.88);color:white;font-family:'Sarabun',sans-serif;font-size:0.82rem;cursor:pointer;font-weight:600;backdrop-filter:blur(8px);}
+    .float-nav-btn:hover{background:rgba(13,43,107,1);}
+    .nav-wrap{position:relative;display:inline-block;}
+    .nav-dd{position:absolute;top:calc(100% + 8px);right:0;z-index:9999;background:white;border:1.5px solid #e2e8f0;border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,0.15);min-width:220px;padding:8px;display:none;}
+    .nav-dd.open{display:block;}
+    .nav-dd-label{font-size:0.65rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.05em;padding:6px 12px 2px;}
+    .nav-dd-item{display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:8px;font-size:0.88rem;color:#1e293b;text-decoration:none;transition:background 0.1s;}
+    .nav-dd-item:hover{background:#f1f5f9;color:#0d2b6b;}
+    .nav-dd-sep{height:1px;background:#e2e8f0;margin:5px 0;}
   </style>
 <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
 </head>
 <body>
 
+<div class="float-nav">
+  <div class="nav-wrap">
+    <button class="float-nav-btn" onclick="toggleNavDD(event)">🔗 ระบบอื่นๆ ▾</button>
+    <div class="nav-dd" id="navDD">
+      <div class="nav-dd-label">เช็คอิน</div>
+      <a class="nav-dd-item" href="dashboard.html">📊 Dashboard เช็คอิน</a>
+      <a class="nav-dd-item" href="bag-dashboard.html">👜 ระบบรับของ</a>
+      <a class="nav-dd-item" href="executive.html">👑 Dashboard ผู้บริหาร</a>
+      <div class="nav-dd-sep"></div>
+      <div class="nav-dd-label">ผู้ส่งผลงาน</div>
+      <a class="nav-dd-item" href="presenter.html">🎙️ สแกนผู้ส่งผลงาน</a>
+      <a class="nav-dd-item" href="presenter-dashboard.html">📋 Dashboard ผู้ส่งผลงาน</a>
+      <div class="nav-dd-sep"></div>
+      <div class="nav-dd-label">ค้นหา & สาธารณะ</div>
+      <a class="nav-dd-item" href="qr-lookup.html">🔍 ค้นหา QR Code</a>
+      <a class="nav-dd-item" href="public.html">🌐 จำนวนผู้เข้าร่วม</a>
+      <div class="nav-dd-sep"></div>
+      <div class="nav-dd-label">แอดมิน</div>
+      <a class="nav-dd-item" href="admin-control.html">⚙️ Control Panel</a>
+      <a class="nav-dd-item" href="staff-menu.html">👥 เมนู Staff</a>
+    </div>
+  </div>
+</div>
 <div class="modal-overlay hidden" id="modalOverlay">
   <div class="modal">
     <div class="modal-status" id="modalStatus"></div>
@@ -247,6 +280,8 @@
 </div>
 
 <script>
+  function toggleNavDD(e){e.stopPropagation();document.getElementById('navDD').classList.toggle('open');}
+  document.addEventListener('click',()=>document.getElementById('navDD')?.classList.remove('open'));
   const SB_URL  = "https://gvxytnjfyepqhbkmcjms.supabase.co";
   const SB_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2eHl0bmpmeWVwcWhia21jam1zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0MzE2NDAsImV4cCI6MjA5NTAwNzY0MH0.RAr_ehb4cxfNliDR0h5XcihUaP-0ltZTTGIAv2Fw1kk";
   const DAY_TH  = {1:'24 มิถุนายน 2569',2:'25 มิถุนายน 2569',3:'26 มิถุนายน 2569'};
@@ -482,6 +517,7 @@
       const p=participants[0];
       const fullName=`${(p.prefix||'').replace(/\s*\([^)]*\)/g,'').trim()} ${p.first_name||''} ${p.last_name||''}`.trim().replace(/\s+/g,' ');
       const isWalkin=p.is_walkin===true;
+      const isNetwork=NETWORK_DEPTS.has(p.dept);
       const pType=isWalkin?'Walk-in':(p.internal_external||'').includes('ภายนอก')?'บุคคลภายนอก':(p.internal_external||'').includes('ภายใน')?'บุคลากรภายใน':'ไม่ระบุ';
 
       // โหมดรับกระเป๋า
@@ -586,7 +622,6 @@
 
       // โหมดเช็คอิน
       if(VIP_DEPTS.has(p.dept)){ showVIPModal(p, fullName); return; }
-      if(NETWORK_DEPTS.has(p.dept)){ showNetworkModal(p, fullName); return; }
       if(EXEMPT_DEPTS.has(p.dept)){
         if(isWalkin){
           const _exTodayRes=await sbFetch(`/rest/v1/checkins?participant_id=eq.${p.id}&day=eq.${day}&event_year=eq.${encodeURIComponent(activeYear)}&select=id`,'GET');
@@ -648,7 +683,11 @@
           document.getElementById('count').textContent=todayCount.toLocaleString();
           document.getElementById('staffCount').textContent=staffCount.toLocaleString();
         };
-        showModal('success','เช็คอินสำเร็จ',`วันที่ ${day} — ${DAY_TH[parseInt(day)]}`,fullName,buildSuccessRows(timeNow,p,isFirst,isWalkin),p.dept||'',_undoCheckin);
+        if(isNetwork){
+          showNetworkSuccessModal(p, fullName, timeNow, _undoCheckin);
+        } else {
+          showModal('success','เช็คอินสำเร็จ',`วันที่ ${day} — ${DAY_TH[parseInt(day)]}`,fullName,buildSuccessRows(timeNow,p,isFirst,isWalkin),p.dept||'',_undoCheckin);
+        }
         setStatus('เช็คอินสำเร็จ');
       } else {
         const err=await insertRes.json().catch(()=>({}));
@@ -769,22 +808,27 @@
       </div>`;
     document.getElementById('modalOverlay').classList.remove('hidden');
   }
-  function showNetworkModal(p, fullName){
+  function showNetworkSuccessModal(p, fullName, time, undoFn){
     document.getElementById('modalStatus').textContent='🤝 เครือข่ายกรม';
     document.getElementById('modalStatus').className='modal-status network';
-    document.getElementById('modalTitle').textContent='ได้รับการยกเว้น (ไม่ต้องเช็คอิน)';
+    document.getElementById('modalTitle').textContent='เช็คอินสำเร็จ';
     const nameEl=document.getElementById('modalName');
     nameEl.style.display=''; nameEl.textContent=fullName;
     document.getElementById('modalDept').style.display='none';
-    document.getElementById('btnOk').className='btn-ok network';
-    document.getElementById('btnOk').style.display='block';
+    const btnOk=document.getElementById('btnOk');
+    btnOk.className='btn-ok network'; btnOk.style.display='block';
     const det=document.getElementById('modalDetail');
     det.style.display='block';
-    det.innerHTML=`<div class="detail-row"><span class="detail-label">หน่วยงาน</span><span class="detail-val" style="color:#0891b2;">${p.dept||'-'}</span></div>
-      <div class="detail-row"><span class="detail-label">ชื่อ-สกุล</span><span class="detail-val">${p.participation_type||'-'}</span></div>
+    det.innerHTML=`<div class="detail-row"><span class="detail-label">เวลา</span><span class="detail-val">${time}</span></div>
+      <div class="detail-row"><span class="detail-label">คูปองอาหาร</span><span class="detail-val ok">รับได้</span></div>
+      <div class="detail-row"><span class="detail-label">หน่วยงาน</span><span class="detail-val" style="color:#0891b2;">${p.dept||'-'}</span></div>
       <div style="margin-top:10px;padding-top:10px;border-top:1px solid #cffafe;text-align:center;font-size:0.85rem;color:#0891b2;line-height:1.8;">
         หากต้องการสิ่งใดเพิ่มเติม<br>ติดต่อ กองแผนงานและวิชาการ
       </div>`;
+    if(undoFn){
+      const cancel=document.querySelector('.btn-cancel');
+      if(cancel){cancel.style.display='block';cancel.textContent='ยกเลิกเช็คอิน';cancel.onclick=()=>{undoFn();closeModal();};}
+    }
     document.getElementById('modalOverlay').classList.remove('hidden');
   }
   function showStaffExemptModal(p, fullName){

@@ -17,6 +17,13 @@
     .tbtn:hover{background:rgba(0,0,0,0.05);}
     .tbtn.danger{background:#dc2626;color:white;border-color:#dc2626;font-weight:600;}
     .last-update{font-size:0.75rem;color:#64748b;}
+    .nav-wrap{position:relative;display:inline-block;}
+    .nav-dd{position:absolute;top:calc(100% + 8px);right:0;z-index:9999;background:white;border:1.5px solid #e2e8f0;border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,0.15);min-width:220px;padding:8px;display:none;}
+    .nav-dd.open{display:block;}
+    .nav-dd-label{font-size:0.65rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.05em;padding:6px 12px 2px;}
+    .nav-dd-item{display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:8px;font-size:0.88rem;color:#1e293b;text-decoration:none;transition:background 0.1s;}
+    .nav-dd-item:hover{background:#f1f5f9;color:#0d2b6b;}
+    .nav-dd-sep{height:1px;background:#e2e8f0;margin:5px 0;}
     .content{max-width:1100px;margin:0 auto;padding:24px 20px;}
     .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:24px;}
     .stat-card{background:var(--white);border-radius:16px;padding:20px 18px;box-shadow:var(--shadow);text-align:center;}
@@ -58,8 +65,27 @@
   <div class="topbar-btns">
     <span class="last-update" id="lastUpdate">-</span>
     <button class="tbtn" onclick="loadAll()">รีเฟรช</button>
-    <a class="tbtn" href="presenter.html">← ระบบสแกนผู้ส่งผลงาน</a>
-    <a class="tbtn" href="dashboard.html">Dashboard เช็คอิน</a>
+    <div class="nav-wrap">
+      <button class="tbtn" onclick="toggleNavDD(event)">🔗 ระบบอื่นๆ ▾</button>
+      <div class="nav-dd" id="navDD">
+        <div class="nav-dd-label">เช็คอิน</div>
+        <a class="nav-dd-item" href="index.html">📷 สแกนเช็คอิน</a>
+        <a class="nav-dd-item" href="dashboard.html">📊 Dashboard เช็คอิน</a>
+        <a class="nav-dd-item" href="bag-dashboard.html">👜 ระบบรับของ</a>
+        <a class="nav-dd-item" href="executive.html">👑 Dashboard ผู้บริหาร</a>
+        <div class="nav-dd-sep"></div>
+        <div class="nav-dd-label">ผู้ส่งผลงาน</div>
+        <a class="nav-dd-item" href="presenter.html">🎙️ สแกนผู้ส่งผลงาน</a>
+        <div class="nav-dd-sep"></div>
+        <div class="nav-dd-label">ค้นหา & สาธารณะ</div>
+        <a class="nav-dd-item" href="qr-lookup.html">🔍 ค้นหา QR Code</a>
+        <a class="nav-dd-item" href="public.html">🌐 จำนวนผู้เข้าร่วม</a>
+        <div class="nav-dd-sep"></div>
+        <div class="nav-dd-label">แอดมิน</div>
+        <a class="nav-dd-item" href="admin-control.html">⚙️ Control Panel</a>
+        <a class="nav-dd-item" href="staff-menu.html">👥 เมนู Staff</a>
+      </div>
+    </div>
     <button class="tbtn danger" onclick="doLogout()">ออกจากระบบ</button>
   </div>
 </div>
@@ -125,6 +151,8 @@
   const SB_URL  = "https://gvxytnjfyepqhbkmcjms.supabase.co";
   const SB_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2eHl0bmpmeWVwcWhia21cam1zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0MzE2NDAsImV4cCI6MjA5NTAwNzY0MH0.RAr_ehb4cxfNliDR0h5XcihUaP-0ltZTTGIAv2Fw1kk";
 
+  function toggleNavDD(e){e.stopPropagation();document.getElementById('navDD').classList.toggle('open');}
+  document.addEventListener('click',()=>document.getElementById('navDD')?.classList.remove('open'));
   if(sessionStorage.getItem('dmsc_auth')!=='ok') window.location.href='login.html';
 
   let allData=[], currentFilter='all';
