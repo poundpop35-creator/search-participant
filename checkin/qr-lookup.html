@@ -60,8 +60,7 @@
     /* QR modal */
     .qr-wrap{background:#f8fafc;border-radius:14px;padding:20px;margin:14px 0;display:inline-block;}
     .qr-note{font-size:0.78rem;color:#64748b;margin-bottom:14px;line-height:1.6;}
-    .btn-download{width:100%;padding:12px;border-radius:10px;border:none;background:#16a34a;color:white;font-family:'Sarabun',sans-serif;font-size:0.95rem;font-weight:700;cursor:pointer;margin-bottom:8px;}
-    .btn-close{width:100%;padding:11px;border-radius:10px;border:1.5px solid var(--border);background:white;font-family:'Sarabun',sans-serif;font-size:0.9rem;cursor:pointer;}
+.btn-close{width:100%;padding:11px;border-radius:10px;border:1.5px solid var(--border);background:white;font-family:'Sarabun',sans-serif;font-size:0.9rem;cursor:pointer;}
     .footer{margin-top:28px;font-size:0.75rem;color:#0d2b6b;text-align:center;}
     /* Check-in list section */
     .sec-btn{background:var(--blue);color:white;border:none;border-radius:10px;padding:8px 16px;font-family:'Sarabun',sans-serif;font-size:0.82rem;font-weight:700;cursor:pointer;white-space:nowrap;}
@@ -109,7 +108,6 @@
     <div class="qr-wrap">
       <div id="qrContainer"></div>
     </div>
-    <button class="btn-download" onclick="downloadQR()">💾 บันทึกรูป QR Code</button>
     <button class="btn-close" onclick="closeQR()">ปิด</button>
   </div>
 </div>
@@ -423,14 +421,18 @@ function showQR() {
   document.getElementById('qrOverlay').classList.remove('hidden');
   const container = document.getElementById('qrContainer');
   container.innerHTML = '';
-  const qrImgUrl = p.qr_idcard || p.qr_passport || '';
-  if (qrImgUrl) {
-    const img = document.createElement('img');
-    img.src = qrImgUrl;
-    img.style.cssText = 'width:220px;height:220px;object-fit:contain;display:block;';
-    img.onerror = () => generateQR(container, p);
-    container.appendChild(img);
-  } else { generateQR(container, p); }
+  if (p.id_card || p.passport) {
+    generateQR(container, p);
+  } else {
+    const qrImgUrl = p.qr_idcard || p.qr_passport || '';
+    if (qrImgUrl) {
+      const img = document.createElement('img');
+      img.src = qrImgUrl;
+      img.style.cssText = 'width:220px;height:220px;object-fit:contain;display:block;background:#fff;';
+      img.onerror = () => container.innerHTML = '<div style="padding:20px;color:#dc2626;font-size:0.85rem;">ไม่สามารถโหลด QR Code ได้</div>';
+      container.appendChild(img);
+    }
+  }
 }
 
 function generateQR(container, p) {
