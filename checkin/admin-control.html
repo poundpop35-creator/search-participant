@@ -409,6 +409,32 @@
   <!-- ══════════ TAB: SETTINGS ══════════ -->
   <div id="tc-settings" style="display:none;">
 
+    <!-- Supabase Connection -->
+    <div class="card">
+      <div class="card-title">🔌 การเชื่อมต่อฐานข้อมูล (Supabase)</div>
+      <p class="card-desc">เมื่อเริ่มงานปีใหม่และสร้าง Supabase โปรเจกต์ใหม่ ให้ใส่ค่าใหม่ที่นี่<br>
+      ระบบทุกหน้าจะใช้โปรเจกต์ใหม่ทันที — <strong>บันทึกเฉพาะอุปกรณ์นี้</strong> (localStorage)</p>
+      <div class="alert alert-info" id="sbCurrentStatus" style="margin-bottom:14px;display:none;"></div>
+      <div class="field">
+        <label>Supabase URL</label>
+        <input id="sbUrlInput" type="text" placeholder="https://xxxxxxxxxxxx.supabase.co">
+      </div>
+      <div class="field">
+        <label>anon key <span style="font-weight:400;color:#94a3b8;">(public — ใช้สำหรับหน้าสาธารณะ)</span></label>
+        <textarea id="sbAnonInput" rows="2" style="width:100%;border:1.5px solid var(--border);border-radius:10px;padding:9px 13px;font-family:monospace;font-size:0.72rem;outline:none;resize:vertical;word-break:break-all;" placeholder="eyJ..."></textarea>
+      </div>
+      <div class="field">
+        <label>service_role key <span style="font-weight:400;color:#dc2626;">⚠️ ห้ามเผยแพร่</span></label>
+        <textarea id="sbKeyInput" rows="2" style="width:100%;border:1.5px solid var(--border);border-radius:10px;padding:9px 13px;font-family:monospace;font-size:0.72rem;outline:none;resize:vertical;word-break:break-all;" placeholder="eyJ..."></textarea>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn btn-primary" onclick="saveSbConfig()">💾 บันทึกการเชื่อมต่อ</button>
+        <button class="btn btn-ghost" onclick="testSbConfig()">🔍 ทดสอบ</button>
+        <button class="btn btn-ghost btn-sm" onclick="clearSbConfig()" style="color:#dc2626;border-color:#fca5a5;">รีเซ็ตเป็นค่าเริ่มต้น</button>
+      </div>
+      <div id="sbConfigStatus" style="margin-top:10px;"></div>
+    </div>
+
     <!-- รูปพื้นหลัง -->
     <div class="card">
       <div class="card-title">🖼️ รูปพื้นหลังของระบบ</div>
@@ -515,8 +541,9 @@
 <script>
 function toggleNavDD(e){e.stopPropagation();document.getElementById('navDD').classList.toggle('open');}
 document.addEventListener('click',()=>document.getElementById('navDD')?.classList.remove('open'));
-const SB_URL = "https://gvxytnjfyepqhbkmcjms.supabase.co";
-const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2eHl0bmpmeWVwcWhia21jam1zIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3OTQzMTY0MCwiZXhwIjoyMDk1MDA3NjQwfQ.Hrfc0erkIatyVbmsOW2SU7piH3L65qbS2kdi2eYzbQk";
+const SB_URL  = localStorage.getItem('dmsc_sb_url')  || "https://gvxytnjfyepqhbkmcjms.supabase.co";
+const SB_KEY  = localStorage.getItem('dmsc_sb_key')  || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2eHl0bmpmeWVwcWhia21jam1zIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3OTQzMTY0MCwiZXhwIjoyMDk1MDA3NjQwfQ.Hrfc0erkIatyVbmsOW2SU7piH3L65qbS2kdi2eYzbQk";
+const SB_ANON = localStorage.getItem('dmsc_sb_anon') || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2eHl0bmpmeWVwcWhia21jam1zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0MzE2NDAsImV4cCI6MjA5NTAwNzY0MH0.RAr_ehb4cxfNliDR0h5XcihUaP-0ltZTTGIAv2Fw1kk";
 const H = {'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'};
 
 let importType = 'pre';
@@ -1395,6 +1422,7 @@ async function clearTextColor(){
 }
 
 async function loadSettings(){
+  loadSbConfig();
   const bg=await sbGetSetting('page_bg');
   if(bg) document.getElementById('bgUrl').value=bg;
   const themeId=await sbGetSetting('theme');
@@ -1416,6 +1444,47 @@ async function loadSettings(){
   const net=await sbGetSetting('network_depts');
   networkList=net?JSON.parse(net):[];
   renderNetwork();
+}
+
+function loadSbConfig(){
+  const url  = localStorage.getItem('dmsc_sb_url')  || '';
+  const anon = localStorage.getItem('dmsc_sb_anon') || '';
+  const key  = localStorage.getItem('dmsc_sb_key')  || '';
+  if(url)  document.getElementById('sbUrlInput').value  = url;
+  if(anon) document.getElementById('sbAnonInput').value = anon;
+  if(key)  document.getElementById('sbKeyInput').value  = key;
+  const info = document.getElementById('sbCurrentStatus');
+  if(url || anon || key){
+    info.style.display = '';
+    info.textContent   = '🟢 กำลังใช้งาน: ' + (url || 'URL เดิม');
+  }
+}
+function saveSbConfig(){
+  const url  = document.getElementById('sbUrlInput').value.trim();
+  const anon = document.getElementById('sbAnonInput').value.trim();
+  const key  = document.getElementById('sbKeyInput').value.trim();
+  if(url)  localStorage.setItem('dmsc_sb_url',  url);  else localStorage.removeItem('dmsc_sb_url');
+  if(anon) localStorage.setItem('dmsc_sb_anon', anon); else localStorage.removeItem('dmsc_sb_anon');
+  if(key)  localStorage.setItem('dmsc_sb_key',  key);  else localStorage.removeItem('dmsc_sb_key');
+  setStatus('sbConfigStatus','ok','✅ บันทึกแล้ว — กด F5 รีโหลดหน้านี้เพื่อเชื่อมต่อโปรเจกต์ใหม่');
+}
+async function testSbConfig(){
+  const url = document.getElementById('sbUrlInput').value.trim() || SB_URL;
+  const key = document.getElementById('sbKeyInput').value.trim() || SB_KEY;
+  setStatus('sbConfigStatus','info','⏳ กำลังทดสอบ...');
+  try {
+    const r = await fetch(`${url}/rest/v1/app_settings?limit=1`,{headers:{'apikey':key,'Authorization':'Bearer '+key}});
+    if(r.ok) setStatus('sbConfigStatus','ok','✅ เชื่อมต่อสำเร็จ! โปรเจกต์ตอบสนอง');
+    else     setStatus('sbConfigStatus','err','❌ เชื่อมต่อไม่ได้ ('+r.status+') — ตรวจสอบ URL หรือ Key อีกครั้ง');
+  } catch(e){ setStatus('sbConfigStatus','err','❌ เชื่อมต่อไม่ได้: '+e.message); }
+}
+function clearSbConfig(){
+  ['dmsc_sb_url','dmsc_sb_anon','dmsc_sb_key'].forEach(k=>localStorage.removeItem(k));
+  document.getElementById('sbUrlInput').value  = '';
+  document.getElementById('sbAnonInput').value = '';
+  document.getElementById('sbKeyInput').value  = '';
+  document.getElementById('sbCurrentStatus').style.display = 'none';
+  setStatus('sbConfigStatus','ok','✅ รีเซ็ตแล้ว — รีโหลดหน้านี้เพื่อกลับใช้ค่าเริ่มต้น');
 }
 
 async function saveBg(){
