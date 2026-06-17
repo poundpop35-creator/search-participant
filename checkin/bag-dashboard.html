@@ -843,14 +843,16 @@ function buildOverviewData(res){
     const isIn=(p.internal_external||'').includes('ภายใน');
     const pt=p.participation_type||'';
     const bagElig=isIn&&(pt.includes('ผู้เข้าร่วมงาน')||pt.includes('ผู้บริหาร')||pt==='ผู้ส่งผลงาน');
-    return bagElig||!!(p.shirt_size&&p.shirt_size.trim());
+    const hasBkd=(p.items||'').includes('บทคัดย่อ');
+    const hasShirt=!!(p.shirt_size&&p.shirt_size.trim());
+    return bagElig||hasBkd||hasShirt;
   }).map(p=>{
     const isIn=(p.internal_external||'').includes('ภายใน');
     const dept=isIn?(p.dept||'-'):(p.ext_dept||p.dept||'-');
     const pt=p.participation_type||'';
     const bagElig=isIn&&(pt.includes('ผู้เข้าร่วมงาน')||pt.includes('ผู้บริหาร')||pt==='ผู้ส่งผลงาน');
     const _it=p.items||'';
-    const hasBkd=bagElig&&_it.includes('บทคัดย่อ');
+    const hasBkd=_it.includes('บทคัดย่อ');
     const hasShirt=!!(p.shirt_size&&p.shirt_size.trim());
     const bagRec=p.bag_received===true||p.bag_received===1||p.bag_received==='true';
     const shirtRec=p.shirt_received===true||p.shirt_received===1||p.shirt_received==='true';
