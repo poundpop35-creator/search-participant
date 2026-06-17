@@ -103,6 +103,33 @@
     /* Section divider label */
     .sec-divider{display:flex;align-items:center;gap:10px;margin:22px 0 14px;color:#94a3b8;font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;}
     .sec-divider::before,.sec-divider::after{content:'';flex:1;height:1px;background:#e2e8f0;}
+    /* ── Project Picker ── */
+    .proj-overlay{position:fixed;inset:0;background:linear-gradient(140deg,#0d2b6b 0%,#1a4eb8 100%);display:flex;align-items:center;justify-content:center;z-index:9999;padding:24px;overflow-y:auto;}
+    .proj-overlay.hidden{display:none;}
+    .proj-picker{width:100%;max-width:880px;}
+    .proj-picker-hd{text-align:center;color:#fff;margin-bottom:28px;}
+    .proj-picker-hd h1{font-size:clamp(1.4rem,4vw,2rem);font-weight:800;margin-bottom:6px;}
+    .proj-picker-hd p{font-size:0.88rem;opacity:0.72;}
+    .proj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin-bottom:16px;}
+    .proj-card{background:rgba(255,255,255,0.11);border:1.5px solid rgba(255,255,255,0.18);border-radius:16px;padding:20px;color:#fff;position:relative;transition:all .18s;}
+    .proj-card:not(.proj-add-card):hover{background:rgba(255,255,255,0.19);transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,0.25);}
+    .proj-card.is-active{border-color:#fbbf24;box-shadow:0 0 0 2px #fbbf24;}
+    .proj-active-badge{position:absolute;top:10px;right:10px;font-size:0.62rem;background:#fbbf24;color:#78350f;padding:2px 8px;border-radius:20px;font-weight:700;}
+    .proj-card-year{font-size:2.2rem;font-weight:800;line-height:1;margin-bottom:4px;}
+    .proj-card-name{font-size:0.88rem;font-weight:600;opacity:0.88;margin-bottom:6px;line-height:1.4;}
+    .proj-card-url{font-size:0.63rem;opacity:0.5;font-family:monospace;word-break:break-all;margin-bottom:12px;}
+    .proj-card-btns{display:flex;gap:6px;}
+    .proj-btn{flex:1;padding:6px 0;border-radius:8px;border:none;font-family:'Sarabun',sans-serif;font-size:0.75rem;font-weight:700;cursor:pointer;transition:opacity .15s;}
+    .proj-btn:active{opacity:.8;}
+    .proj-btn-enter{background:#22c55e;color:#fff;}
+    .proj-btn-edit{background:rgba(255,255,255,0.22);color:#fff;}
+    .proj-btn-del{background:rgba(239,68,68,0.45);color:#fff;}
+    .proj-add-card{background:rgba(255,255,255,0.06);border:2px dashed rgba(255,255,255,0.28);border-radius:16px;padding:32px 20px;cursor:pointer;transition:all .18s;color:rgba(255,255,255,0.65);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:160px;}
+    .proj-add-card:hover{background:rgba(255,255,255,0.13);color:#fff;border-color:rgba(255,255,255,0.5);}
+    .proj-add-icon{font-size:2.2rem;line-height:1;}
+    .proj-add-label{font-size:0.9rem;font-weight:700;}
+    .proj-form-wrap{background:#fff;border-radius:20px;padding:28px;width:100%;max-width:460px;max-height:90vh;overflow-y:auto;}
+    .proj-form-title{font-size:1.1rem;font-weight:800;color:#0d2b6b;margin-bottom:18px;}
     @media (max-width:640px){
       .topbar{padding:8px 12px;}
       .topbar-title{font-size:0.85rem;}
@@ -161,13 +188,61 @@
   </div>
 </div>
 
+<!-- ── Project Picker Overlay ── -->
+<div id="projectPickerOverlay" class="proj-overlay hidden">
+  <div class="proj-picker">
+    <div class="proj-picker-hd">
+      <h1>⚙️ Control Panel</h1>
+      <p>เลือกโปรเจกต์ที่ต้องการจัดการ หรือเพิ่มโปรเจกต์ใหม่</p>
+    </div>
+    <div id="projGrid" class="proj-grid"></div>
+    <div style="text-align:center;">
+      <button class="btn btn-ghost" id="projPickerCloseBtn" onclick="hideProjPicker()" style="color:rgba(255,255,255,0.7);border-color:rgba(255,255,255,0.3);display:none;">✕ ปิด</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Project Form Overlay ── -->
+<div id="projFormOverlay" class="proj-overlay hidden" style="z-index:10000;">
+  <div class="proj-form-wrap">
+    <div class="proj-form-title" id="projFormTitle">เพิ่มโปรเจกต์ใหม่</div>
+    <div class="field">
+      <label>ชื่องาน / ครั้งที่</label>
+      <input id="pfName" type="text" placeholder="ประชุมวิชาการ ครั้งที่ 34">
+    </div>
+    <div class="field">
+      <label>ปี พ.ศ.</label>
+      <input id="pfYear" type="text" placeholder="2568" style="max-width:140px;">
+    </div>
+    <div class="field">
+      <label>Supabase URL</label>
+      <input id="pfUrl" type="text" placeholder="https://xxxx.supabase.co">
+    </div>
+    <div class="field">
+      <label>anon key <span style="font-weight:400;color:#94a3b8;">(public)</span></label>
+      <textarea id="pfAnon" rows="2" style="width:100%;border:1.5px solid var(--border);border-radius:10px;padding:9px 13px;font-family:monospace;font-size:0.72rem;outline:none;resize:vertical;word-break:break-all;" placeholder="eyJ..."></textarea>
+    </div>
+    <div class="field">
+      <label>service_role key <span style="font-weight:400;color:#dc2626;">⚠️ ลับ</span></label>
+      <textarea id="pfKey" rows="2" style="width:100%;border:1.5px solid var(--border);border-radius:10px;padding:9px 13px;font-family:monospace;font-size:0.72rem;outline:none;resize:vertical;word-break:break-all;" placeholder="eyJ..."></textarea>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:6px;">
+      <button class="btn btn-ghost" style="flex:1;" onclick="closeProjForm()">ยกเลิก</button>
+      <button class="btn btn-primary" style="flex:1;" onclick="saveProjForm()">💾 บันทึก</button>
+    </div>
+    <div id="pfStatus" style="margin-top:10px;font-size:0.82rem;color:#dc2626;"></div>
+  </div>
+</div>
+
 <!-- Topbar -->
 <div class="topbar">
   <div class="topbar-left">
     <a href="dashboard.html" class="back-btn">← Dashboard</a>
     <span class="topbar-title">⚙️ Control Panel</span>
+    <span id="activeProjBadge" style="display:none;background:#e8f0fe;color:#1a4eb8;font-size:0.72rem;font-weight:700;padding:3px 10px;border-radius:20px;white-space:nowrap;"></span>
   </div>
-  <div style="display:flex;align-items:center;gap:10px;">
+  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+    <button class="btn btn-ghost btn-sm" onclick="showProjectPicker()" style="font-size:0.76rem;">🔄 เปลี่ยนโปรเจกต์</button>
     <span id="eventBannerText" style="font-size:0.82rem;color:#64748b;"></span>
     <div class="nav-wrap">
       <button class="logout-btn" onclick="toggleNavDD(event)">🔗 ระบบอื่นๆ ▾</button>
@@ -409,30 +484,11 @@
   <!-- ══════════ TAB: SETTINGS ══════════ -->
   <div id="tc-settings" style="display:none;">
 
-    <!-- Supabase Connection -->
+    <!-- Supabase / Projects -->
     <div class="card">
-      <div class="card-title">🔌 การเชื่อมต่อฐานข้อมูล (Supabase)</div>
-      <p class="card-desc">เมื่อเริ่มงานปีใหม่และสร้าง Supabase โปรเจกต์ใหม่ ให้ใส่ค่าใหม่ที่นี่<br>
-      ระบบทุกหน้าจะใช้โปรเจกต์ใหม่ทันที — <strong>บันทึกเฉพาะอุปกรณ์นี้</strong> (localStorage)</p>
-      <div class="alert alert-info" id="sbCurrentStatus" style="margin-bottom:14px;display:none;"></div>
-      <div class="field">
-        <label>Supabase URL</label>
-        <input id="sbUrlInput" type="text" placeholder="https://xxxxxxxxxxxx.supabase.co">
-      </div>
-      <div class="field">
-        <label>anon key <span style="font-weight:400;color:#94a3b8;">(public — ใช้สำหรับหน้าสาธารณะ)</span></label>
-        <textarea id="sbAnonInput" rows="2" style="width:100%;border:1.5px solid var(--border);border-radius:10px;padding:9px 13px;font-family:monospace;font-size:0.72rem;outline:none;resize:vertical;word-break:break-all;" placeholder="eyJ..."></textarea>
-      </div>
-      <div class="field">
-        <label>service_role key <span style="font-weight:400;color:#dc2626;">⚠️ ห้ามเผยแพร่</span></label>
-        <textarea id="sbKeyInput" rows="2" style="width:100%;border:1.5px solid var(--border);border-radius:10px;padding:9px 13px;font-family:monospace;font-size:0.72rem;outline:none;resize:vertical;word-break:break-all;" placeholder="eyJ..."></textarea>
-      </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        <button class="btn btn-primary" onclick="saveSbConfig()">💾 บันทึกการเชื่อมต่อ</button>
-        <button class="btn btn-ghost" onclick="testSbConfig()">🔍 ทดสอบ</button>
-        <button class="btn btn-ghost btn-sm" onclick="clearSbConfig()" style="color:#dc2626;border-color:#fca5a5;">รีเซ็ตเป็นค่าเริ่มต้น</button>
-      </div>
-      <div id="sbConfigStatus" style="margin-top:10px;"></div>
+      <div class="card-title">🔌 โปรเจกต์ Supabase</div>
+      <p class="card-desc">จัดการโปรเจกต์ทั้งหมด (เพิ่ม/แก้ไข/ลบ/เปลี่ยน) ผ่านหน้าเลือกโปรเจกต์</p>
+      <button class="btn btn-primary" onclick="showProjectPicker()">🔄 จัดการโปรเจกต์</button>
       <div style="border-top:1px solid var(--border);margin:16px 0;"></div>
       <div class="card-title" style="font-size:0.88rem;margin-bottom:6px;">💾 Schema Backup</div>
       <p class="card-desc" style="margin-bottom:10px;">ดาวน์โหลด SQL สำหรับสร้างฐานข้อมูลใหม่ใน Supabase โปรเจกต์ปีหน้า — รันในหน้า SQL Editor ของโปรเจกต์ใหม่</p>
@@ -545,6 +601,8 @@
 <script>
 function toggleNavDD(e){e.stopPropagation();document.getElementById('navDD').classList.toggle('open');}
 document.addEventListener('click',()=>document.getElementById('navDD')?.classList.remove('open'));
+// Apply active project keys before const declarations
+(function(){try{const ps=JSON.parse(localStorage.getItem('dmsc_projects')||'[]');const aid=localStorage.getItem('dmsc_active_project');const ap=ps.find(p=>p.id===aid);if(ap){if(ap.url)localStorage.setItem('dmsc_sb_url',ap.url);if(ap.anon)localStorage.setItem('dmsc_sb_anon',ap.anon);if(ap.key)localStorage.setItem('dmsc_sb_key',ap.key);}}catch(e){}})();
 const SB_URL  = localStorage.getItem('dmsc_sb_url')  || "https://gvxytnjfyepqhbkmcjms.supabase.co";
 const SB_KEY  = localStorage.getItem('dmsc_sb_key')  || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2eHl0bmpmeWVwcWhia21jam1zIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3OTQzMTY0MCwiZXhwIjoyMDk1MDA3NjQwfQ.Hrfc0erkIatyVbmsOW2SU7piH3L65qbS2kdi2eYzbQk";
 const SB_ANON = localStorage.getItem('dmsc_sb_anon') || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2eHl0bmpmeWVwcWhia21jam1zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0MzE2NDAsImV4cCI6MjA5NTAwNzY0MH0.RAr_ehb4cxfNliDR0h5XcihUaP-0ltZTTGIAv2Fw1kk";
@@ -562,6 +620,18 @@ if(sessionStorage.getItem('dmsc_auth')!=='ok'||_aRole!=='admin'){
   window.location.href='login.html';
 }
 function doLogout(){ sessionStorage.clear(); window.location.href='login.html'; }
+
+// ─── PROJECT PICKER INIT ───
+window.addEventListener('DOMContentLoaded', function(){
+  updateTopbarProject();
+  const list = _projList();
+  const aid  = localStorage.getItem('dmsc_active_project');
+  const hasActive = list.some(p=>p.id===aid);
+  if(list.length > 0 && !hasActive){
+    showProjectPicker();
+  }
+  loadOverview();
+});
 
 // ─── TABS ───
 function switchTab(name){
@@ -1448,6 +1518,109 @@ async function loadSettings(){
   const net=await sbGetSetting('network_depts');
   networkList=net?JSON.parse(net):[];
   renderNetwork();
+}
+
+// ─── PROJECT PICKER ───
+let _editProjId = null;
+function _projList(){ try{ return JSON.parse(localStorage.getItem('dmsc_projects')||'[]'); }catch(e){ return []; } }
+function _projSave(list){ localStorage.setItem('dmsc_projects', JSON.stringify(list)); }
+
+function showProjectPicker(){
+  renderProjGrid();
+  const overlay = document.getElementById('projectPickerOverlay');
+  overlay.classList.remove('hidden');
+  const hasActive = _projList().some(p=>p.id===localStorage.getItem('dmsc_active_project'));
+  document.getElementById('projPickerCloseBtn').style.display = hasActive ? '' : 'none';
+}
+function hideProjPicker(){
+  document.getElementById('projectPickerOverlay').classList.add('hidden');
+}
+function renderProjGrid(){
+  const list = _projList();
+  const activeId = localStorage.getItem('dmsc_active_project');
+  const grid = document.getElementById('projGrid');
+  let html = list.map(p=>`
+    <div class="proj-card${p.id===activeId?' is-active':''}">
+      ${p.id===activeId?'<div class="proj-active-badge">กำลังใช้งาน</div>':''}
+      <div class="proj-card-year">${p.year||'?'}</div>
+      <div class="proj-card-name">${p.name||'ไม่มีชื่อ'}</div>
+      <div class="proj-card-url">${(p.url||'').replace('https://','')}</div>
+      <div class="proj-card-btns">
+        <button class="proj-btn proj-btn-enter" onclick="selectProject('${p.id}')">เข้าระบบ</button>
+        <button class="proj-btn proj-btn-edit" onclick="openEditProj('${p.id}')">แก้ไข</button>
+        <button class="proj-btn proj-btn-del" onclick="deleteProj('${p.id}')">ลบ</button>
+      </div>
+    </div>`).join('');
+  html += `<div class="proj-add-card" onclick="openAddProj()">
+    <div class="proj-add-icon">＋</div>
+    <div class="proj-add-label">เพิ่มโปรเจกต์ใหม่</div>
+  </div>`;
+  grid.innerHTML = html;
+}
+function selectProject(id){
+  localStorage.setItem('dmsc_active_project', id);
+  const p = _projList().find(x=>x.id===id);
+  if(p){
+    if(p.url)  localStorage.setItem('dmsc_sb_url', p.url);
+    if(p.anon) localStorage.setItem('dmsc_sb_anon', p.anon);
+    if(p.key)  localStorage.setItem('dmsc_sb_key', p.key);
+  }
+  location.reload();
+}
+function openAddProj(){
+  _editProjId = null;
+  document.getElementById('projFormTitle').textContent = 'เพิ่มโปรเจกต์ใหม่';
+  ['pfName','pfYear','pfUrl','pfAnon','pfKey'].forEach(id=>{ document.getElementById(id).value=''; });
+  document.getElementById('pfStatus').textContent='';
+  document.getElementById('projFormOverlay').classList.remove('hidden');
+}
+function openEditProj(id){
+  _editProjId = id;
+  const p = _projList().find(x=>x.id===id);
+  if(!p) return;
+  document.getElementById('projFormTitle').textContent = 'แก้ไขโปรเจกต์';
+  document.getElementById('pfName').value = p.name||'';
+  document.getElementById('pfYear').value = p.year||'';
+  document.getElementById('pfUrl').value  = p.url||'';
+  document.getElementById('pfAnon').value = p.anon||'';
+  document.getElementById('pfKey').value  = p.key||'';
+  document.getElementById('pfStatus').textContent='';
+  document.getElementById('projFormOverlay').classList.remove('hidden');
+}
+function closeProjForm(){
+  document.getElementById('projFormOverlay').classList.add('hidden');
+}
+function saveProjForm(){
+  const name = document.getElementById('pfName').value.trim();
+  const year = document.getElementById('pfYear').value.trim();
+  const url  = document.getElementById('pfUrl').value.trim();
+  const anon = document.getElementById('pfAnon').value.trim();
+  const key  = document.getElementById('pfKey').value.trim();
+  if(!name||!url){ document.getElementById('pfStatus').textContent='กรุณาใส่ชื่องานและ URL'; return; }
+  const list = _projList();
+  if(_editProjId){
+    const idx = list.findIndex(p=>p.id===_editProjId);
+    if(idx>=0) list[idx] = {...list[idx], name, year, url, anon, key};
+  } else {
+    list.push({id: Date.now().toString(36)+Math.random().toString(36).slice(2,6), name, year, url, anon, key});
+  }
+  _projSave(list);
+  closeProjForm();
+  renderProjGrid();
+}
+function deleteProj(id){
+  if(!confirm('ลบโปรเจกต์นี้?')) return;
+  _projSave(_projList().filter(p=>p.id!==id));
+  if(localStorage.getItem('dmsc_active_project')===id) localStorage.removeItem('dmsc_active_project');
+  renderProjGrid();
+}
+function updateTopbarProject(){
+  const active = _projList().find(p=>p.id===localStorage.getItem('dmsc_active_project'));
+  const badge = document.getElementById('activeProjBadge');
+  if(active && badge){
+    badge.textContent = active.year ? `${active.year} · ${active.name}` : active.name;
+    badge.style.display='';
+  }
 }
 
 function loadSbConfig(){
