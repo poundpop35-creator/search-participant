@@ -152,9 +152,9 @@
   <!-- ===== BAG SECTION ===== -->
   <div id="sectionBag" style="display:none;">
     <div class="stats-grid">
-      <div class="stat-card total"><div class="stat-label">มีสิทธิ์รับกระเป๋าทั้งหมด</div><div class="stat-num" id="sTotal">-</div><div class="stat-sub">ราย</div></div>
-      <div class="stat-card received"><div class="stat-label">รับแล้ว</div><div class="stat-num" id="sReceived">-</div><div class="stat-sub" id="sReceivedPct">-</div></div>
-      <div class="stat-card pending"><div class="stat-label">ยังไม่รับ</div><div class="stat-num" id="sPending">-</div><div class="stat-sub" id="sPendingPct">-</div></div>
+      <div class="stat-card total" style="cursor:pointer;" onclick="resetFilters()"><div class="stat-label">มีสิทธิ์รับกระเป๋าทั้งหมด</div><div class="stat-num" id="sTotal">-</div><div class="stat-sub">ราย</div></div>
+      <div class="stat-card received" style="cursor:pointer;" onclick="document.getElementById('fStatus').value='received';applyFilters()"><div class="stat-label">รับแล้ว</div><div class="stat-num" id="sReceived">-</div><div class="stat-sub" id="sReceivedPct">-</div></div>
+      <div class="stat-card pending" style="cursor:pointer;" onclick="document.getElementById('fStatus').value='pending';applyFilters()"><div class="stat-label">ยังไม่รับ</div><div class="stat-num" id="sPending">-</div><div class="stat-sub" id="sPendingPct">-</div></div>
       <div class="stat-card" style="border-left:4px solid #16a34a;cursor:pointer;" onclick="setItemFilter('1')" title="คลิกเพื่อกรองเฉพาะกระเป๋าอย่างเดียว"><div class="stat-label">กระเป๋าอย่างเดียว 🟢</div><div class="stat-num" id="s1Item" style="color:#16a34a;">-</div><div class="stat-sub" id="s1ItemSub">ราย (รับแล้ว -)</div></div>
       <div class="stat-card" style="border-left:4px solid #ea580c;cursor:pointer;" onclick="setItemFilter('2')" title="คลิกเพื่อกรองเฉพาะกระเป๋า+ของระลึกอื่น"><div class="stat-label">กระเป๋า+ของระลึกอื่น 🟠</div><div class="stat-num" id="s2Item" style="color:#ea580c;">-</div><div class="stat-sub" id="s2ItemSub">ราย (รับแล้ว -)</div></div>
     </div>
@@ -245,9 +245,9 @@
   <!-- ===== SHIRT SECTION ===== -->
   <div id="sectionShirt" style="display:none;">
     <div class="stats-grid">
-      <div class="stat-card total"><div class="stat-label">มีสิทธิ์รับเสื้อทั้งหมด</div><div class="stat-num" id="ssTotal">-</div><div class="stat-sub">ราย</div></div>
-      <div class="stat-card received"><div class="stat-label">รับแล้ว</div><div class="stat-num" id="ssReceived">-</div><div class="stat-sub" id="ssReceivedPct">-</div></div>
-      <div class="stat-card pending"><div class="stat-label">ยังไม่รับ</div><div class="stat-num" id="ssPending">-</div><div class="stat-sub" id="ssPendingPct">-</div></div>
+      <div class="stat-card total" style="cursor:pointer;" onclick="resetShirtFilters()"><div class="stat-label">มีสิทธิ์รับเสื้อทั้งหมด</div><div class="stat-num" id="ssTotal">-</div><div class="stat-sub">ราย</div></div>
+      <div class="stat-card received" style="cursor:pointer;" onclick="document.getElementById('sfStatus').value='received';applyShirtFilters()"><div class="stat-label">รับแล้ว</div><div class="stat-num" id="ssReceived">-</div><div class="stat-sub" id="ssReceivedPct">-</div></div>
+      <div class="stat-card pending" style="cursor:pointer;" onclick="document.getElementById('sfStatus').value='pending';applyShirtFilters()"><div class="stat-label">ยังไม่รับ</div><div class="stat-num" id="ssPending">-</div><div class="stat-sub" id="ssPendingPct">-</div></div>
     </div>
     <div class="filter-bar">
       <div class="filter-group">
