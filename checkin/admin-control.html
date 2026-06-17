@@ -217,11 +217,25 @@
       <div id="switchYearStatus"></div>
     </div>
 
+    <!-- เปลี่ยนชื่องานปัจจุบัน -->
+    <div class="card">
+      <div class="card-title">✏️ เปลี่ยนชื่องานปัจจุบัน</div>
+      <p class="card-desc">เปลี่ยนเฉพาะชื่องาน ปีและข้อมูลทั้งหมดยังคงอยู่</p>
+      <div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;">
+        <div class="field" style="flex:1;min-width:200px;margin-bottom:0;">
+          <label>ชื่องาน</label>
+          <input id="editEventName" type="text" placeholder="ประชุมวิชาการวิทยาศาสตร์การแพทย์ ครั้งที่ 34">
+        </div>
+        <button class="btn btn-primary" onclick="saveEventName()">💾 บันทึกชื่อ</button>
+      </div>
+      <div id="editEventNameStatus" style="margin-top:8px;"></div>
+    </div>
+
     <!-- สร้างงานใหม่ -->
     <div class="card">
       <div class="card-title">🎉 สร้างงานประชุมใหม่</div>
       <div class="alert alert-warn" style="margin-bottom:14px;">
-        ⚠️ ใช้เมื่อขึ้นปีงานใหม่เท่านั้น — จะ<strong>ลบข้อมูลเช็คอินและรายชื่อผู้เข้าร่วมทั้งหมด</strong>แล้วเริ่มนับใหม่
+        ⚠️ ใช้เมื่อขึ้นปีงานใหม่เท่านั้น — จะตั้งค่าปีงานใหม่ <strong>ข้อมูลเดิมทุกปียังคงอยู่ครบ ไม่มีการลบ</strong>
       </div>
       <div style="display:flex;gap:10px;flex-wrap:wrap;">
         <div class="field" style="flex:1;min-width:200px;margin-bottom:0;">
@@ -447,9 +461,15 @@
       <div class="danger-box">
         <div class="danger-title">⚠️ Danger Zone — ลบข้อมูลถาวร</div>
         <p style="font-size:0.82rem;color:#7f1d1d;margin-bottom:14px;line-height:1.6;">การดำเนินการเหล่านี้<strong>ไม่สามารถกู้คืนได้</strong> — ใช้ด้วยความระวัง</p>
+        <p style="font-size:0.78rem;font-weight:700;color:#7f1d1d;margin-bottom:8px;">🔒 ลบเฉพาะปีที่ใช้งานอยู่ (แนะนำ)</p>
+        <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
+          <button class="btn btn-red btn-sm" onclick="askClearByYear('checkins')">🗑️ ลบเช็คอินปีปัจจุบัน</button>
+          <button class="btn btn-red btn-sm" onclick="askClearByYear('participants')">🗑️ ลบผู้เข้าร่วมปีปัจจุบัน</button>
+        </div>
+        <p style="font-size:0.78rem;font-weight:700;color:#7f1d1d;margin-bottom:8px;">☢️ ลบทุกปี (ระวัง!)</p>
         <div style="display:flex;flex-wrap:wrap;gap:10px;">
-          <button class="btn btn-red btn-sm" onclick="askClear('checkins','ล้างข้อมูลเช็คอินทั้งหมด','ข้อมูลการเช็คอินทุกวัน ทุกคน จะถูกลบถาวร ยืนยันหรือไม่?')">🗑️ ลบข้อมูลเช็คอินทั้งหมด</button>
-          <button class="btn btn-red btn-sm" onclick="askClear('participants','ลบรายชื่อผู้เข้าร่วมทั้งหมด','รายชื่อผู้เข้าร่วมงานทั้งหมดจะถูกลบถาวร ยืนยันหรือไม่?')">🗑️ ลบรายชื่อผู้เข้าร่วมทั้งหมด</button>
+          <button class="btn btn-red btn-sm" onclick="askClear('checkins','ล้างข้อมูลเช็คอินทั้งหมดทุกปี','เช็คอินทุกวัน ทุกคน ทุกปี จะถูกลบถาวร ยืนยันหรือไม่?')">☢️ ลบเช็คอินทุกปี</button>
+          <button class="btn btn-red btn-sm" onclick="askClear('participants','ลบรายชื่อผู้เข้าร่วมทั้งหมดทุกปี','รายชื่อทุกคน ทุกปี จะถูกลบถาวร ยืนยันหรือไม่?')">☢️ ลบผู้เข้าร่วมทุกปี</button>
         </div>
         <div id="clearStatus" style="margin-top:12px;"></div>
       </div>
@@ -543,6 +563,8 @@ async function loadCurrentEvent(){
   try {
     const name = await sbGetSetting('event_name');
     const year = await sbGetSetting('event_year');
+    const editEl = document.getElementById('editEventName');
+    if(editEl && name) editEl.value = name;
     const banner = document.getElementById('eventBannerText');
     const info = document.getElementById('currentEventInfo');
     if(name){
@@ -592,21 +614,42 @@ async function switchYear(year){
   }
 }
 
+async function saveEventName(){
+  const name = document.getElementById('editEventName').value.trim();
+  if(!name){ setStatus('editEventNameStatus','warn','กรุณากรอกชื่องาน'); return; }
+  try{
+    await sbSetSetting('event_name', name);
+    setStatus('editEventNameStatus','ok','✅ เปลี่ยนชื่องานสำเร็จ');
+    loadCurrentEvent();
+  }catch(e){ setStatus('editEventNameStatus','err','❌ '+e.message); }
+}
+
+async function askClearByYear(target){
+  const year = await sbGetSetting('event_year');
+  const label = target==='checkins' ? 'เช็คอิน' : 'ผู้เข้าร่วมงาน';
+  if(!confirm(`🗑️ ลบข้อมูล${label}ทั้งหมดของปี พ.ศ. ${year}\n\nการดำเนินการนี้ไม่สามารถกู้คืนได้\nยืนยันหรือไม่?`)) return;
+  try{
+    if(target==='checkins') await fetch(`${SB_URL}/rest/v1/checkins?event_year=eq.${encodeURIComponent(year)}`,{method:'DELETE',headers:H});
+    if(target==='participants') await fetch(`${SB_URL}/rest/v1/participants?event_year=eq.${encodeURIComponent(year)}`,{method:'DELETE',headers:H});
+    setStatus('clearStatus','ok',`✅ ลบข้อมูล${label}ปี ${year} สำเร็จ`);
+  }catch(e){ setStatus('clearStatus','err','❌ '+e.message); }
+}
+
 async function createNewEvent(){
   const name = document.getElementById('newEventName').value.trim();
   const year = document.getElementById('newEventYear').value.trim();
   if(!name||!year){ setStatus('newEventStatus','warn','กรุณากรอกชื่องานและปีให้ครบ'); return; }
-  if(!confirm(`⚠️ สร้างงานใหม่: "${name} (${year})"\n\nจะลบข้อมูลต่อไปนี้ทั้งหมด:\n• เช็คอินทั้งหมด\n• รายชื่อผู้เข้าร่วมทั้งหมด\n• URL Walk-in Sheet\n\nดำเนินการต่อ?`)) return;
+  if(!confirm(`สร้างงานใหม่: "${name} (${year})"\n\nจะตั้งค่าปีงานเป็น พ.ศ. ${year}\nข้อมูลเดิมทุกปียังคงอยู่ครบ ไม่มีการลบ\n\nดำเนินการต่อ?`)) return;
   const btn = document.querySelector('[onclick="createNewEvent()"]');
   btn.disabled=true; btn.innerHTML='<span class="sp"></span>กำลังสร้าง...';
-  setStatus('newEventStatus','info','กำลังล้างข้อมูลเก่า...');
+  setStatus('newEventStatus','info','กำลังบันทึกการตั้งค่า...');
   try {
-    await fetch(`${SB_URL}/rest/v1/checkins?id=gte.0`,{method:'DELETE',headers:H});
-    await fetch(`${SB_URL}/rest/v1/participants?id=gte.0`,{method:'DELETE',headers:H});
     await sbSetSetting('event_name', name);
     await sbSetSetting('event_year', year);
     await sbSetSetting('walkin_sheet_url', '');
-    document.getElementById('walkinUrl').value='';
+    await sbSetSetting('pre_sheet_url', '');
+    await sbSetSetting('presenter_sheet_url', '');
+    ['walkinUrl','preSheetUrl','presenterSheetUrl'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
     setStatus('newEventStatus','ok',`✅ สร้างงาน "${name} (${year})" สำเร็จ — พร้อมนำเข้าข้อมูลใหม่`);
     loadCurrentEvent();
     loadYears();
