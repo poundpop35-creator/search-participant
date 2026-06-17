@@ -341,7 +341,7 @@
     }catch(e){}
   }
 
-  window.addEventListener('load', async ()=>{ await loadActiveYear(); initDaySelect(); setMode('scanner'); loadTodayCount(); });
+  window.addEventListener('load', async ()=>{ await loadActiveYear(); initDaySelect(); setMode('scanner'); onDayChange(); });
 
   function initDaySelect(){
     const now=new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Bangkok'}));
@@ -380,6 +380,12 @@
 
   function onDayChange(){
     loadTodayCount();
+    const day=document.getElementById('day').value;
+    const isBag=day==='bag'||day==='shirt';
+    const dbBtn=document.getElementById('dashboardBtn');
+    const bagBtn=document.getElementById('bagDashboardBtn');
+    if(dbBtn) dbBtn.style.display=isBag?'none':'inline-block';
+    if(bagBtn) bagBtn.style.display=isBag?'inline-block':'none';
   }
 
   async function loadTodayCount(){
