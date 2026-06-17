@@ -548,11 +548,19 @@
           return;
         }
         if(p.bag_received===true){
-          showModal('warning','รับกระเป๋าแล้ว','บุคคลนี้รับกระเป๋าไปแล้ว',fullName,[
+          const _aShirt=(p.shirt_size||'').trim()!=='';
+          const _aRows=[
             {label:'ประเภท',val:pType,style:'normal'},
-            {label:'รับไปเมื่อ',val:fmtShort(p.bag_received_date)||(p.bag_received_date||'(ไม่ทราบวันที่)'),style:'done'},
-            {label:'สถานะ',val:'❌ ไม่สามารถรับซ้ำได้',style:'warn'}
-          ],p.dept||'');
+            {label:'🎒 กระเป๋า',val:'รับไปแล้ว ✓',style:'done',sub:fmtShort(p.bag_received_date)||(p.bag_received_date||'(ไม่ทราบวันที่)')},
+          ];
+          if(_aShirt){
+            if(p.shirt_received===true) _aRows.push({label:`👕 เสื้อแจ็คเก็ต (${p.shirt_size})`,val:'รับไปแล้ว ✓',style:'done',sub:fmtShort(p.shirt_received_date)});
+            else _aRows.push({label:`👕 เสื้อแจ็คเก็ต (${p.shirt_size})`,val:'⚠️ ยังไม่ได้รับ',style:'warn'});
+          } else {
+            _aRows.push({label:'👕 เสื้อแจ็คเก็ต',val:'ไม่มีสิทธิ์รับเสื้อ',style:'muted'});
+          }
+          _aRows.push({label:'สถานะ',val:'❌ ไม่สามารถรับซ้ำได้',style:'warn'});
+          showModal('warning','รับกระเป๋าแล้ว','บุคคลนี้รับกระเป๋าไปแล้ว',fullName,_aRows,p.dept||'');
           return;
         }
         const today=new Date().toISOString();
