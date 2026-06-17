@@ -183,18 +183,16 @@ body::before{
   box-shadow:0 20px 60px rgba(0,0,0,.5),0 0 0 1px rgba(0,0,0,.05);
   overflow:hidden;
 }
-/* status header stripe */
-.modal-head{padding:14px 20px 10px;text-align:center;}
-.mbadge{
-  display:inline-flex;align-items:center;gap:6px;
-  padding:5px 18px;border-radius:20px;
-  font-size:0.85rem;font-weight:700;letter-spacing:.02em;
-}
-.mb-success{background:#dcfce7;color:#15803d;}
-.mb-warning{background:#fef3c7;color:#92400e;}
-.mb-error{background:#fee2e2;color:#991b1b;}
-.mb-vip{background:#f3e8ff;color:#6b21a8;}
-.mb-staff{background:#dbeafe;color:#1e40af;}
+/* gradient header */
+.modal-head{padding:20px 18px 14px;text-align:center;}
+.modal-head.mh-success{background:linear-gradient(140deg,#15803d,#22c55e);}
+.modal-head.mh-warning{background:linear-gradient(140deg,#92400e,#f59e0b);}
+.modal-head.mh-error{background:linear-gradient(140deg,#991b1b,#ef4444);}
+.modal-head.mh-vip{background:linear-gradient(140deg,#5b21b6,#a855f7);}
+.modal-head.mh-staff{background:linear-gradient(140deg,#1e40af,#3b82f6);}
+.mhbadge{font-size:0.7rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:rgba(255,255,255,.85);margin-bottom:5px;}
+.mhtitle{font-size:0.97rem;font-weight:800;color:#fff;line-height:1.35;}
+/* original title hidden after JS transform */
 .modal-title{text-align:center;font-size:0.93rem;font-weight:700;color:#1e293b;padding:0 18px 3px;line-height:1.35;}
 .modal-name{text-align:center;font-size:1.08rem;font-weight:800;color:#0d2b6b;padding:4px 18px 1px;}
 .modal-dept{text-align:center;font-size:0.77rem;color:#94a3b8;padding:0 18px 10px;}
@@ -1055,6 +1053,26 @@ document.addEventListener('keydown',e=>{
 let tx=0;
 document.addEventListener('touchstart',e=>tx=e.touches[0].clientX,{passive:true});
 document.addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-tx;if(Math.abs(dx)>50)go(dx<0?1:-1);},{passive:true});
+// Transform .modal-head + .modal-title → gradient header
+const TYPE_MAP={'mb-success':'mh-success','mb-warning':'mh-warning','mb-error':'mh-error','mb-vip':'mh-vip','mb-staff':'mh-staff'};
+document.querySelectorAll('.modal-box').forEach(box=>{
+  const head=box.querySelector('.modal-head');
+  const badge=head?.querySelector('.mbadge');
+  const titleEl=box.querySelector('.modal-title');
+  if(!head||!badge||!titleEl) return;
+  const cls=Object.entries(TYPE_MAP).find(([k])=>badge.classList.contains(k))?.[1]||'mh-success';
+  head.classList.add(cls);
+  const b=document.createElement('div');
+  b.className='mhbadge';
+  b.textContent=badge.textContent;
+  const t=document.createElement('div');
+  t.className='mhtitle';
+  t.textContent=titleEl.textContent;
+  head.innerHTML='';
+  head.appendChild(b);
+  head.appendChild(t);
+  titleEl.style.display='none';
+});
 goTo(0);
 </script>
 </body>
