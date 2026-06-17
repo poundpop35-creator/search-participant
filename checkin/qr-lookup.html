@@ -327,7 +327,7 @@ let selectedP = null;
 let allNames = null;
 
 async function ensureNames() {
-  if (allNames !== null) return;
+  if (allNames !== null && allNames.length > 0) return; // use cache only if non-empty
   const headers = { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY };
   const yr = encodeURIComponent(activeYear);
   let data = [], offset = 0;
@@ -356,7 +356,11 @@ async function doSearch() {
       document.getElementById('resultsWrap').innerHTML = `<div style="text-align:center;padding:12px 0;font-size:0.85rem;font-weight:700;color:#1e3a8a;">โหลดข้อมูลสำเร็จ ${total.toLocaleString()} คน</div>`;
       return;
     }
-    results = allNames.filter(p => (p.first_name||'').includes(q) || (p.last_name||'').includes(q)).slice(0, 30);
+    const ql = q.toLowerCase();
+    results = allNames.filter(p =>
+      (p.first_name||'').toLowerCase().includes(ql) ||
+      (p.last_name||'').toLowerCase().includes(ql)
+    ).slice(0, 30);
     renderResults();
   } catch(e) {
     document.getElementById('resultsWrap').innerHTML = `<div class="no-result" style="color:#dc2626;font-size:0.78rem;word-break:break-all;">❌ ${e.message}</div>`;
