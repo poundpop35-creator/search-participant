@@ -341,6 +341,17 @@
         </select>
       </div>
       <div class="filter-group">
+        <div class="filter-label">ชุดสิทธิ์</div>
+        <select class="filter-select" id="ovBundle" onchange="applyOvFilters()">
+          <option value="">ทั้งหมด</option>
+          <option value="shirt-only">เสื้ออย่างเดียว</option>
+          <option value="bag-bkd">กระเป๋า + บทคัดย่อ</option>
+          <option value="bag-only">กระเป๋าอย่างเดียว</option>
+          <option value="bkd-only">บทคัดย่ออย่างเดียว</option>
+          <option value="all">ได้ทุกอย่าง</option>
+        </select>
+      </div>
+      <div class="filter-group">
         <div class="filter-label">สถานะ</div>
         <select class="filter-select" id="ovStatus" onchange="applyOvFilters()">
           <option value="">ทั้งหมด</option>
@@ -877,13 +888,25 @@ function buildOverviewData(res){
   document.getElementById('ovShirtSub').textContent=`รับแล้ว (${shirtTotal?Math.round(shirtRec/shirtTotal*100):0}%)`;
   applyOvFilters();
 }
+function matchBundle(r,bundle){
+  if(!bundle)return true;
+  const b=r.bagElig,k=r.hasBkd,s=r.hasShirt;
+  if(bundle==='shirt-only') return  s&&!b&&!k;
+  if(bundle==='bag-bkd')    return  b&& k&&!s;
+  if(bundle==='bag-only')   return  b&&!k&&!s;
+  if(bundle==='bkd-only')   return !b&& k&&!s;
+  if(bundle==='all')        return  b&& k&& s;
+  return true;
+}
 function applyOvFilters(){
   const q=(document.getElementById('ovSearch').value||'').trim().toLowerCase();
   const dept=document.getElementById('ovDept').value;
+  const bundle=document.getElementById('ovBundle').value;
   const status=document.getElementById('ovStatus').value;
   ovFiltered=allOverviewData.filter(r=>{
     if(dept&&r.dept!==dept)return false;
     if(q&&!r.name.toLowerCase().includes(q)&&!r.dept.toLowerCase().includes(q))return false;
+    if(!matchBundle(r,bundle))return false;
     if(status){
       const total=[r.bagElig,r.hasBkd,r.hasShirt].filter(Boolean).length;
       const rec=[r.bagElig&&r.bagRec,r.hasBkd&&r.bagRec,r.hasShirt&&r.shirtRec].filter(Boolean).length;
@@ -898,7 +921,7 @@ function applyOvFilters(){
   document.getElementById('ovCount').textContent=`(${ovFiltered.length.toLocaleString()} รายการ)`;
   renderOverviewTable();
 }
-function resetOvFilters(){document.getElementById('ovSearch').value='';document.getElementById('ovDept').value='';document.getElementById('ovStatus').value='';applyOvFilters();}
+function resetOvFilters(){document.getElementById('ovSearch').value='';document.getElementById('ovDept').value='';document.getElementById('ovBundle').value='';document.getElementById('ovStatus').value='';applyOvFilters();}
 function changeOvPage(d){ovPage+=d;renderOverviewTable();window.scrollTo({top:0,behavior:'smooth'});}
 function renderOverviewTable(){
   const start=(ovPage-1)*PAGE;
