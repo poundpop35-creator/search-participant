@@ -1410,7 +1410,7 @@ async function renderDashMap(instKey, provCounts) {
   const savedLabel = document.getElementById(`${containerId}Label`);
   const savedClear = document.getElementById(`${containerId}Clear`);
   try {
-    if (!thaiGeoCacheDash) thaiGeoCacheDash = await d3.json('https://raw.githubusercontent.com/apisit/thailand.json/master/thailand.json');
+    if (!thaiGeoCacheDash) thaiGeoCacheDash = await d3.json('./thailand.json');
     container.innerHTML = '';
     if (savedLabel) container.appendChild(savedLabel);
     if (savedClear) container.appendChild(savedClear);

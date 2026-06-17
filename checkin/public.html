@@ -910,7 +910,7 @@ async function renderExtPanel(extData){
   // Thailand choropleth map — zone-based coloring
   const container=document.getElementById('zoneMapExt');
   try {
-    if(!thaiGeoCache) thaiGeoCache=await d3.json('https://raw.githubusercontent.com/apisit/thailand.json/master/thailand.json');
+    if(!thaiGeoCache) thaiGeoCache=await d3.json('./thailand.json');
     const savedExtLabel=document.getElementById('zoneMapExt-label');
     const savedExtClear=document.getElementById('zoneMapExtClear');
     container.innerHTML='';
@@ -1014,7 +1014,7 @@ async function renderIntMap(intData){
   const container=document.getElementById('zoneMapInt');
   if(!container) return;
   try{
-    if(!thaiGeoCache) thaiGeoCache=await d3.json('https://raw.githubusercontent.com/apisit/thailand.json/master/thailand.json');
+    if(!thaiGeoCache) thaiGeoCache=await d3.json('./thailand.json');
     const savedIntLabel=document.getElementById('zoneMapInt-label');
     const savedIntClear=document.getElementById('zoneMapIntClear');
     container.innerHTML='';

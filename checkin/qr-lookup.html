@@ -799,7 +799,7 @@ async function renderQrMap() {
   const savedLabel = document.getElementById('qrMapLabel');
   const savedClear = document.getElementById('qrMapClear');
   try {
-    if (!thaiGeoCache) thaiGeoCache = await d3.json('https://raw.githubusercontent.com/apisit/thailand.json/master/thailand.json');
+    if (!thaiGeoCache) thaiGeoCache = await d3.json('./thailand.json');
     container.innerHTML = '';
     if (savedLabel) container.appendChild(savedLabel);
     if (savedClear) container.appendChild(savedClear);
@@ -1093,7 +1093,7 @@ async function renderWIMap() {
   const savedLabel = document.getElementById('wiMapLabel');
   const savedClear = document.getElementById('wiMapClear');
   try {
-    if (!thaiGeoCache) thaiGeoCache = await d3.json('https://raw.githubusercontent.com/apisit/thailand.json/master/thailand.json');
+    if (!thaiGeoCache) thaiGeoCache = await d3.json('./thailand.json');
     container.innerHTML = '';
     if (savedLabel) container.appendChild(savedLabel);
     if (savedClear) container.appendChild(savedClear);
