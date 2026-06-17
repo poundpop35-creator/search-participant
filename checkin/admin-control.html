@@ -633,23 +633,25 @@ async function loadYears(){
     const mi = document.getElementById('manualYearInput');
     if(mi && !mi.value) mi.value = expectedYear;
     // auto-fix year if DB year != current BE year
+    let currentYear = activeYear;
     if(activeYear && activeYear !== expectedYear){
       await sbSetSetting('event_year', expectedYear);
+      currentYear = expectedYear;
       setStatus('switchYearStatus','ok',`✅ ปรับปีอัตโนมัติจาก ${activeYear} → ${expectedYear}`);
       loadCurrentEvent();
     }
     const banner = document.getElementById('yearMismatchBanner');
     if(banner) banner.style.display='none';
+    // only show years with actual participant data + current BE year (NOT the old wrong year)
     const yearSet=new Set((rows||[]).map(r=>r.event_year).filter(Boolean));
-    if(activeYear) yearSet.add(activeYear);
-    yearSet.add(expectedYear); // always show current BE year
+    yearSet.add(expectedYear);
     const years=[...yearSet].sort((a,b)=>b.localeCompare(a));
     if(!years.length){
       el.innerHTML='<span style="color:#94a3b8;font-size:0.82rem;">ยังไม่มีข้อมูลในระบบ (นำเข้าข้อมูลก่อน)</span>';
       return;
     }
     el.innerHTML=years.map(y=>{
-      const active=y===activeYear;
+      const active=y===currentYear;
       return `<button onclick="switchYear('${y}')" style="padding:10px 20px;border-radius:10px;border:2px solid ${active?'#0d2b6b':'#c7d7f5'};background:${active?'#0d2b6b':'#fff'};color:${active?'#fff':'#0d2b6b'};font-family:'Sarabun',sans-serif;font-size:0.95rem;font-weight:700;cursor:pointer;">
         ${active?'✓ ':''}พ.ศ. ${y}${active?' <span style="font-size:0.72rem;font-weight:400;opacity:0.8;">(ใช้งานอยู่)</span>':''}
       </button>`;
