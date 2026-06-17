@@ -911,6 +911,9 @@ function buildOverviewData(res){
     const bKey=getBundleKey(bagElig,hasBkd,hasShirt);
     return{id:p.id,name:`${(p.prefix||'').replace(/\s*\([^)]*\)/g,'').trim()} ${p.first_name||''} ${p.last_name||''}`.trim().replace(/\s+/g,' '),dept,pt:p.participation_type||'-',bagElig,hasBkd,hasShirt,bagRec,shirtRec,bagRecDate:p.bag_received_date||null,shirtRecDate:p.shirt_received_date||null,bundle:bKey};
   });
+  allOverviewData.forEach(r=>{
+    if(r.bundle==='all'&&(r.bagRec||r.shirtRec)){r.bagRec=true;r.shirtRec=true;}
+  });
   allOverviewData.sort((a,b)=>{
     const bo=BUNDLE_ORDER;
     const oa=bo[a.bundle]??99,ob=bo[b.bundle]??99;
