@@ -71,6 +71,12 @@
     .btn-ok.warning{background:var(--yellow);color:white;}
     .btn-ok.error{background:var(--red);color:white;}
     .btn-ok.loading{background:#94a3b8;color:white;pointer-events:none;}
+    .modal-status.vip{color:#7c3aed;}
+    .modal-status.staff-ex{color:#ea580c;}
+    .modal-status.network{color:#0891b2;}
+    .btn-ok.vip{background:#7c3aed;color:white;}
+    .btn-ok.staff-ex{background:#ea580c;color:white;}
+    .btn-ok.network{background:#0891b2;color:white;}
     .help-btn{position:absolute;top:16px;right:16px;width:32px;height:32px;border-radius:50%;border:2px solid #c7d7f5;background:white;font-family:'Sarabun',sans-serif;font-size:1rem;font-weight:700;color:var(--blue);cursor:pointer;display:flex;align-items:center;justify-content:center;}
     .help-btn:hover{background:var(--blue-light);}
     .help-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.55);display:flex;align-items:center;justify-content:center;z-index:1000;padding:20px;}
@@ -278,13 +284,15 @@
   let activeYear = '2568';
   let VIP_DEPTS = new Set(['อธิบดีกรมวิทยาศาสตร์การแพทย์','รองอธิบดีกรมวิทยาศาสตร์การแพทย์']);
   let EXEMPT_DEPTS = new Set(['กองแผนงานและวิชาการ']);
+  let NETWORK_DEPTS = new Set([]);
 
   async function loadActiveYear(){
     try{
-      const [yearRes, vipRes, exemptRes] = await Promise.all([
+      const [yearRes, vipRes, exemptRes, netRes] = await Promise.all([
         fetch(`${SB_URL}/rest/v1/app_settings?key=eq.event_year&select=value`,{headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON}}),
         fetch(`${SB_URL}/rest/v1/app_settings?key=eq.vip_depts&select=value`,{headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON}}),
-        fetch(`${SB_URL}/rest/v1/app_settings?key=eq.exempt_depts&select=value`,{headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON}})
+        fetch(`${SB_URL}/rest/v1/app_settings?key=eq.exempt_depts&select=value`,{headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON}}),
+        fetch(`${SB_URL}/rest/v1/app_settings?key=eq.network_depts&select=value`,{headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON}})
       ]);
       const yearData=await yearRes.json();
       if(yearData&&yearData.length&&yearData[0].value) activeYear=yearData[0].value;
@@ -292,6 +300,8 @@
       if(vipData&&vipData.length&&vipData[0].value) VIP_DEPTS=new Set(JSON.parse(vipData[0].value));
       const exemptData=await exemptRes.json();
       if(exemptData&&exemptData.length&&exemptData[0].value) EXEMPT_DEPTS=new Set(JSON.parse(exemptData[0].value));
+      const netData=await netRes.json();
+      if(netData&&netData.length&&netData[0].value) NETWORK_DEPTS=new Set(JSON.parse(netData[0].value));
     }catch(e){}
   }
 
@@ -576,6 +586,7 @@
 
       // โหมดเช็คอิน
       if(VIP_DEPTS.has(p.dept)){ showVIPModal(p, fullName); return; }
+      if(NETWORK_DEPTS.has(p.dept)){ showNetworkModal(p, fullName); return; }
       if(EXEMPT_DEPTS.has(p.dept)){
         if(isWalkin){
           const _exTodayRes=await sbFetch(`/rest/v1/checkins?participant_id=eq.${p.id}&day=eq.${day}&event_year=eq.${encodeURIComponent(activeYear)}&select=id`,'GET');
@@ -743,12 +754,12 @@
 
   function showVIPModal(p, fullName){
     document.getElementById('modalStatus').textContent='🎖️ VIP';
-    document.getElementById('modalStatus').className='modal-status success';
+    document.getElementById('modalStatus').className='modal-status vip';
     document.getElementById('modalTitle').textContent='ได้รับการยกเว้น (ไม่ต้องเช็คอิน)';
     const nameEl=document.getElementById('modalName');
     nameEl.style.display=''; nameEl.textContent=fullName;
     document.getElementById('modalDept').style.display='none';
-    document.getElementById('btnOk').className='btn-ok success';
+    document.getElementById('btnOk').className='btn-ok vip';
     document.getElementById('btnOk').style.display='block';
     const det=document.getElementById('modalDetail');
     det.style.display='block';
@@ -758,20 +769,38 @@
       </div>`;
     document.getElementById('modalOverlay').classList.remove('hidden');
   }
-  function showStaffExemptModal(p, fullName){
-    document.getElementById('modalStatus').textContent='👥 Staff';
-    document.getElementById('modalStatus').className='modal-status success';
+  function showNetworkModal(p, fullName){
+    document.getElementById('modalStatus').textContent='🤝 เครือข่ายกรม';
+    document.getElementById('modalStatus').className='modal-status network';
     document.getElementById('modalTitle').textContent='ได้รับการยกเว้น (ไม่ต้องเช็คอิน)';
     const nameEl=document.getElementById('modalName');
     nameEl.style.display=''; nameEl.textContent=fullName;
     document.getElementById('modalDept').style.display='none';
-    document.getElementById('btnOk').className='btn-ok success';
+    document.getElementById('btnOk').className='btn-ok network';
+    document.getElementById('btnOk').style.display='block';
+    const det=document.getElementById('modalDetail');
+    det.style.display='block';
+    det.innerHTML=`<div class="detail-row"><span class="detail-label">หน่วยงาน</span><span class="detail-val" style="color:#0891b2;">${p.dept||'-'}</span></div>
+      <div class="detail-row"><span class="detail-label">ชื่อ-สกุล</span><span class="detail-val">${p.participation_type||'-'}</span></div>
+      <div style="margin-top:10px;padding-top:10px;border-top:1px solid #cffafe;text-align:center;font-size:0.85rem;color:#0891b2;line-height:1.8;">
+        หากต้องการสิ่งใดเพิ่มเติม<br>ติดต่อ กองแผนงานและวิชาการ
+      </div>`;
+    document.getElementById('modalOverlay').classList.remove('hidden');
+  }
+  function showStaffExemptModal(p, fullName){
+    document.getElementById('modalStatus').textContent='👥 Staff';
+    document.getElementById('modalStatus').className='modal-status staff-ex';
+    document.getElementById('modalTitle').textContent='ได้รับการยกเว้น (ไม่ต้องเช็คอิน)';
+    const nameEl=document.getElementById('modalName');
+    nameEl.style.display=''; nameEl.textContent=fullName;
+    document.getElementById('modalDept').style.display='none';
+    document.getElementById('btnOk').className='btn-ok staff-ex';
     document.getElementById('btnOk').style.display='block';
     const det=document.getElementById('modalDetail');
     det.style.display='block';
     det.innerHTML=`<div class="detail-row"><span class="detail-label">ตำแหน่ง</span><span class="detail-val">${p.participation_type||'-'}</span></div>
       <div class="detail-row"><span class="detail-label">หน่วยงาน</span><span class="detail-val">${p.dept||'-'}</span></div>
-      <div style="margin-top:10px;padding-top:10px;border-top:1px solid #dbeafe;text-align:center;font-size:0.85rem;color:#1d4ed8;line-height:1.8;">
+      <div style="margin-top:10px;padding-top:10px;border-top:1px solid #ffedd5;text-align:center;font-size:0.85rem;color:#ea580c;line-height:1.8;">
         มีข้อสงสัยเพิ่มเติม<br>ติดต่อ กองแผนงานและวิชาการ
       </div>`;
     document.getElementById('modalOverlay').classList.remove('hidden');

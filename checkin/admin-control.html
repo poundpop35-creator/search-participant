@@ -381,6 +381,22 @@
       <div id="exemptStatus" style="margin-top:10px;"></div>
     </div>
 
+    <!-- Network -->
+    <div class="card">
+      <div class="card-title">🤝 หน่วยงานเครือข่ายกรม</div>
+      <p class="card-desc">
+        เมื่อ Staff สแกน QR ของบุคคลจากหน่วยงานในลิสต์นี้ ระบบจะแสดง<strong>การ์ดเครือข่ายกรม (สีฟ้า)</strong> แทนการเช็คอินปกติ<br>
+        เหมาะสำหรับ: โรงพยาบาล, สถาบัน, หรือหน่วยงานภายนอกที่เป็นเครือข่าย
+      </p>
+      <div id="networkChips" style="margin-bottom:12px;min-height:36px;"></div>
+      <div style="display:flex;gap:8px;margin-bottom:10px;">
+        <input id="networkInput" type="text" placeholder="ชื่อหน่วยงานเครือข่าย..." style="flex:1;border:1.5px solid var(--border);border-radius:10px;padding:9px 13px;font-family:'Sarabun',sans-serif;font-size:0.88rem;outline:none;">
+        <button class="btn btn-primary" onclick="addNetwork()">+ เพิ่ม</button>
+      </div>
+      <button class="btn btn-green btn-sm" onclick="saveNetwork()">💾 บันทึก Network List</button>
+      <div id="networkStatus" style="margin-top:10px;"></div>
+    </div>
+
     <!-- Danger Zone -->
     <div class="card">
       <div class="danger-box">
@@ -406,7 +422,7 @@ const H = {'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'appl
 let importType = 'pre';
 let csvHeaders = [], csvRows = [];
 let staffList = [], editIdx = null;
-let vipList = [], exemptList = [];
+let vipList = [], exemptList = [], networkList = [];
 let _syncTimer = null, _syncCountdown = null;
 
 // ─── AUTH ───
@@ -1070,6 +1086,9 @@ async function loadSettings(){
   const exempt=await sbGetSetting('exempt_depts');
   exemptList=exempt?JSON.parse(exempt):['กองแผนงานและวิชาการ'];
   renderExempt();
+  const net=await sbGetSetting('network_depts');
+  networkList=net?JSON.parse(net):[];
+  renderNetwork();
 }
 
 async function saveBg(){
@@ -1094,6 +1113,15 @@ function renderExempt(){
 function addExempt(){ const v=document.getElementById('exemptInput').value.trim(); if(!v) return; if(!exemptList.includes(v)) exemptList.push(v); document.getElementById('exemptInput').value=''; renderExempt(); }
 function removeExempt(i){ exemptList.splice(i,1); renderExempt(); }
 async function saveExempt(){ await sbSetSetting('exempt_depts',JSON.stringify(exemptList)); setStatus('exemptStatus','ok','✅ บันทึก Staff List แล้ว'); }
+
+function renderNetwork(){
+  document.getElementById('networkChips').innerHTML=networkList.map((d,i)=>
+    `<span class="vip-chip" style="background:#cffafe;color:#0e7490;">${d}<button onclick="removeNetwork(${i})" style="color:#0891b2;">✕</button></span>`
+  ).join('')||'<p style="color:#94a3b8;font-size:0.82rem;">ยังไม่มีหน่วยงานเครือข่าย</p>';
+}
+function addNetwork(){ const v=document.getElementById('networkInput').value.trim(); if(!v) return; if(!networkList.includes(v)) networkList.push(v); document.getElementById('networkInput').value=''; renderNetwork(); }
+function removeNetwork(i){ networkList.splice(i,1); renderNetwork(); }
+async function saveNetwork(){ await sbSetSetting('network_depts',JSON.stringify(networkList)); setStatus('networkStatus','ok','✅ บันทึก Network List แล้ว'); }
 
 // ─── INIT ───
 loadOverview();

@@ -880,16 +880,19 @@ async function fetchAll(path,ps=1000){
 let activeYear = '2568';
 let VIP_DEPTS = new Set(['อธิบดีกรมวิทยาศาสตร์การแพทย์','รองอธิบดีกรมวิทยาศาสตร์การแพทย์']);
 let EXEMPT_DEPTS = new Set(['กองแผนงานและวิชาการ']);
+let NETWORK_DEPTS = new Set([]);
 async function loadActiveYear(){
   try{
-    const [yearRes,vipRes,exemptRes]=await Promise.all([
+    const [yearRes,vipRes,exemptRes,netRes]=await Promise.all([
       fetch(`${SB_URL}/rest/v1/app_settings?key=eq.event_year&select=value`,{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}}),
       fetch(`${SB_URL}/rest/v1/app_settings?key=eq.vip_depts&select=value`,{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}}),
-      fetch(`${SB_URL}/rest/v1/app_settings?key=eq.exempt_depts&select=value`,{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}})
+      fetch(`${SB_URL}/rest/v1/app_settings?key=eq.exempt_depts&select=value`,{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}}),
+      fetch(`${SB_URL}/rest/v1/app_settings?key=eq.network_depts&select=value`,{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}})
     ]);
     const yd=await yearRes.json(); if(yd&&yd.length&&yd[0].value) activeYear=yd[0].value;
     const vd=await vipRes.json(); if(vd&&vd.length&&vd[0].value) VIP_DEPTS=new Set(JSON.parse(vd[0].value));
     const ed=await exemptRes.json(); if(ed&&ed.length&&ed[0].value) EXEMPT_DEPTS=new Set(JSON.parse(ed[0].value));
+    const nd=await netRes.json(); if(nd&&nd.length&&nd[0].value) NETWORK_DEPTS=new Set(JSON.parse(nd[0].value));
   }catch(e){}
 }
 
@@ -928,8 +931,8 @@ async function loadAll(){
       province:(p.province||'').trim()||(p.is_walkin===true&&isIn?'กรมวิทยาศาสตร์การแพทย์':'')};
   });
 
-  // Add virtual rows for VIP/exempt dept members (เช็คอินโดย admin ทุกวัน)
-  const allExemptDepts=[...VIP_DEPTS,...EXEMPT_DEPTS];
+  // Add virtual rows for VIP/exempt/network dept members (เช็คอินโดย admin ทุกวัน)
+  const allExemptDepts=[...VIP_DEPTS,...EXEMPT_DEPTS,...NETWORK_DEPTS];
   if(allExemptDepts.length>0){
     try{
       const orFilter=allExemptDepts.map(d=>`dept.eq.${encodeURIComponent(d)}`).join(',');
@@ -937,7 +940,7 @@ async function loadAll(){
       const checkedIds=new Set(allData.map(r=>r.participantId));
       exemptPeople.forEach(p=>{
         if(checkedIds.has(p.id)) return;
-        const exemptType=VIP_DEPTS.has(p.dept)?'vip':'staff';
+        const exemptType=VIP_DEPTS.has(p.dept)?'vip':NETWORK_DEPTS.has(p.dept)?'network':'staff';
         allData.unshift({id:`exempt_${p.id}`,participantId:p.id,day:0,time:null,scannedBy:'admin',
           name:buildName(p),dept:p.dept||'-',isIn:true,tag:p.tag||'-',items:'',
           pt:p.participation_type||'-',isWalkin:false,
@@ -1792,11 +1795,14 @@ function renderTable(){
   if(!page.length){document.getElementById('tBody').innerHTML='<tr><td colspan="11" class="loading-td">ไม่พบข้อมูล</td></tr>';return;}
   document.getElementById('tBody').innerHTML=page.map((r,i)=>{
     if(r.isVIPExempt){
-      const isVIP=r.exemptType==='vip';
+      const isVIP=r.exemptType==='vip', isNet=r.exemptType==='network';
       const badge=isVIP
         ?`<span style="display:inline-block;background:#ede9fe;color:#6d28d9;padding:2px 8px;border-radius:12px;font-size:0.7rem;font-weight:700;margin-left:4px;">🎖️ VIP</span>`
-        :`<span style="display:inline-block;background:#dbeafe;color:#1e40af;padding:2px 8px;border-radius:12px;font-size:0.7rem;font-weight:700;margin-left:4px;">👥 Staff</span>`;
-      const rowBg=isVIP?'background:#faf5ff;':'background:#eff6ff;';
+        :isNet
+        ?`<span style="display:inline-block;background:#cffafe;color:#0e7490;padding:2px 8px;border-radius:12px;font-size:0.7rem;font-weight:700;margin-left:4px;">🤝 เครือข่าย</span>`
+        :`<span style="display:inline-block;background:#ffedd5;color:#9a3412;padding:2px 8px;border-radius:12px;font-size:0.7rem;font-weight:700;margin-left:4px;">👥 Staff</span>`;
+      const rowBg=isVIP?'background:#faf5ff;':isNet?'background:#ecfeff;':'background:#fff7ed;';
+      const color=isVIP?'#6d28d9':isNet?'#0891b2':'#ea580c';
       const contactCell=`<span style="color:#64748b;font-size:0.75rem;">ติดต่อกองแผน</span>`;
       return`<tr style="${rowBg}">
         <td>${start+i+1}</td>
@@ -1805,8 +1811,8 @@ function renderTable(){
         <td><span class="badge b-in">ภายใน</span></td>
         <td>${r.pt}</td>
         <td><span class="badge b-staff">Staff</span></td>
-        <td><span style="font-size:0.75rem;color:${isVIP?'#6d28d9':'#1d4ed8'};font-weight:600;">เช็คอินแล้วทุกวัน</span></td>
-        <td style="font-size:0.75rem;color:${isVIP?'#6d28d9':'#1d4ed8'};font-weight:600;">โดย admin</td>
+        <td><span style="font-size:0.75rem;color:${color};font-weight:600;">เช็คอินแล้วทุกวัน</span></td>
+        <td style="font-size:0.75rem;color:${color};font-weight:600;">โดย admin</td>
         <td style="white-space:nowrap;">${contactCell}</td>
         <td style="white-space:nowrap;">${contactCell}</td>
         <td style="font-size:0.8rem;color:#64748b;">admin</td>
