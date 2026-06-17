@@ -135,6 +135,7 @@
     <span class="tb-sep"></span>
     <!-- บันทึกพิเศษ -->
     <div class="tb-group">
+      <button class="tbtn" onclick="syncBundleAll()" style="background:#0891b2;color:white;border-color:#0891b2;font-weight:700;" title="ซิงค์คนที่ติ๊กรับไปแล้วอย่างนึง ให้รับครบทุกอย่าง (เฉพาะกลุ่มได้ทุกอย่าง)">🔧 ซิงค์ข้อมูล</button>
       <button class="tbtn" onclick="markDirectorsReceived()" style="background:#f59e0b;color:white;border-color:#f59e0b;font-weight:700;" title="บันทึกว่าอธิบดี+รองอธิบดีรับของแล้วทั้งหมด">👑 บันทึกผู้บริหาร</button>
     </div>
     <span class="tb-sep"></span>
@@ -747,7 +748,7 @@ function renderTable(){
     const tT=r.received?r.receivedTime:'-';
     const sT=r.received?(r.scannedBy||'-'):'-';
     const pT=r.received?(r.receivedBy||'-'):'-';
-    const adminAttrs=isAdmin?` data-id="${r.id}" data-raw-date="${r.rawDate||''}" data-received-by="${(r.receivedBy||'').replace(/"/g,'&quot;')}" data-received="${r.received}" data-field="bag_received_date" data-scan-by="${(r.scannedBy||'').replace(/"/g,'&quot;')}" data-editing="0"`:'';
+    const adminAttrs=isAdmin?` data-id="${r.id}" data-raw-date="${r.rawDate||''}" data-received-by="${(r.receivedBy||'').replace(/"/g,'&quot;')}" data-received="${r.received}" data-field="bag_received_date" data-scan-by="${(r.scannedBy||'').replace(/"/g,'&quot;')}" data-editing="0" data-has-shirt="${r.shirtStatus!=='none'?'1':'0'}"`:'';
     const actionCell=isAdmin?`<td style="white-space:nowrap;"><button class="btn-edit-row" onclick="startEdit(this)">✏️ แก้ไข</button></td>`:'';
     const shirtBadge=r.shirtStatus==='received'?`<span class="badge b-cross-received">เสื้อ: รับแล้ว</span>`:r.shirtStatus==='pending'?`<span class="badge b-cross-pending">เสื้อ: ยังไม่รับ</span>`:`<span class="badge b-cross-none">ไม่มีสิทธิ์รับเสื้อ</span>`;
     return `<tr${adminAttrs}>
@@ -832,7 +833,7 @@ function renderShirtTable(){
     const tT=r.received?r.receivedTime:'-';
     const sT=r.received?(r.scannedBy||'-'):'-';
     const pT=r.received?(r.shirtReceivedBy||'-'):'-';
-    const adminAttrs=isAdmin?` data-id="${r.id}" data-raw-date="${r.rawDate||''}" data-received-by="${(r.shirtReceivedBy||'').replace(/"/g,'&quot;')}" data-received="${r.received}" data-field="shirt_received_date" data-scan-by="${(r.scannedBy||'').replace(/"/g,'&quot;')}" data-editing="0"`:'';
+    const adminAttrs=isAdmin?` data-id="${r.id}" data-raw-date="${r.rawDate||''}" data-received-by="${(r.shirtReceivedBy||'').replace(/"/g,'&quot;')}" data-received="${r.received}" data-field="shirt_received_date" data-scan-by="${(r.scannedBy||'').replace(/"/g,'&quot;')}" data-editing="0" data-has-bag="${r.bagStatus!=='none'?'1':'0'}"`:'';
     const actionCell=isAdmin?`<td style="white-space:nowrap;"><button class="btn-edit-row" onclick="startEdit(this)">✏️ แก้ไข</button></td>`:'';
     const bagBadge=r.bagStatus==='received'?`<span class="badge b-cross-received">${r.bagLabel}: รับแล้ว</span>`:r.bagStatus==='pending'?`<span class="badge b-cross-pending">${r.bagLabel}: ยังไม่รับ</span>`:`<span class="badge b-cross-none">ไม่มีสิทธิ์รับกระเป๋า</span>`;
     return `<tr${adminAttrs}>
@@ -1152,6 +1153,16 @@ async function commitEdit(btn){
     nowRec=false;
   }
   patch[proxyField]=proxyVal||null;
+  if(nowRec){
+    const recDate=patch[field]||new Date().toISOString();
+    const scanner=patch[scanField]||row.dataset.scanBy||'';
+    if(isBag&&row.dataset.hasShirt==='1'){
+      patch.shirt_received=true;patch.shirt_received_date=recDate;patch.shirt_scanned_by=scanner;
+    }
+    if(!isBag&&row.dataset.hasBag==='1'){
+      patch.bag_received=true;patch.bag_received_date=recDate;patch.bag_scanned_by=scanner;
+    }
+  }
   btn.disabled=true;btn.textContent='⏳';
   try{
     const res=await fetch(`${SB_URL}/rest/v1/participants?id=eq.${id}`,{
@@ -1196,6 +1207,28 @@ function cancelEdit(btn){
   row.querySelector('.cell-proxy').textContent=received?(receivedBy||'-'):'-';
   btn.closest('td').innerHTML=`<button class="btn-edit-row" onclick="startEdit(this)">✏️ แก้ไข</button>`;
   row.dataset.editing='0';
+}
+
+async function syncBundleAll(){
+  if(!isAdmin){alert('เฉพาะแอดมินเท่านั้น');return;}
+  const toFix=allOverviewData.filter(r=>r.bundle==='all'&&(r.bagRec!==r.shirtRec));
+  if(!toFix.length){alert('ไม่พบข้อมูลที่ต้องซิงค์ — ทุกคนในกลุ่ม "ได้ทุกอย่าง" ครบแล้ว');return;}
+  if(!confirm(`พบ ${toFix.length} คน ที่ติ๊กรับไปแค่อย่างเดียว\nจะซิงค์ให้รับครบทุกอย่าง — ดำเนินการต่อ?`))return;
+  const nowISO=new Date(Date.now()+7*3600000).toISOString().replace('Z','+07:00');
+  let ok=0,fail=0;
+  for(const r of toFix){
+    const patch={};
+    if(!r.bagRec){const d=r.shirtRecDate||nowISO;patch.bag_received=true;patch.bag_received_date=d;patch.bag_scanned_by='แอดมิน';}
+    if(!r.shirtRec){const d=r.bagRecDate||nowISO;patch.shirt_received=true;patch.shirt_received_date=d;patch.shirt_scanned_by='แอดมิน';}
+    const res=await fetch(`${SB_URL}/rest/v1/participants?id=eq.${r.id}`,{
+      method:'PATCH',
+      headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify(patch)
+    });
+    if(res.ok||res.status===204)ok++;else fail++;
+  }
+  alert(`ซิงค์เรียบร้อย: ${ok} คน${fail?` (ผิดพลาด ${fail} คน)`:''}`);
+  await loadAll();
 }
 
 async function markDirectorsReceived(){
