@@ -147,9 +147,16 @@
   <div class="modal">
     <h3 id="cfTitle">ยืนยัน</h3>
     <p id="cfMsg" style="font-size:0.88rem;color:#475569;margin-bottom:16px;line-height:1.7;"></p>
+    <div id="cfTypeWrap" style="margin-bottom:14px;">
+      <label style="display:block;font-size:0.78rem;font-weight:700;color:#dc2626;margin-bottom:6px;" id="cfTypeLabel">พิมพ์เพื่อยืนยัน:</label>
+      <input id="cfTypeInput" type="text" autocomplete="off" spellcheck="false"
+        style="width:100%;border:2px solid #fca5a5;border-radius:8px;padding:9px 12px;font-family:'Sarabun',sans-serif;font-size:1rem;outline:none;transition:border-color .15s;"
+        oninput="checkCfInput()" placeholder="">
+      <p id="cfTypeHint" style="font-size:0.73rem;color:#94a3b8;margin-top:4px;"></p>
+    </div>
     <div style="display:flex;gap:10px;">
       <button class="btn btn-ghost" style="flex:1;" onclick="closeCf()">ยกเลิก</button>
-      <button class="btn btn-red" style="flex:1;" id="cfOkBtn">ยืนยัน</button>
+      <button class="btn btn-red" style="flex:1;opacity:0.4;pointer-events:none;" id="cfOkBtn">ยืนยัน</button>
     </div>
   </div>
 </div>
@@ -535,13 +542,36 @@ function setStatus(id,type,html){
 }
 
 // ─── CONFIRM MODAL ───
+let _cfRequired='';
 function askClear(target,title,msg){
+  _cfRequired='ลบทั้งหมด';
   document.getElementById('cfTitle').textContent=title;
   document.getElementById('cfMsg').textContent=msg;
+  document.getElementById('cfTypeLabel').textContent='พิมพ์ "ลบทั้งหมด" เพื่อยืนยัน:';
+  document.getElementById('cfTypeInput').value='';
+  document.getElementById('cfTypeInput').placeholder='ลบทั้งหมด';
+  document.getElementById('cfTypeHint').textContent='ต้องพิมพ์ตรงทุกตัวอักษร';
+  const btn=document.getElementById('cfOkBtn');
+  btn.style.opacity='0.4'; btn.style.pointerEvents='none';
+  btn.onclick=()=>{ closeCf(); doClear(target); };
   document.getElementById('cfModal').classList.remove('hidden');
-  document.getElementById('cfOkBtn').onclick=()=>{ closeCf(); doClear(target); };
+  setTimeout(()=>document.getElementById('cfTypeInput').focus(),100);
 }
-function closeCf(){ document.getElementById('cfModal').classList.add('hidden'); }
+function checkCfInput(){
+  const val=document.getElementById('cfTypeInput').value;
+  const btn=document.getElementById('cfOkBtn');
+  const match=val===_cfRequired;
+  btn.style.opacity=match?'1':'0.4';
+  btn.style.pointerEvents=match?'auto':'none';
+  document.getElementById('cfTypeInput').style.borderColor=val.length===0?'#fca5a5':match?'#16a34a':'#fca5a5';
+}
+function closeCf(){
+  document.getElementById('cfModal').classList.add('hidden');
+  document.getElementById('cfTypeInput').value='';
+  document.getElementById('cfTypeInput').style.borderColor='#fca5a5';
+  const btn=document.getElementById('cfOkBtn');
+  btn.style.opacity='0.4'; btn.style.pointerEvents='none';
+}
 async function doClear(target){
   try{
     if(target==='checkins') await fetch(`${SB_URL}/rest/v1/checkins?id=gte.0`,{method:'DELETE',headers:H});
@@ -627,12 +657,25 @@ async function saveEventName(){
 async function askClearByYear(target){
   const year = await sbGetSetting('event_year');
   const label = target==='checkins' ? 'เช็คอิน' : 'ผู้เข้าร่วมงาน';
-  if(!confirm(`🗑️ ลบข้อมูล${label}ทั้งหมดของปี พ.ศ. ${year}\n\nการดำเนินการนี้ไม่สามารถกู้คืนได้\nยืนยันหรือไม่?`)) return;
-  try{
-    if(target==='checkins') await fetch(`${SB_URL}/rest/v1/checkins?event_year=eq.${encodeURIComponent(year)}`,{method:'DELETE',headers:H});
-    if(target==='participants') await fetch(`${SB_URL}/rest/v1/participants?event_year=eq.${encodeURIComponent(year)}`,{method:'DELETE',headers:H});
-    setStatus('clearStatus','ok',`✅ ลบข้อมูล${label}ปี ${year} สำเร็จ`);
-  }catch(e){ setStatus('clearStatus','err','❌ '+e.message); }
+  _cfRequired = year;
+  document.getElementById('cfTitle').textContent=`🗑️ ลบข้อมูล${label}ปี ${year}`;
+  document.getElementById('cfMsg').textContent=`ข้อมูล${label}ทั้งหมดของปี พ.ศ. ${year} จะถูกลบถาวร ไม่สามารถกู้คืนได้`;
+  document.getElementById('cfTypeLabel').textContent=`พิมพ์ปี "${year}" เพื่อยืนยัน:`;
+  document.getElementById('cfTypeInput').value='';
+  document.getElementById('cfTypeInput').placeholder=year;
+  document.getElementById('cfTypeHint').textContent=`พิมพ์ตัวเลขปี พ.ศ. ${year} เพื่อยืนยัน`;
+  const btn=document.getElementById('cfOkBtn');
+  btn.style.opacity='0.4'; btn.style.pointerEvents='none';
+  btn.onclick=async()=>{
+    closeCf();
+    try{
+      if(target==='checkins') await fetch(`${SB_URL}/rest/v1/checkins?event_year=eq.${encodeURIComponent(year)}`,{method:'DELETE',headers:H});
+      if(target==='participants') await fetch(`${SB_URL}/rest/v1/participants?event_year=eq.${encodeURIComponent(year)}`,{method:'DELETE',headers:H});
+      setStatus('clearStatus','ok',`✅ ลบข้อมูล${label}ปี ${year} สำเร็จ`);
+    }catch(e){ setStatus('clearStatus','err','❌ '+e.message); }
+  };
+  document.getElementById('cfModal').classList.remove('hidden');
+  setTimeout(()=>document.getElementById('cfTypeInput').focus(),100);
 }
 
 async function createNewEvent(){
