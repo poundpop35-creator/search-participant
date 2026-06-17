@@ -324,10 +324,17 @@
 
   <!-- ===== OVERVIEW SECTION ===== -->
   <div id="sectionOverview">
-    <div class="stats-grid">
-      <div class="stat-card total"><div class="stat-label">กระเป๋า (รับแล้ว/มีสิทธิ์)</div><div class="stat-num" id="ovBagStat" style="color:#0d2b6b;">-</div><div class="stat-sub" id="ovBagSub">-</div></div>
-      <div class="stat-card total"><div class="stat-label">บทคัดย่อ (รับแล้ว/มีสิทธิ์)</div><div class="stat-num" id="ovBkdStat" style="color:#ea580c;">-</div><div class="stat-sub" id="ovBkdSub">-</div></div>
-      <div class="stat-card total"><div class="stat-label">เสื้อ (รับแล้ว/มีสิทธิ์)</div><div class="stat-num" id="ovShirtStat" style="color:#7c3aed;">-</div><div class="stat-sub" id="ovShirtSub">-</div></div>
+    <div class="stats-grid" style="grid-template-columns:repeat(auto-fit,minmax(140px,1fr));">
+      <div class="stat-card total" style="border-top:4px solid #0d2b6b;cursor:pointer;" onclick="document.getElementById('ovBundle').value='all';applyOvFilters()">
+        <div class="stat-label">🎒📚👕 ได้ทุกอย่าง</div><div class="stat-num" id="ovStatAll" style="color:#0d2b6b;">-</div><div class="stat-sub" id="ovSubAll">-</div></div>
+      <div class="stat-card total" style="border-top:4px solid #0891b2;cursor:pointer;" onclick="document.getElementById('ovBundle').value='bag-bkd';applyOvFilters()">
+        <div class="stat-label">🎒📚 กระเป๋า+บทคัดย่อ</div><div class="stat-num" id="ovStatBagBkd" style="color:#0891b2;">-</div><div class="stat-sub" id="ovSubBagBkd">-</div></div>
+      <div class="stat-card total" style="border-top:4px solid #64748b;cursor:pointer;" onclick="document.getElementById('ovBundle').value='bag-only';applyOvFilters()">
+        <div class="stat-label">🎒 กระเป๋าอย่างเดียว</div><div class="stat-num" id="ovStatBagOnly" style="color:#64748b;">-</div><div class="stat-sub" id="ovSubBagOnly">-</div></div>
+      <div class="stat-card total" style="border-top:4px solid #7c3aed;cursor:pointer;" onclick="document.getElementById('ovBundle').value='shirt-only';applyOvFilters()">
+        <div class="stat-label">👕 เสื้ออย่างเดียว</div><div class="stat-num" id="ovStatShirtOnly" style="color:#7c3aed;">-</div><div class="stat-sub" id="ovSubShirtOnly">-</div></div>
+      <div class="stat-card total" style="border-top:4px solid #ea580c;cursor:pointer;" onclick="document.getElementById('ovBundle').value='bkd-only';applyOvFilters()">
+        <div class="stat-label">📚 บทคัดย่ออย่างเดียว</div><div class="stat-num" id="ovStatBkdOnly" style="color:#ea580c;">-</div><div class="stat-sub" id="ovSubBkdOnly">-</div></div>
     </div>
     <div class="filter-bar">
       <div class="filter-group">
@@ -378,6 +385,7 @@
               <th style="text-align:center;min-width:100px;">🎒<br>กระเป๋า</th>
               <th style="text-align:center;min-width:100px;">📚<br>บทคัดย่อ</th>
               <th style="text-align:center;min-width:100px;">👕<br>เสื้อ</th>
+              <th style="min-width:90px;">เวลาแรกที่รับ</th>
             </tr>
           </thead>
           <tbody id="ovBody"><tr><td colspan="6" class="loading-td">กำลังโหลด...</td></tr></tbody>
@@ -848,6 +856,9 @@ function getShirtRows(){
 
 // ===== OVERVIEW =====
 let allOverviewData=[],ovFiltered=[],ovPage=1;
+const BUNDLE_LABELS={'all':'🎒📚👕 ได้ทุกอย่าง','bag-bkd':'🎒📚 กระเป๋า+บทคัดย่อ','bag-only':'🎒 กระเป๋าอย่างเดียว','shirt-only':'👕 เสื้ออย่างเดียว','bkd-only':'📚 บทคัดย่ออย่างเดียว','other':'อื่นๆ'};
+const BUNDLE_ORDER={'all':0,'bag-bkd':1,'bag-only':2,'shirt-only':3,'bkd-only':4,'other':5};
+function getBundleKey(b,k,s){if(b&&k&&s)return'all';if(b&&k&&!s)return'bag-bkd';if(b&&!k&&!s)return'bag-only';if(!b&&!k&&s)return'shirt-only';if(!b&&k&&!s)return'bkd-only';return'other';}
 function buildOverviewData(res){
   const _dIdx=Object.fromEntries(DEPTS.map((d,i)=>[d,i]));
   allOverviewData=res.filter(p=>{
@@ -867,37 +878,33 @@ function buildOverviewData(res){
     const hasShirt=!!(p.shirt_size&&p.shirt_size.trim());
     const bagRec=p.bag_received===true||p.bag_received===1||p.bag_received==='true';
     const shirtRec=p.shirt_received===true||p.shirt_received===1||p.shirt_received==='true';
-    return{id:p.id,name:`${(p.prefix||'').replace(/\s*\([^)]*\)/g,'').trim()} ${p.first_name||''} ${p.last_name||''}`.trim().replace(/\s+/g,' '),dept,bagElig,hasBkd,hasShirt,bagRec,shirtRec};
+    const bKey=getBundleKey(bagElig,hasBkd,hasShirt);
+    return{id:p.id,name:`${(p.prefix||'').replace(/\s*\([^)]*\)/g,'').trim()} ${p.first_name||''} ${p.last_name||''}`.trim().replace(/\s+/g,' '),dept,bagElig,hasBkd,hasShirt,bagRec,shirtRec,bagRecDate:p.bag_received_date||null,shirtRecDate:p.shirt_received_date||null,bundle:bKey};
   });
-  allOverviewData.sort((a,b)=>{const ia=_dIdx[a.dept]??Infinity,ib=_dIdx[b.dept]??Infinity;if(ia!==ib)return ia-ib;return a.name.localeCompare(b.name,'th');});
+  allOverviewData.sort((a,b)=>{
+    const bo=BUNDLE_ORDER;
+    const oa=bo[a.bundle]??99,ob=bo[b.bundle]??99;
+    if(oa!==ob)return oa-ob;
+    const ia=_dIdx[a.dept]??Infinity,ib=_dIdx[b.dept]??Infinity;
+    if(ia!==ib)return ia-ib;
+    return a.name.localeCompare(b.name,'th');
+  });
   const ovDeptSel=document.getElementById('ovDept');
   const depts=[...new Set(allOverviewData.map(r=>r.dept))];
   const deptsSorted=[...DEPTS.filter(d=>depts.includes(d)),...depts.filter(d=>!DEPTS.includes(d)).sort((a,b)=>a.localeCompare(b,'th'))];
   ovDeptSel.innerHTML='<option value="">ทั้งหมด</option>'+deptsSorted.map(d=>`<option value="${d.replace(/"/g,'&quot;')}">${d}</option>`).join('');
-  const bagTotal=allOverviewData.filter(r=>r.bagElig).length;
-  const bagRec=allOverviewData.filter(r=>r.bagElig&&r.bagRec).length;
-  const bkdTotal=allOverviewData.filter(r=>r.hasBkd).length;
-  const bkdRec=allOverviewData.filter(r=>r.hasBkd&&(r.bagElig?r.bagRec:r.shirtRec)).length;
-  const shirtTotal=allOverviewData.filter(r=>r.hasShirt).length;
-  const shirtRec=allOverviewData.filter(r=>r.hasShirt&&r.shirtRec).length;
-  document.getElementById('ovBagStat').textContent=`${bagRec}/${bagTotal}`;
-  document.getElementById('ovBagSub').textContent=`รับแล้ว (${bagTotal?Math.round(bagRec/bagTotal*100):0}%)`;
-  document.getElementById('ovBkdStat').textContent=`${bkdRec}/${bkdTotal}`;
-  document.getElementById('ovBkdSub').textContent=`รับแล้ว (${bkdTotal?Math.round(bkdRec/bkdTotal*100):0}%)`;
-  document.getElementById('ovShirtStat').textContent=`${shirtRec}/${shirtTotal}`;
-  document.getElementById('ovShirtSub').textContent=`รับแล้ว (${shirtTotal?Math.round(shirtRec/shirtTotal*100):0}%)`;
+  const bundles=['all','bag-bkd','bag-only','shirt-only','bkd-only'];
+  const ids=[['ovStatAll','ovSubAll'],['ovStatBagBkd','ovSubBagBkd'],['ovStatBagOnly','ovSubBagOnly'],['ovStatShirtOnly','ovSubShirtOnly'],['ovStatBkdOnly','ovSubBkdOnly']];
+  bundles.forEach((bk,i)=>{
+    const grp=allOverviewData.filter(r=>r.bundle===bk);
+    const tot=grp.length;
+    const rec=grp.filter(r=>{const bkdRec=r.bagElig?r.bagRec:r.shirtRec;const total=[r.bagElig,r.hasBkd,r.hasShirt].filter(Boolean).length;const rv=[r.bagElig&&r.bagRec,r.hasBkd&&bkdRec,r.hasShirt&&r.shirtRec].filter(Boolean).length;return rv>=total&&total>0;}).length;
+    document.getElementById(ids[i][0]).textContent=`${rec}/${tot}`;
+    document.getElementById(ids[i][1]).textContent=`รับครบแล้ว (${tot?Math.round(rec/tot*100):0}%)`;
+  });
   applyOvFilters();
 }
-function matchBundle(r,bundle){
-  if(!bundle)return true;
-  const b=r.bagElig,k=r.hasBkd,s=r.hasShirt;
-  if(bundle==='shirt-only') return  s&&!b&&!k;
-  if(bundle==='bag-bkd')    return  b&& k&&!s;
-  if(bundle==='bag-only')   return  b&&!k&&!s;
-  if(bundle==='bkd-only')   return !b&& k&&!s;
-  if(bundle==='all')        return  b&& k&& s;
-  return true;
-}
+function matchBundle(r,bundle){return !bundle||r.bundle===bundle;}
 function applyOvFilters(){
   const q=(document.getElementById('ovSearch').value||'').trim().toLowerCase();
   const dept=document.getElementById('ovDept').value;
@@ -932,32 +939,50 @@ function renderOverviewTable(){
   document.getElementById('ovInfo').textContent=`แสดง ${tot===0?0:start+1}–${Math.min(start+PAGE,tot)} จาก ${tot.toLocaleString()} รายการ`;
   document.getElementById('ovPrev').disabled=ovPage<=1;
   document.getElementById('ovNext').disabled=ovPage>=totPages;
-  if(!page.length){document.getElementById('ovBody').innerHTML='<tr><td colspan="6" class="loading-td">ไม่พบข้อมูล</td></tr>';return;}
+  if(!page.length){document.getElementById('ovBody').innerHTML='<tr><td colspan="7" class="loading-td">ไม่พบข้อมูล</td></tr>';return;}
   function itemCell(eligible,received){
     if(!eligible)return`<td style="background:#f1f5f9;text-align:center;color:#94a3b8;font-size:0.82rem;padding:10px 6px;">—</td>`;
     if(received)return`<td style="background:#dcfce7;text-align:center;color:#166534;font-weight:700;font-size:0.85rem;padding:10px 6px;">✓ รับแล้ว</td>`;
     return`<td style="background:#fef9c3;text-align:center;color:#854d0e;font-weight:700;font-size:0.85rem;padding:10px 6px;">✗ ยังไม่รับ</td>`;
   }
-  document.getElementById('ovBody').innerHTML=page.map((r,i)=>{
+  let rows='',lastBundle='';
+  page.forEach((r,i)=>{
+    if(r.bundle!==lastBundle){
+      lastBundle=r.bundle;
+      rows+=`<tr><td colspan="7" style="background:#e8f0fe;color:#0d2b6b;font-weight:700;font-size:0.78rem;padding:7px 14px;letter-spacing:0.04em;">${BUNDLE_LABELS[r.bundle]||r.bundle}</td></tr>`;
+    }
     const bkdRec=r.bagElig?r.bagRec:r.shirtRec;
-    return`<tr>
-    <td>${start+i+1}</td>
-    <td style="font-weight:600;">${r.name}</td>
-    <td style="max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#64748b;font-size:0.83rem;" title="${r.dept}">${r.dept}</td>
-    ${itemCell(r.bagElig,r.bagRec)}
-    ${itemCell(r.hasBkd,bkdRec)}
-    ${itemCell(r.hasShirt,r.shirtRec)}
-  </tr>`;}).join('');
+    const times=[];
+    if(r.bagRec&&r.bagRecDate)times.push(new Date(r.bagRecDate));
+    if(r.shirtRec&&r.shirtRecDate)times.push(new Date(r.shirtRecDate));
+    const firstT=times.length?times.reduce((a,b)=>a<b?a:b):null;
+    const timeStr=firstT?firstT.toLocaleString('th-TH',{timeZone:'Asia/Bangkok',hour:'2-digit',minute:'2-digit',day:'2-digit',month:'2-digit'}):'-';
+    rows+=`<tr>
+      <td>${start+i+1}</td>
+      <td style="font-weight:600;">${r.name}</td>
+      <td style="max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#64748b;font-size:0.83rem;" title="${r.dept}">${r.dept}</td>
+      ${itemCell(r.bagElig,r.bagRec)}
+      ${itemCell(r.hasBkd,bkdRec)}
+      ${itemCell(r.hasShirt,r.shirtRec)}
+      <td style="font-size:0.8rem;color:#475569;">${timeStr}</td>
+    </tr>`;
+  });
+  document.getElementById('ovBody').innerHTML=rows;
 }
 function exportOvExcel(){
   if(!ovFiltered.length)return;
   const wb=XLSX.utils.book_new();
   const ws=XLSX.utils.aoa_to_sheet([
-    ['#','ชื่อ-นามสกุล','หน่วยงาน','กระเป๋า','บทคัดย่อ','เสื้อ'],
-    ...ovFiltered.map((r,i)=>[i+1,r.name,r.dept,
-      r.bagElig?(r.bagRec?'รับแล้ว':'ยังไม่รับ'):'ไม่มีสิทธิ์',
-      r.hasBkd?(r.bagRec?'รับแล้ว':'ยังไม่รับ'):'ไม่มีสิทธิ์',
-      r.hasShirt?(r.shirtRec?'รับแล้ว':'ยังไม่รับ'):'ไม่มีสิทธิ์'])
+    ['#','ชุดสิทธิ์','ชื่อ-นามสกุล','หน่วยงาน','กระเป๋า','บทคัดย่อ','เสื้อ','เวลาแรกที่รับ'],
+    ...ovFiltered.map((r,i)=>{
+      const bkdRec=r.bagElig?r.bagRec:r.shirtRec;
+      const times=[];if(r.bagRec&&r.bagRecDate)times.push(new Date(r.bagRecDate));if(r.shirtRec&&r.shirtRecDate)times.push(new Date(r.shirtRecDate));
+      const firstT=times.length?times.reduce((a,b)=>a<b?a:b):null;
+      const timeStr=firstT?firstT.toLocaleString('th-TH',{timeZone:'Asia/Bangkok',hour:'2-digit',minute:'2-digit',day:'2-digit',month:'2-digit'}):'-';
+      return[i+1,BUNDLE_LABELS[r.bundle]||'-',r.name,r.dept,
+        r.bagElig?(r.bagRec?'รับแล้ว':'ยังไม่รับ'):'ไม่มีสิทธิ์',
+        r.hasBkd?(bkdRec?'รับแล้ว':'ยังไม่รับ'):'ไม่มีสิทธิ์',
+        r.hasShirt?(r.shirtRec?'รับแล้ว':'ยังไม่รับ'):'ไม่มีสิทธิ์',timeStr];})
   ]);
   XLSX.utils.book_append_sheet(wb,ws,'ภาพรวม');
   XLSX.writeFile(wb,`overview_${activeYear}.xlsx`);
