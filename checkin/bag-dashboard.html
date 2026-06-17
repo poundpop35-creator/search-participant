@@ -325,9 +325,9 @@
   <!-- ===== OVERVIEW SECTION ===== -->
   <div id="sectionOverview">
     <div class="stats-grid" style="grid-template-columns:repeat(auto-fit,minmax(140px,1fr));">
-      <div class="stat-card total" style="border-top:4px solid #16a34a;">
+      <div class="stat-card total" style="border-top:4px solid #16a34a;cursor:pointer;" onclick="resetOvFilters()">
         <div class="stat-label">ผู้มีสิทธิ์รับของทั้งหมด</div><div class="stat-num" id="ovStatTotal" style="color:#16a34a;">-</div><div class="stat-sub" id="ovSubTotal">-</div></div>
-      <div class="stat-card received" style="border-top:4px solid #0891b2;">
+      <div class="stat-card received" style="border-top:4px solid #0891b2;cursor:pointer;" onclick="document.getElementById('ovStatus').value='any-received';document.getElementById('ovBundle').value='';applyOvFilters()">
         <div class="stat-label">รับของแล้ว (อย่างน้อย 1 อย่าง)</div><div class="stat-num" id="ovStatDone" style="color:#0891b2;">-</div><div class="stat-sub" id="ovSubDone">-</div></div>
       <div class="stat-card total" style="border-top:4px solid #0d2b6b;cursor:pointer;" onclick="document.getElementById('ovBundle').value='all';applyOvFilters()">
         <div class="stat-label">🎒📚👕 ได้ทุกอย่าง</div><div class="stat-num" id="ovStatAll" style="color:#0d2b6b;">-</div><div class="stat-sub" id="ovSubAll">-</div></div>
@@ -369,6 +369,7 @@
         <div class="filter-label">สถานะ</div>
         <select class="filter-select" id="ovStatus" onchange="applyOvFilters()">
           <option value="">ทั้งหมด</option>
+          <option value="any-received">รับของแล้ว (อย่างน้อย 1 อย่าง)</option>
           <option value="all-received">รับครบทุกอย่างแล้ว</option>
           <option value="partial">รับบางอย่าง</option>
           <option value="none">ยังไม่รับเลย</option>
@@ -940,6 +941,7 @@ function applyOvFilters(){
       const bkdRec=r.bagElig?r.bagRec:r.shirtRec;
       const total=[r.bagElig,r.hasBkd,r.hasShirt].filter(Boolean).length;
       const rec=[r.bagElig&&r.bagRec,r.hasBkd&&bkdRec,r.hasShirt&&r.shirtRec].filter(Boolean).length;
+      if(status==='any-received'&&rec===0)return false;
       if(status==='all-received'&&rec<total)return false;
       if(status==='partial'&&(rec===0||rec>=total))return false;
       if(status==='none'&&rec>0)return false;
