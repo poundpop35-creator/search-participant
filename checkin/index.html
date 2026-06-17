@@ -507,9 +507,44 @@
         const pt=(p.participation_type||'');
         const isBagEligible=(p.internal_external||'').includes('ภายใน')&&(pt.includes('ผู้เข้าร่วมงาน')||pt.includes('ผู้บริหาร')||pt==='ผู้ส่งผลงาน');
         if(!isBagEligible){
-          showModal('error','ไม่มีสิทธิ์','ท่านไม่มีสิทธิ์รับกระเป๋าก่อนวันงาน',fullName,[
-            {label:'ประเภท',val:pType,style:'normal'}
-          ],p.dept||'');
+          // ตรวจสิทธิ์เสื้อก่อน block
+          const _shirtOnly=(p.shirt_size||'').trim()!=='';
+          if(!_shirtOnly){
+            showModal('error','ไม่มีสิทธิ์','ท่านไม่มีสิทธิ์รับกระเป๋าก่อนวันงาน',fullName,[
+              {label:'ประเภท',val:pType,style:'normal'}
+            ],p.dept||'');
+            return;
+          }
+          // มีสิทธิ์รับเสื้ออย่างเดียว (ไม่มีสิทธิ์กระเป๋า)
+          if(p.shirt_received===true){
+            showModal('warning','รับเสื้อแล้ว','บุคคลนี้รับเสื้อไปแล้ว',fullName,[
+              {label:'ประเภท',val:pType,style:'normal'},
+              {label:`👕 เสื้อแจ็คเก็ต (${p.shirt_size})`,val:p.shirt_size,style:'normal'},
+              {label:'รับไปเมื่อ',val:fmtShort(p.shirt_received_date)||(p.shirt_received_date||'(ไม่ทราบวันที่)'),style:'done'},
+              {label:'สถานะ',val:'❌ ไม่สามารถรับซ้ำได้',style:'warn'}
+            ],p.dept||'');
+            return;
+          }
+          const _soToday=new Date().toISOString();
+          const _soScanner=sessionStorage.getItem('dmsc_user')||'unknown';
+          const soRes=await sbFetch(`/rest/v1/participants?id=eq.${p.id}`,'PATCH',{shirt_received:true,shirt_received_date:_soToday,shirt_scanned_by:_soScanner});
+          if(soRes.ok||soRes.status===204){
+            todayCount++;
+            document.getElementById('count').textContent=todayCount.toLocaleString();
+            const _undoSo=async()=>{
+              await sbFetch(`/rest/v1/participants?id=eq.${p.id}`,'PATCH',{shirt_received:false,shirt_received_date:null,shirt_scanned_by:null});
+              todayCount=Math.max(0,todayCount-1);document.getElementById('count').textContent=todayCount.toLocaleString();
+            };
+            showModal('success','รับเสื้อสำเร็จ','บันทึกการรับเสื้อเรียบร้อย',fullName,[
+              {label:'ประเภท',val:pType,style:'normal'},
+              {label:'รับไปเมื่อ',val:fmtShort(_soToday),style:'ok'},
+              {label:`👕 เสื้อแจ็คเก็ต (${p.shirt_size})`,val:'รับแล้ว ✓',style:'ok'},
+              {label:'🎒 กระเป๋า',val:'ไม่มีสิทธิ์รับกระเป๋า',style:'muted'}
+            ],p.dept||'',_undoSo);
+            setStatus('รับเสื้อสำเร็จ');
+          } else {
+            showModal('error','เกิดข้อผิดพลาด','ไม่สามารถบันทึกได้','',null);
+          }
           return;
         }
         if(p.bag_received===true){
