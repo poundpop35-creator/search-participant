@@ -375,9 +375,9 @@
           <thead>
             <tr>
               <th>#</th><th>ชื่อ-นามสกุล</th><th>หน่วยงาน</th>
-              <th style="text-align:center;">🎒 กระเป๋า</th>
-              <th style="text-align:center;">📚 บทคัดย่อ</th>
-              <th style="text-align:center;">👕 เสื้อ</th>
+              <th style="text-align:center;min-width:100px;">🎒<br>กระเป๋า</th>
+              <th style="text-align:center;min-width:100px;">📚<br>บทคัดย่อ</th>
+              <th style="text-align:center;min-width:100px;">👕<br>เสื้อ</th>
             </tr>
           </thead>
           <tbody id="ovBody"><tr><td colspan="6" class="loading-td">กำลังโหลด...</td></tr></tbody>
@@ -933,13 +933,14 @@ function renderOverviewTable(){
   document.getElementById('ovNext').disabled=ovPage>=totPages;
   if(!page.length){document.getElementById('ovBody').innerHTML='<tr><td colspan="6" class="loading-td">ไม่พบข้อมูล</td></tr>';return;}
   function itemCell(eligible,received){
-    if(!eligible)return`<td style="text-align:center;color:#cbd5e1;font-size:1.1rem;">—</td>`;
-    return received?`<td style="text-align:center;"><span class="badge b-received">✓ รับแล้ว</span></td>`:`<td style="text-align:center;"><span class="badge b-pending">✗ ยังไม่รับ</span></td>`;
+    if(!eligible)return`<td style="background:#f1f5f9;text-align:center;color:#94a3b8;font-size:0.82rem;padding:10px 6px;">—</td>`;
+    if(received)return`<td style="background:#dcfce7;text-align:center;color:#166534;font-weight:700;font-size:0.85rem;padding:10px 6px;">✓ รับแล้ว</td>`;
+    return`<td style="background:#fef9c3;text-align:center;color:#854d0e;font-weight:700;font-size:0.85rem;padding:10px 6px;">✗ ยังไม่รับ</td>`;
   }
   document.getElementById('ovBody').innerHTML=page.map((r,i)=>`<tr>
     <td>${start+i+1}</td>
-    <td>${r.name}</td>
-    <td style="max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${r.dept}">${r.dept}</td>
+    <td style="font-weight:600;">${r.name}</td>
+    <td style="max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#64748b;font-size:0.83rem;" title="${r.dept}">${r.dept}</td>
     ${itemCell(r.bagElig,r.bagRec)}
     ${itemCell(r.hasBkd,r.bagRec)}
     ${itemCell(r.hasShirt,r.shirtRec)}
