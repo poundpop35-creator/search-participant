@@ -335,7 +335,7 @@ async function ensureNames() {
   let data = [], offset = 0;
   while(true) {
     const r = await fetch(
-      `${SB_URL}/rest/v1/participants?event_year=eq.${yr}&select=id,prefix,first_name,last_name,dept,ext_dept,internal_external,is_walkin&limit=1000&offset=${offset}&order=last_name.asc`,
+      `${SB_URL}/rest/v1/participants?event_year=eq.${yr}&select=id,prefix,first_name,last_name,dept,ext_dept,internal_external,is_walkin,participation_type&limit=1000&offset=${offset}&order=last_name.asc`,
       { headers }
     );
     if (!r.ok) { const txt = await r.text().catch(()=>''); throw new Error('HTTP ' + r.status + ': ' + txt.slice(0,120)); }
@@ -378,12 +378,14 @@ function renderResults() {
     const typeClass = isIn ? 'type-in' : isOut ? 'type-out' : '';
     const regLabel = p.is_walkin ? 'Walk-in' : 'ลงทะเบียนล่วงหน้า';
     const regClass = p.is_walkin ? 'type-walkin' : 'type-prereg';
+    const ptLabel = (p.participation_type||'').replace(/\s+/g,' ').trim();
     return `<div class="result-item" onclick="selectPerson(${i})">
       <div class="result-name">${name}</div>
       <div class="result-dept">${dept}</div>
       <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px;">
         ${typeLabel ? `<span class="result-type ${typeClass}">${typeLabel}</span>` : ''}
         <span class="result-type ${regClass}">${regLabel}</span>
+        ${ptLabel ? `<span class="result-type" style="background:#f3e8ff;color:#6b21a8;">${ptLabel}</span>` : ''}
       </div>
     </div>`;
   }).join('');
