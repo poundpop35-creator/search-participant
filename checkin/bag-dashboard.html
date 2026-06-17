@@ -124,9 +124,11 @@
       .stat-card{padding:12px;}
       .stat-num{font-size:1.5rem;}
       .stat-label{font-size:0.65rem;}
-      .filter-bar{padding:10px;gap:8px;}
-      .sbox{width:100%!important;}
-      .filter-select,.filter-group select{font-size:0.8rem;padding:6px 8px;}
+      .filter-bar{padding:10px;gap:6px;display:grid;grid-template-columns:1fr 1fr;}
+      .filter-bar .btn-reset{grid-column:1/-1;justify-self:start;}
+      .filter-group{width:100%;}
+      .sbox{width:100%!important;max-width:100%;}
+      .filter-select,.filter-group select{width:100%;max-width:100%;font-size:0.8rem;padding:6px 8px;text-overflow:ellipsis;}
       th{font-size:0.65rem;padding:6px 8px;}
       td{font-size:0.76rem;padding:6px 8px;}
       .badge{font-size:0.65rem;padding:2px 6px;}
