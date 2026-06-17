@@ -248,6 +248,7 @@
       <div class="card-title">📋 เลือกประเภทข้อมูลที่จะนำเข้า</div>
       <div style="display:flex;gap:10px;flex-wrap:wrap;">
         <button class="type-btn active" id="typeBtn-pre" onclick="setImportType('pre')">📋 ผู้ลงทะเบียนล่วงหน้า</button>
+        <button class="type-btn" id="typeBtn-presenter" onclick="setImportType('presenter')">🎙️ ผู้ส่งผลงาน</button>
         <button class="type-btn" id="typeBtn-walkin" onclick="setImportType('walkin')">🚶 Walk-in</button>
       </div>
       <div id="typeDesc" style="margin-top:12px;font-size:0.83rem;color:#475569;line-height:1.7;"></div>
@@ -309,22 +310,38 @@
       <div id="importStatus" style="margin-top:12px;"></div>
     </div>
 
-    <!-- Walk-in Auto-Sync -->
-    <div class="sec-divider">ซิงค์ Walk-in อัตโนมัติ</div>
+    <!-- Sheet URLs + Walk-in Auto-Sync -->
+    <div class="sec-divider">URL Google Sheets ทั้ง 3 ประเภท</div>
     <div class="card">
-      <div class="card-title">🔄 Walk-in Auto-Sync</div>
-      <p class="card-desc">
-        บันทึก URL Google Sheet Walk-in ไว้ที่นี่ แล้วกด <strong>"ซิงค์เดี๋ยวนี้"</strong> เพื่อดึงข้อมูลทันที<br>
-        หรือเปิด <strong>Auto-sync</strong> ให้ดึงอัตโนมัติทุก 1 นาทีตลอดที่หน้าเปิดอยู่
-      </p>
+      <div class="card-title">🔗 บันทึก URL Google Sheet</div>
+      <p class="card-desc">บันทึก URL ของแต่ละ Sheet ไว้ที่นี่ ใช้สำหรับซิงค์ข้อมูลในอนาคต</p>
+
       <div class="field">
-        <label>URL Google Sheet Walk-in (Publish as CSV)</label>
+        <label>📋 URL ผู้ลงทะเบียนล่วงหน้า</label>
+        <div style="display:flex;gap:8px;">
+          <input id="preSheetUrl" type="url" placeholder="https://docs.google.com/spreadsheets/d/e/.../pub?output=csv&gid=...">
+          <button class="btn btn-primary" onclick="saveSheetUrl('pre_sheet_url','preSheetUrl','preSheetStatus')">💾 บันทึก</button>
+        </div>
+        <div id="preSheetStatus" style="margin-top:6px;font-size:0.82rem;"></div>
+      </div>
+
+      <div class="field">
+        <label>🎙️ URL ผู้ส่งผลงาน</label>
+        <div style="display:flex;gap:8px;">
+          <input id="presenterSheetUrl" type="url" placeholder="https://docs.google.com/spreadsheets/d/e/.../pub?output=csv&gid=...">
+          <button class="btn btn-primary" onclick="saveSheetUrl('presenter_sheet_url','presenterSheetUrl','presenterSheetStatus')">💾 บันทึก</button>
+        </div>
+        <div id="presenterSheetStatus" style="margin-top:6px;font-size:0.82rem;"></div>
+      </div>
+
+      <div class="field" style="margin-bottom:4px;">
+        <label>🚶 URL Walk-in <span style="color:#16a34a;font-weight:600;">(รองรับ Auto-sync)</span></label>
         <div style="display:flex;gap:8px;">
           <input id="walkinUrl" type="url" placeholder="https://docs.google.com/spreadsheets/d/e/.../pub?output=csv&gid=...">
-          <button class="btn btn-primary" onclick="saveWalkinUrl()">💾 บันทึก URL</button>
+          <button class="btn btn-primary" onclick="saveWalkinUrl()">💾 บันทึก</button>
         </div>
       </div>
-      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:4px;">
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:8px;">
         <button class="btn btn-green" id="syncNowBtn" onclick="syncWalkinNow()">🔄 ซิงค์เดี๋ยวนี้</button>
         <button class="btn btn-ghost" id="autoSyncBtn" onclick="toggleAutoSync()">▶ เปิด Auto-sync (ทุก 1 นาที)</button>
         <span id="syncCountdown" style="font-size:0.82rem;color:#64748b;"></span>
@@ -623,13 +640,43 @@ const TEMPLATES = {
       {th:'หมายเลขพาสปอร์ต',  ex:'AB123456',                                                                                                     req:false},
       {th:'อีเมล',             ex:'somchai@dmsc.moph.go.th',                                                                                      req:false},
       {th:'เบอร์โทร',          ex:'0891234567',                                                                                                   req:false},
+      {th:'ประเภทอาหาร',       ex:'อาหารปกติ / มังสวิรัติ / มุสลิม / อาหารเจ',                                                                  req:false},
+      {th:'การเดินทาง',        ex:'รถยนต์ส่วนตัว / รถสาธารณะ / รถไฟ / เครื่องบิน',                                                              req:false},
       {th:'ของที่ระลึก',       ex:'กระเป๋า+ของ / กระเป๋า / ของ / -',                                                                            req:false},
       {th:'ขนาดเสื้อ',         ex:'S / M / L / XL / XXL',                                                                                        req:false},
     ],
     dbRows: [
-      ['นาย','สมชาย','ใจดี','สถาบันวิจัยวิทยาศาสตร์สาธารณสุข','','บุคลากรภายใน','ผู้เข้าร่วมงาน','กรุงเทพมหานคร','1234567890123','','somchai@dmsc.moph.go.th','0891234567','กระเป๋า+ของ','L'],
-      ['นางสาว','วรรณภา','รักงาน','','บริษัท ABC จำกัด','บุคคลภายนอก','ผู้เข้าร่วมงาน','เชียงใหม่','9876543210987','','wanna@company.com','0812345678','กระเป๋า','M'],
-      ['ดร.','ประสิทธิ์','วิชาการ','สำนักคุณภาพและความปลอดภัยอาหาร','','บุคลากรภายใน','ผู้บริหาร+กรรมการ','นนทบุรี','1111111111111','','','0899999999','กระเป๋า+ของ','XL'],
+      ['นาย','สมชาย','ใจดี','สถาบันวิจัยวิทยาศาสตร์สาธารณสุข','','บุคลากรภายใน','ผู้เข้าร่วมงาน','กรุงเทพมหานคร','1234567890123','','somchai@dmsc.moph.go.th','0891234567','อาหารปกติ','รถยนต์ส่วนตัว','กระเป๋า+ของ','L'],
+      ['นางสาว','วรรณภา','รักงาน','','บริษัท ABC จำกัด','บุคคลภายนอก','ผู้เข้าร่วมงาน','เชียงใหม่','9876543210987','','wanna@company.com','0812345678','มังสวิรัติ','รถไฟ','กระเป๋า','M'],
+      ['ดร.','ประสิทธิ์','วิชาการ','สำนักคุณภาพและความปลอดภัยอาหาร','','บุคลากรภายใน','ผู้บริหาร+กรรมการ','นนทบุรี','1111111111111','','','0899999999','อาหารปกติ','รถยนต์ส่วนตัว','กระเป๋า+ของ','XL'],
+    ]
+  },
+  presenter: {
+    label: 'ผู้ส่งผลงาน',
+    sheetHint: 'Sheet ผู้ส่งผลงาน',
+    urlLabel: 'URL Google Sheet — ผู้ส่งผลงาน (Publish as CSV)',
+    desc: 'นำเข้ารายชื่อผู้ส่งผลงาน/บทคัดย่อ (is_walkin = false)\nควรตั้งประเภทการเข้าร่วมเป็น ผู้ส่งผลงาน หรือ ผู้บริหาร+ผู้ส่งผลงาน',
+    cols: [
+      {th:'คำนำหน้า',         ex:'นาย / นาง / นางสาว / ดร.',                                         req:false},
+      {th:'ชื่อ',              ex:'วิชาการ',                                                           req:true},
+      {th:'นามสกุล',           ex:'นักวิจัย',                                                          req:true},
+      {th:'หน่วยงาน',          ex:'สถาบันวิจัยวิทยาศาสตร์สาธารณสุข',                                 req:false},
+      {th:'หน่วยงานภายนอก',    ex:'มหาวิทยาลัยมหิดล',                                                 req:false},
+      {th:'ประเภทบุคคล',       ex:'บุคลากรภายใน / บุคคลภายนอก',                                       req:false},
+      {th:'ประเภทการเข้าร่วม', ex:'ผู้ส่งผลงาน / ผู้บริหาร+ผู้ส่งผลงาน',                             req:false},
+      {th:'จังหวัด',           ex:'กรุงเทพมหานคร',                                                    req:false},
+      {th:'เลขบัตรประชาชน',    ex:'1234567890123',                                                    req:false},
+      {th:'หมายเลขพาสปอร์ต',  ex:'AB123456',                                                          req:false},
+      {th:'อีเมล',             ex:'researcher@dmsc.moph.go.th',                                        req:false},
+      {th:'เบอร์โทร',          ex:'0891234567',                                                        req:false},
+      {th:'ประเภทอาหาร',       ex:'อาหารปกติ / มังสวิรัติ / มุสลิม / อาหารเจ',                       req:false},
+      {th:'การเดินทาง',        ex:'รถยนต์ส่วนตัว / รถสาธารณะ / รถไฟ / เครื่องบิน',                   req:false},
+      {th:'ของที่ระลึก',       ex:'กระเป๋า+ของ / กระเป๋า / ของ / -',                                 req:false},
+      {th:'ขนาดเสื้อ',         ex:'S / M / L / XL / XXL',                                             req:false},
+    ],
+    dbRows: [
+      ['ดร.','วิชาการ','นักวิจัย','สถาบันวิจัยวิทยาศาสตร์สาธารณสุข','','บุคลากรภายใน','ผู้ส่งผลงาน','กรุงเทพมหานคร','1234567890123','','researcher@dmsc.go.th','0891234567','อาหารปกติ','รถยนต์ส่วนตัว','กระเป๋า+ของ','L'],
+      ['นางสาว','วิจัย','ผลงานดี','','มหาวิทยาลัยมหิดล','บุคคลภายนอก','ผู้บริหาร+ผู้ส่งผลงาน','นนทบุรี','9876543210987','','research@mu.ac.th','0812345678','มังสวิรัติ','รถไฟ','กระเป๋า','M'],
     ]
   },
   walkin: {
@@ -648,17 +695,19 @@ const TEMPLATES = {
       {th:'จังหวัด',           ex:'ขอนแก่น',                                                          req:false},
       {th:'เลขบัตรประชาชน',    ex:'1234567890123',                                                   req:false},
       {th:'หมายเลขพาสปอร์ต',  ex:'',                                                                 req:false},
+      {th:'ประเภทอาหาร',       ex:'อาหารปกติ / มังสวิรัติ / มุสลิม / อาหารเจ',                       req:false},
+      {th:'การเดินทาง',        ex:'รถยนต์ส่วนตัว / รถสาธารณะ / รถไฟ / เครื่องบิน',                   req:false},
     ],
     dbRows: [
-      ['นาย','สมหมาย','มาทีหลัง','','บริษัท XYZ','บุคคลภายนอก','ผู้เข้าร่วมงาน','ขอนแก่น','2222222222222',''],
-      ['นางสาว','สุดา','เที่ยวงาน','กองบริหารทรัพยากรบุคคล','','บุคลากรภายใน','ผู้บริหาร','นครราชสีมา','3333333333333',''],
+      ['นาย','สมหมาย','มาทีหลัง','','บริษัท XYZ','บุคคลภายนอก','ผู้เข้าร่วมงาน','ขอนแก่น','2222222222222','','อาหารปกติ','รถยนต์ส่วนตัว'],
+      ['นางสาว','สุดา','เที่ยวงาน','กองบริหารทรัพยากรบุคคล','','บุคลากรภายใน','ผู้บริหาร','นครราชสีมา','3333333333333','','มุสลิม','รถไฟ'],
     ]
   }
 };
 
 function setImportType(type) {
   importType = type;
-  ['pre','walkin'].forEach(t => {
+  ['pre','presenter','walkin'].forEach(t => {
     document.getElementById('typeBtn-'+t).classList.toggle('active', t===type);
   });
   const tmpl = TEMPLATES[type];
@@ -688,11 +737,18 @@ function downloadTemplate() {
   ws['!cols'] = headers.map(()=>({wch:22}));
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, tmpl.label);
-  XLSX.writeFile(wb, `template_${importType==='pre'?'pre_registered':'walkin'}_dmsc.xlsx`);
+  const _fn={pre:'pre_registered',presenter:'presenter',walkin:'walkin'};
+  XLSX.writeFile(wb, `template_${_fn[importType]||importType}_dmsc.xlsx`);
 }
 
 async function loadImportTab(){
-  const walkinUrl = await sbGetSetting('walkin_sheet_url');
+  const [preUrl, presenterUrl, walkinUrl] = await Promise.all([
+    sbGetSetting('pre_sheet_url'),
+    sbGetSetting('presenter_sheet_url'),
+    sbGetSetting('walkin_sheet_url'),
+  ]);
+  if(preUrl) document.getElementById('preSheetUrl').value = preUrl;
+  if(presenterUrl) document.getElementById('presenterSheetUrl').value = presenterUrl;
   if(walkinUrl) document.getElementById('walkinUrl').value = walkinUrl;
 }
 
@@ -716,6 +772,8 @@ const DB_FIELDS=[
   {key:'passport',           label:'หมายเลขพาสปอร์ต',             req:false},
   {key:'email',              label:'อีเมล',                       req:false},
   {key:'phone',              label:'เบอร์โทรศัพท์',               req:false},
+  {key:'food_type',          label:'ประเภทอาหาร',                 req:false},
+  {key:'travel',             label:'การเดินทาง',                  req:false},
   {key:'items',              label:'ของที่ระลึก (items)',          req:false},
   {key:'shirt_size',         label:'ขนาดเสื้อ',                   req:false},
 ];
@@ -734,6 +792,8 @@ const AUTO_GUESS={
   passport:['พาสปอร์ต','passport','หนังสือเดินทาง'],
   email:['อีเมล','email','e-mail','mail'],
   phone:['เบอร์','phone','tel','โทร','mobile'],
+  food_type:['ประเภทอาหาร','food_type','อาหาร','food','dietary'],
+  travel:['การเดินทาง','travel','ยานพาหนะ','พาหนะ','transportation'],
   items:['ของที่ระลึก','items','bag','souvenir','กระเป๋า','bag_type'],
   shirt_size:['เสื้อ','shirt','size','shirt_size'],
 };
@@ -875,6 +935,13 @@ async function doImport(mode){
 // ──────────────────────────────────────────
 // ─── WALK-IN AUTO SYNC ───
 // ──────────────────────────────────────────
+
+async function saveSheetUrl(settingKey, inputId, statusId){
+  const url = document.getElementById(inputId).value.trim();
+  if(!url){ setStatus(statusId,'warn','กรุณาใส่ URL ก่อน'); return; }
+  await sbSetSetting(settingKey, url);
+  setStatus(statusId,'ok','✅ บันทึก URL แล้ว');
+}
 
 async function saveWalkinUrl(){
   const url = document.getElementById('walkinUrl').value.trim();
