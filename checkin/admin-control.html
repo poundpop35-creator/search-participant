@@ -616,16 +616,29 @@ async function loadCurrentEvent(){
   } catch(e) {}
 }
 
+async function sbAddToYearsList(year){
+  try{
+    const raw = await sbGetSetting('event_years_list');
+    let list = [];
+    try{ list = raw ? JSON.parse(raw) : []; }catch(e){ list = []; }
+    if(!list.includes(year)) list.push(year);
+    await sbSetSetting('event_years_list', JSON.stringify(list));
+  }catch(e){}
+}
+
 async function loadYears(){
   const el = document.getElementById('yearPills');
   if(!el) return;
   try{
-    const [activeYear, rows] = await Promise.all([
+    const [activeYear, listRaw, rows] = await Promise.all([
       sbGetSetting('event_year'),
+      sbGetSetting('event_years_list'),
       fetch(`${SB_URL}/rest/v1/participants?select=event_year&order=event_year.desc&limit=5000`,{headers:H}).then(r=>r.json())
     ]);
-    // pills = ปีที่มีข้อมูลจริง + ปีงานปัจจุบันที่ admin ตั้งไว้
-    const yearSet = new Set((rows||[]).map(r=>r.event_year).filter(Boolean));
+    // pills = ปีที่ admin สร้างไว้ (ถาวร) + ปีที่มีข้อมูลจริง + ปีปัจจุบัน
+    let savedList = [];
+    try{ savedList = listRaw ? JSON.parse(listRaw) : []; }catch(e){ savedList=[]; }
+    const yearSet = new Set([...savedList, ...(rows||[]).map(r=>r.event_year).filter(Boolean)]);
     if(activeYear) yearSet.add(activeYear);
     const years = [...yearSet].sort((a,b)=>b.localeCompare(a));
     if(!years.length){
@@ -742,6 +755,7 @@ async function createNewEvent(){
     await sbSetSetting('walkin_sheet_url', '');
     await sbSetSetting('pre_sheet_url', '');
     await sbSetSetting('presenter_sheet_url', '');
+    await sbAddToYearsList(year); // เพิ่มปีนี้ใน list ถาวร
     ['walkinUrl','preSheetUrl','presenterSheetUrl'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
     setStatus('newEventStatus','ok',`✅ สร้างงาน "${name} (${year})" สำเร็จ — พร้อมนำเข้าข้อมูลใหม่`);
     loadCurrentEvent();
