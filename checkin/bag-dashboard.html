@@ -877,7 +877,7 @@ function buildOverviewData(res){
   const bagTotal=allOverviewData.filter(r=>r.bagElig).length;
   const bagRec=allOverviewData.filter(r=>r.bagElig&&r.bagRec).length;
   const bkdTotal=allOverviewData.filter(r=>r.hasBkd).length;
-  const bkdRec=allOverviewData.filter(r=>r.hasBkd&&r.bagRec).length;
+  const bkdRec=allOverviewData.filter(r=>r.hasBkd&&(r.bagElig?r.bagRec:r.shirtRec)).length;
   const shirtTotal=allOverviewData.filter(r=>r.hasShirt).length;
   const shirtRec=allOverviewData.filter(r=>r.hasShirt&&r.shirtRec).length;
   document.getElementById('ovBagStat').textContent=`${bagRec}/${bagTotal}`;
@@ -908,8 +908,9 @@ function applyOvFilters(){
     if(q&&!r.name.toLowerCase().includes(q)&&!r.dept.toLowerCase().includes(q))return false;
     if(!matchBundle(r,bundle))return false;
     if(status){
+      const bkdRec=r.bagElig?r.bagRec:r.shirtRec;
       const total=[r.bagElig,r.hasBkd,r.hasShirt].filter(Boolean).length;
-      const rec=[r.bagElig&&r.bagRec,r.hasBkd&&r.bagRec,r.hasShirt&&r.shirtRec].filter(Boolean).length;
+      const rec=[r.bagElig&&r.bagRec,r.hasBkd&&bkdRec,r.hasShirt&&r.shirtRec].filter(Boolean).length;
       if(status==='all-received'&&rec<total)return false;
       if(status==='partial'&&(rec===0||rec>=total))return false;
       if(status==='none'&&rec>0)return false;
@@ -937,14 +938,16 @@ function renderOverviewTable(){
     if(received)return`<td style="background:#dcfce7;text-align:center;color:#166534;font-weight:700;font-size:0.85rem;padding:10px 6px;">✓ รับแล้ว</td>`;
     return`<td style="background:#fef9c3;text-align:center;color:#854d0e;font-weight:700;font-size:0.85rem;padding:10px 6px;">✗ ยังไม่รับ</td>`;
   }
-  document.getElementById('ovBody').innerHTML=page.map((r,i)=>`<tr>
+  document.getElementById('ovBody').innerHTML=page.map((r,i)=>{
+    const bkdRec=r.bagElig?r.bagRec:r.shirtRec;
+    return`<tr>
     <td>${start+i+1}</td>
     <td style="font-weight:600;">${r.name}</td>
     <td style="max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#64748b;font-size:0.83rem;" title="${r.dept}">${r.dept}</td>
     ${itemCell(r.bagElig,r.bagRec)}
-    ${itemCell(r.hasBkd,r.bagRec)}
+    ${itemCell(r.hasBkd,bkdRec)}
     ${itemCell(r.hasShirt,r.shirtRec)}
-  </tr>`).join('');
+  </tr>`;}).join('');
 }
 function exportOvExcel(){
   if(!ovFiltered.length)return;
