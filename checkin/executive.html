@@ -79,13 +79,6 @@
     .view-toggle{display:flex;gap:6px;}
     .vtbtn{padding:6px 14px;border-radius:8px;border:1.5px solid #C8DDE8;background:white;font-family:'Sarabun',sans-serif;font-size:0.82rem;cursor:pointer;color:#5a7a8e;font-weight:600;}
     .vtbtn.active{background:#1F3540;color:white;border-color:#1F3540;}
-    .nav-wrap{position:relative;display:inline-block;}
-    .nav-dd{position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%);z-index:9999;background:white;border:1.5px solid #e2e8f0;border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,0.15);min-width:220px;padding:8px;display:none;text-align:left;}
-    .nav-dd.open{display:block;}
-    .nav-dd-label{font-size:0.65rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.05em;padding:6px 12px 2px;}
-    .nav-dd-item{display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:8px;font-size:0.88rem;color:#1e293b;text-decoration:none;transition:background 0.1s;}
-    .nav-dd-item:hover{background:#f1f5f9;color:#0d2b6b;}
-    .nav-dd-sep{height:1px;background:#e2e8f0;margin:5px 0;}
   </style>
 <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
 </head>
@@ -101,27 +94,6 @@
   <p>กรมวิทยาศาสตร์การแพทย์ กระทรวงสาธารณสุข</p>
   <div style="margin-top:20px;">
     <a class="hero-btn" href="public.html">← Live Dashboard</a>
-    <div class="nav-wrap" style="display:inline-block;">
-      <button class="hero-btn" onclick="toggleNavDD(event)">🔗 ระบบอื่นๆ ▾</button>
-      <div class="nav-dd" id="navDD">
-        <div class="nav-dd-label">เช็คอิน</div>
-        <a class="nav-dd-item" href="index.html">📷 สแกนเช็คอิน</a>
-        <a class="nav-dd-item" href="dashboard.html">📊 Dashboard เช็คอิน</a>
-        <a class="nav-dd-item" href="bag-dashboard.html">👜 ระบบรับของ</a>
-        <div class="nav-dd-sep"></div>
-        <div class="nav-dd-label">ผู้ส่งผลงาน</div>
-        <a class="nav-dd-item" href="presenter.html">🎙️ สแกนผู้ส่งผลงาน</a>
-        <a class="nav-dd-item" href="presenter-dashboard.html">📋 Dashboard ผู้ส่งผลงาน</a>
-        <div class="nav-dd-sep"></div>
-        <div class="nav-dd-label">ค้นหา & สาธารณะ</div>
-        <a class="nav-dd-item" href="qr-lookup.html">🔍 ค้นหา QR Code</a>
-        <a class="nav-dd-item" href="public.html">🌐 จำนวนผู้เข้าร่วม</a>
-        <div class="nav-dd-sep"></div>
-        <div class="nav-dd-label">แอดมิน</div>
-        <a class="nav-dd-item" href="admin-control.html">⚙️ Control Panel</a>
-        <a class="nav-dd-item" href="staff-menu.html">👥 เมนู Staff</a>
-      </div>
-    </div>
   </div>
 </div>
 
@@ -216,8 +188,6 @@
 </div>
 
 <script>
-function toggleNavDD(e){e.stopPropagation();document.getElementById('navDD').classList.toggle('open');}
-document.addEventListener('click',()=>document.getElementById('navDD')?.classList.remove('open'));
 const SUPABASE_URL  = "https://gvxytnjfyepqhbkmcjms.supabase.co";
 const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2eHl0bmpmeWVwcWhia21jam1zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0MzE2NDAsImV4cCI6MjA5NTAwNzY0MH0.RAr_ehb4cxfNliDR0h5XcihUaP-0ltZTTGIAv2Fw1kk";
 
