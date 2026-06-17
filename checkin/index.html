@@ -226,7 +226,6 @@
     <option value="2">วันที่ 2 — 25 มิถุนายน 2569</option>
     <option value="3">วันที่ 3 — 26 มิถุนายน 2569</option>
     <option value="bag">🎒👕 รับกระเป๋า + เสื้อ (ก่อนวันงาน)</option>
-    <option value="shirt">👕 รับเสื้อเพิ่มเติม (เฉพาะเสื้อ)</option>
   </select>
 
   <div class="row-label">เลือกวิธีสแกน</div>
@@ -299,10 +298,8 @@
     const eventDay = EVENT_DATE_DAY[todayStr];
     const sel = document.getElementById('day');
     if(eventDay){
-      ['bag','shirt'].forEach(v=>{
-        const opt = sel.querySelector(`option[value="${v}"]`);
-        if(opt) opt.style.display='none';
-      });
+      const bagOpt = sel.querySelector('option[value="bag"]');
+      if(bagOpt) bagOpt.style.display='none';
       sel.value = String(eventDay);
     }
   })();
@@ -357,19 +354,14 @@
     }
     const sel=document.getElementById('day');
     const bagOpt=sel.querySelector('option[value="bag"]');
-    const shirtOpt=sel.querySelector('option[value="shirt"]');
     const bagOpenAt=new Date(2026,4,29,8,0,0); // 29 พ.ค. 08:00 น.
     if(now<bagOpenAt){
       bagOpt.disabled=true;
-      bagOpt.textContent='รับกระเป๋า — เปิด 29 พ.ค. 08:00 น.';
-      shirtOpt.disabled=true;
-      shirtOpt.textContent='รับเสื้อ — เปิด 29 พ.ค. 08:00 น.';
+      bagOpt.textContent='รับกระเป๋า+เสื้อ — เปิด 29 พ.ค. 08:00 น.';
     }
     if(isBangkok2026June&&confDays[d]){
       bagOpt.disabled=true;
-      bagOpt.textContent='รับกระเป๋า (ก่อนวันงาน) — ปิดแล้ว';
-      shirtOpt.disabled=true;
-      shirtOpt.textContent='รับเสื้อ (ก่อนวันงาน) — ปิดแล้ว';
+      bagOpt.textContent='รับกระเป๋า+เสื้อ (ก่อนวันงาน) — ปิดแล้ว';
       sel.value=String(confDays[d]);
       if(!isAdmin){
         sel.disabled=true;
@@ -381,7 +373,7 @@
   function onDayChange(){
     loadTodayCount();
     const day=document.getElementById('day').value;
-    const isBag=day==='bag'||day==='shirt';
+    const isBag=day==='bag';
     const dbBtn=document.getElementById('dashboardBtn');
     const bagBtn=document.getElementById('bagDashboardBtn');
     if(dbBtn) dbBtn.style.display=isBag?'none':'inline-block';
@@ -394,23 +386,8 @@
     document.getElementById('counterSub').textContent='กำลังโหลด...';
     const user=sessionStorage.getItem('dmsc_user')||'';
     document.getElementById('staffCounterName').textContent=user||'—';
-    document.getElementById('staffCounterBox').style.display=(day==='bag'||day==='shirt')?'none':'flex';
-    if(day==='shirt'){
-      document.getElementById('counterLabel').textContent='รับเสื้อแล้ว';
-      try{
-        const res=await fetch(`${SB_URL}/rest/v1/participants?shirt_received=eq.true&select=id`,
-          {headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON,'Prefer':'count=exact','Range':'0-0'}});
-        const range=res.headers.get('Content-Range');
-        let count=0;
-        if(range){const m=range.match(/\/(\d+)/);if(m)count=parseInt(m[1]);}
-        todayCount=count;
-        document.getElementById('count').textContent=count.toLocaleString();
-        document.getElementById('counterSub').textContent='ราย (รับเสื้อแล้ว)';
-      }catch(e){
-        document.getElementById('count').textContent='?';
-        document.getElementById('counterSub').textContent='โหลดไม่สำเร็จ';
-      }
-    } else if(day==='bag'){
+    document.getElementById('staffCounterBox').style.display=day==='bag'?'none':'flex';
+    if(day==='bag'){
       document.getElementById('counterLabel').textContent='รับกระเป๋าแล้ว';
       try{
         const res=await fetch(`${SB_URL}/rest/v1/participants?bag_received=eq.true&event_year=eq.${encodeURIComponent(activeYear)}&select=id`,
@@ -514,8 +491,6 @@
       if(!participants||participants.length===0){
         if(day==='bag'){
           showModal('error','ไม่มีสิทธิ์','ท่านไม่มีสิทธิ์รับกระเป๋าก่อนวันงาน','',null);
-        } else if(day==='shirt'){
-          showModal('error','ไม่มีสิทธิ์','ท่านไม่มีสิทธิ์รับเสื้อก่อนวันงาน','',null);
         } else {
           showModal('error','ไม่พบข้อมูล','ไม่พบข้อมูลในระบบ','',null);
         }
@@ -581,50 +556,6 @@
           const modalSub=_shirtPending?'บันทึกกระเป๋าและเสื้อเรียบร้อย':'บันทึกการรับกระเป๋าเรียบร้อย';
           showModal('success',modalTitle,modalSub,fullName,bagRows,p.dept||'',_undoBag);
           setStatus(_shirtPending?'รับกระเป๋า+เสื้อสำเร็จ':'รับกระเป๋าสำเร็จ');
-        } else {
-          showModal('error','เกิดข้อผิดพลาด','ไม่สามารถบันทึกได้','',null);
-        }
-        return;
-      }
-
-      // โหมดรับเสื้อ
-      if(day==='shirt'){
-        if(!p.shirt_size||!p.shirt_size.trim()){
-          showModal('error','ไม่มีสิทธิ์','ท่านไม่มีสิทธิ์รับเสื้อก่อนวันงาน',fullName,[
-            {label:'ประเภท',val:pType,style:'normal'}
-          ],p.dept||'');
-          return;
-        }
-        if(p.shirt_received===true){
-          showModal('warning','รับเสื้อแล้ว','บุคคลนี้รับเสื้อไปแล้ว',fullName,[
-            {label:'ของที่ระลึก (3) เสื้อแจ็คเก็ต',val:p.shirt_size,style:'normal'},
-            {label:'รับไปเมื่อ',val:fmtShort(p.shirt_received_date)||(p.shirt_received_date||'(ไม่ทราบวันที่)'),style:'done'},
-            {label:'สถานะ',val:'❌ ไม่สามารถรับซ้ำได้',style:'warn'}
-          ],p.dept||'');
-          return;
-        }
-        const today=new Date().toISOString();
-        const _shirtScanner=sessionStorage.getItem('dmsc_user')||'unknown';
-        const shirtRes=await sbFetch(`/rest/v1/participants?id=eq.${p.id}`,'PATCH',{shirt_received:true,shirt_received_date:today,shirt_scanned_by:_shirtScanner});
-        if(!shirtRes.ok&&shirtRes.status!==204){const errTxt=await shirtRes.text().catch(()=>''); console.error('shirt PATCH failed',shirtRes.status,errTxt);}
-        if(shirtRes.ok||shirtRes.status===204){
-          todayCount++;
-          document.getElementById('count').textContent=todayCount.toLocaleString();
-          const _sItems=p.items||'';
-          const _sHasBag=_sItems.includes('กระเป๋า');
-          const _sOther=_sItems.replace('กระเป๋า','').replace(/\+\+/g,'+').replace(/^\+|\+$/g,'').trim();
-          const _undoShirt=async()=>{
-            await sbFetch(`/rest/v1/participants?id=eq.${p.id}`,'PATCH',{shirt_received:false,shirt_received_date:null,shirt_scanned_by:null});
-            todayCount=Math.max(0,todayCount-1);document.getElementById('count').textContent=todayCount.toLocaleString();
-          };
-          const shirtRows=[
-            {label:'รับไปเมื่อ',val:fmtShort(today),style:'ok'}
-          ];
-          if(_sHasBag) shirtRows.push({label:'ของที่ระลึก (1) กระเป๋า',val:p.bag_received===true?'รับไปแล้ว ✓':'ยังไม่ได้รับ',style:p.bag_received===true?'done':'normal',sub:p.bag_received===true?fmtShort(p.bag_received_date):null});
-          if(_sOther) shirtRows.push({label:`ของที่ระลึก (2) ${_sOther}`,val:p.bag_received===true?'รับไปแล้ว ✓':'ยังไม่ได้รับ',style:p.bag_received===true?'done':'normal'});
-          shirtRows.push({label:`ของที่ระลึก (3) เสื้อแจ็คเก็ต (${p.shirt_size})`,val:'รับแล้ว ✓',style:'ok'});
-          showModal('success','รับเสื้อสำเร็จ','บันทึกการรับเสื้อเรียบร้อย',fullName,shirtRows,p.dept||'',_undoShirt);
-          setStatus('รับเสื้อสำเร็จ');
         } else {
           showModal('error','เกิดข้อผิดพลาด','ไม่สามารถบันทึกได้','',null);
         }
