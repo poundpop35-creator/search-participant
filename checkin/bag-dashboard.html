@@ -479,6 +479,18 @@
           <option value="pending">ยังมีที่ค้างรับ</option>
         </select>
       </div>
+      <div class="filter-group">
+        <div class="filter-label">วันที่รับ</div>
+        <input type="date" class="filter-select" id="ovDate" onchange="applyOvFilters()" style="width:140px;">
+      </div>
+      <div class="filter-group">
+        <div class="filter-label">เวลาตั้งแต่</div>
+        <input type="time" class="filter-select" id="ovTimeFrom" onchange="applyOvFilters()" style="width:110px;">
+      </div>
+      <div class="filter-group">
+        <div class="filter-label">เวลาถึง</div>
+        <input type="time" class="filter-select" id="ovTimeTo" onchange="applyOvFilters()" style="width:110px;">
+      </div>
       <button class="btn-reset" onclick="resetOvFilters()">✕ ล้าง</button>
     </div>
     <div class="tcard">
@@ -1076,6 +1088,9 @@ function applyOvFilters(){
   const dept=document.getElementById('ovDept').value;
   const bundle=document.getElementById('ovBundle').value;
   const status=document.getElementById('ovStatus').value;
+  const ovDate=document.getElementById('ovDate').value;
+  const ovTF=document.getElementById('ovTimeFrom').value;
+  const ovTT=document.getElementById('ovTimeTo').value;
   ovFiltered=allOverviewData.filter(r=>{
     if(pt&&r.pt!==pt)return false;
     if(dept&&r.dept!==dept)return false;
@@ -1091,13 +1106,25 @@ function applyOvFilters(){
       if(status==='none'&&rec>0)return false;
       if(status==='pending'&&rec>=total)return false;
     }
+    if(ovDate||ovTF||ovTT){
+      const dates=[r.bagRecDate,r.shirtRecDate].filter(Boolean);
+      if(!dates.length)return false;
+      const [tfH,tfM]=ovTF?ovTF.split(':').map(Number):[0,0];
+      const [ttH,ttM]=ovTT?ovTT.split(':').map(Number):[23,59];
+      const match=dates.some(d=>{
+        if(ovDate&&bkkDateStr(d)!==ovDate)return false;
+        if(ovTF||ovTT){const m=bkkMins(d);if(m<(tfH*60+tfM)||m>(ttH*60+ttM))return false;}
+        return true;
+      });
+      if(!match)return false;
+    }
     return true;
   });
   ovPage=1;
   document.getElementById('ovCount').textContent=`(${ovFiltered.length.toLocaleString()} รายการ)`;
   renderOverviewTable();
 }
-function resetOvFilters(){document.getElementById('ovSearch').value='';document.getElementById('ovPT').value='';document.getElementById('ovDept').value='';document.getElementById('ovBundle').value='';document.getElementById('ovStatus').value='';applyOvFilters();}
+function resetOvFilters(){document.getElementById('ovSearch').value='';document.getElementById('ovPT').value='';document.getElementById('ovDept').value='';document.getElementById('ovBundle').value='';document.getElementById('ovStatus').value='';document.getElementById('ovDate').value='';document.getElementById('ovTimeFrom').value='';document.getElementById('ovTimeTo').value='';applyOvFilters();}
 function changeOvPage(d){ovPage+=d;renderOverviewTable();window.scrollTo({top:0,behavior:'smooth'});}
 function renderOverviewTable(){
   const start=(ovPage-1)*PAGE;
