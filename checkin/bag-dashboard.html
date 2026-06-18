@@ -285,6 +285,18 @@
         <div class="filter-label">ค้นหา</div>
         <input class="sbox" id="sBox" placeholder="ชื่อ / หน่วยงาน..." oninput="applyFilters()">
       </div>
+      <div class="filter-group">
+        <div class="filter-label">วันที่รับ</div>
+        <input type="date" class="filter-select" id="fDate" onchange="applyFilters()" style="width:140px;">
+      </div>
+      <div class="filter-group">
+        <div class="filter-label">เวลาตั้งแต่</div>
+        <input type="time" class="filter-select" id="fTimeFrom" onchange="applyFilters()" style="width:110px;">
+      </div>
+      <div class="filter-group">
+        <div class="filter-label">เวลาถึง</div>
+        <input type="time" class="filter-select" id="fTimeTo" onchange="applyFilters()" style="width:110px;">
+      </div>
       <button class="btn-reset" onclick="resetFilters()">✕ ล้าง</button>
     </div>
     <div class="tcard">
@@ -362,6 +374,18 @@
       <div class="filter-group">
         <div class="filter-label">ค้นหา</div>
         <input class="sbox" id="sfBox" placeholder="ชื่อ / หน่วยงาน..." oninput="applyShirtFilters()">
+      </div>
+      <div class="filter-group">
+        <div class="filter-label">วันที่รับ</div>
+        <input type="date" class="filter-select" id="sfDate" onchange="applyShirtFilters()" style="width:140px;">
+      </div>
+      <div class="filter-group">
+        <div class="filter-label">เวลาตั้งแต่</div>
+        <input type="time" class="filter-select" id="sfTimeFrom" onchange="applyShirtFilters()" style="width:110px;">
+      </div>
+      <div class="filter-group">
+        <div class="filter-label">เวลาถึง</div>
+        <input type="time" class="filter-select" id="sfTimeTo" onchange="applyShirtFilters()" style="width:110px;">
       </div>
       <button class="btn-reset" onclick="resetShirtFilters()">✕ ล้าง</button>
     </div>
@@ -777,11 +801,17 @@ async function loadAll(){
   }
 }
 
+function bkkDateStr(isoStr){if(!isoStr)return null;return new Date(isoStr).toLocaleDateString('sv',{timeZone:'Asia/Bangkok'});}
+function bkkMins(isoStr){if(!isoStr)return null;const d=new Date(new Date(isoStr).toLocaleString('en-US',{timeZone:'Asia/Bangkok'}));return d.getHours()*60+d.getMinutes();}
+
 function applyFilters(){
   const q=(document.getElementById('sBox').value||'').toLowerCase();
   const st=document.getElementById('fStatus').value;
   const tg=document.getElementById('fTag').value;
   const it=document.getElementById('fItemType').value;
+  const fDate=document.getElementById('fDate').value;
+  const fTF=document.getElementById('fTimeFrom').value;
+  const fTT=document.getElementById('fTimeTo').value;
   filtered=allData.filter(r=>{
     const mQ=!q||r.name.toLowerCase().includes(q)||r.dept.toLowerCase().includes(q);
     const mSt=!st||(st==='received'&&r.received)||(st==='pending'&&!r.received);
@@ -789,11 +819,16 @@ function applyFilters(){
     const mTg=!tg||r.tag===tg;
     const mDp=selFDept.size===0||selFDept.has(r.dept);
     const mIt=!it||r.itemType===it;
-    return mQ&&mSt&&mPt&&mTg&&mDp&&mIt;
+    const mDate=!fDate||bkkDateStr(r.rawDate)===fDate;
+    const rm=bkkMins(r.rawDate);
+    const [tfH,tfM]=fTF?fTF.split(':').map(Number):[0,0];
+    const [ttH,ttM]=fTT?fTT.split(':').map(Number):[23,59];
+    const mTime=(!fTF&&!fTT)||rm===null||(rm>=(tfH*60+tfM)&&rm<=(ttH*60+ttM));
+    return mQ&&mSt&&mPt&&mTg&&mDp&&mIt&&mDate&&mTime;
   });
   curPage=1;
   const fTotal=filtered.length, fRec=filtered.filter(r=>r.received).length, fPend=fTotal-fRec;
-  const isFiltered=q||st||it||selPT.size>0||tg||selFDept.size>0;
+  const isFiltered=q||st||it||selPT.size>0||tg||selFDept.size>0||fDate||fTF||fTT;
   document.getElementById('sTotal').textContent=fTotal.toLocaleString();
   document.getElementById('sReceived').textContent=fRec.toLocaleString();
   document.getElementById('sPending').textContent=fPend.toLocaleString();
@@ -849,6 +884,9 @@ function resetFilters(){
   document.getElementById('fDeptAll').checked=true;
   selFDept=new Set();updateBtnDD('fDeptBtn',selFDept,'หน่วยงาน');
   document.getElementById('sBox').value='';
+  document.getElementById('fDate').value='';
+  document.getElementById('fTimeFrom').value='';
+  document.getElementById('fTimeTo').value='';
   applyFilters();
 }
 function setItemFilter(val){
@@ -869,12 +907,20 @@ function applyShirtFilters(){
   const q=(document.getElementById('sfBox').value||'').toLowerCase();
   const st=document.getElementById('sfStatus').value;
   const sizes=getSelectedSizes();
+  const sfDate=document.getElementById('sfDate').value;
+  const sfTF=document.getElementById('sfTimeFrom').value;
+  const sfTT=document.getElementById('sfTimeTo').value;
   shirtFiltered=allShirtData.filter(r=>{
     const mQ=!q||r.name.toLowerCase().includes(q)||r.dept.toLowerCase().includes(q);
     const mSt=!st||(st==='received'&&r.received)||(st==='pending'&&!r.received);
     const mSz=sizes.length===0||sizes.includes(r.shirtSize);
     const mDp=selSfDept.size===0||selSfDept.has(r.dept);
-    return mQ&&mSt&&mSz&&mDp;
+    const mDate=!sfDate||bkkDateStr(r.rawDate)===sfDate;
+    const rm=bkkMins(r.rawDate);
+    const [tfH,tfM]=sfTF?sfTF.split(':').map(Number):[0,0];
+    const [ttH,ttM]=sfTT?sfTT.split(':').map(Number):[23,59];
+    const mTime=(!sfTF&&!sfTT)||rm===null||(rm>=(tfH*60+tfM)&&rm<=(ttH*60+ttM));
+    return mQ&&mSt&&mSz&&mDp&&mDate&&mTime;
   });
   shirtPage=1;
   const fTotal=shirtFiltered.length, fRec=shirtFiltered.filter(r=>r.received).length, fPend=fTotal-fRec;
@@ -929,6 +975,9 @@ function resetShirtFilters(){
   document.getElementById('sfDeptAll').checked=true;
   selSfDept=new Set();updateBtnDD('sfDeptBtn',selSfDept,'หน่วยงาน');
   document.getElementById('sfBox').value='';
+  document.getElementById('sfDate').value='';
+  document.getElementById('sfTimeFrom').value='';
+  document.getElementById('sfTimeTo').value='';
   applyShirtFilters();
 }
 
