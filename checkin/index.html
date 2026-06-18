@@ -712,7 +712,7 @@
     const hasBag=items.includes('กระเป๋า');
     const otherItems=items.replace('กระเป๋า','').replace(/\+\+/g,'+').replace(/^\+|\+$/g,'').trim();
     const hasShirt=(p.shirt_size||'').trim()!=='';
-    const shirtDone=p.shirt_received===true;
+    const shirtDone=p.shirt_received===true||bagDone;
     const rows=[
       {label:'เวลา',val:time,style:'normal'},
       {label:'คูปองอาหาร',val:'รับได้',style:'ok'},
@@ -731,7 +731,7 @@
     const hasBag=items.includes('กระเป๋า');
     const otherItems=items.replace('กระเป๋า','').replace(/\+\+/g,'+').replace(/^\+|\+$/g,'').trim();
     const hasShirt=(p.shirt_size||'').trim()!=='';
-    const shirtDone=p.shirt_received===true;
+    const shirtDone=p.shirt_received===true||p.bag_received===true;
     const rows=[
       {label:'เวลาที่เช็คอิน',val:time,style:'normal'},
       {label:'คูปองอาหาร',val:'รับไปแล้ว',style:'done'},
