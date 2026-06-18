@@ -234,6 +234,38 @@
   </div>
 </div>
 
+<!-- ─── WALKIN DUPLICATES CARD ─── -->
+<div class="card wide-card" style="margin-top:16px;padding:20px;border:1.5px solid #fed7aa;">
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+    <div>
+      <span style="font-size:0.98rem;font-weight:700;color:#c2410c;">⚠️ Walk-in ที่ซ้ำกับลงทะเบียนล่วงหน้า</span>
+      <span id="dupCount" style="font-size:0.8rem;color:#64748b;margin-left:6px;font-weight:400;"></span>
+    </div>
+    <button class="sec-btn" id="dupToggleBtn" onclick="toggleDupCard()" style="display:none;border-color:#fed7aa;color:#c2410c;">▼ ดูรายชื่อ</button>
+  </div>
+  <div id="dupCardBody" style="display:none;margin-top:14px;">
+    <p style="font-size:0.8rem;color:#92400e;background:#fff7ed;border-radius:8px;padding:8px 12px;margin-bottom:10px;line-height:1.6;">
+      รายชื่อเหล่านี้ถูกข้ามไปตอนนำเข้า Walk-in เนื่องจากเลขบัตรประชาชนซ้ำกับผู้ลงทะเบียนล่วงหน้า ระบบนับรายชื่อดังกล่าวเป็นผู้ลงทะเบียนล่วงหน้าอยู่แล้ว
+    </p>
+    <div style="overflow-x:auto;">
+      <table style="width:100%;border-collapse:collapse;font-size:0.82rem;">
+        <thead>
+          <tr style="background:#fff7ed;">
+            <th style="padding:8px 10px;text-align:left;border-bottom:1.5px solid #fed7aa;color:#92400e;">#</th>
+            <th style="padding:8px 10px;text-align:left;border-bottom:1.5px solid #fed7aa;color:#92400e;">ชื่อ-นามสกุล</th>
+            <th style="padding:8px 10px;text-align:left;border-bottom:1.5px solid #fed7aa;color:#92400e;">หน่วยงาน</th>
+            <th style="padding:8px 10px;text-align:left;border-bottom:1.5px solid #fed7aa;color:#92400e;">เลขบัตร (ซ่อนบางส่วน)</th>
+          </tr>
+        </thead>
+        <tbody id="dupTBody">
+          <tr><td colspan="4" style="text-align:center;padding:20px;color:#94a3b8;">กำลังโหลด...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div id="dupEmptyMsg" style="display:none;margin-top:10px;font-size:0.82rem;color:#94a3b8;text-align:center;">ไม่มีรายการ Walk-in ที่ซ้ำกัน</div>
+</div>
+
 <!-- ─── MAP CARD ─── -->
 <div class="card wide-card" style="margin-top:16px;padding:20px;">
   <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
@@ -1316,6 +1348,51 @@ function renderWIZoneTable() {
 // Auto-load WI map on page start (after all WI vars/functions are declared)
 wiMapRendered = true;
 loadWIMapData();
+
+// ─── WALKIN DUPLICATES ───
+async function loadWalkinDuplicates() {
+  try {
+    const H = { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY };
+    const r = await fetch(`${SB_URL}/rest/v1/app_settings?key=eq.walkin_duplicates&select=value`, { headers: H });
+    const d = await r.json();
+    const countEl = document.getElementById('dupCount');
+    const toggleBtn = document.getElementById('dupToggleBtn');
+    const emptyMsg = document.getElementById('dupEmptyMsg');
+    if (!Array.isArray(d) || !d.length) { countEl.textContent='(ไม่มีข้อมูล)'; emptyMsg.style.display='block'; return; }
+    let dups = [];
+    try { dups = JSON.parse(d[0].value || '[]'); } catch(e) {}
+    if (!Array.isArray(dups) || !dups.length) {
+      countEl.textContent = '(ไม่มีรายการซ้ำ)';
+      document.getElementById('dupTBody').innerHTML = '';
+      emptyMsg.style.display = 'block';
+      return;
+    }
+    countEl.textContent = `(${dups.length} รายการ)`;
+    toggleBtn.style.display = '';
+    document.getElementById('dupTBody').innerHTML = dups.map((row, i) => {
+      const name = `${(row.prefix||'').trim()} ${(row.first_name||'').trim()} ${(row.last_name||'').trim()}`.trim().replace(/\s+/g,' ');
+      const dept = row.dept || '';
+      const raw = (row.id_card || '').replace(/\D/g,'');
+      const masked = raw.length >= 4 ? raw.slice(0,3) + '×'.repeat(Math.max(0,raw.length-7)) + raw.slice(-4) : raw || '—';
+      return `<tr style="border-bottom:1px solid #fef3c7;">
+        <td style="padding:7px 10px;color:#92400e;font-weight:700;">${i+1}</td>
+        <td style="padding:7px 10px;">${name||'—'}</td>
+        <td style="padding:7px 10px;color:#64748b;">${dept||'—'}</td>
+        <td style="padding:7px 10px;font-family:monospace;font-size:0.78rem;color:#92400e;">${masked}</td>
+      </tr>`;
+    }).join('');
+  } catch(e) {}
+}
+
+function toggleDupCard() {
+  const body = document.getElementById('dupCardBody');
+  const btn = document.getElementById('dupToggleBtn');
+  const open = body.style.display === 'none';
+  body.style.display = open ? 'block' : 'none';
+  btn.textContent = open ? '▲ ซ่อน' : '▼ ดูรายชื่อ';
+}
+
+loadWalkinDuplicates();
 </script>
 
 <!-- ─── QR SHARE ─── -->
