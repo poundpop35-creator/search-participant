@@ -1201,6 +1201,9 @@ async function doImport(mode){
     setStatus('importStatus','ok',`✅ นำเข้าสำเร็จ: <strong>${ok.toLocaleString()} คน</strong>${skip?` | ซ้ำกับที่มีอยู่: <strong>${skip} คน</strong>`:''}${err?` | ผิดพลาด: ${err} คน`:''}`);
     const sl=document.getElementById('skippedList');
     if(skippedRows.length){
+      // บันทึกลง Supabase เพื่อให้ qr-lookup.html แสดงได้
+      const toSave=skippedRows.map(r=>({id_card:r.id_card||'',prefix:r.prefix||'',first_name:r.first_name||'',last_name:r.last_name||'',dept:r.dept||r.ext_dept||'',participation_type:r.participation_type||''}));
+      await sbSetSetting('walkin_duplicates',JSON.stringify(toSave));
       const rows=skippedRows.map(r=>`<tr><td>${r.prefix||''}</td><td><strong>${r.first_name||''} ${r.last_name||''}</strong></td><td style="color:#64748b;">${r.dept||r.ext_dept||''}</td><td style="font-family:monospace;font-size:0.78rem;color:#94a3b8;">${r.id_card||''}</td></tr>`).join('');
       sl.innerHTML=`<div style="background:#fffbeb;border:1px solid #fcd34d;border-radius:12px;padding:16px;">
         <div style="font-weight:700;color:#92400e;margin-bottom:10px;">⚠️ รายชื่อที่ซ้ำกับผู้ลงทะเบียนล่วงหน้า (${skippedRows.length} คน) — ไม่ได้นำเข้า</div>
@@ -1208,11 +1211,18 @@ async function doImport(mode){
           <thead><tr style="background:#fef3c7;"><th style="padding:6px 10px;text-align:left;">คำนำหน้า</th><th style="padding:6px 10px;text-align:left;">ชื่อ-สกุล</th><th style="padding:6px 10px;text-align:left;">หน่วยงาน</th><th style="padding:6px 10px;text-align:left;">เลขบัตร</th></tr></thead>
           <tbody>${rows}</tbody>
         </table></div>
-        <button class="btn btn-ghost btn-sm" style="margin-top:10px;" onclick="downloadSkipped()">⬇️ ดาวน์โหลด CSV รายการซ้ำ</button>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
+          <button class="btn btn-ghost btn-sm" onclick="downloadSkipped()">⬇️ ดาวน์โหลด CSV</button>
+          <span style="font-size:0.78rem;color:#92400e;align-self:center;">✅ บันทึกแล้ว — ดูได้ที่หน้า ค้นหา QR Code</span>
+        </div>
       </div>`;
       sl.style.display='block';
       window._skippedRows=skippedRows;
-    } else { sl.style.display='none'; }
+    } else {
+      sl.style.display='none';
+      // ล้างรายการซ้ำเก่าถ้าไม่มีซ้ำ
+      await sbSetSetting('walkin_duplicates','[]');
+    }
   }catch(e){
     setStatus('importStatus','err','❌ '+e.message);
   }finally{
