@@ -1379,7 +1379,7 @@ async function loadWalkinDuplicates() {
       const name = `${(row.prefix||'').trim()} ${(row.first_name||'').trim()} ${(row.last_name||'').trim()}`.trim().replace(/\s+/g,' ');
       const dept = row.dept || '';
       const raw = (row.id_card || '').replace(/\D/g,'');
-      const masked = raw.length >= 4 ? raw.slice(0,3) + '×'.repeat(Math.max(0,raw.length-7)) + raw.slice(-4) : raw || '—';
+      const masked = raw.length >= 5 ? '×'.repeat(Math.max(0,raw.length-5)) + raw.slice(-5) : raw || '—';
       return `<tr style="border-bottom:1px solid #fef3c7;">
         <td style="padding:7px 10px;color:#92400e;font-weight:700;">${i+1}</td>
         <td style="padding:7px 10px;">${name||'—'}</td>
