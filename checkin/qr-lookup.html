@@ -365,7 +365,7 @@ async function ensureNames() {
   let data = [], offset = 0;
   while(true) {
     const r = await fetch(
-      `${SB_URL}/rest/v1/participants?event_year=eq.${yr}&select=id,prefix,first_name,last_name,dept,ext_dept,internal_external,is_walkin,participation_type&limit=1000&offset=${offset}&order=last_name.asc`,
+      `${SB_URL}/rest/v1/participants?event_year=eq.${yr}&select=id,prefix,first_name,last_name,id_card,dept,ext_dept,internal_external,is_walkin,participation_type&limit=1000&offset=${offset}&order=last_name.asc`,
       { headers }
     );
     if (!r.ok) { const txt = await r.text().catch(()=>''); throw new Error('HTTP ' + r.status + ': ' + txt.slice(0,120)); }
@@ -375,7 +375,13 @@ async function ensureNames() {
     if (d.length < 1000) break;
     offset += 1000;
   }
-  allNames = data;
+  // Deduplicate by id_card — prefer pre-reg (is_walkin=false) over walk-in when same person
+  const seen = new Map();
+  data.forEach(p => {
+    const key = (p.id_card || '').replace(/\D/g,'') || `_noid_${p.id}`;
+    if (!seen.has(key) || seen.get(key).is_walkin === true) seen.set(key, p);
+  });
+  allNames = Array.from(seen.values());
 }
 
 async function doSearch() {
