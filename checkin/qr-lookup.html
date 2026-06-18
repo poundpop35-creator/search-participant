@@ -1397,7 +1397,7 @@ async function loadWalkinDuplicates() {
         if (Array.isArray(prData)) prData.forEach(p => { preRegMap[(p.id_card||'').replace(/\D/g,'')] = p; });
       } catch(e) {}
     }
-    countEl.textContent = `(${dups.length} รายการ)`;
+    countEl.textContent = `(${dups.length} คน)`;
     toggleBtn.style.display = '';
     document.getElementById('dupTBody').innerHTML = dups.map((row, i) => {
       const key = (row.id_card||'').replace(/\D/g,'');
