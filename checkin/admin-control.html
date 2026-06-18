@@ -413,6 +413,7 @@
         <button class="btn btn-green" id="importBtn" style="display:none;" onclick="confirmImport()">✅ นำเข้าข้อมูล</button>
       </div>
       <div id="importStatus" style="margin-top:12px;"></div>
+      <div id="skippedList" style="display:none;margin-top:14px;"></div>
     </div>
 
     <!-- Sheet URLs + Walk-in Auto-Sync -->
@@ -1160,7 +1161,7 @@ async function doImport(mode){
   btn.disabled=true; btn.innerHTML='<span class="sp"></span>กำลังนำเข้า...';
   setStatus('importStatus','info','กำลังดำเนินการ...');
   try{
-    let ok=0,skip=0,err=0;
+    let ok=0,skip=0,err=0,skippedRows=[];
     if(mode==='replace'){
       setStatus('importStatus','info','กำลังลบข้อมูลเก่า...');
       await fetch(`${SB_URL}/rest/v1/participants?id=gte.0`,{method:'DELETE',headers:H});
@@ -1182,7 +1183,10 @@ async function doImport(mode){
       setStatus('importStatus','info',`กำลังนำเข้า ${Math.min(i+BATCH,mapped.length).toLocaleString()}/${mapped.length.toLocaleString()}...`);
       let batch=mapped.slice(i,i+BATCH);
       if(mode==='add'){
-        const toInsert=batch.filter(r=>!r.id_card||!existIds.has(r.id_card.replace(/\D/g,'')));
+        const toInsert=batch.filter(r=>{
+          if(r.id_card && existIds.has(r.id_card.replace(/\D/g,''))){ skippedRows.push(r); return false; }
+          return true;
+        });
         skip+=batch.length-toInsert.length;
         if(!toInsert.length) continue;
         batch=toInsert;
@@ -1194,7 +1198,21 @@ async function doImport(mode){
       });
       if(res.ok||res.status===201) ok+=batch.length; else err+=batch.length;
     }
-    setStatus('importStatus','ok',`✅ นำเข้าสำเร็จ: <strong>${ok.toLocaleString()} คน</strong>${skip?` | ข้าม: ${skip} คน`:''}${err?` | ผิดพลาด: ${err} คน`:''}`);
+    setStatus('importStatus','ok',`✅ นำเข้าสำเร็จ: <strong>${ok.toLocaleString()} คน</strong>${skip?` | ซ้ำกับที่มีอยู่: <strong>${skip} คน</strong>`:''}${err?` | ผิดพลาด: ${err} คน`:''}`);
+    const sl=document.getElementById('skippedList');
+    if(skippedRows.length){
+      const rows=skippedRows.map(r=>`<tr><td>${r.prefix||''}</td><td><strong>${r.first_name||''} ${r.last_name||''}</strong></td><td style="color:#64748b;">${r.dept||r.ext_dept||''}</td><td style="font-family:monospace;font-size:0.78rem;color:#94a3b8;">${r.id_card||''}</td></tr>`).join('');
+      sl.innerHTML=`<div style="background:#fffbeb;border:1px solid #fcd34d;border-radius:12px;padding:16px;">
+        <div style="font-weight:700;color:#92400e;margin-bottom:10px;">⚠️ รายชื่อที่ซ้ำกับผู้ลงทะเบียนล่วงหน้า (${skippedRows.length} คน) — ไม่ได้นำเข้า</div>
+        <div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:0.82rem;">
+          <thead><tr style="background:#fef3c7;"><th style="padding:6px 10px;text-align:left;">คำนำหน้า</th><th style="padding:6px 10px;text-align:left;">ชื่อ-สกุล</th><th style="padding:6px 10px;text-align:left;">หน่วยงาน</th><th style="padding:6px 10px;text-align:left;">เลขบัตร</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table></div>
+        <button class="btn btn-ghost btn-sm" style="margin-top:10px;" onclick="downloadSkipped()">⬇️ ดาวน์โหลด CSV รายการซ้ำ</button>
+      </div>`;
+      sl.style.display='block';
+      window._skippedRows=skippedRows;
+    } else { sl.style.display='none'; }
   }catch(e){
     setStatus('importStatus','err','❌ '+e.message);
   }finally{
@@ -1656,6 +1674,19 @@ async function testSbConfig(){
     else     setStatus('sbConfigStatus','err','❌ เชื่อมต่อไม่ได้ ('+r.status+') — ตรวจสอบ URL หรือ Key อีกครั้ง');
   } catch(e){ setStatus('sbConfigStatus','err','❌ เชื่อมต่อไม่ได้: '+e.message); }
 }
+function downloadSkipped(){
+  const rows = window._skippedRows||[];
+  if(!rows.length) return;
+  const fields=['prefix','first_name','last_name','dept','ext_dept','id_card','participation_type'];
+  const header=fields.join(',');
+  const lines=rows.map(r=>fields.map(f=>`"${(r[f]||'').replace(/"/g,'""')}"`).join(','));
+  const csv='﻿'+[header,...lines].join('\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download='walkin_duplicates.csv'; a.click();
+  URL.revokeObjectURL(a.href);
+}
+
 function downloadSchema(){
   const sql = `-- ============================================================
 --  DMSc Event Check-in System — Database Schema Backup
