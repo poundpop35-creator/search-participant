@@ -1166,14 +1166,20 @@ async function doImport(mode){
       setStatus('importStatus','info','กำลังลบข้อมูลเก่า...');
       await fetch(`${SB_URL}/rest/v1/participants?id=gte.0`,{method:'DELETE',headers:H});
     }
-    let existIds=new Set();
+    let existIds=new Set(), preRegIds=new Set();
     if(mode==='add'){
       let from=0;
       while(true){
-        const r=await fetch(`${SB_URL}/rest/v1/participants?select=id_card&limit=1000&offset=${from}`,{headers:H});
+        const r=await fetch(`${SB_URL}/rest/v1/participants?select=id_card,is_walkin&limit=1000&offset=${from}`,{headers:H});
         const d=await r.json();
         if(!Array.isArray(d)||!d.length) break;
-        d.forEach(p=>{ if(p.id_card) existIds.add(p.id_card.replace(/\D/g,'')); });
+        d.forEach(p=>{
+          if(p.id_card){
+            const clean=p.id_card.replace(/\D/g,'');
+            existIds.add(clean);
+            if(!p.is_walkin) preRegIds.add(clean);
+          }
+        });
         if(d.length<1000) break; from+=1000;
       }
     }
@@ -1184,7 +1190,11 @@ async function doImport(mode){
       let batch=mapped.slice(i,i+BATCH);
       if(mode==='add'){
         const toInsert=batch.filter(r=>{
-          if(r.id_card && existIds.has(r.id_card.replace(/\D/g,''))){ skippedRows.push(r); return false; }
+          if(r.id_card && existIds.has(r.id_card.replace(/\D/g,''))){
+            // only flag as duplicate if it matched a pre-registered (non-walk-in) participant
+            if(preRegIds.has(r.id_card.replace(/\D/g,''))) skippedRows.push(r);
+            return false;
+          }
           return true;
         });
         skip+=batch.length-toInsert.length;
