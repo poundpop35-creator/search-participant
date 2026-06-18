@@ -128,21 +128,7 @@
     <div class="subtitle">งานประชุมวิชาการวิทยาศาสตร์การแพทย์ ครั้งที่ 34</div>
   </div>
 
-  <div class="search-label">ค้นหาด้วยชื่อ หรือ นามสกุล</div>
-  <div style="background:#fef2f2;border:2px solid #dc2626;border-radius:12px;padding:10px 14px;margin-bottom:10px;display:flex;align-items:flex-start;gap:10px;">
-    <span style="font-size:1.3rem;line-height:1.3;flex-shrink:0;">⚠️</span>
-    <div style="font-size:0.83rem;color:#991b1b;line-height:1.7;">
-      <div style="font-weight:700;color:#dc2626;font-size:0.88rem;">กรุณาพิมพ์ชื่อภาษาไทย หรือ ภาษาอังกฤษ</div>
-      <div>For Walk-in: หากไม่พบชื่อตนเอง<br>กรุณาติดต่อที่ช่อง Walk-in หรือแจ้ง Staff</div>
-    </div>
-  </div>
-  <div class="search-row">
-    <input class="search-input" type="text" id="searchInput" placeholder="เช่น สมชาย, วรรณภา..."
-      onkeydown="if(event.key==='Enter')doSearch()" autocomplete="off">
-    <button class="search-btn" onclick="doSearch()">ค้นหา</button>
-  </div>
-  <div class="search-hint">กรอกชื่อหรือนามสกุลอย่างน้อย 2 ตัวอักษร</div>
-  <div style="background:#fffbeb;border:1px solid #fcd34d;border-radius:10px;padding:10px 14px;margin-top:10px;font-size:0.8rem;color:#92400e;line-height:1.8;">
+  <div style="background:#fffbeb;border:1px solid #fcd34d;border-radius:10px;padding:10px 14px;font-size:0.8rem;color:#92400e;line-height:1.8;">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;flex-shrink:0;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> <strong>แนะนำ:</strong> กรุณาตรวจสอบ QR Code ของท่านทาง<br><strong>E-mail ที่ลงทะเบียนไว้</strong> ก่อนเป็นลำดับแรก
     <div style="border-top:1px solid #fcd34d;margin-top:8px;padding-top:8px;color:#78350f;">
       <div><span style="font-weight:700;">▸ ลงทะเบียนล่วงหน้า</span> — ค้นหาได้ทันที</div>
@@ -154,9 +140,26 @@
   </div>
 
   <a href="https://form.jotform.com/261190158656461" target="_blank" rel="noopener"
-    style="display:block;margin-top:14px;padding:14px;border-radius:14px;background:linear-gradient(135deg,#ea580c,#f97316);color:white;text-align:center;font-size:1rem;font-weight:700;text-decoration:none;box-shadow:0 4px 14px rgba(234,88,12,0.35);letter-spacing:0.02em;">
+    style="display:block;margin-top:10px;padding:14px;border-radius:14px;background:linear-gradient(135deg,#ea580c,#f97316);color:white;text-align:center;font-size:1rem;font-weight:700;text-decoration:none;box-shadow:0 4px 14px rgba(234,88,12,0.35);letter-spacing:0.02em;">
     📋 ลงทะเบียน Walk-in<br><span style="font-size:0.82rem;font-weight:400;opacity:0.9;">(สำหรับผู้ที่ยังไม่ได้ลงทะเบียน)</span>
   </a>
+
+  <div style="border-top:1px solid #e2e8f0;margin-top:16px;padding-top:14px;">
+    <div class="search-label">ค้นหาด้วยชื่อ หรือ นามสกุล</div>
+    <div style="background:#fef2f2;border:2px solid #dc2626;border-radius:12px;padding:10px 14px;margin-bottom:10px;display:flex;align-items:flex-start;gap:10px;">
+      <span style="font-size:1.3rem;line-height:1.3;flex-shrink:0;">⚠️</span>
+      <div style="font-size:0.83rem;color:#991b1b;line-height:1.7;">
+        <div style="font-weight:700;color:#dc2626;font-size:0.88rem;">กรุณาพิมพ์ชื่อภาษาไทย หรือ ภาษาอังกฤษ</div>
+        <div>For Walk-in: หากไม่พบชื่อตนเอง<br>กรุณาติดต่อที่ช่อง Walk-in หรือแจ้ง Staff</div>
+      </div>
+    </div>
+    <div class="search-row">
+      <input class="search-input" type="text" id="searchInput" placeholder="เช่น สมชาย, วรรณภา..."
+        onkeydown="if(event.key==='Enter')doSearch()" autocomplete="off">
+      <button class="search-btn" onclick="doSearch()">ค้นหา</button>
+    </div>
+    <div class="search-hint">กรอกชื่อหรือนามสกุลอย่างน้อย 2 ตัวอักษร</div>
+  </div>
 
   <div class="results-wrap" id="resultsWrap"></div>
 </div>
