@@ -38,7 +38,7 @@
     .result-type{display:inline-block;font-size:0.68rem;font-weight:700;padding:2px 8px;border-radius:99px;margin-top:4px;}
     .type-in{background:#dbeafe;color:#1d4ed8;}
     .type-out{background:#dcfce7;color:#15803d;}
-    .type-prereg{background:#dcfce7;color:#15803d;}
+    .type-prereg{background:#ccfbf1;color:#0f766e;}
     .type-walkin{background:#fed7aa;color:#c2410c;}
     .no-result{text-align:center;color:#94a3b8;padding:24px 0;font-size:0.9rem;}
     .loading-msg{text-align:center;color:#94a3b8;padding:16px 0;font-size:0.9rem;}
@@ -418,13 +418,19 @@ function renderResults() {
     const regLabel = p.is_walkin ? 'Walk-in' : 'ลงทะเบียนล่วงหน้า';
     const regClass = p.is_walkin ? 'type-walkin' : 'type-prereg';
     const ptLabel = (p.participation_type||'').replace(/\s+/g,' ').trim();
+    const ptStyle = ptLabel.includes('ผู้บริหาร') ? 'background:#fef3c7;color:#92400e;' :
+      ptLabel.includes('กรรมการ') ? 'background:#ede9fe;color:#5b21b6;' :
+      ptLabel.includes('คณะทำงาน') ? 'background:#d1fae5;color:#065f46;' :
+      ptLabel.includes('ผู้ส่งผลงาน') ? 'background:#e0e7ff;color:#3730a3;' :
+      ptLabel.includes('ผู้เข้าร่วมงาน') ? 'background:#f1f5f9;color:#475569;' :
+      'background:#fce7f3;color:#9d174d;';
     return `<div class="result-item" onclick="selectPerson(${i})">
       <div class="result-name">${name}</div>
       <div class="result-dept">${dept}</div>
       <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px;">
         ${typeLabel ? `<span class="result-type ${typeClass}">${typeLabel}</span>` : ''}
         <span class="result-type ${regClass}">${regLabel}</span>
-        ${ptLabel ? `<span class="result-type" style="background:#f3e8ff;color:#6b21a8;">${ptLabel}</span>` : ''}
+        ${ptLabel ? `<span class="result-type" style="${ptStyle}">${ptLabel}</span>` : ''}
       </div>
     </div>`;
   }).join('');
