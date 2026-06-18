@@ -1286,7 +1286,7 @@ function renderParticipants(){
   }).join('');
 }
 
-function changePPage(d){curPPage+=d;renderParticipants();window.scrollTo({top:0,behavior:'smooth'});}
+function changePPage(d){curPPage+=d;renderParticipants();}
 
 function renderZoneRegSummary(){
   const ie=window['zoneIE_reg']||'';
@@ -1873,7 +1873,7 @@ function renderTable(){
   }).join('');
 }
 
-function changePage(d){curPage+=d;renderTable();window.scrollTo({top:0,behavior:'smooth'});}
+function changePage(d){curPage+=d;renderTable();}
 
 // ===== DEPT =====
 function renderDept(){
