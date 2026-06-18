@@ -659,29 +659,26 @@
         document.getElementById('count').textContent=todayCount.toLocaleString();
         staffCount++;
         document.getElementById('staffCount').textContent=staffCount.toLocaleString();
-        // Auto-mark bag/shirt received at check-in time
         const items=p.items||'';
         const hasBag=items.includes('กระเป๋า');
         const hasShirt=(p.shirt_size||'').trim()!=='';
         const autoReceive={};
         if(hasBag&&!p.bag_received){autoReceive.bag_received=true;autoReceive.bag_received_date=nowISO;}
         if(hasShirt&&!p.shirt_received){autoReceive.shirt_received=true;autoReceive.shirt_received_date=nowISO;}
-        if(Object.keys(autoReceive).length>0){
-          await sbFetch(`/rest/v1/participants?id=eq.${p.id}`,'PATCH',autoReceive).catch(()=>{});
-          Object.assign(p,autoReceive);
-        }
         const timeNow=new Date(nowISO).toLocaleTimeString('th-TH',{timeZone:'Asia/Bangkok'});
         const _undoCheckin=async()=>{
           await sbFetch(`/rest/v1/checkins?participant_id=eq.${p.id}&day=eq.${day}&event_year=eq.${encodeURIComponent(activeYear)}`,'DELETE');
-          if(Object.keys(autoReceive).length>0){const rv={};if(autoReceive.bag_received){rv.bag_received=false;rv.bag_received_date=null;}if(autoReceive.shirt_received){rv.shirt_received=false;rv.shirt_received_date=null;}await sbFetch(`/rest/v1/participants?id=eq.${p.id}`,'PATCH',rv).catch(()=>{});}
           todayCount=Math.max(0,todayCount-1);staffCount=Math.max(0,staffCount-1);
           document.getElementById('count').textContent=todayCount.toLocaleString();
           document.getElementById('staffCount').textContent=staffCount.toLocaleString();
         };
+        const _confirmCheckin=Object.keys(autoReceive).length>0?async()=>{
+          await sbFetch(`/rest/v1/participants?id=eq.${p.id}`,'PATCH',autoReceive).catch(()=>{});
+        }:null;
         if(isNetwork){
-          showNetworkSuccessModal(p, fullName, timeNow, _undoCheckin);
+          showNetworkSuccessModal(p, fullName, timeNow, _undoCheckin, _confirmCheckin);
         } else {
-          showModal('success','เช็คอินสำเร็จ',`วันที่ ${day} — ${DAY_TH[parseInt(day)]}`,fullName,buildSuccessRows(timeNow,p,isFirst,isWalkin),p.dept||'',_undoCheckin);
+          showModal('success','เช็คอินสำเร็จ',`วันที่ ${day} — ${DAY_TH[parseInt(day)]}`,fullName,buildSuccessRows(timeNow,p,isFirst,isWalkin),p.dept||'',_undoCheckin,_confirmCheckin);
         }
         setStatus('เช็คอินสำเร็จ');
       } else {
@@ -748,15 +745,16 @@
     return rows;
   }
 
-  let pendingUndo=null;
+  let pendingUndo=null, pendingConfirm=null;
 
   const MODAL_META={
     success:{icon:'✅',cls:'success'},warning:{icon:'⚠️',cls:'warning'},
     error:{icon:'❌',cls:'error'},loading:{icon:'⏳',cls:'loading'},
     vip:{icon:'🎖️',cls:'vip'},'staff-ex':{icon:'👥',cls:'staff-ex'},network:{icon:'🤝',cls:'network'},
   };
-  function showModal(type,status,title,name,rows,dept,undoFn){
+  function showModal(type,status,title,name,rows,dept,undoFn,confirmFn){
     pendingUndo=undoFn||null;
+    pendingConfirm=confirmFn||null;
     const m=MODAL_META[type]||MODAL_META.loading;
     document.getElementById('modalIcon').textContent=m.icon;
     document.getElementById('modalHeader').className='modal-header '+m.cls;
@@ -788,6 +786,7 @@
   }
 
   async function cancelModal(){
+    pendingConfirm=null;
     if(!pendingUndo){closeModal();return;}
     const cancelBtn=document.querySelector('.btn-cancel');
     const okBtn=document.getElementById('btnOk');
@@ -821,7 +820,8 @@
       <div style="margin-top:10px;padding-top:10px;border-top:1px solid #ede9fe;text-align:center;font-size:0.84rem;color:#7c3aed;line-height:1.9;">หากต้องการสิ่งใดเพิ่มเติม<br>ติดต่อ กองแผนงานและวิชาการ</div>`;
     document.getElementById('modalOverlay').classList.remove('hidden');
   }
-  function showNetworkSuccessModal(p, fullName, time, undoFn){
+  function showNetworkSuccessModal(p, fullName, time, undoFn, confirmFn){
+    pendingConfirm=confirmFn||null;
     _setModalHeader('network','🤝','เครือข่ายกรม','เช็คอินสำเร็จ',fullName);
     const det=document.getElementById('modalDetail');
     det.style.display='block';
@@ -831,7 +831,7 @@
       <div style="margin-top:10px;padding-top:10px;border-top:1px solid #cffafe;text-align:center;font-size:0.84rem;color:#0891b2;line-height:1.9;">หากต้องการสิ่งใดเพิ่มเติม<br>ติดต่อ กองแผนงานและวิชาการ</div>`;
     if(undoFn){
       const cancel=document.querySelector('.btn-cancel');
-      if(cancel){cancel.style.display='block';cancel.textContent='ยกเลิกเช็คอิน';cancel.onclick=()=>{undoFn();closeModal();};}
+      if(cancel){cancel.style.display='block';cancel.textContent='ยกเลิกเช็คอิน';cancel.onclick=()=>{pendingConfirm=null;undoFn();closeModal();};}
     }
     document.getElementById('modalOverlay').classList.remove('hidden');
   }
@@ -863,6 +863,8 @@
 
   function closeModal(){
     document.getElementById('modalOverlay').classList.add('hidden');
+    const fn=pendingConfirm;pendingConfirm=null;
+    if(fn){fn().catch(()=>{});}
     if(currentMode==='camera'){try{qrCode.resume();}catch(e){}}
     else{document.getElementById('scanInput').value='';scanBuffer='';}
     document.getElementById('manualInput').value='';
