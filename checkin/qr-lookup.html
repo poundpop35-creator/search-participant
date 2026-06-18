@@ -254,11 +254,10 @@
             <th style="padding:8px 10px;text-align:left;border-bottom:1.5px solid #fed7aa;color:#92400e;">#</th>
             <th style="padding:8px 10px;text-align:left;border-bottom:1.5px solid #fed7aa;color:#92400e;">ชื่อ-นามสกุล</th>
             <th style="padding:8px 10px;text-align:left;border-bottom:1.5px solid #fed7aa;color:#92400e;">หน่วยงาน</th>
-            <th style="padding:8px 10px;text-align:left;border-bottom:1.5px solid #fed7aa;color:#92400e;">เลขบัตร (ซ่อนบางส่วน)</th>
           </tr>
         </thead>
         <tbody id="dupTBody">
-          <tr><td colspan="4" style="text-align:center;padding:20px;color:#94a3b8;">กำลังโหลด...</td></tr>
+          <tr><td colspan="3" style="text-align:center;padding:20px;color:#94a3b8;">กำลังโหลด...</td></tr>
         </tbody>
       </table>
     </div>
@@ -1378,13 +1377,10 @@ async function loadWalkinDuplicates() {
     document.getElementById('dupTBody').innerHTML = dups.map((row, i) => {
       const name = `${(row.prefix||'').trim()} ${(row.first_name||'').trim()} ${(row.last_name||'').trim()}`.trim().replace(/\s+/g,' ');
       const dept = row.dept || '';
-      const raw = (row.id_card || '').replace(/\D/g,'');
-      const masked = raw.length >= 5 ? '×'.repeat(Math.max(0,raw.length-5)) + raw.slice(-5) : raw || '—';
       return `<tr style="border-bottom:1px solid #fef3c7;">
         <td style="padding:7px 10px;color:#92400e;font-weight:700;">${i+1}</td>
         <td style="padding:7px 10px;">${name||'—'}</td>
         <td style="padding:7px 10px;color:#64748b;">${dept||'—'}</td>
-        <td style="padding:7px 10px;font-family:monospace;font-size:0.78rem;color:#92400e;">${masked}</td>
       </tr>`;
     }).join('');
   } catch(e) {}
