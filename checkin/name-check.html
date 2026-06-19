@@ -6,25 +6,33 @@
 <title>เช็กรายชื่อ</title>
 <style>
   *{box-sizing:border-box;margin:0;padding:0;}
-  body{font-family:'Sarabun',sans-serif;background:#f1f5f9;padding:20px;font-size:15px;}
+  body{font-family:'Sarabun',sans-serif;background:#f1f5f9;padding:16px;font-size:15px;}
   h1{font-size:1.2rem;color:#1e3a5f;margin-bottom:16px;}
-  .card{background:#fff;border-radius:12px;padding:20px;box-shadow:0 2px 8px #0001;margin-bottom:16px;}
-  textarea{width:100%;height:220px;border:1px solid #cbd5e1;border-radius:8px;padding:10px;font-family:'Sarabun',sans-serif;font-size:14px;resize:vertical;}
+  .card{background:#fff;border-radius:12px;padding:16px;box-shadow:0 2px 8px #0001;margin-bottom:14px;}
+  textarea{width:100%;height:200px;border:1px solid #cbd5e1;border-radius:8px;padding:10px;font-family:'Sarabun',sans-serif;font-size:14px;resize:vertical;}
   button{background:#1e3a5f;color:#fff;border:none;border-radius:8px;padding:10px 24px;font-size:15px;cursor:pointer;margin-top:10px;}
   button:hover{background:#2d5086;}
   button:disabled{background:#94a3b8;cursor:not-allowed;}
   .hint{font-size:0.8rem;color:#94a3b8;margin-top:6px;}
-  table{width:100%;border-collapse:collapse;font-size:14px;}
-  th{background:#1e3a5f;color:#fff;padding:8px 10px;text-align:left;}
-  td{padding:8px 10px;border-bottom:1px solid #e2e8f0;}
-  tr:hover td{background:#f8fafc;}
-  .found{color:#16a34a;font-weight:700;}
-  .notfound{color:#dc2626;}
-  .approx{color:#d97706;font-weight:600;}
-  .tag-in{background:#dbeafe;color:#1e40af;border-radius:4px;padding:2px 6px;font-size:12px;}
-  .tag-out{background:#dcfce7;color:#166534;border-radius:4px;padding:2px 6px;font-size:12px;}
-  #summary{font-size:0.9rem;color:#475569;margin-bottom:10px;}
+  #summary{font-size:0.9rem;color:#475569;margin-bottom:12px;font-weight:600;}
   #statusMsg{font-size:0.82rem;color:#64748b;margin-top:6px;}
+
+  /* Result rows */
+  .rrow{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid #f1f5f9;}
+  .rrow:last-child{border-bottom:none;}
+  .rnum{flex:0 0 24px;text-align:center;font-size:0.75rem;color:#94a3b8;padding-top:3px;font-weight:700;}
+  .rbadge{flex:0 0 72px;padding-top:2px;}
+  .rbadge span{display:inline-block;font-size:0.72rem;font-weight:700;padding:3px 7px;border-radius:99px;}
+  .b-found{background:#dcfce7;color:#15803d;}
+  .b-approx{background:#fef3c7;color:#b45309;}
+  .b-none{background:#fee2e2;color:#b91c1c;}
+  .rinfo{flex:1;min-width:0;}
+  .rquery{font-size:0.78rem;color:#94a3b8;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .rname{font-size:0.92rem;font-weight:700;color:#1e293b;line-height:1.4;}
+  .rdept{font-size:0.75rem;color:#64748b;margin-top:2px;line-height:1.4;}
+  .rtags{margin-top:4px;display:flex;gap:4px;flex-wrap:wrap;}
+  .tag-in{background:#dbeafe;color:#1e40af;border-radius:4px;padding:2px 7px;font-size:0.68rem;font-weight:700;}
+  .tag-out{background:#dcfce7;color:#166534;border-radius:4px;padding:2px 7px;font-size:0.68rem;font-weight:700;}
 </style>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
@@ -42,19 +50,7 @@
 <div id="results" style="display:none;">
   <div class="card">
     <div id="summary"></div>
-    <table>
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>ชื่อที่ค้นหา</th>
-          <th>ผล</th>
-          <th>ชื่อในระบบ</th>
-          <th>หน่วยงาน</th>
-          <th>ประเภท</th>
-        </tr>
-      </thead>
-      <tbody id="tbody"></tbody>
-    </table>
+    <div id="tbody"></div>
   </div>
 </div>
 
@@ -436,30 +432,33 @@ async function checkNames() {
 
     const tbody = document.getElementById('tbody');
     tbody.innerHTML = rows.map(({ line, exact, fuzzy }, i) => {
-      const renderRow = (p, mi, label, labelClass) => {
+      const renderMatch = (p, badge, badgeClass) => {
         const isIn = (p.internal_external || '').includes('ภายใน');
-        const dept = isIn ? (p.dept || '-') : (p.ext_dept || p.dept || '-');
+        const dept = isIn ? (p.dept || '') : (p.ext_dept || p.dept || '');
         const tag = isIn ? '<span class="tag-in">ภายใน</span>' : '<span class="tag-out">ภายนอก</span>';
-        return `<tr>
-          <td>${mi === 0 ? i+1 : ''}</td>
-          <td>${mi === 0 ? line : ''}</td>
-          <td class="${labelClass}">${label}</td>
-          <td>${p.prefix || ''}${p.first_name} ${p.last_name}</td>
-          <td>${dept}</td>
-          <td>${tag}</td>
-        </tr>`;
+        const fullName = `${p.prefix || ''}${p.first_name} ${p.last_name}`.trim();
+        return `<div class="rrow">
+          <div class="rnum">${i+1}</div>
+          <div class="rbadge"><span class="${badgeClass}">${badge}</span></div>
+          <div class="rinfo">
+            <div class="rquery">${line}</div>
+            <div class="rname">${fullName}</div>
+            ${dept ? `<div class="rdept">${dept}</div>` : ''}
+            <div class="rtags">${tag}</div>
+          </div>
+        </div>`;
       };
       if (exact.length) {
-        return exact.map((p, mi) => renderRow(p, mi, '✓ พบ', 'found')).join('');
+        return exact.map(p => renderMatch(p, '✓ พบ', 'b-found')).join('');
       }
       if (fuzzy.length) {
-        return fuzzy.map((p, mi) => renderRow(p, mi, '~ ใกล้เคียง', 'approx')).join('');
+        return fuzzy.map(p => renderMatch(p, '~ ใกล้เคียง', 'b-approx')).join('');
       }
-      return `<tr>
-        <td>${i+1}</td><td>${line}</td>
-        <td class="notfound">ไม่พบ</td>
-        <td>-</td><td>-</td><td>-</td>
-      </tr>`;
+      return `<div class="rrow">
+        <div class="rnum">${i+1}</div>
+        <div class="rbadge"><span class="b-none">ไม่พบ</span></div>
+        <div class="rinfo"><div class="rquery">${line}</div><div class="rname" style="color:#94a3b8;">—</div></div>
+      </div>`;
     }).join('');
 
     document.getElementById('results').style.display = 'block';
