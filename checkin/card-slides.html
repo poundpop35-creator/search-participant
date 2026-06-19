@@ -170,59 +170,44 @@ body::before{
   display:flex;align-items:center;justify-content:center;
   min-height:340px;
 }
-.modal-box{
-  background:#fff;
-  border-radius:20px;
-  width:100%;max-width:320px;
-  box-shadow:0 8px 40px rgba(0,0,0,.12),0 0 0 1px rgba(0,0,0,.04);
-  overflow:hidden;
-}
-/* gradient header */
-.modal-head{padding:20px 18px 14px;text-align:center;}
-.modal-head.mh-success{background:linear-gradient(140deg,#15803d,#22c55e);}
-.modal-head.mh-warning{background:linear-gradient(140deg,#92400e,#f59e0b);}
-.modal-head.mh-error{background:linear-gradient(140deg,#991b1b,#ef4444);}
-.modal-head.mh-vip{background:linear-gradient(140deg,#5b21b6,#a855f7);}
-.modal-head.mh-staff{background:linear-gradient(140deg,#9a3412,#f97316);}
-.mbadge{font-size:0.7rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:rgba(255,255,255,.85);margin-bottom:5px;}
-.mhtitle{font-size:0.97rem;font-weight:800;color:#fff;line-height:1.35;}
-.modal-title{text-align:center;font-size:0.93rem;font-weight:700;color:#1e293b;padding:0 18px 3px;line-height:1.35;}
-.modal-name{text-align:center;font-size:1.08rem;font-weight:800;color:#1e40af;padding:4px 18px 1px;}
-.modal-dept{text-align:center;font-size:0.77rem;color:#94a3b8;padding:0 18px 10px;}
-.modal-divider{height:1px;background:#f1f5f9;margin:0 14px 6px;}
-/* rows */
-.modal-rows{padding:0 10px 4px;}
-.row{
-  display:flex;align-items:baseline;justify-content:space-between;
-  padding:6px 8px;border-radius:8px;margin-bottom:2px;
-  gap:8px;
-}
-.row:nth-child(odd){background:#f8fafc;}
-.rl{font-size:0.76rem;color:#64748b;font-weight:600;flex:0 0 auto;max-width:55%;line-height:1.35;}
-.rv{font-size:0.78rem;font-weight:700;text-align:right;line-height:1.35;}
-.rv.ok{color:#16a34a;}.rv.done{color:#dc2626;font-weight:700;}.rv.warn{color:#d97706;}.rv.nor{color:#334155;}.rv.pur{color:#7c3aed;}
-.rsub{font-size:0.67rem;color:#94a3b8;font-weight:400;display:block;text-align:right;margin-top:1px;}
+/* ── MODAL (copied from real system) ── */
+.modal{background:white;border-radius:22px;overflow:hidden;width:100%;max-width:370px;box-shadow:0 16px 56px rgba(0,0,0,.32);}
+.modal-header{padding:24px 22px 18px;text-align:center;color:white;}
+.modal-header.success{background:linear-gradient(140deg,#15803d,#22c55e);}
+.modal-header.warning{background:linear-gradient(140deg,#92400e,#f59e0b);}
+.modal-header.error{background:linear-gradient(140deg,#991b1b,#ef4444);}
+.modal-header.vip{background:linear-gradient(140deg,#5b21b6,#a855f7);}
+.modal-header.staff-ex{background:linear-gradient(140deg,#9a3412,#f97316);}
+.modal-icon{font-size:2.4rem;line-height:1;margin-bottom:6px;}
+.modal-status{font-size:0.72rem;font-weight:700;letter-spacing:0.09em;text-transform:uppercase;opacity:0.9;margin-bottom:5px;}
+.modal-title{font-size:1.1rem;font-weight:800;line-height:1.35;}
+.modal-body{padding:16px 20px 4px;text-align:center;}
+.modal-name{font-size:1.05rem;font-weight:700;color:#0d2b6b;margin-bottom:2px;}
+.modal-dept{font-size:0.88rem;color:#64748b;margin-bottom:12px;font-weight:500;}
+.modal-detail{background:#f8fafc;border-radius:12px;padding:12px 14px;margin-bottom:14px;text-align:left;border:1px solid #e2e8f0;}
+.detail-row{display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #f1f5f9;font-size:0.88rem;}
+.detail-row:last-child{border-bottom:none;}
+.detail-label{color:#374151;word-break:break-word;}
+.detail-val{color:#1e293b;font-weight:600;text-align:right;}
+.detail-val.done{color:#dc2626;font-weight:700;}
+.detail-val.ok{color:#16a34a;}
+.detail-val.warn{color:#d97706;}
+.detail-val.muted{color:#94a3b8;font-weight:400;}
+.modal-btns{display:flex;gap:10px;padding:0 20px 20px;}
+.btn-ok{flex:1;padding:13px;border-radius:12px;border:none;font-family:'Sarabun',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;}
+.btn-cancel{flex:0 0 auto;padding:13px 18px;border-radius:12px;border:1.5px solid #e2e8f0;background:white;font-family:'Sarabun',sans-serif;font-size:1rem;font-weight:600;cursor:pointer;color:#64748b;}
+.btn-ok.success{background:linear-gradient(135deg,#15803d,#16a34a);color:white;}
+.btn-ok.warning{background:linear-gradient(135deg,#92400e,#d97706);color:white;}
+.btn-ok.error{background:linear-gradient(135deg,#991b1b,#dc2626);color:white;}
+.btn-ok.vip{background:linear-gradient(135deg,#5b21b6,#7c3aed);color:white;}
+.btn-ok.staff-ex{background:linear-gradient(135deg,#9a3412,#ea580c);color:white;}
 /* note box */
-.modal-note{margin:4px 10px 4px;padding:8px 10px;border-radius:8px;text-align:center;font-size:0.76rem;line-height:1.55;}
+.modal-note{margin:0 0 10px;padding:8px 10px;border-radius:8px;text-align:center;font-size:0.76rem;line-height:1.55;}
 .mn-purple{background:#f3e8ff;color:#7c3aed;}
 .mn-blue{background:#dbeafe;color:#1d4ed8;}
 .mn-green{background:#dcfce7;color:#15803d;font-weight:700;}
 /* shirt btn */
-.shirt-btn{
-  margin:6px 10px;background:#0891b2;color:white;
-  border:none;border-radius:10px;padding:9px;
-  width:calc(100% - 20px);display:block;text-align:center;
-  font-family:'Sarabun',sans-serif;font-size:0.86rem;font-weight:700;cursor:pointer;
-}
-/* actions */
-.modal-actions{display:flex;gap:8px;padding:8px 10px 12px;}
-.mok{flex:1;padding:10px;border-radius:10px;border:none;font-family:'Sarabun',sans-serif;font-size:0.9rem;font-weight:700;cursor:pointer;}
-.mok.success{background:linear-gradient(135deg,#15803d,#16a34a);color:#fff;}
-.mok.warning{background:linear-gradient(135deg,#92400e,#d97706);color:#fff;}
-.mok.error{background:linear-gradient(135deg,#991b1b,#dc2626);color:#fff;}
-.mok.vip{background:linear-gradient(135deg,#5b21b6,#7c3aed);color:#fff;}
-.mok.staff{background:linear-gradient(135deg,#9a3412,#ea580c);color:#fff;}
-.mcancel{flex:0 0 auto;padding:10px 16px;border-radius:10px;border:1.5px solid #e2e8f0;background:#fff;font-family:'Sarabun',sans-serif;font-size:0.86rem;color:#64748b;cursor:pointer;}
+.shirt-btn{margin:0 0 10px;background:#0891b2;color:white;border:none;border-radius:10px;padding:9px;width:100%;display:block;text-align:center;font-family:'Sarabun',sans-serif;font-size:0.86rem;font-weight:700;cursor:pointer;}
 
 /* ── BOTTOM NAV ── */
 #bottomNav{
@@ -302,7 +287,7 @@ body::before{
   .info-note{flex:1 1 40%;margin-top:0;font-size:0.74rem;}
 
   .modal-stage{padding:14px 8px;min-height:auto;border-radius:16px;}
-  .modal-box{max-width:100%;}
+  .modal{max-width:100%;}
 
   .nav-dots{gap:4px;}
   .dot{width:6px;height:6px;}
@@ -385,16 +370,20 @@ body::before{
     <div class="info-note">ไม่บันทึก DB<br>ไม่มีปุ่มยกเลิก</div>
   </div>
   <div class="modal-stage">
-    <div class="modal-box">
-      <div class="modal-head mh-vip"><span class="mbadge">🎖️ VIP</span></div>
+    <div class="modal">
+      <div class="modal-header vip">
+      <div class="modal-icon">🎖️</div>
+      <div class="modal-status">️ VIP</div>
       <div class="modal-title">ได้รับการยกเว้น (ไม่ต้องเช็คอิน)</div>
+    </div>
+<div class="modal-body">
       <div class="modal-name">นาย ทดสอบ กองแผน</div>
-      <div class="modal-divider"></div>
-      <div class="modal-rows">
-        <div class="row"><span class="rl">ตำแหน่ง</span><span class="rv pur">อธิบดีกรมวิทยาศาสตร์การแพทย์</span></div>
+      <div class="modal-detail">
+        <div class="detail-row"><span class="detail-label">ตำแหน่ง</span><span class="detail-val" style="color:#7c3aed;">อธิบดีกรมวิทยาศาสตร์การแพทย์</span></div>
       </div>
       <div class="modal-note mn-purple">หากต้องการสิ่งใดเพิ่มเติม<br>ติดต่อ กองแผนงานและวิชาการ</div>
-      <div class="modal-actions"><button class="mok vip">ตกลง</button></div>
+    </div>
+          <div class="modal-btns"><button class="btn-ok vip">ตกลง</button></div>
     </div>
   </div>
 </div>
@@ -410,17 +399,21 @@ body::before{
     <div class="info-note">ไม่บันทึก DB<br>ไม่มีปุ่มยกเลิก</div>
   </div>
   <div class="modal-stage">
-    <div class="modal-box">
-      <div class="modal-head mh-staff"><span class="mbadge">👥 Staff</span></div>
+    <div class="modal">
+      <div class="modal-header staff-ex">
+      <div class="modal-icon">👥</div>
+      <div class="modal-status">Staff</div>
       <div class="modal-title">ได้รับการยกเว้น (ไม่ต้องเช็คอิน)</div>
+    </div>
+<div class="modal-body">
       <div class="modal-name">นาย ทดสอบ กองแผน</div>
-      <div class="modal-divider"></div>
-      <div class="modal-rows">
-        <div class="row"><span class="rl">ตำแหน่ง</span><span class="rv nor">นักวิเคราะห์นโยบายและแผน</span></div>
-        <div class="row"><span class="rl">หน่วยงาน</span><span class="rv nor">กองแผนงานและวิชาการ</span></div>
+      <div class="modal-detail">
+        <div class="detail-row"><span class="detail-label">ตำแหน่ง</span><span class="detail-val">นักวิเคราะห์นโยบายและแผน</span></div>
+        <div class="detail-row"><span class="detail-label">หน่วยงาน</span><span class="detail-val">กองแผนงานและวิชาการ</span></div>
       </div>
       <div class="modal-note mn-blue">มีข้อสงสัยเพิ่มเติม<br>ติดต่อ กองแผนงานและวิชาการ</div>
-      <div class="modal-actions"><button class="mok staff">ตกลง</button></div>
+    </div>
+          <div class="modal-btns"><button class="btn-ok staff-ex">ตกลง</button></div>
     </div>
   </div>
 </div>
@@ -436,18 +429,22 @@ body::before{
     <div class="info-note">✅ บันทึก DB แล้ว<br>count เพิ่มขึ้น 1<br>ไม่มีปุ่มยกเลิก</div>
   </div>
   <div class="modal-stage">
-    <div class="modal-box">
-      <div class="modal-head mh-staff"><span class="mbadge">👥 Staff</span></div>
+    <div class="modal">
+      <div class="modal-header staff-ex">
+      <div class="modal-icon">👥</div>
+      <div class="modal-status">Staff</div>
       <div class="modal-title">ได้รับการยกเว้น (ไม่ต้องเช็คอิน)</div>
+    </div>
+<div class="modal-body">
       <div class="modal-name">นาย ทดสอบ กองแผน</div>
-      <div class="modal-divider"></div>
-      <div class="modal-rows">
-        <div class="row"><span class="rl">ตำแหน่ง</span><span class="rv nor">Walk-in</span></div>
-        <div class="row"><span class="rl">หน่วยงาน</span><span class="rv nor">กองแผนงานและวิชาการ</span></div>
+      <div class="modal-detail">
+        <div class="detail-row"><span class="detail-label">ตำแหน่ง</span><span class="detail-val">Walk-in</span></div>
+        <div class="detail-row"><span class="detail-label">หน่วยงาน</span><span class="detail-val">กองแผนงานและวิชาการ</span></div>
       </div>
       <div class="modal-note mn-blue">มีข้อสงสัยเพิ่มเติม<br>ติดต่อ กองแผนงานและวิชาการ</div>
       <div class="modal-note mn-green">✅ บันทึกและนับในระบบแล้ว</div>
-      <div class="modal-actions"><button class="mok staff">ตกลง</button></div>
+    </div>
+          <div class="modal-btns"><button class="btn-ok staff-ex">ตกลง</button></div>
     </div>
   </div>
 </div>
@@ -463,11 +460,14 @@ body::before{
     <div class="info-note">ไม่มีปุ่มยกเลิก</div>
   </div>
   <div class="modal-stage">
-    <div class="modal-box">
-      <div class="modal-head mh-error"><span class="mbadge">❌ ไม่พบข้อมูล</span></div>
+    <div class="modal">
+      <div class="modal-header error">
+      <div class="modal-icon">❌</div>
+      <div class="modal-status">ไม่พบข้อมูล</div>
       <div class="modal-title">ไม่พบข้อมูลในระบบ</div>
+    </div>
       <div style="height:12px;"></div>
-      <div class="modal-actions"><button class="mok error">ตกลง</button></div>
+      <div class="modal-btns"><button class="btn-ok error">ตกลง</button></div>
     </div>
   </div>
 </div>
@@ -483,18 +483,22 @@ body::before{
     <div class="info-note">✅ มีปุ่มยกเลิก</div>
   </div>
   <div class="modal-stage">
-    <div class="modal-box">
-      <div class="modal-head mh-success"><span class="mbadge">✅ เช็คอินสำเร็จ</span></div>
+    <div class="modal">
+      <div class="modal-header success">
+      <div class="modal-icon">✅</div>
+      <div class="modal-status">เช็คอินสำเร็จ</div>
       <div class="modal-title">วันที่ 1 — วันที่หนึ่ง</div>
+    </div>
+<div class="modal-body">
       <div class="modal-name">นาย ทดสอบ กองแผน</div>
       <div class="modal-dept">กองบริหารทรัพยากร</div>
-      <div class="modal-divider"></div>
-      <div class="modal-rows">
-        <div class="row"><span class="rl">เวลา</span><span class="rv nor">14:30:25</span></div>
-        <div class="row"><span class="rl">คูปองอาหาร</span><span class="rv ok">รับได้ ✓</span></div>
-        <div class="row"><span class="rl">ประเภท</span><span class="rv nor">Walk-in</span></div>
+      <div class="modal-detail">
+        <div class="detail-row"><span class="detail-label">เวลา</span><span class="detail-val">14:30:25</span></div>
+        <div class="detail-row"><span class="detail-label">คูปองอาหาร</span><span class="detail-val ok">รับได้ ✓</span></div>
+        <div class="detail-row"><span class="detail-label">ประเภท</span><span class="detail-val">Walk-in</span></div>
       </div>
-      <div class="modal-actions"><button class="mcancel">ยกเลิก</button><button class="mok success">ตกลง</button></div>
+    </div>
+          <div class="modal-btns"><button class="btn-cancel">ยกเลิก</button><button class="btn-ok success">ตกลง</button></div>
     </div>
   </div>
 </div>
@@ -510,19 +514,23 @@ body::before{
     <div class="info-note">✅ มีปุ่มยกเลิก</div>
   </div>
   <div class="modal-stage">
-    <div class="modal-box">
-      <div class="modal-head mh-success"><span class="mbadge">✅ เช็คอินสำเร็จ</span></div>
+    <div class="modal">
+      <div class="modal-header success">
+      <div class="modal-icon">✅</div>
+      <div class="modal-status">เช็คอินสำเร็จ</div>
       <div class="modal-title">วันที่ 1 — วันที่หนึ่ง</div>
+    </div>
+<div class="modal-body">
       <div class="modal-name">นาย ทดสอบ กองแผน</div>
       <div class="modal-dept">กองชีวเคมีคลินิก</div>
-      <div class="modal-divider"></div>
-      <div class="modal-rows">
-        <div class="row"><span class="rl">เวลา</span><span class="rv nor">09:15:42</span></div>
-        <div class="row"><span class="rl">คูปองอาหาร</span><span class="rv ok">รับได้ ✓</span></div>
-        <div class="row"><span class="rl">ของที่ระลึก (1) <span style="color:#16a34a;font-weight:700">คูปองกระเป๋า (สีเขียว)</span></span><span class="rv ok">รับได้ ✓</span></div>
-        <div class="row"><span class="rl">ประเภท</span><span class="rv nor">participant</span></div>
+      <div class="modal-detail">
+        <div class="detail-row"><span class="detail-label">เวลา</span><span class="detail-val">09:15:42</span></div>
+        <div class="detail-row"><span class="detail-label">คูปองอาหาร</span><span class="detail-val ok">รับได้ ✓</span></div>
+        <div class="detail-row"><span class="detail-label">ของที่ระลึก (1) <span style="color:#16a34a;font-weight:700">คูปองกระเป๋า (สีเขียว)</span></span><span class="detail-val ok">รับได้ ✓</span></div>
+        <div class="detail-row"><span class="detail-label">ประเภท</span><span class="detail-val">participant</span></div>
       </div>
-      <div class="modal-actions"><button class="mcancel">ยกเลิก</button><button class="mok success">ตกลง</button></div>
+    </div>
+          <div class="modal-btns"><button class="btn-cancel">ยกเลิก</button><button class="btn-ok success">ตกลง</button></div>
     </div>
   </div>
 </div>
@@ -538,21 +546,25 @@ body::before{
     <div class="info-note">คูปองสีส้ม<br>✅ มีปุ่มยกเลิก</div>
   </div>
   <div class="modal-stage">
-    <div class="modal-box">
-      <div class="modal-head mh-success"><span class="mbadge">✅ เช็คอินสำเร็จ</span></div>
+    <div class="modal">
+      <div class="modal-header success">
+      <div class="modal-icon">✅</div>
+      <div class="modal-status">เช็คอินสำเร็จ</div>
       <div class="modal-title">วันที่ 2 — วันที่สอง</div>
+    </div>
+<div class="modal-body">
       <div class="modal-name">นาย ทดสอบ กองแผน</div>
       <div class="modal-dept">กองภูมิคุ้มกันวิทยา</div>
-      <div class="modal-divider"></div>
-      <div class="modal-rows">
-        <div class="row"><span class="rl">เวลา</span><span class="rv nor">08:55:11</span></div>
-        <div class="row"><span class="rl">คูปองอาหาร</span><span class="rv ok">รับได้ ✓</span></div>
-        <div class="row" style="align-items:flex-start;"><span class="rl" style="padding-top:2px;">ของที่ระลึก (1) <span style="color:#ea580c;font-weight:700">คูปองกระเป๋า (สีส้ม)</span></span><span><span class="rv done">รับไปแล้ว ✓</span><span class="rsub">14 มิ.ย.</span></span></div>
-        <div class="row"><span class="rl">ของที่ระลึก (2) <span style="color:#2563eb;font-weight:700">บทคัดย่อ</span> <span style="color:#94a3b8;font-size:0.72em;font-weight:400;">(อยู่ในกระเป๋า)</span></span><span class="rv done">รับไปแล้ว ✓</span></div>
-        <div class="row" style="align-items:flex-start;"><span class="rl" style="padding-top:2px;">ของที่ระลึก (3) <span style="color:#0891b2;font-weight:700">เสื้อแจ็คเก็ต (XL)</span></span><span><span class="rv done">รับไปแล้ว ✓</span><span class="rsub">15 มิ.ย.</span></span></div>
-        <div class="row"><span class="rl">ประเภท</span><span class="rv nor">participant</span></div>
+      <div class="modal-detail">
+        <div class="detail-row"><span class="detail-label">เวลา</span><span class="detail-val">08:55:11</span></div>
+        <div class="detail-row"><span class="detail-label">คูปองอาหาร</span><span class="detail-val ok">รับได้ ✓</span></div>
+        <div class="detail-row" style="align-items:flex-start;"><span class="detail-label" style="padding-top:2px;">ของที่ระลึก (1) <span style="color:#ea580c;font-weight:700">คูปองกระเป๋า (สีส้ม)</span></span><span><span class="detail-val done">รับไปแล้ว ✓</span><br><span style="font-size:0.7rem;color:#94a3b8;font-weight:400;">14 มิ.ย.</span></span></div>
+        <div class="detail-row"><span class="detail-label">ของที่ระลึก (2) <span style="color:#2563eb;font-weight:700">บทคัดย่อ</span> <span style="color:#94a3b8;font-size:0.72em;font-weight:400;">(อยู่ในกระเป๋า)</span></span><span class="detail-val done">รับไปแล้ว ✓</span></div>
+        <div class="detail-row" style="align-items:flex-start;"><span class="detail-label" style="padding-top:2px;">ของที่ระลึก (3) <span style="color:#0891b2;font-weight:700">เสื้อแจ็คเก็ต (XL)</span></span><span><span class="detail-val done">รับไปแล้ว ✓</span><br><span style="font-size:0.7rem;color:#94a3b8;font-weight:400;">15 มิ.ย.</span></span></div>
+        <div class="detail-row"><span class="detail-label">ประเภท</span><span class="detail-val">participant</span></div>
       </div>
-      <div class="modal-actions"><button class="mcancel">ยกเลิก</button><button class="mok success">ตกลง</button></div>
+    </div>
+          <div class="modal-btns"><button class="btn-cancel">ยกเลิก</button><button class="btn-ok success">ตกลง</button></div>
     </div>
   </div>
 </div>
@@ -568,18 +580,22 @@ body::before{
     <div class="info-note">ไม่มีปุ่มยกเลิก</div>
   </div>
   <div class="modal-stage">
-    <div class="modal-box">
-      <div class="modal-head mh-warning"><span class="mbadge">⚠️ เคยเช็คอินแล้ว</span></div>
+    <div class="modal">
+      <div class="modal-header warning">
+      <div class="modal-icon">⚠️</div>
+      <div class="modal-status">️ เคยเช็คอินแล้ว</div>
       <div class="modal-title">เช็คอินวันที่ 1 ไปแล้ว</div>
+    </div>
+<div class="modal-body">
       <div class="modal-name">นาย ทดสอบ กองแผน</div>
       <div class="modal-dept">-</div>
-      <div class="modal-divider"></div>
-      <div class="modal-rows">
-        <div class="row"><span class="rl">เวลาที่เช็คอิน</span><span class="rv nor">09:10:00</span></div>
-        <div class="row"><span class="rl">คูปองอาหาร</span><span class="rv done">รับไปแล้ว ✓</span></div>
-        <div class="row"><span class="rl">ประเภท</span><span class="rv nor">Walk-in</span></div>
+      <div class="modal-detail">
+        <div class="detail-row"><span class="detail-label">เวลาที่เช็คอิน</span><span class="detail-val">09:10:00</span></div>
+        <div class="detail-row"><span class="detail-label">คูปองอาหาร</span><span class="detail-val done">รับไปแล้ว ✓</span></div>
+        <div class="detail-row"><span class="detail-label">ประเภท</span><span class="detail-val">Walk-in</span></div>
       </div>
-      <div class="modal-actions"><button class="mok warning">ตกลง</button></div>
+    </div>
+          <div class="modal-btns"><button class="btn-ok warning">ตกลง</button></div>
     </div>
   </div>
 </div>
@@ -595,21 +611,25 @@ body::before{
     <div class="info-note">แสดงสถานะปัจจุบัน<br>ไม่มีปุ่มยกเลิก</div>
   </div>
   <div class="modal-stage">
-    <div class="modal-box">
-      <div class="modal-head mh-warning"><span class="mbadge">⚠️ เคยเช็คอินแล้ว</span></div>
+    <div class="modal">
+      <div class="modal-header warning">
+      <div class="modal-icon">⚠️</div>
+      <div class="modal-status">️ เคยเช็คอินแล้ว</div>
       <div class="modal-title">เช็คอินวันที่ 1 ไปแล้ว</div>
+    </div>
+<div class="modal-body">
       <div class="modal-name">นาย ทดสอบ กองแผน</div>
       <div class="modal-dept">กองโรคติดต่อ</div>
-      <div class="modal-divider"></div>
-      <div class="modal-rows">
-        <div class="row"><span class="rl">เวลาที่เช็คอิน</span><span class="rv nor">08:47:33</span></div>
-        <div class="row"><span class="rl">คูปองอาหาร</span><span class="rv done">รับไปแล้ว ✓</span></div>
-        <div class="row" style="align-items:flex-start;"><span class="rl" style="padding-top:2px;">ของที่ระลึก (1) <span style="color:#ea580c;font-weight:700">คูปองกระเป๋า (สีส้ม)</span></span><span><span class="rv done">รับไปแล้ว ✓</span><span class="rsub">14 มิ.ย.</span></span></div>
-        <div class="row"><span class="rl">ของที่ระลึก (2) <span style="color:#2563eb;font-weight:700">บทคัดย่อ</span> <span style="color:#94a3b8;font-size:0.72em;font-weight:400;">(อยู่ในกระเป๋า)</span></span><span class="rv done">รับไปแล้ว ✓</span></div>
-        <div class="row"><span class="rl">ของที่ระลึก (3) <span style="color:#0891b2;font-weight:700">เสื้อแจ็คเก็ต (M)</span></span><span class="rv done">รับไปแล้ว ✓</span></div>
-        <div class="row"><span class="rl">ประเภท</span><span class="rv nor">participant</span></div>
+      <div class="modal-detail">
+        <div class="detail-row"><span class="detail-label">เวลาที่เช็คอิน</span><span class="detail-val">08:47:33</span></div>
+        <div class="detail-row"><span class="detail-label">คูปองอาหาร</span><span class="detail-val done">รับไปแล้ว ✓</span></div>
+        <div class="detail-row" style="align-items:flex-start;"><span class="detail-label" style="padding-top:2px;">ของที่ระลึก (1) <span style="color:#ea580c;font-weight:700">คูปองกระเป๋า (สีส้ม)</span></span><span><span class="detail-val done">รับไปแล้ว ✓</span><br><span style="font-size:0.7rem;color:#94a3b8;font-weight:400;">14 มิ.ย.</span></span></div>
+        <div class="detail-row"><span class="detail-label">ของที่ระลึก (2) <span style="color:#2563eb;font-weight:700">บทคัดย่อ</span> <span style="color:#94a3b8;font-size:0.72em;font-weight:400;">(อยู่ในกระเป๋า)</span></span><span class="detail-val done">รับไปแล้ว ✓</span></div>
+        <div class="detail-row"><span class="detail-label">ของที่ระลึก (3) <span style="color:#0891b2;font-weight:700">เสื้อแจ็คเก็ต (M)</span></span><span class="detail-val done">รับไปแล้ว ✓</span></div>
+        <div class="detail-row"><span class="detail-label">ประเภท</span><span class="detail-val">participant</span></div>
       </div>
-      <div class="modal-actions"><button class="mok warning">ตกลง</button></div>
+    </div>
+          <div class="modal-btns"><button class="btn-ok warning">ตกลง</button></div>
     </div>
   </div>
 </div>
@@ -627,11 +647,14 @@ body::before{
     <div class="info-note">⚠️ ไม่มีชื่อ · ไม่มีหน่วยงาน<br>ไม่มีปุ่มยกเลิก</div>
   </div>
   <div class="modal-stage">
-    <div class="modal-box">
-      <div class="modal-head mh-error"><span class="mbadge">❌ ไม่มีสิทธิ์</span></div>
+    <div class="modal">
+      <div class="modal-header error">
+      <div class="modal-icon">❌</div>
+      <div class="modal-status">ไม่มีสิทธิ์</div>
       <div class="modal-title">ท่านไม่มีสิทธิ์รับกระเป๋าก่อนวันงาน</div>
+    </div>
       <div style="height:12px;"></div>
-      <div class="modal-actions"><button class="mok error">ตกลง</button></div>
+      <div class="modal-btns"><button class="btn-ok error">ตกลง</button></div>
     </div>
   </div>
 </div>
@@ -647,16 +670,20 @@ body::before{
     <div class="info-note">มีชื่อ + หน่วยงาน<br>ไม่มีปุ่มยกเลิก</div>
   </div>
   <div class="modal-stage">
-    <div class="modal-box">
-      <div class="modal-head mh-error"><span class="mbadge">❌ ไม่มีสิทธิ์</span></div>
+    <div class="modal">
+      <div class="modal-header error">
+      <div class="modal-icon">❌</div>
+      <div class="modal-status">ไม่มีสิทธิ์</div>
       <div class="modal-title">ท่านไม่มีสิทธิ์รับกระเป๋าก่อนวันงาน</div>
+    </div>
+<div class="modal-body">
       <div class="modal-name">นาย ทดสอบ กองแผน</div>
       <div class="modal-dept">กองระบาดวิทยา</div>
-      <div class="modal-divider"></div>
-      <div class="modal-rows">
-        <div class="row"><span class="rl">ประเภท</span><span class="rv nor">Walk-in</span></div>
+      <div class="modal-detail">
+        <div class="detail-row"><span class="detail-label">ประเภท</span><span class="detail-val">Walk-in</span></div>
       </div>
-      <div class="modal-actions"><button class="mok error">ตกลง</button></div>
+    </div>
+          <div class="modal-btns"><button class="btn-ok error">ตกลง</button></div>
     </div>
   </div>
 </div>
@@ -672,18 +699,22 @@ body::before{
     <div class="info-note">ไม่มีปุ่มยกเลิก</div>
   </div>
   <div class="modal-stage">
-    <div class="modal-box">
-      <div class="modal-head mh-warning"><span class="mbadge">⚠️ รับกระเป๋าแล้ว</span></div>
+    <div class="modal">
+      <div class="modal-header warning">
+      <div class="modal-icon">⚠️</div>
+      <div class="modal-status">️ รับกระเป๋าแล้ว</div>
       <div class="modal-title">บุคคลนี้รับกระเป๋าไปแล้ว</div>
+    </div>
+<div class="modal-body">
       <div class="modal-name">นาย ทดสอบ กองแผน</div>
       <div class="modal-dept">กองแบคทีเรียและเชื้อรา</div>
-      <div class="modal-divider"></div>
-      <div class="modal-rows">
-        <div class="row"><span class="rl">ประเภท</span><span class="rv nor">บุคลากรภายใน</span></div>
-        <div class="row"><span class="rl">รับไปเมื่อ</span><span class="rv done">14 มิ.ย.</span></div>
-        <div class="row"><span class="rl">สถานะ</span><span class="rv warn">❌ ไม่สามารถรับซ้ำได้</span></div>
+      <div class="modal-detail">
+        <div class="detail-row"><span class="detail-label">ประเภท</span><span class="detail-val">บุคลากรภายใน</span></div>
+        <div class="detail-row"><span class="detail-label">รับไปเมื่อ</span><span class="detail-val done">14 มิ.ย.</span></div>
+        <div class="detail-row"><span class="detail-label">สถานะ</span><span class="detail-val warn">❌ ไม่สามารถรับซ้ำได้</span></div>
       </div>
-      <div class="modal-actions"><button class="mok warning">ตกลง</button></div>
+    </div>
+          <div class="modal-btns"><button class="btn-ok warning">ตกลง</button></div>
     </div>
   </div>
 </div>
@@ -699,19 +730,23 @@ body::before{
     <div class="info-note">✅ มีปุ่มยกเลิก<br>ไม่มีปุ่มรับเสื้อ</div>
   </div>
   <div class="modal-stage">
-    <div class="modal-box">
-      <div class="modal-head mh-success"><span class="mbadge">✅ รับกระเป๋าสำเร็จ</span></div>
+    <div class="modal">
+      <div class="modal-header success">
+      <div class="modal-icon">✅</div>
+      <div class="modal-status">รับกระเป๋าสำเร็จ</div>
       <div class="modal-title">บันทึกการรับกระเป๋าเรียบร้อย</div>
+    </div>
+<div class="modal-body">
       <div class="modal-name">นาย ทดสอบ กองแผน</div>
       <div class="modal-dept">กองวิทยาศาสตร์การแพทย์ชุมชน</div>
-      <div class="modal-divider"></div>
-      <div class="modal-rows">
-        <div class="row"><span class="rl">ประเภท</span><span class="rv nor">บุคลากรภายใน</span></div>
-        <div class="row"><span class="rl">รับไปเมื่อ</span><span class="rv ok">16 มิ.ย.</span></div>
-        <div class="row"><span class="rl">สถานะกระเป๋า</span><span class="rv ok">✓ รับกระเป๋าสำเร็จ</span></div>
-        <div class="row"><span class="rl">ของที่ระลึก (1) กระเป๋า</span><span class="rv ok">รับแล้ว ✓</span></div>
+      <div class="modal-detail">
+        <div class="detail-row"><span class="detail-label">ประเภท</span><span class="detail-val">บุคลากรภายใน</span></div>
+        <div class="detail-row"><span class="detail-label">รับไปเมื่อ</span><span class="detail-val ok">16 มิ.ย.</span></div>
+        <div class="detail-row"><span class="detail-label">สถานะกระเป๋า</span><span class="detail-val ok">✓ รับกระเป๋าสำเร็จ</span></div>
+        <div class="detail-row"><span class="detail-label">ของที่ระลึก (1) กระเป๋า</span><span class="detail-val ok">รับแล้ว ✓</span></div>
       </div>
-      <div class="modal-actions"><button class="mcancel">ยกเลิก</button><button class="mok success">ตกลง</button></div>
+    </div>
+          <div class="modal-btns"><button class="btn-cancel">ยกเลิก</button><button class="btn-ok success">ตกลง</button></div>
     </div>
   </div>
 </div>
@@ -727,20 +762,24 @@ body::before{
     <div class="info-note">บทคัดย่อแสดง "อยู่ในกระเป๋า"</div>
   </div>
   <div class="modal-stage">
-    <div class="modal-box">
-      <div class="modal-head mh-success"><span class="mbadge">✅ รับกระเป๋าสำเร็จ</span></div>
+    <div class="modal">
+      <div class="modal-header success">
+      <div class="modal-icon">✅</div>
+      <div class="modal-status">รับกระเป๋าสำเร็จ</div>
       <div class="modal-title">บันทึกการรับกระเป๋าเรียบร้อย</div>
+    </div>
+<div class="modal-body">
       <div class="modal-name">นาย ทดสอบ กองแผน</div>
       <div class="modal-dept">กองชีววิทยาคลินิก</div>
-      <div class="modal-divider"></div>
-      <div class="modal-rows">
-        <div class="row"><span class="rl">ประเภท</span><span class="rv nor">บุคลากรภายใน</span></div>
-        <div class="row"><span class="rl">รับไปเมื่อ</span><span class="rv ok">16 มิ.ย.</span></div>
-        <div class="row"><span class="rl">สถานะกระเป๋า</span><span class="rv ok">✓ รับกระเป๋าสำเร็จ</span></div>
-        <div class="row"><span class="rl">ของที่ระลึก (1) กระเป๋า</span><span class="rv ok">รับแล้ว ✓</span></div>
-        <div class="row"><span class="rl">ของที่ระลึก (2) บทคัดย่อ (อยู่ในกระเป๋า)</span><span class="rv ok">อยู่ในกระเป๋า</span></div>
+      <div class="modal-detail">
+        <div class="detail-row"><span class="detail-label">ประเภท</span><span class="detail-val">บุคลากรภายใน</span></div>
+        <div class="detail-row"><span class="detail-label">รับไปเมื่อ</span><span class="detail-val ok">16 มิ.ย.</span></div>
+        <div class="detail-row"><span class="detail-label">สถานะกระเป๋า</span><span class="detail-val ok">✓ รับกระเป๋าสำเร็จ</span></div>
+        <div class="detail-row"><span class="detail-label">ของที่ระลึก (1) กระเป๋า</span><span class="detail-val ok">รับแล้ว ✓</span></div>
+        <div class="detail-row"><span class="detail-label">ของที่ระลึก (2) บทคัดย่อ (อยู่ในกระเป๋า)</span><span class="detail-val ok">อยู่ในกระเป๋า</span></div>
       </div>
-      <div class="modal-actions"><button class="mcancel">ยกเลิก</button><button class="mok success">ตกลง</button></div>
+    </div>
+          <div class="modal-btns"><button class="btn-cancel">ยกเลิก</button><button class="btn-ok success">ตกลง</button></div>
     </div>
   </div>
 </div>
@@ -756,22 +795,25 @@ body::before{
     <div class="info-note">กดปุ่มฟ้าได้เลย<br>ไม่ต้องไปสแกนที่ระบบเสื้อซ้ำ</div>
   </div>
   <div class="modal-stage">
-    <div class="modal-box">
-      <div class="modal-head mh-success"><span class="mbadge">✅ รับกระเป๋าสำเร็จ</span></div>
+    <div class="modal">
+      <div class="modal-header success">
+      <div class="modal-icon">✅</div>
+      <div class="modal-status">รับกระเป๋าสำเร็จ</div>
       <div class="modal-title">บันทึกการรับกระเป๋าเรียบร้อย</div>
+    </div>
+<div class="modal-body">
       <div class="modal-name">นาย ทดสอบ กองแผน</div>
       <div class="modal-dept">สถาบันชีววัตถุ</div>
-      <div class="modal-divider"></div>
-      <div class="modal-rows">
-        <div class="row"><span class="rl">ประเภท</span><span class="rv nor">บุคลากรภายใน</span></div>
-        <div class="row"><span class="rl">รับไปเมื่อ</span><span class="rv ok">16 มิ.ย.</span></div>
-        <div class="row"><span class="rl">ของที่ระลึก (1) กระเป๋า</span><span class="rv ok">รับแล้ว ✓</span></div>
-        <div class="row"><span class="rl">ของที่ระลึก (2) บทคัดย่อ (อยู่ในกระเป๋า)</span><span class="rv ok">อยู่ในกระเป๋า</span></div>
-        <div class="row"><span class="rl">ของที่ระลึก (3) เสื้อแจ็คเก็ต (XL)</span><span class="rv nor">ยังไม่ได้รับ</span></div>
+      <div class="modal-detail">
+        <div class="detail-row"><span class="detail-label">ประเภท</span><span class="detail-val">บุคลากรภายใน</span></div>
+        <div class="detail-row"><span class="detail-label">รับไปเมื่อ</span><span class="detail-val ok">16 มิ.ย.</span></div>
+        <div class="detail-row"><span class="detail-label">ของที่ระลึก (1) กระเป๋า</span><span class="detail-val ok">รับแล้ว ✓</span></div>
+        <div class="detail-row"><span class="detail-label">ของที่ระลึก (2) บทคัดย่อ (อยู่ในกระเป๋า)</span><span class="detail-val ok">อยู่ในกระเป๋า</span></div>
+        <div class="detail-row"><span class="detail-label">ของที่ระลึก (3) เสื้อแจ็คเก็ต (XL)</span><span class="detail-val">ยังไม่ได้รับ</span></div>
       </div>
       <div style="border-top:1px solid #f1f5f9;margin:4px 10px 0;padding-top:6px;text-align:center;font-size:0.76rem;color:#64748b;">มีเสื้อไซต์ <b>XL</b> — ยังไม่ได้รับ</div>
       <button class="shirt-btn">👕 รับเสื้อพร้อมกันด้วย</button>
-      <div class="modal-actions"><button class="mcancel">ยกเลิก</button><button class="mok success">ตกลง</button></div>
+      <div class="modal-btns"><button class="btn-cancel">ยกเลิก</button><button class="btn-ok success">ตกลง</button></div>
     </div>
   </div>
 </div>
@@ -787,19 +829,22 @@ body::before{
     <div class="info-note">ไม่ปรากฏปุ่ม 👕</div>
   </div>
   <div class="modal-stage">
-    <div class="modal-box">
-      <div class="modal-head mh-success"><span class="mbadge">✅ รับกระเป๋าสำเร็จ</span></div>
+    <div class="modal">
+      <div class="modal-header success">
+      <div class="modal-icon">✅</div>
+      <div class="modal-status">รับกระเป๋าสำเร็จ</div>
       <div class="modal-title">บันทึกการรับกระเป๋าเรียบร้อย</div>
+    </div>
       <div class="modal-name">นาย ทดสอบ กองแผน</div>
       <div class="modal-dept">กองมาตรฐานห้องปฏิบัติการ</div>
-      <div class="modal-divider"></div>
-      <div class="modal-rows">
-        <div class="row"><span class="rl">ประเภท</span><span class="rv nor">บุคลากรภายใน</span></div>
-        <div class="row"><span class="rl">รับไปเมื่อ</span><span class="rv ok">16 มิ.ย.</span></div>
-        <div class="row"><span class="rl">ของที่ระลึก (1) กระเป๋า</span><span class="rv ok">รับแล้ว ✓</span></div>
-        <div class="row" style="align-items:flex-start;"><span class="rl" style="padding-top:2px;">ของที่ระลึก (3) เสื้อแจ็คเก็ต (XL)</span><span><span class="rv done">รับไปแล้ว ✓</span><span class="rsub">14 มิ.ย.</span></span></div>
+      <div class="modal-detail">
+        <div class="detail-row"><span class="detail-label">ประเภท</span><span class="detail-val">บุคลากรภายใน</span></div>
+        <div class="detail-row"><span class="detail-label">รับไปเมื่อ</span><span class="detail-val ok">16 มิ.ย.</span></div>
+        <div class="detail-row"><span class="detail-label">ของที่ระลึก (1) กระเป๋า</span><span class="detail-val ok">รับแล้ว ✓</span></div>
+        <div class="detail-row" style="align-items:flex-start;"><span class="detail-label" style="padding-top:2px;">ของที่ระลึก (3) เสื้อแจ็คเก็ต (XL)</span><span><span class="detail-val done">รับไปแล้ว ✓</span><br><span style="font-size:0.7rem;color:#94a3b8;font-weight:400;">14 มิ.ย.</span></span></div>
       </div>
-      <div class="modal-actions"><button class="mcancel">ยกเลิก</button><button class="mok success">ตกลง</button></div>
+    </div>
+          <div class="modal-btns"><button class="btn-cancel">ยกเลิก</button><button class="btn-ok success">ตกลง</button></div>
     </div>
   </div>
 </div>
@@ -815,11 +860,14 @@ body::before{
     <div class="info-note">ไม่มีปุ่มยกเลิก</div>
   </div>
   <div class="modal-stage">
-    <div class="modal-box">
-      <div class="modal-head mh-error"><span class="mbadge">❌ เกิดข้อผิดพลาด</span></div>
+    <div class="modal">
+      <div class="modal-header error">
+      <div class="modal-icon">❌</div>
+      <div class="modal-status">เกิดข้อผิดพลาด</div>
       <div class="modal-title">ไม่สามารถบันทึกได้</div>
+    </div>
       <div style="height:12px;"></div>
-      <div class="modal-actions"><button class="mok error">ตกลง</button></div>
+      <div class="modal-btns"><button class="btn-ok error">ตกลง</button></div>
     </div>
   </div>
 </div>
@@ -837,16 +885,20 @@ body::before{
     <div class="info-note">ไม่มีปุ่มยกเลิก</div>
   </div>
   <div class="modal-stage">
-    <div class="modal-box">
-      <div class="modal-head mh-error"><span class="mbadge">❌ ไม่มีสิทธิ์</span></div>
+    <div class="modal">
+      <div class="modal-header error">
+      <div class="modal-icon">❌</div>
+      <div class="modal-status">ไม่มีสิทธิ์</div>
       <div class="modal-title">ท่านไม่มีสิทธิ์รับเสื้อก่อนวันงาน</div>
+    </div>
+<div class="modal-body">
       <div class="modal-name">นาย ทดสอบ กองแผน</div>
       <div class="modal-dept">กองพยาธิวิทยาคลินิก</div>
-      <div class="modal-divider"></div>
-      <div class="modal-rows">
-        <div class="row"><span class="rl">ประเภท</span><span class="rv nor">บุคลากรภายใน</span></div>
+      <div class="modal-detail">
+        <div class="detail-row"><span class="detail-label">ประเภท</span><span class="detail-val">บุคลากรภายใน</span></div>
       </div>
-      <div class="modal-actions"><button class="mok error">ตกลง</button></div>
+    </div>
+          <div class="modal-btns"><button class="btn-ok error">ตกลง</button></div>
     </div>
   </div>
 </div>
@@ -862,18 +914,22 @@ body::before{
     <div class="info-note">ไม่มีปุ่มยกเลิก</div>
   </div>
   <div class="modal-stage">
-    <div class="modal-box">
-      <div class="modal-head mh-warning"><span class="mbadge">⚠️ รับเสื้อแล้ว</span></div>
+    <div class="modal">
+      <div class="modal-header warning">
+      <div class="modal-icon">⚠️</div>
+      <div class="modal-status">️ รับเสื้อแล้ว</div>
       <div class="modal-title">บุคคลนี้รับเสื้อไปแล้ว</div>
+    </div>
+<div class="modal-body">
       <div class="modal-name">นาย ทดสอบ กองแผน</div>
       <div class="modal-dept">ศูนย์วิทยาศาสตร์การแพทย์เชียงใหม่</div>
-      <div class="modal-divider"></div>
-      <div class="modal-rows">
-        <div class="row"><span class="rl">ของที่ระลึก (3) เสื้อแจ็คเก็ต</span><span class="rv nor">M</span></div>
-        <div class="row"><span class="rl">รับไปเมื่อ</span><span class="rv done">15 มิ.ย.</span></div>
-        <div class="row"><span class="rl">สถานะ</span><span class="rv warn">❌ ไม่สามารถรับซ้ำได้</span></div>
+      <div class="modal-detail">
+        <div class="detail-row"><span class="detail-label">ของที่ระลึก (3) เสื้อแจ็คเก็ต</span><span class="detail-val">M</span></div>
+        <div class="detail-row"><span class="detail-label">รับไปเมื่อ</span><span class="detail-val done">15 มิ.ย.</span></div>
+        <div class="detail-row"><span class="detail-label">สถานะ</span><span class="detail-val warn">❌ ไม่สามารถรับซ้ำได้</span></div>
       </div>
-      <div class="modal-actions"><button class="mok warning">ตกลง</button></div>
+    </div>
+          <div class="modal-btns"><button class="btn-ok warning">ตกลง</button></div>
     </div>
   </div>
 </div>
@@ -889,17 +945,21 @@ body::before{
     <div class="info-note">✅ มีปุ่มยกเลิก</div>
   </div>
   <div class="modal-stage">
-    <div class="modal-box">
-      <div class="modal-head mh-success"><span class="mbadge">✅ รับเสื้อสำเร็จ</span></div>
+    <div class="modal">
+      <div class="modal-header success">
+      <div class="modal-icon">✅</div>
+      <div class="modal-status">รับเสื้อสำเร็จ</div>
       <div class="modal-title">บันทึกการรับเสื้อเรียบร้อย</div>
+    </div>
+<div class="modal-body">
       <div class="modal-name">นาย ทดสอบ กองแผน</div>
       <div class="modal-dept">กองไวรัสวิทยา</div>
-      <div class="modal-divider"></div>
-      <div class="modal-rows">
-        <div class="row"><span class="rl">รับไปเมื่อ</span><span class="rv ok">16 มิ.ย.</span></div>
-        <div class="row"><span class="rl">ของที่ระลึก (3) เสื้อแจ็คเก็ต (L)</span><span class="rv ok">รับแล้ว ✓</span></div>
+      <div class="modal-detail">
+        <div class="detail-row"><span class="detail-label">รับไปเมื่อ</span><span class="detail-val ok">16 มิ.ย.</span></div>
+        <div class="detail-row"><span class="detail-label">ของที่ระลึก (3) เสื้อแจ็คเก็ต (L)</span><span class="detail-val ok">รับแล้ว ✓</span></div>
       </div>
-      <div class="modal-actions"><button class="mcancel">ยกเลิก</button><button class="mok success">ตกลง</button></div>
+    </div>
+          <div class="modal-btns"><button class="btn-cancel">ยกเลิก</button><button class="btn-ok success">ตกลง</button></div>
     </div>
   </div>
 </div>
@@ -915,18 +975,22 @@ body::before{
     <div class="info-note">✅ มีปุ่มยกเลิก</div>
   </div>
   <div class="modal-stage">
-    <div class="modal-box">
-      <div class="modal-head mh-success"><span class="mbadge">✅ รับเสื้อสำเร็จ</span></div>
+    <div class="modal">
+      <div class="modal-header success">
+      <div class="modal-icon">✅</div>
+      <div class="modal-status">รับเสื้อสำเร็จ</div>
       <div class="modal-title">บันทึกการรับเสื้อเรียบร้อย</div>
+    </div>
+<div class="modal-body">
       <div class="modal-name">นาย ทดสอบ กองแผน</div>
       <div class="modal-dept">กองสาธารณสุขฉุกเฉิน</div>
-      <div class="modal-divider"></div>
-      <div class="modal-rows">
-        <div class="row"><span class="rl">รับไปเมื่อ</span><span class="rv ok">16 มิ.ย.</span></div>
-        <div class="row"><span class="rl">ของที่ระลึก (1) กระเป๋า</span><span class="rv nor">ยังไม่ได้รับ</span></div>
-        <div class="row"><span class="rl">ของที่ระลึก (3) เสื้อแจ็คเก็ต (XL)</span><span class="rv ok">รับแล้ว ✓</span></div>
+      <div class="modal-detail">
+        <div class="detail-row"><span class="detail-label">รับไปเมื่อ</span><span class="detail-val ok">16 มิ.ย.</span></div>
+        <div class="detail-row"><span class="detail-label">ของที่ระลึก (1) กระเป๋า</span><span class="detail-val">ยังไม่ได้รับ</span></div>
+        <div class="detail-row"><span class="detail-label">ของที่ระลึก (3) เสื้อแจ็คเก็ต (XL)</span><span class="detail-val ok">รับแล้ว ✓</span></div>
       </div>
-      <div class="modal-actions"><button class="mcancel">ยกเลิก</button><button class="mok success">ตกลง</button></div>
+    </div>
+          <div class="modal-btns"><button class="btn-cancel">ยกเลิก</button><button class="btn-ok success">ตกลง</button></div>
     </div>
   </div>
 </div>
@@ -942,19 +1006,23 @@ body::before{
     <div class="info-note">✅ มีปุ่มยกเลิก</div>
   </div>
   <div class="modal-stage">
-    <div class="modal-box">
-      <div class="modal-head mh-success"><span class="mbadge">✅ รับเสื้อสำเร็จ</span></div>
+    <div class="modal">
+      <div class="modal-header success">
+      <div class="modal-icon">✅</div>
+      <div class="modal-status">รับเสื้อสำเร็จ</div>
       <div class="modal-title">บันทึกการรับเสื้อเรียบร้อย</div>
+    </div>
+<div class="modal-body">
       <div class="modal-name">นาย ทดสอบ กองแผน</div>
       <div class="modal-dept">กองระบาดวิทยา</div>
-      <div class="modal-divider"></div>
-      <div class="modal-rows">
-        <div class="row"><span class="rl">รับไปเมื่อ</span><span class="rv ok">16 มิ.ย.</span></div>
-        <div class="row"><span class="rl">ของที่ระลึก (1) กระเป๋า</span><span class="rv nor">ยังไม่ได้รับ</span></div>
-        <div class="row"><span class="rl">ของที่ระลึก (2) บทคัดย่อ (อยู่ในกระเป๋า)</span><span class="rv nor">ยังไม่ได้รับ</span></div>
-        <div class="row"><span class="rl">ของที่ระลึก (3) เสื้อแจ็คเก็ต (S)</span><span class="rv ok">รับแล้ว ✓</span></div>
+      <div class="modal-detail">
+        <div class="detail-row"><span class="detail-label">รับไปเมื่อ</span><span class="detail-val ok">16 มิ.ย.</span></div>
+        <div class="detail-row"><span class="detail-label">ของที่ระลึก (1) กระเป๋า</span><span class="detail-val">ยังไม่ได้รับ</span></div>
+        <div class="detail-row"><span class="detail-label">ของที่ระลึก (2) บทคัดย่อ (อยู่ในกระเป๋า)</span><span class="detail-val">ยังไม่ได้รับ</span></div>
+        <div class="detail-row"><span class="detail-label">ของที่ระลึก (3) เสื้อแจ็คเก็ต (S)</span><span class="detail-val ok">รับแล้ว ✓</span></div>
       </div>
-      <div class="modal-actions"><button class="mcancel">ยกเลิก</button><button class="mok success">ตกลง</button></div>
+    </div>
+          <div class="modal-btns"><button class="btn-cancel">ยกเลิก</button><button class="btn-ok success">ตกลง</button></div>
     </div>
   </div>
 </div>
@@ -970,19 +1038,23 @@ body::before{
     <div class="info-note">✅ มีปุ่มยกเลิก</div>
   </div>
   <div class="modal-stage">
-    <div class="modal-box">
-      <div class="modal-head mh-success"><span class="mbadge">✅ รับเสื้อสำเร็จ</span></div>
+    <div class="modal">
+      <div class="modal-header success">
+      <div class="modal-icon">✅</div>
+      <div class="modal-status">รับเสื้อสำเร็จ</div>
       <div class="modal-title">บันทึกการรับเสื้อเรียบร้อย</div>
+    </div>
+<div class="modal-body">
       <div class="modal-name">นาย ทดสอบ กองแผน</div>
       <div class="modal-dept">สำนักมาตรฐานห้องปฏิบัติการ</div>
-      <div class="modal-divider"></div>
-      <div class="modal-rows">
-        <div class="row"><span class="rl">รับไปเมื่อ</span><span class="rv ok">16 มิ.ย.</span></div>
-        <div class="row" style="align-items:flex-start;"><span class="rl" style="padding-top:2px;">ของที่ระลึก (1) กระเป๋า</span><span><span class="rv done">รับไปแล้ว ✓</span><span class="rsub">14 มิ.ย.</span></span></div>
-        <div class="row"><span class="rl">ของที่ระลึก (2) บทคัดย่อ (อยู่ในกระเป๋า)</span><span class="rv done">รับไปแล้ว ✓</span></div>
-        <div class="row"><span class="rl">ของที่ระลึก (3) เสื้อแจ็คเก็ต (M)</span><span class="rv ok">รับแล้ว ✓</span></div>
+      <div class="modal-detail">
+        <div class="detail-row"><span class="detail-label">รับไปเมื่อ</span><span class="detail-val ok">16 มิ.ย.</span></div>
+        <div class="detail-row" style="align-items:flex-start;"><span class="detail-label" style="padding-top:2px;">ของที่ระลึก (1) กระเป๋า</span><span><span class="detail-val done">รับไปแล้ว ✓</span><br><span style="font-size:0.7rem;color:#94a3b8;font-weight:400;">14 มิ.ย.</span></span></div>
+        <div class="detail-row"><span class="detail-label">ของที่ระลึก (2) บทคัดย่อ (อยู่ในกระเป๋า)</span><span class="detail-val done">รับไปแล้ว ✓</span></div>
+        <div class="detail-row"><span class="detail-label">ของที่ระลึก (3) เสื้อแจ็คเก็ต (M)</span><span class="detail-val ok">รับแล้ว ✓</span></div>
       </div>
-      <div class="modal-actions"><button class="mcancel">ยกเลิก</button><button class="mok success">ตกลง</button></div>
+    </div>
+          <div class="modal-btns"><button class="btn-cancel">ยกเลิก</button><button class="btn-ok success">ตกลง</button></div>
     </div>
   </div>
 </div>
