@@ -61,42 +61,35 @@
 <script>
 const SB_URL = "https://gvxytnjfyepqhbkmcjms.supabase.co";
 const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2eHl0bmpmeWVwcWhia21jam1zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0MzE2NDAsImV4cCI6MjA5NTAwNzY0MH0.RAr_ehb4cxfNliDR0h5XcihUaP-0ltZTTGIAv2Fw1kk";
+const YEAR = localStorage.getItem('dmsc_year') || '2568';
+const HEADERS = { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY };
 
-let allParticipants = [];
-
-async function loadAll() {
-  const res = await fetch(`${SB_URL}/rest/v1/participants?select=prefix,first_name,last_name,dept,ext_dept,internal_external&limit=5000`, {
-    headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY }
-  });
-  allParticipants = await res.json();
+function stripPrefix(s) {
+  return (s || '').trim().replace(/^(นาย|นางสาว|นาง)\s*/, '').replace(/\s+/g, ' ');
 }
 
-function normalize(s) {
-  return (s || '').trim().replace(/\s+/g, ' ');
+async function searchOnServer(firstName, lastName) {
+  let url = `${SB_URL}/rest/v1/participants?select=prefix,first_name,last_name,dept,ext_dept,internal_external&event_year=eq.${YEAR}`;
+  if (firstName && lastName) {
+    url += `&first_name=ilike.${encodeURIComponent(firstName)}&last_name=ilike.${encodeURIComponent(lastName)}`;
+  } else {
+    const term = firstName || lastName;
+    url += `&or=(first_name.ilike.${encodeURIComponent(term)},last_name.ilike.${encodeURIComponent(term)})`;
+  }
+  const res = await fetch(url, { headers: HEADERS });
+  return await res.json();
 }
 
-function search(query) {
-  const q = normalize(query).replace(/^(นาย|นาง|นางสาว)\s*/, '');
-  const parts = q.split(' ').filter(Boolean);
-  if (!parts.length) return { exact: [], fuzzy: [] };
-
-  const exact = allParticipants.filter(p => {
-    const fn = normalize(p.first_name);
-    const ln = normalize(p.last_name);
-    if (parts.length === 1) return fn === parts[0] || ln === parts[0];
-    return fn === parts[0] && ln === parts[1];
-  });
-
-  if (exact.length) return { exact, fuzzy: [] };
-
-  // fuzzy: partial match on either part
-  const fuzzy = allParticipants.filter(p => {
-    const fn = normalize(p.first_name);
-    const ln = normalize(p.last_name);
-    return parts.every(pt => fn.includes(pt) || ln.includes(pt));
-  });
-
-  return { exact: [], fuzzy };
+async function searchFuzzy(firstName, lastName) {
+  let url = `${SB_URL}/rest/v1/participants?select=prefix,first_name,last_name,dept,ext_dept,internal_external&event_year=eq.${YEAR}`;
+  if (firstName && lastName) {
+    url += `&first_name=ilike.*${encodeURIComponent(firstName)}*&last_name=ilike.*${encodeURIComponent(lastName)}*`;
+  } else {
+    const term = firstName || lastName;
+    url += `&or=(first_name.ilike.*${encodeURIComponent(term)}*,last_name.ilike.*${encodeURIComponent(term)}*)`;
+  }
+  const res = await fetch(url, { headers: HEADERS });
+  return await res.json();
 }
 
 async function checkNames() {
@@ -106,20 +99,25 @@ async function checkNames() {
 
   document.getElementById('results').style.display = 'none';
   const btn = document.querySelector('button');
-  btn.textContent = 'กำลังโหลด...';
+  btn.textContent = 'กำลังค้นหา...';
   btn.disabled = true;
 
-  if (!allParticipants.length) await loadAll();
+  const rows = [];
+  for (const line of lines) {
+    const q = stripPrefix(line);
+    const parts = q.split(' ').filter(Boolean);
+    const fn = parts[0] || '';
+    const ln = parts[1] || '';
+    let exact = await searchOnServer(fn, ln);
+    let fuzzy = [];
+    if (!exact.length) fuzzy = await searchFuzzy(fn, ln);
+    rows.push({ line, exact, fuzzy });
+  }
 
   btn.textContent = 'ตรวจสอบ';
   btn.disabled = false;
 
-  let found = 0;
-  const rows = lines.map((line, i) => {
-    const { exact, fuzzy } = search(line);
-    if (exact.length) found++;
-    return { line, exact, fuzzy };
-  });
+  const found = rows.filter(r => r.exact.length).length;
 
   document.getElementById('summary').innerHTML =
     `พบตรง <strong class="found">${found}</strong> จาก ${lines.length} ชื่อ`;
