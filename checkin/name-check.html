@@ -78,18 +78,25 @@ function normalize(s) {
 function search(query) {
   const q = normalize(query).replace(/^(นาย|นาง|นางสาว)\s*/, '');
   const parts = q.split(' ').filter(Boolean);
-  if (!parts.length) return [];
+  if (!parts.length) return { exact: [], fuzzy: [] };
 
-  return allParticipants.filter(p => {
+  const exact = allParticipants.filter(p => {
     const fn = normalize(p.first_name);
     const ln = normalize(p.last_name);
-    const full = fn + ' ' + ln;
-    if (parts.length === 1) {
-      return fn === parts[0] || ln === parts[0];
-    }
-    // ชื่อ + นามสกุล
+    if (parts.length === 1) return fn === parts[0] || ln === parts[0];
     return fn === parts[0] && ln === parts[1];
   });
+
+  if (exact.length) return { exact, fuzzy: [] };
+
+  // fuzzy: partial match on either part
+  const fuzzy = allParticipants.filter(p => {
+    const fn = normalize(p.first_name);
+    const ln = normalize(p.last_name);
+    return parts.every(pt => fn.includes(pt) || ln.includes(pt));
+  });
+
+  return { exact: [], fuzzy };
 }
 
 async function checkNames() {
@@ -109,39 +116,40 @@ async function checkNames() {
 
   let found = 0;
   const rows = lines.map((line, i) => {
-    const matches = search(line);
-    if (matches.length) found++;
-    return { line, matches };
+    const { exact, fuzzy } = search(line);
+    if (exact.length) found++;
+    return { line, exact, fuzzy };
   });
 
   document.getElementById('summary').innerHTML =
-    `พบ <strong class="found">${found}</strong> จาก ${lines.length} ชื่อที่ค้นหา`;
+    `พบตรง <strong class="found">${found}</strong> จาก ${lines.length} ชื่อ`;
 
   const tbody = document.getElementById('tbody');
-  tbody.innerHTML = rows.map(({ line, matches }, i) => {
-    if (!matches.length) {
-      return `<tr>
-        <td>${i+1}</td>
-        <td>${line}</td>
-        <td class="notfound">ไม่พบ</td>
-        <td>-</td><td>-</td><td>-</td>
-      </tr>`;
-    }
-    return matches.map((p, mi) => {
+  tbody.innerHTML = rows.map(({ line, exact, fuzzy }, i) => {
+    const renderRow = (p, mi, label, labelStyle) => {
       const isIn = (p.internal_external || '').includes('ภายใน');
       const dept = isIn ? (p.dept || '-') : (p.ext_dept || p.dept || '-');
-      const tag = isIn
-        ? '<span class="tag-in">ภายใน</span>'
-        : '<span class="tag-out">ภายนอก</span>';
+      const tag = isIn ? '<span class="tag-in">ภายใน</span>' : '<span class="tag-out">ภายนอก</span>';
       return `<tr>
         <td>${mi === 0 ? i+1 : ''}</td>
         <td>${mi === 0 ? line : ''}</td>
-        <td class="found">✓ พบ</td>
+        <td style="${labelStyle}">${label}</td>
         <td>${p.prefix || ''}${p.first_name} ${p.last_name}</td>
         <td>${dept}</td>
         <td>${tag}</td>
       </tr>`;
-    }).join('');
+    };
+    if (exact.length) {
+      return exact.map((p, mi) => renderRow(p, mi, '✓ พบ', 'color:#16a34a;font-weight:700')).join('');
+    }
+    if (fuzzy.length) {
+      return fuzzy.map((p, mi) => renderRow(p, mi, '~ ใกล้เคียง', 'color:#d97706;font-weight:600')).join('');
+    }
+    return `<tr>
+      <td>${i+1}</td><td>${line}</td>
+      <td class="notfound">ไม่พบ</td>
+      <td>-</td><td>-</td><td>-</td>
+    </tr>`;
   }).join('');
 
   document.getElementById('results').style.display = 'block';
