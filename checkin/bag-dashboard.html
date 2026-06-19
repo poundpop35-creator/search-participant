@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ระบบรับของก่อนวันงาน — กรมวิทยาศาสตร์การแพทย์</title>
+  <title>ระบบรับกระเป๋า + เสื้อ + คูปองอาหาร — กรมวิทยาศาสตร์การแพทย์</title>
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <style>
@@ -152,7 +152,7 @@
   <div style="display:flex;align-items:center;gap:10px;">
     <img src="https://raw.githubusercontent.com/poundpop35-creator/search-participant/main/logo-%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B8%8A%E0%B8%B8%E0%B8%A1%E0%B8%A7%E0%B8%B4%E0%B8%8A%E0%B8%B2%E0%B8%81%E0%B8%B2%E0%B8%A3-34-Final_0.png" style="height:36px;object-fit:contain;" alt="conf">
     <img src="https://raw.githubusercontent.com/poundpop35-creator/search-participant/main/logo-DMSc-MOPH%20(1)%20(2)_0.png" style="height:36px;object-fit:contain;" alt="dmsc">
-    <h1>ระบบรับของก่อนวันงาน (กระเป๋า + เสื้อ)</h1>
+    <h1>ระบบรับกระเป๋า + เสื้อ + คูปองอาหาร</h1>
   </div>
   <div class="topbar-btns">
     <!-- ข้อมูลผู้ใช้ -->
@@ -516,8 +516,12 @@
     <div class="stats-grid" style="grid-template-columns:repeat(auto-fit,minmax(140px,1fr));">
       <div class="stat-card total" style="border-top:4px solid #16a34a;cursor:pointer;" onclick="resetOvFilters()">
         <div class="stat-label">ผู้มีสิทธิ์รับของทั้งหมด</div><div class="stat-num" id="ovStatTotal" style="color:#16a34a;">-</div><div class="stat-sub" id="ovSubTotal">-</div></div>
-      <div class="stat-card received" style="border-top:4px solid #0891b2;cursor:pointer;" onclick="document.getElementById('ovStatus').value='any-received';document.getElementById('ovBundle').value='';applyOvFilters()">
-        <div class="stat-label">รับของแล้ว (อย่างน้อย 1 อย่าง)</div><div class="stat-num" id="ovStatDone" style="color:#0891b2;">-</div><div class="stat-sub" id="ovSubDone">-</div></div>
+      <div class="stat-card total" style="border-top:4px solid #0d2b6b;cursor:pointer;" onclick="document.getElementById('ovPersonType').value='ภายใน';applyOvFilters()">
+        <div class="stat-label">ก่อนวันงาน (ภายใน)</div><div class="stat-num" id="ovStatPreEvent" style="color:#0d2b6b;">-</div><div class="stat-sub" id="ovSubPreEvent">-</div></div>
+      <div class="stat-card total" style="border-top:4px solid #0891b2;cursor:pointer;" onclick="document.getElementById('ovPersonType').value='ภายนอก';applyOvFilters()">
+        <div class="stat-label">วันงาน (ภายนอก)</div><div class="stat-num" id="ovStatEventDay" style="color:#0891b2;">-</div><div class="stat-sub" id="ovSubEventDay">-</div></div>
+      <div class="stat-card received" style="border-top:4px solid #16a34a;cursor:pointer;" onclick="document.getElementById('ovStatus').value='any-received';document.getElementById('ovBundle').value='';applyOvFilters()">
+        <div class="stat-label">รับของแล้ว (อย่างน้อย 1 อย่าง)</div><div class="stat-num" id="ovStatDone" style="color:#16a34a;">-</div><div class="stat-sub" id="ovSubDone">-</div></div>
       <div class="stat-card total" style="border-top:4px solid #0d2b6b;cursor:pointer;" onclick="document.getElementById('ovBundle').value='all';applyOvFilters()">
         <div class="stat-label">🎒📚👕 ได้ทุกอย่าง</div><div class="stat-num" id="ovStatAll" style="color:#0d2b6b;">-</div><div class="stat-sub" id="ovSubAll">-</div></div>
       <div class="stat-card total" style="border-top:4px solid #0891b2;cursor:pointer;" onclick="document.getElementById('ovBundle').value='bag-bkd';applyOvFilters()">
@@ -1272,6 +1276,8 @@ function buildOverviewData(res){
   const deptsSorted=[...DEPTS.filter(d=>depts.includes(d)),...depts.filter(d=>!DEPTS.includes(d)).sort((a,b)=>a.localeCompare(b,'th'))];
   ovDeptSel.innerHTML='<option value="">ทั้งหมด</option>'+deptsSorted.map(d=>`<option value="${d.replace(/"/g,'&quot;')}">${d}</option>`).join('');
   const ovTotal=allOverviewData.length;
+  const ovInternal=allOverviewData.filter(r=>r.personType==='ภายใน').length;
+  const ovExternal=allOverviewData.filter(r=>r.personType==='ภายนอก').length;
   const ovDone=allOverviewData.filter(r=>{
     const bkdRec=r.bagElig?r.bagRec:r.shirtRec;
     const rec=[r.bagElig&&r.bagRec,r.hasBkd&&bkdRec,r.hasShirt&&r.shirtRec].filter(Boolean).length;
@@ -1279,6 +1285,10 @@ function buildOverviewData(res){
   }).length;
   document.getElementById('ovStatTotal').textContent=ovTotal.toLocaleString();
   document.getElementById('ovSubTotal').textContent='ราย';
+  document.getElementById('ovStatPreEvent').textContent=ovInternal.toLocaleString();
+  document.getElementById('ovSubPreEvent').textContent='ราย (รับก่อนวันงาน)';
+  document.getElementById('ovStatEventDay').textContent=ovExternal.toLocaleString();
+  document.getElementById('ovSubEventDay').textContent='ราย (รับวันงาน)';
   document.getElementById('ovStatDone').textContent=ovDone.toLocaleString();
   document.getElementById('ovSubDone').textContent=`${ovTotal?Math.round(ovDone/ovTotal*100):0}% ของทั้งหมด`;
   const bundles=['all','bag-bkd','bag-only','shirt-bkd'];
@@ -1334,7 +1344,30 @@ function applyOvFilters(){
     return true;
   });
   ovPage=1;
-  document.getElementById('ovCount').textContent=`(${ovFiltered.length.toLocaleString()} รายการ)`;
+  // Update stat cards to reflect filtered data
+  const fTotal=ovFiltered.length;
+  const fInternal=ovFiltered.filter(r=>r.personType==='ภายใน').length;
+  const fExternal=ovFiltered.filter(r=>r.personType==='ภายนอก').length;
+  const fDone=ovFiltered.filter(r=>{
+    const bkdRec=r.bagElig?r.bagRec:r.shirtRec;
+    const rec=[r.bagElig&&r.bagRec,r.hasBkd&&bkdRec,r.hasShirt&&r.shirtRec].filter(Boolean).length;
+    return rec>0;
+  }).length;
+  document.getElementById('ovStatTotal').textContent=fTotal.toLocaleString();
+  document.getElementById('ovStatPreEvent').textContent=fInternal.toLocaleString();
+  document.getElementById('ovStatEventDay').textContent=fExternal.toLocaleString();
+  document.getElementById('ovStatDone').textContent=fDone.toLocaleString();
+  document.getElementById('ovSubDone').textContent=`${fTotal?Math.round(fDone/fTotal*100):0}% ของที่แสดง`;
+  const bundles=['all','bag-bkd','bag-only','shirt-bkd'];
+  const ids=[['ovStatAll','ovSubAll'],['ovStatBagBkd','ovSubBagBkd'],['ovStatBagOnly','ovSubBagOnly'],['ovStatShirtBkd','ovSubShirtBkd']];
+  bundles.forEach((bk,i)=>{
+    const grp=ovFiltered.filter(r=>r.bundle===bk);
+    const tot=grp.length;
+    const rec=grp.filter(r=>{const bkdRec=r.bagElig?r.bagRec:r.shirtRec;const total=[r.bagElig,r.hasBkd,r.hasShirt].filter(Boolean).length;const rv=[r.bagElig&&r.bagRec,r.hasBkd&&bkdRec,r.hasShirt&&r.shirtRec].filter(Boolean).length;return rv>=total&&total>0;}).length;
+    document.getElementById(ids[i][0]).textContent=`${rec}/${tot}`;
+    document.getElementById(ids[i][1]).textContent=`รับครบแล้ว (${tot?Math.round(rec/tot*100):0}%)`;
+  });
+  document.getElementById('ovCount').textContent=`(${fTotal.toLocaleString()} รายการ)`;
   renderOverviewTable();
 }
 function resetOvFilters(){document.getElementById('ovPersonType').value='';document.getElementById('ovSearch').value='';document.getElementById('ovPT').value='';document.getElementById('ovDept').value='';document.getElementById('ovBundle').value='';document.getElementById('ovStatus').value='';document.getElementById('ovDate').value='';document.getElementById('ovTimeFrom').value='';document.getElementById('ovTimeTo').value='';applyOvFilters();}
