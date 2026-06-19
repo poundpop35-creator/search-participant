@@ -529,6 +529,14 @@
     </div>
     <div class="filter-bar">
       <div class="filter-group">
+        <div class="filter-label">ประเภท</div>
+        <select class="filter-select" id="ovPersonType" onchange="applyOvFilters()">
+          <option value="">ทั้งหมด</option>
+          <option value="ภายใน">ภายใน</option>
+          <option value="ภายนอก">ภายนอก</option>
+        </select>
+      </div>
+      <div class="filter-group">
         <div class="filter-label">ค้นหา</div>
         <input class="sbox" id="ovSearch" placeholder="ชื่อ / หน่วยงาน..." oninput="applyOvFilters()">
       </div>
@@ -1224,21 +1232,26 @@ function buildOverviewData(res){
     const isIn=(p.internal_external||'').includes('ภายใน');
     const pt=p.participation_type||'';
     const bagElig=isIn&&(pt.includes('ผู้เข้าร่วมงาน')||pt.includes('ผู้บริหาร')||pt==='ผู้ส่งผลงาน');
+    const hasBag=(p.items||'').includes('กระเป๋า');
     const hasBkd=(p.items||'').includes('บทคัดย่อ');
     const hasShirt=!!(p.shirt_size&&p.shirt_size.trim());
-    return bagElig||hasBkd||hasShirt;
+    const extWithBag=!isIn&&hasBag;
+    return bagElig||hasBkd||hasShirt||extWithBag;
   }).map(p=>{
     const isIn=(p.internal_external||'').includes('ภายใน');
+    const personType=isIn?'ภายใน':'ภายนอก';
     const dept=isIn?(p.dept||'-'):(p.ext_dept||p.dept||'-');
     const pt=p.participation_type||'';
     const bagElig=isIn&&(pt.includes('ผู้เข้าร่วมงาน')||pt.includes('ผู้บริหาร')||pt==='ผู้ส่งผลงาน');
     const _it=p.items||'';
+    const hasBag=_it.includes('กระเป๋า');
     const hasBkd=_it.includes('บทคัดย่อ');
     const hasShirt=!!(p.shirt_size&&p.shirt_size.trim());
     const bagRec=p.bag_received===true||p.bag_received===1||p.bag_received==='true';
     const shirtRec=p.shirt_received===true||p.shirt_received===1||p.shirt_received==='true';
-    const bKey=getBundleKey(bagElig,hasBkd,hasShirt);
-    return{id:p.id,name:`${(p.prefix||'').replace(/\s*\([^)]*\)/g,'').trim()} ${p.first_name||''} ${p.last_name||''}`.trim().replace(/\s+/g,' '),dept,pt:p.participation_type||'-',bagElig,hasBkd,hasShirt,bagRec,shirtRec,bagRecDate:p.bag_received_date||null,shirtRecDate:p.shirt_received_date||null,bundle:bKey};
+    const bagEligOrExt=bagElig||(!isIn&&hasBag);
+    const bKey=getBundleKey(bagEligOrExt,hasBkd,hasShirt);
+    return{id:p.id,personType,name:`${(p.prefix||'').replace(/\s*\([^)]*\)/g,'').trim()} ${p.first_name||''} ${p.last_name||''}`.trim().replace(/\s+/g,' '),dept,pt:p.participation_type||'-',bagElig:bagEligOrExt,hasBkd,hasShirt,bagRec,shirtRec,bagRecDate:p.bag_received_date||null,shirtRecDate:p.shirt_received_date||null,bundle:bKey};
   });
   allOverviewData.forEach(r=>{
     if(r.bundle==='all'&&(r.bagRec||r.shirtRec)){r.bagRec=true;r.shirtRec=true;}
@@ -1282,6 +1295,7 @@ function buildOverviewData(res){
 function matchBundle(r,bundle){return !bundle||r.bundle===bundle;}
 function applyOvFilters(){
   const q=(document.getElementById('ovSearch').value||'').trim().toLowerCase();
+  const personType=document.getElementById('ovPersonType').value;
   const pt=document.getElementById('ovPT').value;
   const dept=document.getElementById('ovDept').value;
   const bundle=document.getElementById('ovBundle').value;
@@ -1290,6 +1304,7 @@ function applyOvFilters(){
   const ovTF=document.getElementById('ovTimeFrom').value;
   const ovTT=document.getElementById('ovTimeTo').value;
   ovFiltered=allOverviewData.filter(r=>{
+    if(personType&&r.personType!==personType)return false;
     if(pt&&r.pt!==pt)return false;
     if(dept&&r.dept!==dept)return false;
     if(q&&!r.name.toLowerCase().includes(q)&&!r.dept.toLowerCase().includes(q))return false;
@@ -1322,7 +1337,7 @@ function applyOvFilters(){
   document.getElementById('ovCount').textContent=`(${ovFiltered.length.toLocaleString()} รายการ)`;
   renderOverviewTable();
 }
-function resetOvFilters(){document.getElementById('ovSearch').value='';document.getElementById('ovPT').value='';document.getElementById('ovDept').value='';document.getElementById('ovBundle').value='';document.getElementById('ovStatus').value='';document.getElementById('ovDate').value='';document.getElementById('ovTimeFrom').value='';document.getElementById('ovTimeTo').value='';applyOvFilters();}
+function resetOvFilters(){document.getElementById('ovPersonType').value='';document.getElementById('ovSearch').value='';document.getElementById('ovPT').value='';document.getElementById('ovDept').value='';document.getElementById('ovBundle').value='';document.getElementById('ovStatus').value='';document.getElementById('ovDate').value='';document.getElementById('ovTimeFrom').value='';document.getElementById('ovTimeTo').value='';applyOvFilters();}
 function changeOvPage(d){ovPage+=d;renderOverviewTable();window.scrollTo({top:0,behavior:'smooth'});}
 function renderOverviewTable(){
   const start=(ovPage-1)*PAGE;
