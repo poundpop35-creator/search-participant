@@ -165,8 +165,16 @@
 </div>
 
 <!-- ─── IMAGE ─── -->
-<div style="margin-top:16px;text-align:center;">
-  <img src="../IMG_7798.jpeg" alt="" style="width:100%;max-width:600px;border-radius:12px;">
+<div class="card wide-card" style="margin-top:16px;padding:14px;text-align:center;">
+  <img src="../IMG_7798.jpeg" alt="" onclick="openLightbox(this)"
+    style="width:100%;max-width:600px;border-radius:10px;cursor:zoom-in;box-shadow:0 2px 12px rgba(0,0,0,0.12);display:block;margin:0 auto;">
+  <div style="font-size:0.72rem;color:#94a3b8;margin-top:8px;">แตะรูปเพื่อขยาย</div>
+</div>
+
+<!-- Lightbox -->
+<div id="lightbox" onclick="closeLightbox()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;align-items:center;justify-content:center;cursor:zoom-out;">
+  <img id="lightboxImg" style="max-width:95vw;max-height:92vh;border-radius:8px;box-shadow:0 4px 32px rgba(0,0,0,0.5);">
+  <div style="position:absolute;top:16px;right:20px;color:white;font-size:1.8rem;line-height:1;">✕</div>
 </div>
 
 <!-- ─── CHECK-IN LIST CARD ─── -->
@@ -341,6 +349,10 @@
 <div class="footer">© 2026 Built by <span style="font-family:'Dancing Script',cursive;font-weight:700;font-size:1.3em;color:#0ABAB5;">Saharat Phetrnitchakun</span> · <span style="font-weight:800;letter-spacing:0.04em;font-size:1.05em;"><span style="color:#2563eb;">D</span><span style="color:#f59e0b;">P</span><span style="color:#16a34a;">T</span><span style="color:#dc2626;">C</span></span> · DMSc</div>
 
 <script>
+function openLightbox(img){const lb=document.getElementById('lightbox');document.getElementById('lightboxImg').src=img.src;lb.style.display='flex';}
+function closeLightbox(){document.getElementById('lightbox').style.display='none';}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeLightbox();});
+
 const SB_URL  = localStorage.getItem('dmsc_sb_url')  || "https://gvxytnjfyepqhbkmcjms.supabase.co";
 const SB_ANON = localStorage.getItem('dmsc_sb_anon') || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2eHl0bmpmeWVwcWhia21jam1zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0MzE2NDAsImV4cCI6MjA5NTAwNzY0MH0.RAr_ehb4cxfNliDR0h5XcihUaP-0ltZTTGIAv2Fw1kk";
 const SB_KEY  = localStorage.getItem('dmsc_sb_key')  || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2eHl0bmpmeWVwcWhia21jam1zIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3OTQzMTY0MCwiZXhwIjoyMDk1MDA3NjQwfQ.Hrfc0erkIatyVbmsOW2SU7piH3L65qbS2kdi2eYzbQk";
