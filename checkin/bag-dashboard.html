@@ -226,7 +226,8 @@
     <button class="mtab active" id="tabOverview" onclick="switchMainTab('overview')">📋 ภาพรวม</button>
     <button class="mtab" id="tabBag" onclick="switchMainTab('bag')">🎒 กระเป๋า (ภายใน)</button>
     <button class="mtab" id="tabShirt" onclick="switchMainTab('shirt')">👕 เสื้อ</button>
-    <button class="mtab" id="tabExt" onclick="switchMainTab('ext')">🌐 ภายนอก</button>
+    <button class="mtab" id="tabExt" onclick="switchMainTab('ext')">🌐 กระเป๋าภายนอก</button>
+    <button class="mtab" id="tabFood" onclick="switchMainTab('food')">🍱 คูปองอาหาร</button>
   </div>
 
   <!-- ===== BAG SECTION ===== -->
@@ -494,6 +495,83 @@
     </div>
   </div>
 
+  <!-- ===== FOOD COUPON SECTION ===== -->
+  <div id="sectionFood" style="display:none;">
+    <div class="stats-grid" style="grid-template-columns:repeat(auto-fit,minmax(140px,1fr));">
+      <div class="stat-card total" style="cursor:pointer;" onclick="document.getElementById('ffDay').value='';applyFoodFilters()">
+        <div class="stat-label">คูปองอาหารทั้งหมด (3 วัน)</div>
+        <div class="stat-num" id="fdTotal">-</div><div class="stat-sub">ใบ</div>
+      </div>
+      <div class="stat-card" style="border-left:4px solid #0d2b6b;cursor:pointer;" onclick="document.getElementById('ffDay').value='1';applyFoodFilters()">
+        <div class="stat-label">วันที่ 1</div>
+        <div class="stat-num" id="fdDay1" style="color:#0d2b6b;">-</div><div class="stat-sub">ใบ</div>
+      </div>
+      <div class="stat-card" style="border-left:4px solid #0891b2;cursor:pointer;" onclick="document.getElementById('ffDay').value='2';applyFoodFilters()">
+        <div class="stat-label">วันที่ 2</div>
+        <div class="stat-num" id="fdDay2" style="color:#0891b2;">-</div><div class="stat-sub">ใบ</div>
+      </div>
+      <div class="stat-card" style="border-left:4px solid #7c3aed;cursor:pointer;" onclick="document.getElementById('ffDay').value='3';applyFoodFilters()">
+        <div class="stat-label">วันที่ 3</div>
+        <div class="stat-num" id="fdDay3" style="color:#7c3aed;">-</div><div class="stat-sub">ใบ</div>
+      </div>
+    </div>
+    <div class="filter-bar">
+      <div class="filter-group">
+        <div class="filter-label">วัน</div>
+        <select class="filter-select" id="ffDay" onchange="applyFoodFilters()">
+          <option value="">ทุกวัน</option>
+          <option value="1">วันที่ 1</option>
+          <option value="2">วันที่ 2</option>
+          <option value="3">วันที่ 3</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <div class="filter-label">ประเภท</div>
+        <select class="filter-select" id="ffType" onchange="applyFoodFilters()">
+          <option value="">ทั้งหมด</option>
+          <option value="ภายใน">ภายใน</option>
+          <option value="ภายนอก">ภายนอก</option>
+          <option value="Walk-in">Walk-in</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <div class="filter-label">ค้นหา</div>
+        <input class="sbox" id="ffBox" placeholder="ชื่อ / หน่วยงาน..." oninput="applyFoodFilters()">
+      </div>
+      <button class="btn-reset" onclick="resetFoodFilters()">✕ ล้าง</button>
+    </div>
+    <div class="tcard">
+      <div class="thead-row">
+        <div>
+          <span class="ttitle">รายชื่อผู้รับคูปองอาหาร</span>
+          <span class="tcount" id="fdTCount"></span>
+        </div>
+        <div class="export-btns">
+          <button class="btn-xl green" onclick="exportFoodExcel()">⬇ Excel</button>
+          <button class="btn-xl teal"  onclick="exportFoodCSV()">⬇ CSV</button>
+        </div>
+      </div>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th><th>ชื่อ-นามสกุล</th><th>หน่วยงาน</th>
+              <th>ประเภท</th><th>วัน</th><th>เวลาเช็คอิน</th><th>สแกนโดย</th>
+            </tr>
+          </thead>
+          <tbody id="fdBody"><tr><td colspan="7" class="loading-td">กำลังโหลด...</td></tr></tbody>
+        </table>
+      </div>
+      <div class="pager">
+        <span id="fdPInfo">-</span>
+        <div style="display:flex;gap:6px;">
+          <button class="pbtn" id="fdBPrev" onclick="changeFoodPage(-1)">← ก่อนหน้า</button>
+          <button class="pbtn" id="fdBNext" onclick="changeFoodPage(1)">ถัดไป →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- ===== OVERVIEW SECTION ===== -->
   <div id="sectionOverview">
     <div class="stats-grid" style="grid-template-columns:repeat(auto-fit,minmax(140px,1fr));">
@@ -630,6 +708,7 @@ document.addEventListener('click',()=>document.getElementById('navDD')?.classLis
 
 let allData=[], filtered=[], curPage=1;
 let allExtData=[], extFiltered=[], extPage=1;
+let allFoodData=[], foodFiltered=[], foodPage=1;
 let activeYear = '2569';
 async function loadActiveYear(){
   try{
@@ -659,10 +738,12 @@ function switchMainTab(tab){
   document.getElementById('sectionShirt').style.display    = tab==='shirt'    ? '' : 'none';
   document.getElementById('sectionOverview').style.display = tab==='overview' ? '' : 'none';
   document.getElementById('sectionExt').style.display      = tab==='ext'      ? '' : 'none';
+  document.getElementById('sectionFood').style.display     = tab==='food'     ? '' : 'none';
   document.getElementById('tabBag').classList.toggle('active',      tab==='bag');
   document.getElementById('tabShirt').classList.toggle('active',    tab==='shirt');
   document.getElementById('tabOverview').classList.toggle('active', tab==='overview');
   document.getElementById('tabExt').classList.toggle('active',      tab==='ext');
+  document.getElementById('tabFood').classList.toggle('active',     tab==='food');
 }
 
 // Init participation type checkboxes
@@ -902,10 +983,45 @@ async function loadAll(){
 
     document.getElementById('lastUpdate').textContent='อัปเดต: '+new Date().toLocaleTimeString('th-TH',{timeZone:'Asia/Bangkok'});
 
+    // --- Food coupon data (from checkins table) ---
+    let foodRes=[], foodFrom=0;
+    while(true){
+      const fr=await fetch(`${SB_URL}/rest/v1/checkins?event_year=eq.${encodeURIComponent(activeYear)}&select=id,day,checkin_time,scanned_by,participants(id,prefix,first_name,last_name,dept,ext_dept,internal_external,is_walkin,participation_type,tag)&order=checkin_time.asc`,{
+        headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Range-Unit':'items','Range':`${foodFrom}-${foodFrom+999}`}
+      });
+      const fd=await fr.json();
+      if(!Array.isArray(fd)||fd.length===0) break;
+      foodRes=foodRes.concat(fd);
+      if(fd.length<1000) break; foodFrom+=1000;
+    }
+    allFoodData=foodRes.map(c=>{
+      const p=c.participants||{};
+      const isWalkin=p.is_walkin===true||p.is_walkin===1||p.is_walkin==='true';
+      const isIn=(p.internal_external||'').includes('ภายใน');
+      const personType=isWalkin?'Walk-in':isIn?'ภายใน':'ภายนอก';
+      const dept=isIn?(p.dept||'-'):(p.ext_dept||p.dept||'-');
+      return{
+        id:c.id, participantId:p.id,
+        name:`${(p.prefix||'').replace(/\s*\([^)]*\)/g,'').trim()} ${p.first_name||''} ${p.last_name||''}`.trim().replace(/\s+/g,' '),
+        dept, personType, pt:p.participation_type||'-',
+        day:c.day, checkinTimeRaw:c.checkin_time,
+        checkinTime:fmtBagTime(c.checkin_time),
+        scannedBy:c.scanned_by||'-'
+      };
+    });
+    const fd1=allFoodData.filter(r=>r.day===1).length;
+    const fd2=allFoodData.filter(r=>r.day===2).length;
+    const fd3=allFoodData.filter(r=>r.day===3).length;
+    document.getElementById('fdTotal').textContent=allFoodData.length.toLocaleString();
+    document.getElementById('fdDay1').textContent=fd1.toLocaleString();
+    document.getElementById('fdDay2').textContent=fd2.toLocaleString();
+    document.getElementById('fdDay3').textContent=fd3.toLocaleString();
+
     buildOverviewData(res);
     applyFilters();
     applyShirtFilters();
     applyExtFilters();
+    applyFoodFilters();
   }catch(e){
     document.getElementById('tBody').innerHTML='<tr><td colspan="10" class="loading-td">โหลดไม่สำเร็จ</td></tr>';
   }
@@ -1180,6 +1296,73 @@ function getExtRows(){
     'วันที่รับ':r.received?r.receivedDate:'-',
     'เวลา':r.received?r.receivedTime:'-',
     'สแกนโดย':r.received?r.scannedBy||'-':'-'}));
+}
+
+// ===== FOOD COUPON FUNCTIONS =====
+function applyFoodFilters(){
+  const day=document.getElementById('ffDay').value;
+  const type=document.getElementById('ffType').value;
+  const q=(document.getElementById('ffBox').value||'').toLowerCase();
+  foodFiltered=allFoodData.filter(r=>{
+    if(day&&String(r.day)!==day) return false;
+    if(type&&r.personType!==type) return false;
+    if(q&&!(r.name.toLowerCase().includes(q)||r.dept.toLowerCase().includes(q))) return false;
+    return true;
+  });
+  foodPage=1; renderFoodTable();
+}
+function resetFoodFilters(){
+  document.getElementById('ffDay').value='';
+  document.getElementById('ffType').value='';
+  document.getElementById('ffBox').value='';
+  applyFoodFilters();
+}
+function renderFoodTable(){
+  const PAGE=25,total=foodFiltered.length,pages=Math.max(1,Math.ceil(total/PAGE));
+  foodPage=Math.max(1,Math.min(foodPage,pages));
+  const start=(foodPage-1)*PAGE,slice=foodFiltered.slice(start,start+PAGE);
+  document.getElementById('fdTCount').textContent=`(${total.toLocaleString()} รายการ)`;
+  document.getElementById('fdPInfo').textContent=`${start+1}–${Math.min(start+PAGE,total)} จาก ${total.toLocaleString()} รายการ`;
+  document.getElementById('fdBPrev').disabled=foodPage<=1;
+  document.getElementById('fdBNext').disabled=foodPage>=pages;
+  if(slice.length===0){
+    document.getElementById('fdBody').innerHTML='<tr><td colspan="7" class="loading-td">ไม่พบข้อมูล</td></tr>';
+    return;
+  }
+  const typeColor={'ภายใน':'#dbeafe','ภายนอก':'#dcfce7','Walk-in':'#fef9c3'};
+  const typeTxt={'ภายใน':'#1e40af','ภายนอก':'#166534','Walk-in':'#92400e'};
+  const dayColor={1:'#0d2b6b',2:'#0891b2',3:'#7c3aed'};
+  document.getElementById('fdBody').innerHTML=slice.map((r,i)=>{
+    const tc=typeColor[r.personType]||'#f1f5f9',tt=typeTxt[r.personType]||'#64748b';
+    const dc=dayColor[r.day]||'#64748b';
+    return `<tr>
+      <td>${start+i+1}</td>
+      <td>${r.name}</td>
+      <td style="font-size:0.82rem;">${r.dept}</td>
+      <td><span class="badge" style="background:${tc};color:${tt};">${r.personType}</span></td>
+      <td><span style="font-weight:700;color:${dc};">วันที่ ${r.day}</span></td>
+      <td>${r.checkinTime}</td>
+      <td style="font-size:0.8rem;color:#64748b;">${r.scannedBy}</td>
+    </tr>`;
+  }).join('');
+}
+function changeFoodPage(d){foodPage+=d;renderFoodTable();window.scrollTo({top:0,behavior:'smooth'});}
+function exportFoodExcel(){
+  const rows=getFoodRows();
+  const ws=XLSX.utils.json_to_sheet(rows);
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'คูปองอาหาร');
+  XLSX.writeFile(wb,`food_coupon_${new Date().toISOString().slice(0,10)}.xlsx`);
+}
+function exportFoodCSV(){
+  const rows=getFoodRows(),h=Object.keys(rows[0]);
+  const csv=[h.join(','),...rows.map(r=>h.map(k=>`"${String(r[k]).replace(/"/g,'""')}"`).join(','))].join('\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8'}));
+  a.download=`food_coupon_${new Date().toISOString().slice(0,10)}.csv`;a.click();
+}
+function getFoodRows(){
+  return foodFiltered.map((r,i)=>({'ลำดับ':i+1,'ชื่อ-นามสกุล':r.name,'หน่วยงาน':r.dept,
+    'ประเภท':r.personType,'วัน':r.day,'เวลาเช็คอิน':r.checkinTime,'สแกนโดย':r.scannedBy}));
 }
 
 // ===== OVERVIEW =====
