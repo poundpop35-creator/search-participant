@@ -982,11 +982,19 @@ function applyFilters(){
   curPage=1;
   const fTotal=filtered.length, fRec=filtered.filter(r=>r.received).length, fPend=fTotal-fRec;
   const isFiltered=q||st||it||pt||selPT.size>0||tg||selFDept.size>0||fDate||fTF||fTT;
+  const fInternal=filtered.filter(r=>r.personType==='ภายใน').length;
+  const fExternal=filtered.filter(r=>r.personType==='ภายนอก').length;
+  const fIntRec=filtered.filter(r=>r.personType==='ภายใน'&&r.received).length;
+  const fExtRec=filtered.filter(r=>r.personType==='ภายนอก'&&r.received).length;
   document.getElementById('sTotal').textContent=fTotal.toLocaleString();
   document.getElementById('sReceived').textContent=fRec.toLocaleString();
   document.getElementById('sPending').textContent=fPend.toLocaleString();
   document.getElementById('sReceivedPct').textContent=fTotal?`${Math.round(fRec/fTotal*100)}% ${isFiltered?'ของที่แสดง':'ของทั้งหมด'}`:'-';
   document.getElementById('sPendingPct').textContent=fTotal?`${Math.round(fPend/fTotal*100)}% ${isFiltered?'ของที่แสดง':'ของทั้งหมด'}`:'-';
+  document.getElementById('sInternal').textContent=fInternal.toLocaleString();
+  document.getElementById('sInternalSub').textContent=`ราย (รับแล้ว ${fIntRec.toLocaleString()})`;
+  document.getElementById('sExternal').textContent=fExternal.toLocaleString();
+  document.getElementById('sExternalSub').textContent=`ราย (รับแล้ว ${fExtRec.toLocaleString()})`;
   document.getElementById('tCount').textContent=`(${fTotal.toLocaleString()} รายการ)`;
   renderTable();
 }
