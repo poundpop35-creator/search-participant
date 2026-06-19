@@ -561,10 +561,10 @@
           const _aShirt=(p.shirt_size||'').trim()!=='';
           const _aRows=[
             {label:'ประเภท',val:pType,style:'normal'},
-            {label:'🎒 กระเป๋า',val:'รับไปแล้ว ✓',style:'done',sub:fmtShort(p.bag_received_date)||(p.bag_received_date||'(ไม่ทราบวันที่)')},
+            {label:'🎒 กระเป๋า',val:'รับไปแล้ว ✗',style:'done',sub:fmtShort(p.bag_received_date)||(p.bag_received_date||'(ไม่ทราบวันที่)')},
           ];
           if(_aShirt){
-            if(p.shirt_received===true) _aRows.push({label:`👕 เสื้อแจ็คเก็ต (${p.shirt_size})`,val:'รับไปแล้ว ✓',style:'done',sub:fmtShort(p.shirt_received_date)});
+            if(p.shirt_received===true) _aRows.push({label:`👕 เสื้อแจ็คเก็ต (${p.shirt_size})`,val:'รับไปแล้ว ✗',style:'done',sub:fmtShort(p.shirt_received_date)});
             else _aRows.push({label:`👕 เสื้อแจ็คเก็ต (${p.shirt_size})`,val:'⚠️ ยังไม่ได้รับ',style:'warn'});
           } else {
             _aRows.push({label:'👕 เสื้อแจ็คเก็ต',val:'ไม่มีสิทธิ์รับเสื้อ',style:'muted'});
@@ -595,7 +595,7 @@
           if(_otherItems) bagRows.push({label:`ของที่ระลึก ${_otherItems}`,val:'อยู่ในกระเป๋า',style:'ok'});
           if(_hasShirt){
             const alreadyHad=!_shirtPending;
-            bagRows.push({label:`👕 เสื้อแจ็คเก็ต (${p.shirt_size})`,val:alreadyHad?'รับไปก่อนหน้าแล้ว ✓':'รับแล้ว ✓',style:alreadyHad?'done':'ok',sub:alreadyHad?fmtShort(p.shirt_received_date):fmtShort(today)});
+            bagRows.push({label:`👕 เสื้อแจ็คเก็ต (${p.shirt_size})`,val:alreadyHad?'รับไปก่อนหน้าแล้ว ✗':'รับแล้ว ✓',style:alreadyHad?'done':'ok',sub:alreadyHad?fmtShort(p.shirt_received_date):fmtShort(today)});
           } else {
             bagRows.push({label:'👕 เสื้อแจ็คเก็ต',val:'ไม่มีสิทธิ์รับเสื้อ',style:'muted'});
           }
@@ -719,9 +719,9 @@
       {label:'คูปองอาหาร',val:'รับได้',style:'ok'},
     ];
     if(!isWalkin){
-      if(hasBag){const bagColor=otherItems?'#ea580c':'#16a34a';const bagColorTxt=otherItems?'(สีส้ม)':'(สีเขียว)';rows.push({labelHtml:`ของที่ระลึก (1) <span style="color:${bagColor};font-weight:700">คูปองกระเป๋า ${bagColorTxt}</span>`,label:`ของที่ระลึก (1) คูปองกระเป๋า ${bagColorTxt}`,val:bagDone?'รับไปแล้ว':'รับได้',style:bagDone?'done':'ok',sub:bagDone?fmtShort(p.bag_received_date):null});}
-      if(otherItems) rows.push({labelHtml:`ของที่ระลึก (2) <span style="color:#2563eb;font-weight:700">${otherItems}</span> <span style="color:#94a3b8;font-size:0.72em;font-weight:400;">(อยู่ในกระเป๋า)</span>`,label:`ของที่ระลึก (2) ${otherItems} (อยู่ในกระเป๋า)`,val:bagDone?'รับไปแล้ว':'รับได้',style:bagDone?'done':'ok',sub:bagDone?fmtShort(p.bag_received_date):null});
-      if(hasShirt) rows.push({labelHtml:`ของที่ระลึก (3) <span style="color:#0891b2;font-weight:700">เสื้อแจ็คเก็ต (${p.shirt_size})</span>`,label:`ของที่ระลึก (3) เสื้อแจ็คเก็ต`,val:shirtDone?'รับไปแล้ว':'รับได้',style:shirtDone?'done':'ok',sub:shirtDone?fmtShort(p.shirt_received_date):null});
+      if(hasBag){const bagColor=otherItems?'#ea580c':'#16a34a';const bagColorTxt=otherItems?'(สีส้ม)':'(สีเขียว)';rows.push({labelHtml:`ของที่ระลึก (1) <span style="color:${bagColor};font-weight:700">คูปองกระเป๋า ${bagColorTxt}</span>`,label:`ของที่ระลึก (1) คูปองกระเป๋า ${bagColorTxt}`,val:bagDone?'รับไปแล้ว ✗':'รับได้',style:bagDone?'done':'ok',sub:bagDone?fmtShort(p.bag_received_date):null});}
+      if(otherItems) rows.push({labelHtml:`ของที่ระลึก (2) <span style="color:#2563eb;font-weight:700">${otherItems}</span> <span style="color:#94a3b8;font-size:0.72em;font-weight:400;">(อยู่ในกระเป๋า)</span>`,label:`ของที่ระลึก (2) ${otherItems} (อยู่ในกระเป๋า)`,val:bagDone?'รับไปแล้ว ✗':'รับได้',style:bagDone?'done':'ok',sub:bagDone?fmtShort(p.bag_received_date):null});
+      if(hasShirt) rows.push({labelHtml:`ของที่ระลึก (3) <span style="color:#0891b2;font-weight:700">เสื้อแจ็คเก็ต (${p.shirt_size})</span>`,label:`ของที่ระลึก (3) เสื้อแจ็คเก็ต`,val:shirtDone?'รับไปแล้ว ✗':'รับได้',style:shirtDone?'done':'ok',sub:shirtDone?fmtShort(p.shirt_received_date):null});
     }
     rows.push({label:'ประเภท',val:isWalkin?'Walk-in':(p.tag||'-'),style:'normal'});
     return rows;
@@ -735,12 +735,12 @@
     const shirtDone=p.shirt_received===true||p.bag_received===true;
     const rows=[
       {label:'เวลาที่เช็คอิน',val:time,style:'normal'},
-      {label:'คูปองอาหาร',val:'รับไปแล้ว',style:'done'},
+      {label:'คูปองอาหาร',val:'รับไปแล้ว ✗',style:'done'},
     ];
     if(!isWalkin){
-      if(hasBag){const bagColor=otherItems?'#ea580c':'#16a34a';const bagColorTxt=otherItems?'(สีส้ม)':'(สีเขียว)';rows.push({labelHtml:`ของที่ระลึก (1) <span style="color:${bagColor};font-weight:700">คูปองกระเป๋า ${bagColorTxt}</span>`,label:`ของที่ระลึก (1) คูปองกระเป๋า ${bagColorTxt}`,val:'รับไปแล้ว',style:'done',sub:fmtShort(p.bag_received_date)});}
-      if(otherItems) rows.push({labelHtml:`ของที่ระลึก (2) <span style="color:#2563eb;font-weight:700">${otherItems}</span> <span style="color:#94a3b8;font-size:0.72em;font-weight:400;">(อยู่ในกระเป๋า)</span>`,label:`ของที่ระลึก (2) ${otherItems} (อยู่ในกระเป๋า)`,val:'รับไปแล้ว',style:'done'});
-      if(hasShirt) rows.push({labelHtml:`ของที่ระลึก (3) <span style="color:#0891b2;font-weight:700">เสื้อแจ็คเก็ต (${p.shirt_size})</span>`,label:`ของที่ระลึก (3) เสื้อแจ็คเก็ต`,val:'รับไปแล้ว',style:'done',sub:shirtDone?fmtShort(p.shirt_received_date):null});
+      if(hasBag){const bagColor=otherItems?'#ea580c':'#16a34a';const bagColorTxt=otherItems?'(สีส้ม)':'(สีเขียว)';rows.push({labelHtml:`ของที่ระลึก (1) <span style="color:${bagColor};font-weight:700">คูปองกระเป๋า ${bagColorTxt}</span>`,label:`ของที่ระลึก (1) คูปองกระเป๋า ${bagColorTxt}`,val:'รับไปแล้ว ✗',style:'done',sub:fmtShort(p.bag_received_date)});}
+      if(otherItems) rows.push({labelHtml:`ของที่ระลึก (2) <span style="color:#2563eb;font-weight:700">${otherItems}</span> <span style="color:#94a3b8;font-size:0.72em;font-weight:400;">(อยู่ในกระเป๋า)</span>`,label:`ของที่ระลึก (2) ${otherItems} (อยู่ในกระเป๋า)`,val:'รับไปแล้ว ✗',style:'done',sub:fmtShort(p.bag_received_date)});
+      if(hasShirt) rows.push({labelHtml:`ของที่ระลึก (3) <span style="color:#0891b2;font-weight:700">เสื้อแจ็คเก็ต (${p.shirt_size})</span>`,label:`ของที่ระลึก (3) เสื้อแจ็คเก็ต`,val:'รับไปแล้ว ✗',style:'done',sub:shirtDone?fmtShort(p.shirt_received_date):null});
     }
     rows.push({label:'ประเภท',val:isWalkin?'Walk-in':(p.tag||'-'),style:'normal'});
     return rows;
