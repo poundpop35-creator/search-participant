@@ -224,8 +224,9 @@
 <div class="main">
   <div class="main-tabs">
     <button class="mtab active" id="tabOverview" onclick="switchMainTab('overview')">📋 ภาพรวม</button>
-    <button class="mtab" id="tabBag" onclick="switchMainTab('bag')">🎒 กระเป๋า</button>
+    <button class="mtab" id="tabBag" onclick="switchMainTab('bag')">🎒 กระเป๋า (ภายใน)</button>
     <button class="mtab" id="tabShirt" onclick="switchMainTab('shirt')">👕 เสื้อ</button>
+    <button class="mtab" id="tabExt" onclick="switchMainTab('ext')">🌐 ภายนอก</button>
   </div>
 
   <!-- ===== BAG SECTION ===== -->
@@ -425,6 +426,74 @@
     </div>
   </div>
 
+  <!-- ===== EXTERNAL SECTION ===== -->
+  <div id="sectionExt" style="display:none;">
+    <div class="stats-grid">
+      <div class="stat-card total" style="cursor:pointer;" onclick="resetExtFilters()">
+        <div class="stat-label">บุคคลภายนอก มีสิทธิ์รับคูปองกระเป๋า</div>
+        <div class="stat-num" id="exTotal">-</div><div class="stat-sub">ราย</div>
+      </div>
+      <div class="stat-card received" style="cursor:pointer;" onclick="document.getElementById('efStatus').value='received';applyExtFilters()">
+        <div class="stat-label">รับคูปองแล้ว (เช็คอินแล้ว)</div>
+        <div class="stat-num" id="exReceived">-</div><div class="stat-sub" id="exReceivedPct">-</div>
+      </div>
+      <div class="stat-card pending" style="cursor:pointer;" onclick="document.getElementById('efStatus').value='pending';applyExtFilters()">
+        <div class="stat-label">ยังไม่ได้รับคูปอง</div>
+        <div class="stat-num" id="exPending">-</div><div class="stat-sub" id="exPendingPct">-</div>
+      </div>
+    </div>
+    <div class="filter-bar">
+      <div class="filter-group">
+        <div class="filter-label">สถานะ</div>
+        <select class="filter-select" id="efStatus" onchange="applyExtFilters()">
+          <option value="">ทั้งหมด</option>
+          <option value="received">รับแล้ว</option>
+          <option value="pending">ยังไม่รับ</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <div class="filter-label">ค้นหา</div>
+        <input class="sbox" id="efBox" placeholder="ชื่อ / หน่วยงาน..." oninput="applyExtFilters()">
+      </div>
+      <div class="filter-group">
+        <div class="filter-label">วันที่รับ</div>
+        <input type="date" class="filter-select" id="efDate" onchange="applyExtFilters()" style="width:140px;">
+      </div>
+      <button class="btn-reset" onclick="resetExtFilters()">✕ ล้าง</button>
+    </div>
+    <div class="tcard">
+      <div class="thead-row">
+        <div>
+          <span class="ttitle">บุคคลภายนอก — คูปองกระเป๋า (วันงาน)</span>
+          <span class="tcount" id="exTCount"></span>
+        </div>
+        <div class="export-btns">
+          <button class="btn-xl green" onclick="exportExtExcel()">⬇ Excel</button>
+          <button class="btn-xl teal"  onclick="exportExtCSV()">⬇ CSV</button>
+        </div>
+      </div>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th><th>ชื่อ-นามสกุล</th><th>หน่วยงาน</th>
+              <th>ประเภทการเข้าร่วม</th>
+              <th>สถานะคูปอง</th><th>วันที่รับ</th><th>เวลา</th><th>สแกนโดย</th>
+            </tr>
+          </thead>
+          <tbody id="exBody"><tr><td colspan="8" class="loading-td">กำลังโหลด...</td></tr></tbody>
+        </table>
+      </div>
+      <div class="pager">
+        <span id="exPInfo">-</span>
+        <div style="display:flex;gap:6px;">
+          <button class="pbtn" id="exBPrev" onclick="changeExtPage(-1)">← ก่อนหน้า</button>
+          <button class="pbtn" id="exBNext" onclick="changeExtPage(1)">ถัดไป →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- ===== OVERVIEW SECTION ===== -->
   <div id="sectionOverview">
     <div class="stats-grid" style="grid-template-columns:repeat(auto-fit,minmax(140px,1fr));">
@@ -560,6 +629,7 @@ function toggleNavDD(e){
 document.addEventListener('click',()=>document.getElementById('navDD')?.classList.remove('open'));
 
 let allData=[], filtered=[], curPage=1;
+let allExtData=[], extFiltered=[], extPage=1;
 let activeYear = '2569';
 async function loadActiveYear(){
   try{
@@ -588,9 +658,11 @@ function switchMainTab(tab){
   document.getElementById('sectionBag').style.display      = tab==='bag'      ? '' : 'none';
   document.getElementById('sectionShirt').style.display    = tab==='shirt'    ? '' : 'none';
   document.getElementById('sectionOverview').style.display = tab==='overview' ? '' : 'none';
+  document.getElementById('sectionExt').style.display      = tab==='ext'      ? '' : 'none';
   document.getElementById('tabBag').classList.toggle('active',      tab==='bag');
   document.getElementById('tabShirt').classList.toggle('active',    tab==='shirt');
   document.getElementById('tabOverview').classList.toggle('active', tab==='overview');
+  document.getElementById('tabExt').classList.toggle('active',      tab==='ext');
 }
 
 // Init participation type checkboxes
@@ -803,11 +875,37 @@ async function loadAll(){
     document.getElementById('ssReceivedPct').textContent=sTotal2?`${Math.round(sRec/sTotal2*100)}% ของทั้งหมด`:'-';
     document.getElementById('ssPendingPct').textContent=sTotal2?`${Math.round(sPend/sTotal2*100)}% ของทั้งหมด`:'-';
 
+    // --- External (ภายนอก) bag data ---
+    allExtData = res.filter(p => {
+      const isOut = !(p.internal_external||'').includes('ภายใน');
+      return isOut && (p.items||'').includes('กระเป๋า');
+    }).map(p => {
+      const dept = p.ext_dept || p.dept || '-';
+      return {
+        id: p.id,
+        name: `${(p.prefix||'').replace(/\s*\([^)]*\)/g,'').trim()} ${p.first_name||''} ${p.last_name||''}`.trim().replace(/\s+/g,' '),
+        dept, pt: p.participation_type||'-',
+        received: p.bag_received===true||p.bag_received===1||p.bag_received==='true',
+        rawDate: p.bag_received_date||null,
+        receivedDate: fmtBagDate(p.bag_received_date),
+        receivedTime: fmtBagTime(p.bag_received_date),
+        scannedBy: p.bag_scanned_by||''
+      };
+    });
+    allExtData.sort((a,b)=>a.name.localeCompare(b.name,'th'));
+    const exTot=allExtData.length, exRec=allExtData.filter(r=>r.received).length, exPend=exTot-exRec;
+    document.getElementById('exTotal').textContent=exTot.toLocaleString();
+    document.getElementById('exReceived').textContent=exRec.toLocaleString();
+    document.getElementById('exPending').textContent=exPend.toLocaleString();
+    document.getElementById('exReceivedPct').textContent=exTot?`${Math.round(exRec/exTot*100)}% ของทั้งหมด`:'-';
+    document.getElementById('exPendingPct').textContent=exTot?`${Math.round(exPend/exTot*100)}% ของทั้งหมด`:'-';
+
     document.getElementById('lastUpdate').textContent='อัปเดต: '+new Date().toLocaleTimeString('th-TH',{timeZone:'Asia/Bangkok'});
 
     buildOverviewData(res);
     applyFilters();
     applyShirtFilters();
+    applyExtFilters();
   }catch(e){
     document.getElementById('tBody').innerHTML='<tr><td colspan="10" class="loading-td">โหลดไม่สำเร็จ</td></tr>';
   }
@@ -1013,6 +1111,75 @@ function getShirtRows(){
     'เวลา':r.received?r.receivedTime:'-',
     'สแกนโดย':r.received?r.scannedBy||'-':'-',
     'ผู้มารับแทน':r.shirtReceivedBy||'-'}));
+}
+
+// ===== EXTERNAL (ภายนอก) FUNCTIONS =====
+function applyExtFilters(){
+  const status=document.getElementById('efStatus').value;
+  const q=(document.getElementById('efBox').value||'').toLowerCase();
+  const dateFilter=document.getElementById('efDate').value;
+  extFiltered=allExtData.filter(r=>{
+    if(status==='received'&&!r.received) return false;
+    if(status==='pending'&&r.received) return false;
+    if(q&&!(r.name.toLowerCase().includes(q)||r.dept.toLowerCase().includes(q))) return false;
+    if(dateFilter&&r.rawDate&&bkkDateStr(r.rawDate)!==dateFilter) return false;
+    return true;
+  });
+  extPage=1; renderExtTable();
+}
+function resetExtFilters(){
+  document.getElementById('efStatus').value='';
+  document.getElementById('efBox').value='';
+  document.getElementById('efDate').value='';
+  applyExtFilters();
+}
+function renderExtTable(){
+  const PAGE=25, total=extFiltered.length, pages=Math.max(1,Math.ceil(total/PAGE));
+  extPage=Math.max(1,Math.min(extPage,pages));
+  const start=(extPage-1)*PAGE, slice=extFiltered.slice(start,start+PAGE);
+  document.getElementById('exTCount').textContent=`(${total.toLocaleString()} ราย)`;
+  document.getElementById('exPInfo').textContent=`${start+1}–${Math.min(start+PAGE,total)} จาก ${total.toLocaleString()} ราย`;
+  document.getElementById('exBPrev').disabled=extPage<=1;
+  document.getElementById('exBNext').disabled=extPage>=pages;
+  if(slice.length===0){
+    document.getElementById('exBody').innerHTML='<tr><td colspan="8" class="loading-td">ไม่พบข้อมูล</td></tr>';
+    return;
+  }
+  document.getElementById('exBody').innerHTML=slice.map((r,i)=>{
+    const badge=r.received?'<span class="badge b-received">รับแล้ว</span>':'<span class="badge b-pending">ยังไม่รับ</span>';
+    return `<tr>
+      <td>${start+i+1}</td>
+      <td>${r.name}</td>
+      <td>${r.dept}</td>
+      <td style="font-size:0.8rem;color:#475569;">${r.pt}</td>
+      <td>${badge}</td>
+      <td>${r.received?r.receivedDate:'-'}</td>
+      <td>${r.received?r.receivedTime:'-'}</td>
+      <td style="font-size:0.8rem;color:#64748b;">${r.received?r.scannedBy||'-':'-'}</td>
+    </tr>`;
+  }).join('');
+}
+function changeExtPage(d){extPage+=d;renderExtTable();window.scrollTo({top:0,behavior:'smooth'});}
+function exportExtExcel(){
+  const rows=getExtRows();
+  const ws=XLSX.utils.json_to_sheet(rows);
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'ภายนอก');
+  XLSX.writeFile(wb,`external_bag_${new Date().toISOString().slice(0,10)}.xlsx`);
+}
+function exportExtCSV(){
+  const rows=getExtRows(),h=Object.keys(rows[0]);
+  const csv=[h.join(','),...rows.map(r=>h.map(k=>`"${String(r[k]).replace(/"/g,'""')}"`).join(','))].join('\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8'}));
+  a.download=`external_bag_${new Date().toISOString().slice(0,10)}.csv`;a.click();
+}
+function getExtRows(){
+  return extFiltered.map((r,i)=>({'ลำดับ':i+1,'ชื่อ-นามสกุล':r.name,'หน่วยงาน':r.dept,
+    'ประเภทการเข้าร่วม':r.pt,
+    'สถานะคูปอง':r.received?'รับแล้ว':'ยังไม่รับ',
+    'วันที่รับ':r.received?r.receivedDate:'-',
+    'เวลา':r.received?r.receivedTime:'-',
+    'สแกนโดย':r.received?r.scannedBy||'-':'-'}));
 }
 
 // ===== OVERVIEW =====
