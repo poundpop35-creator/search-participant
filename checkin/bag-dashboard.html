@@ -36,7 +36,7 @@
     .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:20px;}
     .stat-card{background:var(--white);border-radius:14px;padding:18px;box-shadow:var(--shadow);display:flex;flex-direction:column;}
     .stat-label{font-size:0.74rem;color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;min-height:2.6em;}
-    .stat-num{font-size:2rem;font-weight:700;}
+    .stat-num{font-size:2rem;font-weight:700;overflow-wrap:break-word;word-break:break-all;}
     .stat-sub{font-size:0.76rem;color:#94a3b8;margin-top:3px;}
     .stat-card.total .stat-num{color:var(--blue);}
     .stat-card.received .stat-num{color:var(--green);}
@@ -513,23 +513,25 @@
 
   <!-- ===== OVERVIEW SECTION ===== -->
   <div id="sectionOverview">
-    <div class="stats-grid" style="grid-template-columns:repeat(auto-fit,minmax(140px,1fr));">
+    <div class="stats-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:10px;">
       <div class="stat-card total" style="border-top:4px solid #16a34a;cursor:pointer;" onclick="resetOvFilters()">
         <div class="stat-label">ผู้มีสิทธิ์รับของทั้งหมด</div><div class="stat-num" id="ovStatTotal" style="color:#16a34a;">-</div><div class="stat-sub" id="ovSubTotal">-</div></div>
       <div class="stat-card total" style="border-top:4px solid #0d2b6b;cursor:pointer;" onclick="document.getElementById('ovPersonType').value='ภายใน';applyOvFilters()">
-        <div class="stat-label">ก่อนวันงาน (ภายใน)</div><div class="stat-num" id="ovStatPreEvent" style="color:#0d2b6b;">-</div><div class="stat-sub" id="ovSubPreEvent">-</div></div>
+        <div class="stat-label">ผู้มีสิทธิ์รับของก่อนวันงาน (ภายใน)</div><div class="stat-num" id="ovStatPreEvent" style="color:#0d2b6b;">-</div><div class="stat-sub" id="ovSubPreEvent">-</div></div>
       <div class="stat-card total" style="border-top:4px solid #0891b2;cursor:pointer;" onclick="document.getElementById('ovPersonType').value='ภายนอก';applyOvFilters()">
-        <div class="stat-label">วันงาน (ภายนอก)</div><div class="stat-num" id="ovStatEventDay" style="color:#0891b2;">-</div><div class="stat-sub" id="ovSubEventDay">-</div></div>
+        <div class="stat-label">ผู้มีสิทธิ์รับของในวันงาน (ภายนอก)</div><div class="stat-num" id="ovStatEventDay" style="color:#0891b2;">-</div><div class="stat-sub" id="ovSubEventDay">-</div></div>
+    </div>
+    <div class="stats-grid" style="grid-template-columns:repeat(auto-fit,minmax(130px,1fr));">
       <div class="stat-card received" style="border-top:4px solid #16a34a;cursor:pointer;" onclick="document.getElementById('ovStatus').value='any-received';document.getElementById('ovBundle').value='';applyOvFilters()">
         <div class="stat-label">รับของแล้ว (อย่างน้อย 1 อย่าง)</div><div class="stat-num" id="ovStatDone" style="color:#16a34a;">-</div><div class="stat-sub" id="ovSubDone">-</div></div>
       <div class="stat-card total" style="border-top:4px solid #0d2b6b;cursor:pointer;" onclick="document.getElementById('ovBundle').value='all';applyOvFilters()">
-        <div class="stat-label">🎒📚👕 ได้ทุกอย่าง</div><div class="stat-num" id="ovStatAll" style="color:#0d2b6b;">-</div><div class="stat-sub" id="ovSubAll">-</div></div>
+        <div class="stat-label">🎒📚👕 ได้ทุกอย่าง</div><div class="stat-num" id="ovStatAll" style="color:#0d2b6b;font-size:1.1rem;">-</div><div class="stat-sub" id="ovSubAll">-</div></div>
       <div class="stat-card total" style="border-top:4px solid #0891b2;cursor:pointer;" onclick="document.getElementById('ovBundle').value='bag-bkd';applyOvFilters()">
-        <div class="stat-label">🎒📚 กระเป๋า+บทคัดย่อ</div><div class="stat-num" id="ovStatBagBkd" style="color:#0891b2;">-</div><div class="stat-sub" id="ovSubBagBkd">-</div></div>
+        <div class="stat-label">🎒📚 กระเป๋า+บทคัดย่อ</div><div class="stat-num" id="ovStatBagBkd" style="color:#0891b2;font-size:1.1rem;">-</div><div class="stat-sub" id="ovSubBagBkd">-</div></div>
       <div class="stat-card total" style="border-top:4px solid #64748b;cursor:pointer;" onclick="document.getElementById('ovBundle').value='bag-only';applyOvFilters()">
-        <div class="stat-label">🎒 กระเป๋าอย่างเดียว</div><div class="stat-num" id="ovStatBagOnly" style="color:#64748b;">-</div><div class="stat-sub" id="ovSubBagOnly">-</div></div>
+        <div class="stat-label">🎒 กระเป๋าอย่างเดียว</div><div class="stat-num" id="ovStatBagOnly" style="color:#64748b;font-size:1.1rem;">-</div><div class="stat-sub" id="ovSubBagOnly">-</div></div>
       <div class="stat-card total" style="border-top:4px solid #7c3aed;cursor:pointer;" onclick="document.getElementById('ovBundle').value='shirt-bkd';applyOvFilters()">
-        <div class="stat-label">👕📚 เสื้อ+บทคัดย่อ</div><div class="stat-num" id="ovStatShirtBkd" style="color:#7c3aed;">-</div><div class="stat-sub" id="ovSubShirtBkd">-</div></div>
+        <div class="stat-label">👕📚 เสื้อ+บทคัดย่อ</div><div class="stat-num" id="ovStatShirtBkd" style="color:#7c3aed;font-size:1.1rem;">-</div><div class="stat-sub" id="ovSubShirtBkd">-</div></div>
     </div>
     <div class="filter-bar">
       <div class="filter-group">
