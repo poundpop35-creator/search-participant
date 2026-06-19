@@ -331,9 +331,8 @@ body::before{
   <p class="title-sub">คู่มืออ้างอิงสำหรับเจ้าหน้าที่ประจำจุด</p>
   <div class="title-pills">
     <div class="title-pill tp-checkin" style="cursor:pointer;" onclick="goToSys('checkin')">📋 ระบบเช็คอิน <b>9 กรณี</b></div>
-    <div class="title-pill tp-bag" style="cursor:pointer;" onclick="goToSys('bag')">🎒 ระบบรับกระเป๋า <b>8 กรณี</b></div>
-    <div class="title-pill tp-shirt" style="cursor:pointer;" onclick="goToSys('shirt')">👕 ระบบรับเสื้อ <b>6 กรณี</b></div>
-  </div>
+    <div class="title-pill tp-bag" style="cursor:pointer;" onclick="goToSys('bag')">🎒 ระบบรับกระเป๋า+เสื้อ <b>14 กรณี</b></div>
+      </div>
   <div class="title-hint">กด ← → หรือปุ่มด้านล่างเพื่อเลื่อนสไลด์</div>
 </div>
 </div>
@@ -621,7 +620,7 @@ body::before{
 <div class="slide" data-sys="bag">
 <div class="card-wrap">
   <div class="info-panel">
-    <div class="case-num"><span class="sys-dot sd-bag"></span>ระบบรับกระเป๋า · 1/8</div>
+    <div class="case-num"><span class="sys-dot sd-bag"></span>ระบบรับกระเป๋า+เสื้อ · 1/14</div>
     <div class="info-title">❌ ไม่พบในระบบ</div>
     <div class="info-desc">สแกน QR/บัตรแล้วไม่พบชื่อใน participants เลย หรือ event_year ไม่ตรง</div>
     <div class="info-note">⚠️ ไม่มีชื่อ · ไม่มีหน่วยงาน<br>ไม่มีปุ่มยกเลิก</div>
@@ -641,7 +640,7 @@ body::before{
 <div class="slide" data-sys="bag">
 <div class="card-wrap">
   <div class="info-panel">
-    <div class="case-num"><span class="sys-dot sd-bag"></span>ระบบรับกระเป๋า · 2/8</div>
+    <div class="case-num"><span class="sys-dot sd-bag"></span>ระบบรับกระเป๋า+เสื้อ · 2/14</div>
     <div class="info-title">❌ ไม่มีสิทธิ์<br>(พบในระบบแต่ไม่ผ่านเงื่อนไข)</div>
     <div class="info-desc">เช่น Staff, บุคคลภายนอก, ประเภทการเข้าร่วมไม่ใช่ผู้เข้าร่วมงาน</div>
     <div class="info-note">มีชื่อ + หน่วยงาน<br>ไม่มีปุ่มยกเลิก</div>
@@ -666,7 +665,7 @@ body::before{
 <div class="slide" data-sys="bag">
 <div class="card-wrap">
   <div class="info-panel">
-    <div class="case-num"><span class="sys-dot sd-bag"></span>ระบบรับกระเป๋า · 3/8</div>
+    <div class="case-num"><span class="sys-dot sd-bag"></span>ระบบรับกระเป๋า+เสื้อ · 3/14</div>
     <div class="info-title">⚠️ รับกระเป๋าไปแล้ว</div>
     <div class="info-desc">bag_received = true แล้ว สแกนซ้ำ ระบบห้ามรับซ้ำ</div>
     <div class="info-note">ไม่มีปุ่มยกเลิก</div>
@@ -693,7 +692,7 @@ body::before{
 <div class="slide" data-sys="bag">
 <div class="card-wrap">
   <div class="info-panel">
-    <div class="case-num"><span class="sys-dot sd-bag"></span>ระบบรับกระเป๋า · 4/8</div>
+    <div class="case-num"><span class="sys-dot sd-bag"></span>ระบบรับกระเป๋า+เสื้อ · 4/14</div>
     <div class="info-title">✅ รับกระเป๋าสำเร็จ<br>กระเป๋าอย่างเดียว ไม่มีเสื้อ</div>
     <div class="info-desc">items = "กระเป๋า"<br>shirt_size = ว่าง</div>
     <div class="info-note">✅ มีปุ่มยกเลิก<br>ไม่มีปุ่มรับเสื้อ</div>
@@ -721,7 +720,7 @@ body::before{
 <div class="slide" data-sys="bag">
 <div class="card-wrap">
   <div class="info-panel">
-    <div class="case-num"><span class="sys-dot sd-bag"></span>ระบบรับกระเป๋า · 5/8</div>
+    <div class="case-num"><span class="sys-dot sd-bag"></span>ระบบรับกระเป๋า+เสื้อ · 5/14</div>
     <div class="info-title">✅ รับกระเป๋าสำเร็จ<br>กระเป๋า+บทคัดย่อ ไม่มีเสื้อ</div>
     <div class="info-desc">items = "กระเป๋า+บทคัดย่อ"<br>shirt_size = ว่าง</div>
     <div class="info-note">บทคัดย่อแสดง "อยู่ในกระเป๋า"</div>
@@ -750,7 +749,7 @@ body::before{
 <div class="slide" data-sys="bag">
 <div class="card-wrap">
   <div class="info-panel">
-    <div class="case-num"><span class="sys-dot sd-bag"></span>ระบบรับกระเป๋า · 6/8</div>
+    <div class="case-num"><span class="sys-dot sd-bag"></span>ระบบรับกระเป๋า+เสื้อ · 6/14</div>
     <div class="info-title">✅ รับกระเป๋าสำเร็จ<br>มีเสื้อ — ยังไม่ได้รับ</div>
     <div class="info-desc">shirt_size = XL<br>shirt_received = false<br>→ ปุ่มรับเสื้อพร้อมกันปรากฏ</div>
     <div class="info-note">กดปุ่มฟ้าได้เลย<br>ไม่ต้องไปสแกนที่ระบบเสื้อซ้ำ</div>
@@ -781,7 +780,7 @@ body::before{
 <div class="slide" data-sys="bag">
 <div class="card-wrap">
   <div class="info-panel">
-    <div class="case-num"><span class="sys-dot sd-bag"></span>ระบบรับกระเป๋า · 7/8</div>
+    <div class="case-num"><span class="sys-dot sd-bag"></span>ระบบรับกระเป๋า+เสื้อ · 7/14</div>
     <div class="info-title">✅ รับกระเป๋าสำเร็จ<br>มีเสื้อ — รับเสื้อไปแล้ว</div>
     <div class="info-desc">shirt_received = true แล้ว<br>→ ขึ้น "รับไปแล้ว ✓" ไม่มีปุ่มเสื้อ</div>
     <div class="info-note">ไม่ปรากฏปุ่ม 👕</div>
@@ -809,7 +808,7 @@ body::before{
 <div class="slide" data-sys="bag">
 <div class="card-wrap">
   <div class="info-panel">
-    <div class="case-num"><span class="sys-dot sd-bag"></span>ระบบรับกระเป๋า · 8/8</div>
+    <div class="case-num"><span class="sys-dot sd-bag"></span>ระบบรับกระเป๋า+เสื้อ · 8/14</div>
     <div class="info-title">❌ บันทึกไม่สำเร็จ</div>
     <div class="info-desc">PATCH ไปที่ Supabase แล้วได้ status ที่ไม่ใช่ 200/204</div>
     <div class="info-note">ไม่มีปุ่มยกเลิก</div>
@@ -828,10 +827,10 @@ body::before{
 <!-- ════════ SHIRT SLIDES ════════ -->
 
 <!-- 10 -->
-<div class="slide" data-sys="shirt">
+<div class="slide" data-sys="bag">
 <div class="card-wrap">
   <div class="info-panel">
-    <div class="case-num"><span class="sys-dot sd-shirt"></span>ระบบรับเสื้อ · 1/6</div>
+    <div class="case-num"><span class="sys-dot sd-bag"></span>ระบบรับกระเป๋า+เสื้อ · 9/14</div>
     <div class="info-title">❌ ไม่มีสิทธิ์รับเสื้อ<br>(ไม่มี shirt_size)</div>
     <div class="info-desc">พบในระบบแต่ shirt_size ว่างเปล่า</div>
     <div class="info-note">ไม่มีปุ่มยกเลิก</div>
@@ -853,10 +852,10 @@ body::before{
 </div>
 
 <!-- 11 -->
-<div class="slide" data-sys="shirt">
+<div class="slide" data-sys="bag">
 <div class="card-wrap">
   <div class="info-panel">
-    <div class="case-num"><span class="sys-dot sd-shirt"></span>ระบบรับเสื้อ · 2/6</div>
+    <div class="case-num"><span class="sys-dot sd-bag"></span>ระบบรับกระเป๋า+เสื้อ · 10/14</div>
     <div class="info-title">⚠️ รับเสื้อไปแล้ว (ซ้ำ)</div>
     <div class="info-desc">shirt_received = true แล้ว สแกนซ้ำอีกครั้ง</div>
     <div class="info-note">ไม่มีปุ่มยกเลิก</div>
@@ -880,10 +879,10 @@ body::before{
 </div>
 
 <!-- 12 -->
-<div class="slide" data-sys="shirt">
+<div class="slide" data-sys="bag">
 <div class="card-wrap">
   <div class="info-panel">
-    <div class="case-num"><span class="sys-dot sd-shirt"></span>ระบบรับเสื้อ · 3/6</div>
+    <div class="case-num"><span class="sys-dot sd-bag"></span>ระบบรับกระเป๋า+เสื้อ · 11/14</div>
     <div class="info-title">✅ รับเสื้อสำเร็จ<br>ไม่มีกระเป๋า</div>
     <div class="info-desc">items ไม่มีคำว่า "กระเป๋า"<br>shirt_size = L</div>
     <div class="info-note">✅ มีปุ่มยกเลิก</div>
@@ -906,10 +905,10 @@ body::before{
 </div>
 
 <!-- 13 -->
-<div class="slide" data-sys="shirt">
+<div class="slide" data-sys="bag">
 <div class="card-wrap">
   <div class="info-panel">
-    <div class="case-num"><span class="sys-dot sd-shirt"></span>ระบบรับเสื้อ · 4/6</div>
+    <div class="case-num"><span class="sys-dot sd-bag"></span>ระบบรับกระเป๋า+เสื้อ · 12/14</div>
     <div class="info-title">✅ รับเสื้อสำเร็จ<br>มีกระเป๋า — ยังไม่รับกระเป๋า</div>
     <div class="info-desc">items = "กระเป๋า"<br>bag_received = false</div>
     <div class="info-note">✅ มีปุ่มยกเลิก</div>
@@ -933,10 +932,10 @@ body::before{
 </div>
 
 <!-- 14 -->
-<div class="slide" data-sys="shirt">
+<div class="slide" data-sys="bag">
 <div class="card-wrap">
   <div class="info-panel">
-    <div class="case-num"><span class="sys-dot sd-shirt"></span>ระบบรับเสื้อ · 5/6</div>
+    <div class="case-num"><span class="sys-dot sd-bag"></span>ระบบรับกระเป๋า+เสื้อ · 13/14</div>
     <div class="info-title">✅ รับเสื้อสำเร็จ<br>กระเป๋า+บทคัดย่อ ยังไม่รับ</div>
     <div class="info-desc">items = "กระเป๋า+บทคัดย่อ"<br>bag_received = false</div>
     <div class="info-note">✅ มีปุ่มยกเลิก</div>
@@ -961,10 +960,10 @@ body::before{
 </div>
 
 <!-- 15 -->
-<div class="slide" data-sys="shirt">
+<div class="slide" data-sys="bag">
 <div class="card-wrap">
   <div class="info-panel">
-    <div class="case-num"><span class="sys-dot sd-shirt"></span>ระบบรับเสื้อ · 6/6</div>
+    <div class="case-num"><span class="sys-dot sd-bag"></span>ระบบรับกระเป๋า+เสื้อ · 14/14</div>
     <div class="info-title">✅ รับเสื้อสำเร็จ<br>กระเป๋า+บทคัดย่อ รับแล้วทั้งคู่</div>
     <div class="info-desc">bag_received = true<br>→ ทั้ง (1) และ (2) ขึ้น "รับไปแล้ว ✓"</div>
     <div class="info-note">✅ มีปุ่มยกเลิก</div>
@@ -997,7 +996,7 @@ body::before{
     <button class="nav-arrow" id="prevBtn" onclick="go(-1)">← ก่อนหน้า</button>
     <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
       <div class="nav-dots" id="dots"></div>
-      <button onclick="goTo(0)" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.5);border-radius:10px;padding:5px 16px;font-family:'Sarabun',sans-serif;font-size:0.76rem;cursor:pointer;letter-spacing:.03em;" title="กลับหน้าแรก">⌂ หน้าแรก</button>
+      <button onclick="goTo(0)" class="nav-home" title="กลับหน้าแรก">⌂ หน้าแรก</button>
     </div>
     <button class="nav-arrow" id="nextBtn" onclick="go(1)">ถัดไป →</button>
   </div>
@@ -1013,8 +1012,7 @@ let cur=0;
 
 const SYS={
   all:{label:'ภาพรวม',cls:'sb-all',dot:'d-all'},
-  bag:{label:'🎒 ระบบรับกระเป๋า',cls:'sb-bag',dot:'d-bag'},
-  shirt:{label:'👕 ระบบรับเสื้อ',cls:'sb-shirt',dot:'d-shirt'},
+  bag:{label:'🎒 ระบบรับกระเป๋า+เสื้อ',cls:'sb-bag',dot:'d-bag'},
   checkin:{label:'📋 ระบบเช็คอิน',cls:'sb-checkin',dot:'d-checkin'},
 };
 
@@ -1050,26 +1048,7 @@ document.addEventListener('keydown',e=>{
 let tx=0;
 document.addEventListener('touchstart',e=>tx=e.touches[0].clientX,{passive:true});
 document.addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-tx;if(Math.abs(dx)>50)go(dx<0?1:-1);},{passive:true});
-// Transform .modal-head + .modal-title → gradient header
-const TYPE_MAP={'mb-success':'mh-success','mb-warning':'mh-warning','mb-error':'mh-error','mb-vip':'mh-vip','mb-staff':'mh-staff'};
-document.querySelectorAll('.modal-box').forEach(box=>{
-  const head=box.querySelector('.modal-head');
-  const badge=head?.querySelector('.mbadge');
-  const titleEl=box.querySelector('.modal-title');
-  if(!head||!badge||!titleEl) return;
-  const cls=Object.entries(TYPE_MAP).find(([k])=>badge.classList.contains(k))?.[1]||'mh-success';
-  head.classList.add(cls);
-  const b=document.createElement('div');
-  b.className='mhbadge';
-  b.textContent=badge.textContent;
-  const t=document.createElement('div');
-  t.className='mhtitle';
-  t.textContent=titleEl.textContent;
-  head.innerHTML='';
-  head.appendChild(b);
-  head.appendChild(t);
-  titleEl.style.display='none';
-});
+
 goTo(0);
 </script>
 </body>
