@@ -414,37 +414,46 @@ async function checkNames() {
       const fn = parts[0] || '';
       const ln = parts.length > 1 ? parts.slice(1).join(' ') : '';
 
-      // Try full-name match (firstName+lastName) first, then full-string match
       let exact = searchByParts(fn, ln);
-      // If no result with split, try the whole stripped string as a single query
       if (!exact.length) exact = searchInData(q);
-      rows.push({ line, results: exact });
+
+      // Fuzzy fallback: first-name only (marks as "ใกล้เคียง")
+      let fuzzy = [];
+      if (!exact.length && fn) {
+        fuzzy = allParticipants.filter(p =>
+          (p.first_name || '').toLowerCase().includes(fn.toLowerCase())
+        );
+      }
+      rows.push({ line, exact, fuzzy });
     }
 
     btn.textContent = 'ตรวจสอบ';
     btn.disabled = false;
 
-    const found = rows.filter(r => r.results.length).length;
+    const found = rows.filter(r => r.exact.length).length;
     document.getElementById('summary').innerHTML =
-      `พบ <strong class="found">${found}</strong> จาก ${lines.length} ชื่อ`;
+      `พบตรง <strong class="found">${found}</strong> จาก ${lines.length} ชื่อ`;
 
     const tbody = document.getElementById('tbody');
-    tbody.innerHTML = rows.map(({ line, results }, i) => {
-      const renderRow = (p, mi) => {
+    tbody.innerHTML = rows.map(({ line, exact, fuzzy }, i) => {
+      const renderRow = (p, mi, label, labelClass) => {
         const isIn = (p.internal_external || '').includes('ภายใน');
         const dept = isIn ? (p.dept || '-') : (p.ext_dept || p.dept || '-');
         const tag = isIn ? '<span class="tag-in">ภายใน</span>' : '<span class="tag-out">ภายนอก</span>';
         return `<tr>
           <td>${mi === 0 ? i+1 : ''}</td>
           <td>${mi === 0 ? line : ''}</td>
-          <td class="found">✓ พบ</td>
+          <td class="${labelClass}">${label}</td>
           <td>${p.prefix || ''}${p.first_name} ${p.last_name}</td>
           <td>${dept}</td>
           <td>${tag}</td>
         </tr>`;
       };
-      if (results.length) {
-        return results.map((p, mi) => renderRow(p, mi)).join('');
+      if (exact.length) {
+        return exact.map((p, mi) => renderRow(p, mi, '✓ พบ', 'found')).join('');
+      }
+      if (fuzzy.length) {
+        return fuzzy.map((p, mi) => renderRow(p, mi, '~ ใกล้เคียง', 'approx')).join('');
       }
       return `<tr>
         <td>${i+1}</td><td>${line}</td>
