@@ -369,21 +369,56 @@
       <p style="font-size:0.76rem;color:#94a3b8;margin-top:8px;">* ไม่จำเป็นต้องใช้ชื่อหัวตารางเหมือนกันทุกตัวอักษร ระบบจะจับคู่คอลัมน์ให้อัตโนมัติ</p>
     </div>
 
-    <!-- URL + Fetch -->
+    <!-- URL Google Sheets + นำเข้า (combined) -->
     <div class="card">
-      <div class="card-title">📥 นำเข้าจาก Google Sheets (ครั้งเดียว)</div>
-      <div class="alert alert-info">
-        <strong>วิธีเตรียม Google Sheet:</strong> ไฟล์ → เผยแพร่ไปยังเว็บ → เลือกชีท <span id="sheetHint" style="font-weight:700;color:#1d4ed8;"></span> → รูปแบบ <strong>CSV</strong> → คัดลอก URL
+      <div class="card-title">🔗 URL Google Sheet + นำเข้าข้อมูล</div>
+      <div class="alert alert-info" style="margin-bottom:14px;">
+        <strong>วิธีเตรียม Google Sheet:</strong> ไฟล์ → เผยแพร่ไปยังเว็บ → เลือกชีท → รูปแบบ <strong>CSV</strong> → คัดลอก URL — กด <strong>💾 บันทึก</strong> เก็บ URL ไว้ใช้ซ้ำ / กด <strong>📥 นำเข้า</strong> เพื่อดึงข้อมูลเข้าระบบทันที
       </div>
+
       <div class="field">
-        <label id="urlLabel">URL ผู้ลงทะเบียนล่วงหน้า (Publish as CSV)</label>
-        <div style="display:flex;gap:8px;">
-          <input id="sheetUrl" type="url" placeholder="https://docs.google.com/spreadsheets/d/e/.../pub?output=csv&gid=0">
-          <button class="btn btn-primary" id="fetchBtn" onclick="fetchSheet()">ดึงข้อมูล</button>
+        <label>📋 URL ผู้ลงทะเบียนล่วงหน้า</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <input id="preSheetUrl" type="url" style="flex:1;min-width:0;" placeholder="https://docs.google.com/spreadsheets/d/e/.../pub?output=csv&gid=...">
+          <button class="btn btn-ghost btn-sm" onclick="saveSheetUrl('pre_sheet_url','preSheetUrl','preSheetStatus')">💾 บันทึก</button>
+          <button class="btn btn-primary btn-sm" onclick="importFromUrl('pre','preSheetUrl')">📥 นำเข้า</button>
+        </div>
+        <div id="preSheetStatus" style="margin-top:6px;font-size:0.82rem;"></div>
+      </div>
+
+      <div class="field">
+        <label>🎙️ URL ผู้ส่งผลงาน</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <input id="presenterSheetUrl" type="url" style="flex:1;min-width:0;" placeholder="https://docs.google.com/spreadsheets/d/e/.../pub?output=csv&gid=...">
+          <button class="btn btn-ghost btn-sm" onclick="saveSheetUrl('presenter_sheet_url','presenterSheetUrl','presenterSheetStatus')">💾 บันทึก</button>
+          <button class="btn btn-primary btn-sm" onclick="importFromUrl('presenter','presenterSheetUrl')">📥 นำเข้า</button>
+        </div>
+        <div id="presenterSheetStatus" style="margin-top:6px;font-size:0.82rem;"></div>
+      </div>
+
+      <div class="field" style="margin-bottom:4px;">
+        <label>🚶 URL Walk-in <span style="color:#16a34a;font-weight:600;">(รองรับ Auto-sync)</span></label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <input id="walkinUrl" type="url" style="flex:1;min-width:0;" placeholder="https://docs.google.com/spreadsheets/d/e/.../pub?output=csv&gid=...">
+          <button class="btn btn-ghost btn-sm" onclick="saveWalkinUrl()">💾 บันทึก</button>
+          <button class="btn btn-primary btn-sm" onclick="importFromUrl('walkin','walkinUrl')">📥 นำเข้า</button>
         </div>
       </div>
-      <div id="sheetStatus"></div>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:8px;">
+        <button class="btn btn-green" id="syncNowBtn" onclick="syncWalkinNow()">🔄 ซิงค์เดี๋ยวนี้</button>
+        <button class="btn btn-ghost" id="autoSyncBtn" onclick="toggleAutoSync()">▶ เปิด Auto-sync (ทุก 1 นาที)</button>
+        <span id="syncCountdown" style="font-size:0.82rem;color:#64748b;"></span>
+      </div>
+      <div id="walkinSyncStatus" style="margin-top:10px;"></div>
+
+      <!-- hidden elements used by fetchSheet() internals -->
+      <input id="sheetUrl" type="hidden">
+      <button id="fetchBtn" style="display:none;" onclick="fetchSheet()"></button>
+      <span id="sheetHint" style="display:none;"></span>
+      <span id="urlLabel" style="display:none;"></span>
     </div>
+
+    <div id="sheetStatus" style="margin-bottom:8px;"></div>
 
     <!-- Column mapping -->
     <div class="card" id="mappingCard" style="display:none;">
@@ -414,45 +449,6 @@
       </div>
       <div id="importStatus" style="margin-top:12px;"></div>
       <div id="skippedList" style="display:none;margin-top:14px;"></div>
-    </div>
-
-    <!-- Sheet URLs + Walk-in Auto-Sync -->
-    <div class="sec-divider">URL Google Sheets ทั้ง 3 ประเภท</div>
-    <div class="card">
-      <div class="card-title">🔗 บันทึก URL Google Sheet</div>
-      <p class="card-desc">บันทึก URL ของแต่ละ Sheet ไว้ที่นี่ ใช้สำหรับซิงค์ข้อมูลในอนาคต</p>
-
-      <div class="field">
-        <label>📋 URL ผู้ลงทะเบียนล่วงหน้า</label>
-        <div style="display:flex;gap:8px;">
-          <input id="preSheetUrl" type="url" placeholder="https://docs.google.com/spreadsheets/d/e/.../pub?output=csv&gid=...">
-          <button class="btn btn-primary" onclick="saveSheetUrl('pre_sheet_url','preSheetUrl','preSheetStatus')">💾 บันทึก</button>
-        </div>
-        <div id="preSheetStatus" style="margin-top:6px;font-size:0.82rem;"></div>
-      </div>
-
-      <div class="field">
-        <label>🎙️ URL ผู้ส่งผลงาน</label>
-        <div style="display:flex;gap:8px;">
-          <input id="presenterSheetUrl" type="url" placeholder="https://docs.google.com/spreadsheets/d/e/.../pub?output=csv&gid=...">
-          <button class="btn btn-primary" onclick="saveSheetUrl('presenter_sheet_url','presenterSheetUrl','presenterSheetStatus')">💾 บันทึก</button>
-        </div>
-        <div id="presenterSheetStatus" style="margin-top:6px;font-size:0.82rem;"></div>
-      </div>
-
-      <div class="field" style="margin-bottom:4px;">
-        <label>🚶 URL Walk-in <span style="color:#16a34a;font-weight:600;">(รองรับ Auto-sync)</span></label>
-        <div style="display:flex;gap:8px;">
-          <input id="walkinUrl" type="url" placeholder="https://docs.google.com/spreadsheets/d/e/.../pub?output=csv&gid=...">
-          <button class="btn btn-primary" onclick="saveWalkinUrl()">💾 บันทึก</button>
-        </div>
-      </div>
-      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:8px;">
-        <button class="btn btn-green" id="syncNowBtn" onclick="syncWalkinNow()">🔄 ซิงค์เดี๋ยวนี้</button>
-        <button class="btn btn-ghost" id="autoSyncBtn" onclick="toggleAutoSync()">▶ เปิด Auto-sync (ทุก 1 นาที)</button>
-        <span id="syncCountdown" style="font-size:0.82rem;color:#64748b;"></span>
-      </div>
-      <div id="walkinSyncStatus" style="margin-top:10px;"></div>
     </div>
 
   </div>
@@ -1249,6 +1245,17 @@ async function saveSheetUrl(settingKey, inputId, statusId){
   if(!url){ setStatus(statusId,'warn','กรุณาใส่ URL ก่อน'); return; }
   await sbSetSetting(settingKey, url);
   setStatus(statusId,'ok','✅ บันทึก URL แล้ว');
+}
+
+async function importFromUrl(type, inputId) {
+  const url = document.getElementById(inputId).value.trim();
+  if(!url){ setStatus('sheetStatus','warn','กรุณาใส่ URL ก่อนกด นำเข้า'); return; }
+  setImportType(type);
+  document.getElementById('sheetUrl').value = url;
+  await fetchSheet();
+  if(document.getElementById('mappingCard').style.display !== 'none'){
+    document.getElementById('mappingCard').scrollIntoView({behavior:'smooth'});
+  }
 }
 
 async function saveWalkinUrl(){
