@@ -747,13 +747,11 @@ function changeCIPage(d) {
 }
 
 function exportCheckinExcel() {
-  if (!allCIData) { alert('ยังไม่มีข้อมูล — กรุณาเปิดดูรายชื่อก่อน'); return; }
-  const pw = prompt('พิมพ์ชื่อหน่วยงานเพื่อดาวน์โหลด\n(จะได้รับรายชื่อเฉพาะหน่วยงานนั้น):');
+  const pw = prompt('กรุณาใส่รหัสผ่านเพื่อดาวน์โหลด:');
   if (pw === null) return;
-  const q = pw.trim().toLowerCase();
-  if (!q) { alert('กรุณาพิมพ์ชื่อหน่วยงาน'); return; }
-  const src = allCIData.filter(r => r.dept.toLowerCase().includes(q));
-  if (!src.length) { alert(`ไม่พบหน่วยงาน "${pw.trim()}" — กรุณาตรวจสอบการสะกด`); return; }
+  if (pw !== 'DMSc2569') { alert('รหัสผ่านไม่ถูกต้อง'); return; }
+  if (!allCIData) { alert('ยังไม่มีข้อมูล — กรุณาเปิดดูรายชื่อก่อน'); return; }
+  const src = ciFiltered.length > 0 ? ciFiltered : allCIData;
   const rows = src.map((r, i) => ({
     'ลำดับ': i+1, 'ชื่อ-นามสกุล': r.name, 'หน่วยงาน': r.dept,
     'จังหวัด': r.province, 'เขตสุขภาพ': r.zone ? 'เขตสุขภาพที่ ' + r.zone : '-',
@@ -761,7 +759,7 @@ function exportCheckinExcel() {
   }));
   const ws = XLSX.utils.json_to_sheet(rows);
   const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'PreRegistered');
-  XLSX.writeFile(wb, `pre_registered_${pw.trim().replace(/\s+/g,'_')}_${new Date().toISOString().slice(0,10)}.xlsx`);
+  XLSX.writeFile(wb, `pre_registered_dmsc_${new Date().toISOString().slice(0,10)}.xlsx`);
 }
 
 // ─── WALK-IN LIST ───
@@ -854,13 +852,11 @@ function changeWIPage(d) {
 }
 
 function exportWIExcel() {
-  if (!allWIData) { alert('ยังไม่มีข้อมูล — กรุณาเปิดดูรายชื่อก่อน'); return; }
-  const pw = prompt('พิมพ์ชื่อหน่วยงานเพื่อดาวน์โหลด\n(จะได้รับรายชื่อเฉพาะหน่วยงานนั้น):');
+  const pw = prompt('กรุณาใส่รหัสผ่านเพื่อดาวน์โหลด:');
   if (pw === null) return;
-  const q = pw.trim().toLowerCase();
-  if (!q) { alert('กรุณาพิมพ์ชื่อหน่วยงาน'); return; }
-  const src = allWIData.filter(r => r.dept.toLowerCase().includes(q));
-  if (!src.length) { alert(`ไม่พบหน่วยงาน "${pw.trim()}" — กรุณาตรวจสอบการสะกด`); return; }
+  if (pw !== 'DMSc2569') { alert('รหัสผ่านไม่ถูกต้อง'); return; }
+  if (!allWIData) { alert('ยังไม่มีข้อมูล — กรุณาเปิดดูรายชื่อก่อน'); return; }
+  const src = wiFiltered.length > 0 ? wiFiltered : allWIData;
   const rows = src.map((r, i) => ({
     'ลำดับ': i+1, 'ชื่อ-นามสกุล': r.name, 'หน่วยงาน': r.dept,
     'จังหวัด': r.province, 'เขตสุขภาพ': r.zone ? 'เขตสุขภาพที่ ' + r.zone : '-',
@@ -868,7 +864,7 @@ function exportWIExcel() {
   }));
   const ws = XLSX.utils.json_to_sheet(rows);
   const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'WalkIn');
-  XLSX.writeFile(wb, `walkin_${pw.trim().replace(/\s+/g,'_')}_${new Date().toISOString().slice(0,10)}.xlsx`);
+  XLSX.writeFile(wb, `walkin_dmsc_${new Date().toISOString().slice(0,10)}.xlsx`);
 }
 
 
@@ -1043,13 +1039,11 @@ function changeAllPage(d) {
 }
 
 function exportAllExcel() {
-  if (!allAllData) { alert('ยังไม่มีข้อมูล — กรุณาเปิดดูรายชื่อก่อน'); return; }
-  const pw = prompt('พิมพ์ชื่อหน่วยงานเพื่อดาวน์โหลด\n(จะได้รับรายชื่อเฉพาะหน่วยงานนั้น):');
+  const pw = prompt('กรุณาใส่รหัสผ่านเพื่อดาวน์โหลด:');
   if (pw === null) return;
-  const q = pw.trim().toLowerCase();
-  if (!q) { alert('กรุณาพิมพ์ชื่อหน่วยงาน'); return; }
-  const src = allAllData.filter(r => r.dept.toLowerCase().includes(q));
-  if (!src.length) { alert(`ไม่พบหน่วยงาน "${pw.trim()}" — กรุณาตรวจสอบการสะกด`); return; }
+  if (pw !== 'DMSc2569') { alert('รหัสผ่านไม่ถูกต้อง'); return; }
+  if (!allAllData) { alert('ยังไม่มีข้อมูล — กรุณาเปิดดูรายชื่อก่อน'); return; }
+  const src = allAllFiltered.length > 0 ? allAllFiltered : allAllData;
   const rows = src.map((r,i) => ({
     'ลำดับ': i+1, 'ชื่อ-นามสกุล': r.name, 'หน่วยงาน': r.dept,
     'ประเภทการลงทะเบียน': r.isWalkin ? 'Walk-in' : 'ลงทะเบียนล่วงหน้า',
@@ -1058,7 +1052,7 @@ function exportAllExcel() {
   }));
   const ws = XLSX.utils.json_to_sheet(rows);
   const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'AllParticipants');
-  XLSX.writeFile(wb, `all_${pw.trim().replace(/\s+/g,'_')}_${new Date().toISOString().slice(0,10)}.xlsx`);
+  XLSX.writeFile(wb, `all_participants_dmsc_${new Date().toISOString().slice(0,10)}.xlsx`);
 }
 
 // ─── MAP ───
