@@ -200,15 +200,19 @@
 </div>
 
 <!-- ─── ALL PARTICIPANTS CARD ─── -->
-<div class="card wide-card" style="margin-top:16px;padding:20px;">
-  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+<div class="card wide-card" style="margin-top:16px;padding:0;overflow:hidden;border-left:5px solid #7c3aed;">
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;padding:16px 20px;background:linear-gradient(135deg,#f5f3ff 0%,#ede9fe 100%);">
     <div>
-      <span style="font-size:0.98rem;font-weight:700;color:#5b21b6;">รายชื่อทั้งหมด (ลงทะเบียนล่วงหน้า + Walk-in)</span>
-      <span id="allCount" style="font-size:0.8rem;color:#64748b;margin-left:6px;font-weight:400;"></span>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+        <span style="font-size:1.05rem;">👥</span>
+        <span style="font-size:0.98rem;font-weight:700;color:#4c1d95;">รายชื่อทั้งหมด</span>
+        <span id="allCount" style="font-size:0.75rem;font-weight:600;color:#5b21b6;background:#ddd6fe;padding:2px 10px;border-radius:99px;"></span>
+      </div>
+      <div style="font-size:0.78rem;color:#6d28d9;margin-top:2px;padding-left:26px;">ลงทะเบียนล่วงหน้า + Walk-in รวมกัน</div>
     </div>
-    <button class="sec-btn" id="allToggleBtn" onclick="toggleAll()" style="background:#5b21b6;">▼ ดูรายชื่อ</button>
+    <button class="sec-btn" id="allToggleBtn" onclick="toggleAll()" style="background:#7c3aed;border-color:#7c3aed;color:#fff;">▼ ดูรายชื่อ</button>
   </div>
-  <div id="allBody" style="display:none;margin-top:14px;">
+  <div id="allBody" style="display:none;padding:16px 20px 20px;">
     <div style="display:flex;gap:8px;margin-bottom:6px;">
       <input id="allSearch" type="text" placeholder="ค้นหาชื่อ / หน่วยงาน / จังหวัด" oninput="allApplyFilters()"
         style="flex:1;border:1.5px solid var(--border);border-radius:10px;padding:8px 12px;font-family:Sarabun,sans-serif;font-size:0.88rem;outline:none;transition:border-color .2s;"
@@ -237,16 +241,20 @@
 </div>
 
 <!-- ─── CHECK-IN LIST CARD ─── -->
-<div class="card wide-card" style="margin-top:16px;padding:20px;">
-  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+<div class="card wide-card" style="margin-top:16px;padding:0;overflow:hidden;border-left:5px solid #1d4ed8;">
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;padding:16px 20px;background:linear-gradient(135deg,#eff6ff 0%,#dbeafe 100%);">
     <div>
-      <span style="font-size:0.98rem;font-weight:700;color:var(--blue);">รายชื่อผู้ลงทะเบียนล่วงหน้า</span>
-      <span id="ciCount" style="font-size:0.8rem;color:#64748b;margin-left:6px;font-weight:400;"></span>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+        <span style="font-size:1.05rem;">📋</span>
+        <span style="font-size:0.98rem;font-weight:700;color:#1e3a8a;">รายชื่อผู้ลงทะเบียนล่วงหน้า</span>
+        <span id="ciCount" style="font-size:0.75rem;font-weight:600;color:#1d4ed8;background:#bfdbfe;padding:2px 10px;border-radius:99px;"></span>
+      </div>
+      <div style="font-size:0.78rem;color:#2563eb;margin-top:2px;padding-left:26px;">Pre-registered participants</div>
     </div>
-    <button class="sec-btn" id="ciToggleBtn" onclick="toggleCI()">▼ ดูรายชื่อ</button>
+    <button class="sec-btn" id="ciToggleBtn" onclick="toggleCI()" style="background:#1d4ed8;border-color:#1d4ed8;color:#fff;">▼ ดูรายชื่อ</button>
   </div>
 
-  <div id="ciBody" style="display:none;margin-top:14px;">
+  <div id="ciBody" style="display:none;padding:16px 20px 20px;">
     <!-- Search row + Excel button -->
     <div style="display:flex;gap:8px;margin-bottom:6px;">
       <input id="ciSearch" type="text" placeholder="ค้นหาชื่อ / หน่วยงาน / จังหวัด" oninput="ciApplyFilters()"
@@ -278,16 +286,20 @@
 </div>
 
 <!-- ─── WALK-IN LIST CARD ─── -->
-<div class="card wide-card" style="margin-top:16px;padding:20px;">
-  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+<div class="card wide-card" style="margin-top:16px;padding:0;overflow:hidden;border-left:5px solid #ea580c;">
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;padding:16px 20px;background:linear-gradient(135deg,#fff7ed 0%,#fed7aa 100%);">
     <div>
-      <span style="font-size:0.98rem;font-weight:700;color:#ea580c;">รายชื่อผู้ลงทะเบียน Walk-in</span>
-      <span id="wiCount" style="font-size:0.8rem;color:#64748b;margin-left:6px;font-weight:400;"></span>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+        <span style="font-size:1.05rem;">🚶</span>
+        <span style="font-size:0.98rem;font-weight:700;color:#7c2d12;">รายชื่อผู้ลงทะเบียน Walk-in</span>
+        <span id="wiCount" style="font-size:0.75rem;font-weight:600;color:#ea580c;background:#fed7aa;padding:2px 10px;border-radius:99px;"></span>
+      </div>
+      <div style="font-size:0.78rem;color:#c2410c;margin-top:2px;padding-left:26px;">ลงทะเบียน ณ วันงาน</div>
     </div>
-    <button class="sec-btn" id="wiToggleBtn" onclick="toggleWI()" style="background:#ea580c;">▼ ดูรายชื่อ</button>
+    <button class="sec-btn" id="wiToggleBtn" onclick="toggleWI()" style="background:#ea580c;border-color:#ea580c;color:#fff;">▼ ดูรายชื่อ</button>
   </div>
 
-  <div id="wiBody" style="display:none;margin-top:14px;">
+  <div id="wiBody" style="display:none;padding:16px 20px 20px;">
     <div style="display:flex;gap:8px;margin-bottom:6px;">
       <input id="wiSearch" type="text" placeholder="ค้นหาชื่อ / หน่วยงาน / จังหวัด" oninput="wiApplyFilters()"
         style="flex:1;border:1.5px solid var(--border);border-radius:10px;padding:8px 12px;font-family:Sarabun,sans-serif;font-size:0.88rem;outline:none;transition:border-color .2s;"
@@ -316,15 +328,19 @@
 </div>
 
 <!-- ─── WALKIN DUPLICATES CARD ─── -->
-<div class="card wide-card" style="margin-top:16px;padding:20px;border:1.5px solid #fed7aa;">
-  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+<div class="card wide-card" style="margin-top:16px;padding:0;overflow:hidden;border-left:5px solid #d97706;">
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;padding:16px 20px;background:linear-gradient(135deg,#fffbeb 0%,#fef3c7 100%);">
     <div>
-      <span style="font-size:0.98rem;font-weight:700;color:#c2410c;">⚠️ Walk-in ที่ซ้ำกับลงทะเบียนล่วงหน้า</span>
-      <span id="dupCount" style="font-size:0.8rem;color:#64748b;margin-left:6px;font-weight:400;"></span>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+        <span style="font-size:1.05rem;">⚠️</span>
+        <span style="font-size:0.98rem;font-weight:700;color:#78350f;">Walk-in ที่ซ้ำกับลงทะเบียนล่วงหน้า</span>
+        <span id="dupCount" style="font-size:0.75rem;font-weight:600;color:#b45309;background:#fde68a;padding:2px 10px;border-radius:99px;"></span>
+      </div>
+      <div style="font-size:0.78rem;color:#92400e;margin-top:2px;padding-left:26px;">ถูกข้ามตอนนำเข้า — นับเป็นผู้ลงทะเบียนล่วงหน้าแล้ว</div>
     </div>
-    <button class="sec-btn" id="dupToggleBtn" onclick="toggleDupCard()" style="display:none;border-color:#fed7aa;color:#c2410c;">▼ ดูรายชื่อ</button>
+    <button class="sec-btn" id="dupToggleBtn" onclick="toggleDupCard()" style="display:none;background:#d97706;border-color:#d97706;color:#fff;">▼ ดูรายชื่อ</button>
   </div>
-  <div id="dupCardBody" style="display:none;margin-top:14px;">
+  <div id="dupCardBody" style="display:none;padding:16px 20px 20px;">
     <p style="font-size:0.8rem;color:#92400e;background:#fff7ed;border-radius:8px;padding:8px 12px;margin-bottom:10px;line-height:1.6;">
       รายชื่อเหล่านี้ถูกข้ามไปตอนนำเข้า Walk-in เนื่องจากเลขบัตรประชาชนซ้ำกับผู้ลงทะเบียนล่วงหน้า ระบบนับรายชื่อดังกล่าวเป็นผู้ลงทะเบียนล่วงหน้าอยู่แล้ว
     </p>
@@ -343,7 +359,7 @@
       </table>
     </div>
   </div>
-  <div id="dupEmptyMsg" style="display:none;margin-top:10px;font-size:0.82rem;color:#94a3b8;text-align:center;">ไม่มีรายการ Walk-in ที่ซ้ำกัน</div>
+  <div id="dupEmptyMsg" style="display:none;padding:12px 20px 16px;font-size:0.82rem;color:#94a3b8;text-align:center;">ไม่มีรายการ Walk-in ที่ซ้ำกัน</div>
 </div>
 
 <!-- ─── MAP CARD ─── -->
