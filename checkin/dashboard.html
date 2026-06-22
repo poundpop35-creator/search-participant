@@ -826,7 +826,8 @@ const SB_ANON = localStorage.getItem('dmsc_sb_anon') || "eyJhbGciOiJIUzI1NiIsInR
     if(cp) cp.style.display='inline-flex';
   }
 })();
-const DAY_L = {1:'24 มิ.ย.',2:'25 มิ.ย.',3:'26 มิ.ย.'};
+const DAY_L   = {1:'24 มิ.ย.',2:'25 มิ.ย.',3:'26 มิ.ย.'};
+const DAY_ISO = {1:'2026-06-24',2:'2026-06-25',3:'2026-06-26'};
 const PAGE  = 5;
 const DEPTS = ['อธิบดีกรมวิทยาศาสตร์การแพทย์','รองอธิบดีกรมวิทยาศาสตร์การแพทย์','สำนักผู้ทรงคุณวุฒิกรมวิทยาศาสตร์การแพทย์','กองแผนงานและวิชาการ','กองทดสอบความชำนาญ','กลุ่มพัฒนาระบบบริหาร','กลุ่มตรวจสอบภายใน','กลุ่มงานจริยธรรม','สำนักงานเลขานุการกรม','สถาบันชีววัตถุ','สถาบันวิจัยวิทยาศาสตร์สาธารณสุข','สถาบันวิจัยสมุนไพร','สถาบันชีววิทยาศาสตร์ทางการแพทย์','สำนักคุณภาพและความปลอดภัยอาหาร','สำนักเครื่องสำอางและวัตถุอันตราย','สำนักรังสีและเครื่องมือแพทย์','สำนักมาตรฐานห้องปฏิบัติการ','สำนักยาและวัตถุเสพติด','ศูนย์รวมบริการ','ศูนย์เทคโนโลยีสารสนเทศและการสื่อสาร','กองความร่วมมือระหว่างประเทศ','กองบริหารทรัพยากรบุคคล','กองบริหารการคลัง','กองประชาสัมพันธ์และสื่อสารสาธารณะ','ศูนย์ตอบโต้เหตุฉุกเฉินด้านห้องปฏิบัติการและรังสี','ศูนย์วิทยาศาสตร์การแพทย์ที่ 1 เชียงใหม่','ศูนย์วิทยาศาสตร์การแพทย์ที่ 1/1 เชียงราย','ศูนย์วิทยาศาสตร์การแพทย์ที่ 2 พิษณุโลก','ศูนย์วิทยาศาสตร์การแพทย์ที่ 3 นครสวรรค์','ศูนย์วิทยาศาสตร์การแพทย์ที่ 4 สระบุรี','ศูนย์วิทยาศาสตร์การแพทย์ที่ 5 สมุทรสงคราม','ศูนย์วิทยาศาสตร์การแพทย์ที่ 6 ชลบุรี','ศูนย์วิทยาศาสตร์การแพทย์ที่ 7 ขอนแก่น','ศูนย์วิทยาศาสตร์การแพทย์ที่ 8 อุดรธานี','ศูนย์วิทยาศาสตร์การแพทย์ที่ 9 นครราชสีมา','ศูนย์วิทยาศาสตร์การแพทย์ที่ 10 อุบลราชธานี','ศูนย์วิทยาศาสตร์การแพทย์ที่ 11 สุราษฎร์ธานี','ศูนย์วิทยาศาสตร์การแพทย์ที่ 11/1 ภูเก็ต','ศูนย์วิทยาศาสตร์การแพทย์ที่ 12 สงขลา','ศูนย์วิทยาศาสตร์การแพทย์ที่ 12/1 ตรัง'];
 
@@ -969,12 +970,15 @@ async function loadAll(){
       exemptPeople.forEach(p=>{
         if(checkedIds.has(p.id)) return;
         const exemptType=VIP_DEPTS.has(p.dept)?'vip':'staff';
-        allData.push({id:`exempt_${p.id}`,participantId:p.id,day:0,time:null,scannedBy:'admin',
-          name:buildName(p),dept:p.dept||'-',isIn:true,tag:p.tag||'-',items:'',
+        const base={name:buildName(p),dept:p.dept||'-',isIn:true,tag:p.tag||'-',items:'',
           pt:p.participation_type||'-',isWalkin:false,
           bagReceived:false,bagDate:null,bagTime:null,
           shirtSize:'',shirtReceived:false,shirtDate:null,shirtTime:null,
-          province:(p.province||'').trim()||'กรุงเทพมหานคร',isVIPExempt:true,exemptType});
+          province:(p.province||'').trim()||'กรุงเทพมหานคร',isVIPExempt:true,exemptType};
+        [1,2,3].forEach(day=>{
+          const t=new Date(`${DAY_ISO[day]}T06:00:00+07:00`).toISOString();
+          allData.push({...base,id:`exempt_${p.id}_d${day}`,participantId:p.id,day,time:t,scannedBy:'admin'});
+        });
       });
     }catch(e){}
   }
@@ -1763,7 +1767,7 @@ function applyFilters(){
   const tg=document.getElementById('fTag').value;
   const wi=document.getElementById('fWalkin').value;
   filtered=allData.filter(r=>{
-    const mDay=curTab===0||r.day===curTab||r.isVIPExempt;
+    const mDay=curTab===0||r.day===curTab;
     const mSearch=!q||r.name.toLowerCase().includes(q)||r.dept.toLowerCase().includes(q);
     const mIE=!ie||(ie==='internal'&&r.isIn)||(ie==='external'&&!r.isIn);
     const mPT=selPT.size===0||selPT.has(r.pt);
@@ -1830,7 +1834,7 @@ function renderTable(){
         ?`<span style="display:inline-block;background:#cffafe;color:#0e7490;padding:2px 8px;border-radius:12px;font-size:0.7rem;font-weight:700;margin-left:4px;">🤝 เครือข่าย</span>`
         :`<span style="display:inline-block;background:#ffedd5;color:#9a3412;padding:2px 8px;border-radius:12px;font-size:0.7rem;font-weight:700;margin-left:4px;">👥 Staff</span>`;
       const rowBg=isVIP?'background:#faf5ff;':isNet?'background:#ecfeff;':'background:#fff7ed;';
-      const color=isVIP?'#6d28d9':isNet?'#0891b2':'#ea580c';
+      const vipT=new Date(r.time).toLocaleTimeString('th-TH',{timeZone:'Asia/Bangkok',hour:'2-digit',minute:'2-digit'});
       const contactCell=`<span style="color:#64748b;font-size:0.75rem;">ติดต่อกองแผน</span>`;
       return`<tr style="${rowBg}">
         <td>${start+i+1}</td>
@@ -1839,8 +1843,8 @@ function renderTable(){
         <td><span class="badge b-in">ภายใน</span></td>
         <td>${r.pt}</td>
         <td><span class="badge b-staff">Staff</span></td>
-        <td><span style="font-size:0.75rem;color:${color};font-weight:600;">เช็คอินแล้วทุกวัน</span></td>
-        <td style="font-size:0.75rem;color:${color};font-weight:600;">โดย admin</td>
+        <td><span class="badge b-day">${DAY_L[r.day]}</span></td>
+        <td>${vipT}</td>
         <td style="white-space:nowrap;">${contactCell}</td>
         <td style="white-space:nowrap;">${contactCell}</td>
         <td style="font-size:0.8rem;color:#64748b;">admin</td>
@@ -1882,7 +1886,7 @@ function renderDept(){
 
   // กรองข้อมูลตาม dept filters
   const data=allData.filter(r=>{
-    const mDay=dayF===0||r.day===dayF||r.isVIPExempt;
+    const mDay=dayF===0||r.day===dayF;
     const mPT=selDPT.size===0||selDPT.has(r.pt);
     return mDay&&mPT;
   });
@@ -1893,14 +1897,7 @@ function renderDept(){
   const _deptSet=new Set(DEPTS);
   data.forEach(r=>{
     if(r.dept&&r.dept!=='-'&&!_deptSet.has(r.dept)&&!stats[r.dept]) stats[r.dept]={1:0,2:0,3:0};
-    if(r.dept&&stats[r.dept]){
-      if(r.isVIPExempt){
-        if(dayF===0){stats[r.dept][1]++;stats[r.dept][2]++;stats[r.dept][3]++;}
-        else stats[r.dept][dayF]++;
-      } else {
-        stats[r.dept][r.day]=(stats[r.dept][r.day]||0)+1;
-      }
-    }
+    if(r.dept&&stats[r.dept]) stats[r.dept][r.day]=(stats[r.dept][r.day]||0)+1;
   });
   const _deptIdx=Object.fromEntries(DEPTS.map((d,i)=>[d,i]));
   const allSortedDepts=Object.keys(stats).sort((a,b)=>{
