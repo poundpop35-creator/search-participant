@@ -1894,8 +1894,12 @@ function renderDept(){
   data.forEach(r=>{
     if(r.dept&&r.dept!=='-'&&!_deptSet.has(r.dept)&&!stats[r.dept]) stats[r.dept]={1:0,2:0,3:0};
     if(r.dept&&stats[r.dept]){
-      const d=r.isVIPExempt?(dayF||1):r.day;
-      stats[r.dept][d]=(stats[r.dept][d]||0)+1;
+      if(r.isVIPExempt){
+        if(dayF===0){stats[r.dept][1]++;stats[r.dept][2]++;stats[r.dept][3]++;}
+        else stats[r.dept][dayF]++;
+      } else {
+        stats[r.dept][r.day]=(stats[r.dept][r.day]||0)+1;
+      }
     }
   });
   const _deptIdx=Object.fromEntries(DEPTS.map((d,i)=>[d,i]));
