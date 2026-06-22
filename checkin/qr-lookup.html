@@ -78,12 +78,6 @@
     .zone-tbl{width:100%;border-collapse:collapse;font-size:0.82rem;}
     .zone-tbl th{padding:7px 10px;text-align:left;background:#f0f6ff;color:#1e3a8a;font-size:0.78rem;}
     .zone-tbl tr:hover>td{background:#f8fafc;}
-    .dept-panel{border:1.5px solid var(--border);border-radius:10px;padding:10px 12px;margin-top:6px;background:#f8faff;}
-    .dept-cb-list{max-height:160px;overflow-y:auto;display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:6px;}
-    .dept-cb-item{display:flex;align-items:center;gap:4px;font-size:0.78rem;color:#334155;cursor:pointer;white-space:nowrap;}
-    .dept-cb-item input{cursor:pointer;accent-color:var(--blue);width:14px;height:14px;flex-shrink:0;}
-    .dept-filter-btn{border:1.5px solid var(--border);border-radius:8px;padding:5px 11px;font-family:'Sarabun',sans-serif;font-size:0.8rem;cursor:pointer;background:white;color:#334155;transition:all .15s;}
-    .dept-filter-btn.active{border-color:var(--blue);color:var(--blue);background:#e8f0fe;font-weight:700;}
   </style>
 </head>
 <body>
@@ -221,16 +215,6 @@
         onfocus="this.style.borderColor='#7c3aed'" onblur="this.style.borderColor='var(--border)'">
       <button class="sec-btn" onclick="exportAllExcel()" style="white-space:nowrap;background:#5b21b6;">⬇ Excel</button>
     </div>
-    <div style="margin-bottom:8px;">
-      <button id="allDeptBtn" class="dept-filter-btn" onclick="toggleAllDeptPanel()">🏢 กรองหน่วยงาน<span id="allDeptBadge" style="color:#dc2626;font-weight:700;"></span></button>
-      <div id="allDeptPanel" class="dept-panel" style="display:none;">
-        <div style="display:flex;gap:6px;margin-bottom:4px;">
-          <button onclick="selectAllAllDept()" style="font-size:0.75rem;padding:3px 8px;border-radius:6px;border:1.5px solid var(--border);background:white;cursor:pointer;font-family:'Sarabun',sans-serif;">เลือกทั้งหมด</button>
-          <button onclick="clearAllAllDept()" style="font-size:0.75rem;padding:3px 8px;border-radius:6px;border:1.5px solid #fca5a5;background:white;color:#dc2626;cursor:pointer;font-family:'Sarabun',sans-serif;">ล้าง</button>
-        </div>
-        <div class="dept-cb-list" id="allDeptList"></div>
-      </div>
-    </div>
     <div style="overflow-x:auto;">
       <table class="ci-tbl">
         <thead>
@@ -269,16 +253,6 @@
         style="flex:1;border:1.5px solid var(--border);border-radius:10px;padding:8px 12px;font-family:Sarabun,sans-serif;font-size:0.88rem;outline:none;transition:border-color .2s;"
         onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='var(--border)'">
       <button class="sec-btn green" onclick="exportCheckinExcel()" style="white-space:nowrap;">⬇ Excel</button>
-    </div>
-    <div style="margin-bottom:8px;">
-      <button id="ciDeptBtn" class="dept-filter-btn" onclick="toggleCIDeptPanel()">🏢 กรองหน่วยงาน<span id="ciDeptBadge" style="color:#dc2626;font-weight:700;"></span></button>
-      <div id="ciDeptPanel" class="dept-panel" style="display:none;">
-        <div style="display:flex;gap:6px;margin-bottom:4px;">
-          <button onclick="selectAllCIDept()" style="font-size:0.75rem;padding:3px 8px;border-radius:6px;border:1.5px solid var(--border);background:white;cursor:pointer;font-family:'Sarabun',sans-serif;">เลือกทั้งหมด</button>
-          <button onclick="clearCIDept()" style="font-size:0.75rem;padding:3px 8px;border-radius:6px;border:1.5px solid #fca5a5;background:white;color:#dc2626;cursor:pointer;font-family:'Sarabun',sans-serif;">ล้าง</button>
-        </div>
-        <div class="dept-cb-list" id="ciDeptList"></div>
-      </div>
     </div>
     <!-- Table -->
     <div style="overflow-x:auto;">
@@ -319,16 +293,6 @@
         style="flex:1;border:1.5px solid var(--border);border-radius:10px;padding:8px 12px;font-family:Sarabun,sans-serif;font-size:0.88rem;outline:none;transition:border-color .2s;"
         onfocus="this.style.borderColor='#ea580c'" onblur="this.style.borderColor='var(--border)'">
       <button class="sec-btn" onclick="exportWIExcel()" style="white-space:nowrap;background:#ea580c;">⬇ Excel</button>
-    </div>
-    <div style="margin-bottom:8px;">
-      <button id="wiDeptBtn" class="dept-filter-btn" onclick="toggleWIDeptPanel()">🏢 กรองหน่วยงาน<span id="wiDeptBadge" style="color:#dc2626;font-weight:700;"></span></button>
-      <div id="wiDeptPanel" class="dept-panel" style="display:none;">
-        <div style="display:flex;gap:6px;margin-bottom:4px;">
-          <button onclick="selectAllWIDept()" style="font-size:0.75rem;padding:3px 8px;border-radius:6px;border:1.5px solid var(--border);background:white;cursor:pointer;font-family:'Sarabun',sans-serif;">เลือกทั้งหมด</button>
-          <button onclick="clearWIDept()" style="font-size:0.75rem;padding:3px 8px;border-radius:6px;border:1.5px solid #fca5a5;background:white;color:#dc2626;cursor:pointer;font-family:'Sarabun',sans-serif;">ล้าง</button>
-        </div>
-        <div class="dept-cb-list" id="wiDeptList"></div>
-      </div>
     </div>
     <div style="overflow-x:auto;">
       <table class="ci-tbl">
@@ -696,11 +660,7 @@ const CI_VIP = ['สราวุฒิ บุญสุข','พิเชฐ บ�
 function ciApplyFilters() {
   if (!allCIData) return;
   const q = (document.getElementById('ciSearch').value || '').toLowerCase();
-  ciFiltered = allCIData.filter(r => {
-    if (q && !r.name.toLowerCase().includes(q) && !r.dept.toLowerCase().includes(q) && !r.province.toLowerCase().includes(q)) return false;
-    if (ciSelDepts.size > 0 && !ciSelDepts.has(r.dept)) return false;
-    return true;
-  });
+  ciFiltered = allCIData.filter(r => !q || r.name.toLowerCase().includes(q) || r.dept.toLowerCase().includes(q) || r.province.toLowerCase().includes(q));
   ciFiltered.sort((a, b) => {
     const av = CI_VIP.findIndex(n => a.name.includes(n));
     const bv = CI_VIP.findIndex(n => b.name.includes(n));
@@ -811,11 +771,7 @@ async function toggleWI() {
 function wiApplyFilters() {
   if (!allWIData) return;
   const q = (document.getElementById('wiSearch').value || '').toLowerCase();
-  wiFiltered = allWIData.filter(r => {
-    if (q && !r.name.toLowerCase().includes(q) && !r.dept.toLowerCase().includes(q) && !r.province.toLowerCase().includes(q)) return false;
-    if (wiSelDepts.size > 0 && !wiSelDepts.has(r.dept)) return false;
-    return true;
-  });
+  wiFiltered = allWIData.filter(r => !q || r.name.toLowerCase().includes(q) || r.dept.toLowerCase().includes(q) || r.province.toLowerCase().includes(q));
   document.getElementById('wiCount').textContent = `(${wiFiltered.length.toLocaleString()} คน)`;
   wiPage = 1;
   renderWITable();
@@ -868,70 +824,11 @@ function exportWIExcel() {
 }
 
 
-// ─── DEPT FILTER: CI ───
-let ciSelDepts = new Set();
-function toggleCIDeptPanel() {
-  const p = document.getElementById('ciDeptPanel');
-  const show = p.style.display === 'none';
-  p.style.display = show ? 'block' : 'none';
-  document.getElementById('ciDeptBtn').classList.toggle('active', show);
-  if (show && allCIData) buildCIDeptList();
-}
-function buildCIDeptList() {
-  const depts = [...new Set(allCIData.map(r=>r.dept).filter(d=>d&&d!=='-'))].sort((a,b)=>a.localeCompare(b,'th'));
-  document.getElementById('ciDeptList').innerHTML = depts.map(d => {
-    const chk = ciSelDepts.size === 0 || ciSelDepts.has(d);
-    return `<label class="dept-cb-item"><input type="checkbox" value="${d.replace(/"/g,'&quot;')}" ${chk?'checked':''} onchange="ciDeptChange()"> ${d}</label>`;
-  }).join('');
-}
-function ciDeptChange() {
-  const boxes = [...document.querySelectorAll('#ciDeptList input')];
-  const checked = boxes.filter(b=>b.checked).map(b=>b.value);
-  ciSelDepts = checked.length === boxes.length ? new Set() : new Set(checked);
-  document.getElementById('ciDeptBadge').textContent = ciSelDepts.size > 0 ? ` (${ciSelDepts.size})` : '';
-  ciApplyFilters();
-}
-function selectAllCIDept() { ciSelDepts.clear(); if(allCIData) buildCIDeptList(); document.getElementById('ciDeptBadge').textContent=''; ciApplyFilters(); }
-function clearCIDept() {
-  [...document.querySelectorAll('#ciDeptList input')].forEach(b=>b.checked=false);
-  ciSelDepts=new Set(); ciDeptChange();
-}
-
-// ─── DEPT FILTER: WI ───
-let wiSelDepts = new Set();
-function toggleWIDeptPanel() {
-  const p = document.getElementById('wiDeptPanel');
-  const show = p.style.display === 'none';
-  p.style.display = show ? 'block' : 'none';
-  document.getElementById('wiDeptBtn').classList.toggle('active', show);
-  if (show && allWIData) buildWIDeptList();
-}
-function buildWIDeptList() {
-  const depts = [...new Set(allWIData.map(r=>r.dept).filter(d=>d&&d!=='-'))].sort((a,b)=>a.localeCompare(b,'th'));
-  document.getElementById('wiDeptList').innerHTML = depts.map(d => {
-    const chk = wiSelDepts.size === 0 || wiSelDepts.has(d);
-    return `<label class="dept-cb-item"><input type="checkbox" value="${d.replace(/"/g,'&quot;')}" ${chk?'checked':''} onchange="wiDeptChange()"> ${d}</label>`;
-  }).join('');
-}
-function wiDeptChange() {
-  const boxes = [...document.querySelectorAll('#wiDeptList input')];
-  const checked = boxes.filter(b=>b.checked).map(b=>b.value);
-  wiSelDepts = checked.length === boxes.length ? new Set() : new Set(checked);
-  document.getElementById('wiDeptBadge').textContent = wiSelDepts.size > 0 ? ` (${wiSelDepts.size})` : '';
-  wiApplyFilters();
-}
-function selectAllWIDept() { wiSelDepts.clear(); if(allWIData) buildWIDeptList(); document.getElementById('wiDeptBadge').textContent=''; wiApplyFilters(); }
-function clearWIDept() {
-  [...document.querySelectorAll('#wiDeptList input')].forEach(b=>b.checked=false);
-  wiSelDepts=new Set(); wiDeptChange();
-}
-
 // ─── ALL PARTICIPANTS ───
 let allAllData = null;
 let allAllFiltered = [];
 let allAllPage = 1;
 const ALL_PAGE = 5;
-let allSelDepts = new Set();
 
 async function ensureAllData() {
   if (allAllData !== null) return;
@@ -959,41 +856,10 @@ async function toggleAll() {
   }
 }
 
-function toggleAllDeptPanel() {
-  const p = document.getElementById('allDeptPanel');
-  const show = p.style.display === 'none';
-  p.style.display = show ? 'block' : 'none';
-  document.getElementById('allDeptBtn').classList.toggle('active', show);
-  if (show && allAllData) buildAllDeptList();
-}
-function buildAllDeptList() {
-  const depts = [...new Set(allAllData.map(r=>r.dept).filter(d=>d&&d!=='-'))].sort((a,b)=>a.localeCompare(b,'th'));
-  document.getElementById('allDeptList').innerHTML = depts.map(d => {
-    const chk = allSelDepts.size === 0 || allSelDepts.has(d);
-    return `<label class="dept-cb-item"><input type="checkbox" value="${d.replace(/"/g,'&quot;')}" ${chk?'checked':''} onchange="allDeptChange()"> ${d}</label>`;
-  }).join('');
-}
-function allDeptChange() {
-  const boxes = [...document.querySelectorAll('#allDeptList input')];
-  const checked = boxes.filter(b=>b.checked).map(b=>b.value);
-  allSelDepts = checked.length === boxes.length ? new Set() : new Set(checked);
-  document.getElementById('allDeptBadge').textContent = allSelDepts.size > 0 ? ` (${allSelDepts.size})` : '';
-  allApplyFilters();
-}
-function selectAllAllDept() { allSelDepts.clear(); if(allAllData) buildAllDeptList(); document.getElementById('allDeptBadge').textContent=''; allApplyFilters(); }
-function clearAllAllDept() {
-  [...document.querySelectorAll('#allDeptList input')].forEach(b=>b.checked=false);
-  allSelDepts=new Set(); allDeptChange();
-}
-
 function allApplyFilters() {
   if (!allAllData) return;
   const q = (document.getElementById('allSearch').value || '').toLowerCase();
-  allAllFiltered = allAllData.filter(r => {
-    if (q && !r.name.toLowerCase().includes(q) && !r.dept.toLowerCase().includes(q) && !r.province.toLowerCase().includes(q)) return false;
-    if (allSelDepts.size > 0 && !allSelDepts.has(r.dept)) return false;
-    return true;
-  });
+  allAllFiltered = allAllData.filter(r => !q || r.name.toLowerCase().includes(q) || r.dept.toLowerCase().includes(q) || r.province.toLowerCase().includes(q));
   allAllFiltered.sort((a,b) => {
     const ad = CI_DEPT_ORDER.indexOf(a.dept), bd = CI_DEPT_ORDER.indexOf(b.dept);
     const as = ad===-1?CI_DEPT_ORDER.length:ad, bs = bd===-1?CI_DEPT_ORDER.length:bd;
