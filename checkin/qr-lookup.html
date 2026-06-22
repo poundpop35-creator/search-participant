@@ -421,8 +421,6 @@
   </div>
 </div>
 
-<div class="footer">© 2026 Built by <span style="font-family:'Dancing Script',cursive;font-weight:700;font-size:1.3em;color:#0ABAB5;">Saharat Phetrnitchakun</span> · <span style="font-weight:800;letter-spacing:0.04em;font-size:1.05em;"><span style="color:#2563eb;">D</span><span style="color:#f59e0b;">P</span><span style="color:#16a34a;">T</span><span style="color:#dc2626;">C</span></span> · DMSc</div>
-
 <script>
 function openLightbox(img){const lb=document.getElementById('lightbox');document.getElementById('lightboxImg').src=img.src;lb.style.display='flex';}
 function closeLightbox(){document.getElementById('lightbox').style.display='none';}
@@ -838,7 +836,6 @@ function exportWIExcel() {
   const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'WalkIn');
   XLSX.writeFile(wb, `walkin_dmsc_${new Date().toISOString().slice(0,10)}.xlsx`);
 }
-
 
 // ─── ALL PARTICIPANTS ───
 let allAllData = null;
@@ -1689,6 +1686,7 @@ loadWalkinDuplicates();
   };
 })();
 </script>
-<div style="text-align:center;padding:18px 0 10px;font-family:'Sarabun',sans-serif;font-size:0.75rem;color:#94a3b8;letter-spacing:0.02em;">© 2026 Built by Saharat Phetrnitchakun · DPTC · DMSc</div>
+
+<div style="text-align:center;padding:18px 0 14px;font-family:'Sarabun',sans-serif;font-size:0.78rem;color:#94a3b8;">© 2026 Built by <span style="font-family:'Dancing Script',cursive;font-weight:700;font-size:1.25em;color:#0ABAB5;letter-spacing:0.01em;">Saharat Phetrnitchakun</span> · <span style="font-weight:800;letter-spacing:0.04em;font-size:1.05em;"><span style="color:#2563eb;">D</span><span style="color:#f59e0b;">P</span><span style="color:#16a34a;">T</span><span style="color:#dc2626;">C</span></span> · DMSc</div>
 </body>
 </html>

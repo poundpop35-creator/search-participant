@@ -1196,7 +1196,6 @@ function toggleDeptCard(){
   }
 }
 
-
 function switchPTab(t){
   curPTab=t; curPPage=1;
   [0,1,2,3].forEach(i=>{const b=document.getElementById('ptab'+i);if(b)b.classList.toggle('active',i===t);});
@@ -2193,7 +2192,6 @@ document.getElementById('clearOverlay').addEventListener('click', function(e) {
   if (e.target === this) closeClearModal();
 });
 </script>
-<div style="text-align:center;padding:16px 20px;font-size:0.75rem;color:#0d2b6b;">© 2026 Built by <span style="font-family:'Dancing Script',cursive;font-weight:700;font-size:1.25em;color:#0ABAB5;letter-spacing:0.01em;">Saharat Phetrnitchakun</span> · <span style="font-weight:800;letter-spacing:0.04em;font-size:1.05em;"><span style="color:#2563eb;">D</span><span style="color:#f59e0b;">P</span><span style="color:#16a34a;">T</span><span style="color:#dc2626;">C</span></span> · DMSc</div>
 
 <!-- Floating Theme Picker -->
 <div id="themeFab" onclick="toggleThemePanel()" style="position:fixed;bottom:28px;right:24px;z-index:9000;width:52px;height:52px;border-radius:50%;background:#fff;box-shadow:0 4px 20px rgba(0,0,0,0.18);display:flex;align-items:center;justify-content:center;cursor:pointer;border:2px solid #e2e8f0;transition:transform 0.15s;" onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'">
@@ -2535,6 +2533,7 @@ document.addEventListener('click', e => {
 async function _loadPageBg(){try{const r=await fetch(SB_URL+'/rest/v1/app_settings?key=eq.page_bg&select=value',{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}});const d=await r.json();if(Array.isArray(d)&&d.length){const v=d[0].value||'';localStorage.setItem('pageBgUrl',v);document.body.style.backgroundImage=v?`linear-gradient(rgba(232,240,254,0.55),rgba(232,240,254,0.55)),url('${v}')`:''}}catch(e){}}
 _loadPageBg();setInterval(_loadPageBg,30000);
 </script>
-<div style="text-align:center;padding:18px 0 10px;font-family:'Sarabun',sans-serif;font-size:0.75rem;color:#94a3b8;letter-spacing:0.02em;">© 2026 Built by Saharat Phetrnitchakun · DPTC · DMSc</div>
+
+<div style="text-align:center;padding:18px 0 14px;font-family:'Sarabun',sans-serif;font-size:0.78rem;color:#94a3b8;">© 2026 Built by <span style="font-family:'Dancing Script',cursive;font-weight:700;font-size:1.25em;color:#0ABAB5;letter-spacing:0.01em;">Saharat Phetrnitchakun</span> · <span style="font-weight:800;letter-spacing:0.04em;font-size:1.05em;"><span style="color:#2563eb;">D</span><span style="color:#f59e0b;">P</span><span style="color:#16a34a;">T</span><span style="color:#dc2626;">C</span></span> · DMSc</div>
 </body>
 </html>
