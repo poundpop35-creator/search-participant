@@ -2535,5 +2535,6 @@ document.addEventListener('click', e => {
 async function _loadPageBg(){try{const r=await fetch(SB_URL+'/rest/v1/app_settings?key=eq.page_bg&select=value',{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}});const d=await r.json();if(Array.isArray(d)&&d.length){const v=d[0].value||'';localStorage.setItem('pageBgUrl',v);document.body.style.backgroundImage=v?`linear-gradient(rgba(232,240,254,0.55),rgba(232,240,254,0.55)),url('${v}')`:''}}catch(e){}}
 _loadPageBg();setInterval(_loadPageBg,30000);
 </script>
+<div style="text-align:center;padding:18px 0 10px;font-family:'Sarabun',sans-serif;font-size:0.75rem;color:#94a3b8;letter-spacing:0.02em;">© 2026 Built by Saharat Phetrnitchakun · DPTC · DMSc</div>
 </body>
 </html>
