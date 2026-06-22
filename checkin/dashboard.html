@@ -969,7 +969,7 @@ async function loadAll(){
       exemptPeople.forEach(p=>{
         if(checkedIds.has(p.id)) return;
         const exemptType=VIP_DEPTS.has(p.dept)?'vip':'staff';
-        allData.unshift({id:`exempt_${p.id}`,participantId:p.id,day:0,time:null,scannedBy:'admin',
+        allData.push({id:`exempt_${p.id}`,participantId:p.id,day:0,time:null,scannedBy:'admin',
           name:buildName(p),dept:p.dept||'-',isIn:true,tag:p.tag||'-',items:'',
           pt:p.participation_type||'-',isWalkin:false,
           bagReceived:false,bagDate:null,bagTime:null,
@@ -1882,7 +1882,7 @@ function renderDept(){
 
   // กรองข้อมูลตาม dept filters
   const data=allData.filter(r=>{
-    const mDay=dayF===0||r.day===dayF;
+    const mDay=dayF===0||r.day===dayF||r.isVIPExempt;
     const mPT=selDPT.size===0||selDPT.has(r.pt);
     return mDay&&mPT;
   });
@@ -1893,7 +1893,10 @@ function renderDept(){
   const _deptSet=new Set(DEPTS);
   data.forEach(r=>{
     if(r.dept&&r.dept!=='-'&&!_deptSet.has(r.dept)&&!stats[r.dept]) stats[r.dept]={1:0,2:0,3:0};
-    if(r.dept&&stats[r.dept]) stats[r.dept][r.day]++;
+    if(r.dept&&stats[r.dept]){
+      const d=r.isVIPExempt?(dayF||1):r.day;
+      stats[r.dept][d]=(stats[r.dept][d]||0)+1;
+    }
   });
   const _deptIdx=Object.fromEntries(DEPTS.map((d,i)=>[d,i]));
   const allSortedDepts=Object.keys(stats).sort((a,b)=>{
