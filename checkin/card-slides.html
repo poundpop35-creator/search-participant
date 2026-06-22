@@ -319,7 +319,7 @@ body::before{
   <h1 class="title-main">ตัวอย่างการ์ด<br>ทุกระบบ ทุกกรณี</h1>
   <p class="title-sub">คู่มืออ้างอิงสำหรับเจ้าหน้าที่ประจำจุด</p>
   <div class="title-pills">
-    <div class="title-pill tp-checkin" style="cursor:pointer;" onclick="goToSys('checkin')">📋 ระบบเช็คอิน <b>10 กรณี</b></div>
+    <div class="title-pill tp-checkin" style="cursor:pointer;" onclick="goToSys('checkin')">📋 ระบบเช็คอิน <b>11 กรณี</b></div>
     <div class="title-pill tp-bag" style="cursor:pointer;" onclick="goToSys('bag')">🎒 ระบบรับกระเป๋า+เสื้อ <b>14 กรณี</b></div>
       </div>
   <div class="title-hint">กด ← → หรือปุ่มด้านล่างเพื่อเลื่อนสไลด์</div>
@@ -355,20 +355,20 @@ body::before{
   <div class="sum-table-wrap" style="margin-top:10px;"><table class="sum-table">
     <tr><th>กรณีพิเศษ (เช็คอินเท่านั้น)</th><th>นับในระบบ?</th><th>การ์ดที่แสดง</th></tr>
     <tr><td>🎖️ VIP (อธิบดี / รองอธิบดี)</td><td class="no">❌ ไม่นับ</td><td>การ์ด VIP สีม่วง</td></tr>
+    <tr><td>🤝 เครือข่ายกรม</td><td class="yes">✅ นับ</td><td>การ์ดเครือข่าย สีฟ้า</td></tr>
     <tr><td>👥 กองแผนงาน (ลงทะเบียนล่วงหน้า)</td><td class="no">❌ ไม่นับ</td><td>การ์ด Staff สีส้ม</td></tr>
     <tr><td>👥 กองแผนงาน (Walk-in)</td><td class="yes">✅ นับ</td><td>การ์ด Staff สีส้ม</td></tr>
-    <tr><td>🤝 เครือข่ายกรม</td><td class="yes">✅ นับ</td><td>การ์ดเครือข่าย สีฟ้า</td></tr>
   </table></div>
 </div>
 </div>
 
 <!-- ════════ CHECK-IN SLIDES ════════ -->
 
-<!-- ci-1 -->
+<!-- ci-1: VIP -->
 <div class="slide" data-sys="checkin">
 <div class="card-wrap">
   <div class="info-panel">
-    <div class="case-num"><span class="sys-dot sd-checkin"></span>ระบบเช็คอิน · 1/10</div>
+    <div class="case-num"><span class="sys-dot sd-checkin"></span>ระบบเช็คอิน · 1/11</div>
     <div class="info-title">🎖️ VIP<br>(อธิบดี / รองอธิบดี)</div>
     <div class="info-desc">dept ตรงกับ VIP_DEPTS<br>ยกเว้นเสมอ ไม่นับในระบบ</div>
     <div class="info-note">ไม่บันทึก DB<br>ไม่มีปุ่มยกเลิก</div>
@@ -393,11 +393,42 @@ body::before{
 </div>
 </div>
 
-<!-- ci-2 -->
+<!-- ci-2: เครือข่ายกรม -->
 <div class="slide" data-sys="checkin">
 <div class="card-wrap">
   <div class="info-panel">
-    <div class="case-num"><span class="sys-dot sd-checkin"></span>ระบบเช็คอิน · 2/10</div>
+    <div class="case-num"><span class="sys-dot sd-checkin"></span>ระบบเช็คอิน · 2/11</div>
+    <div class="info-title">🤝 เครือข่ายกรม</div>
+    <div class="info-desc">NETWORK_DEPTS.has(dept) = true<br>→ บันทึก checkin + นับ count<br>ไม่แสดงของที่ระลึก<br>แค่เวลา + คูปองอาหาร</div>
+    <div class="info-note">✅ บันทึก DB<br>มีปุ่มยกเลิก</div>
+  </div>
+  <div class="modal-stage">
+    <div class="modal">
+      <div class="modal-header network">
+        <div class="modal-icon">🤝</div>
+        <div class="modal-status">เครือข่ายกรม</div>
+        <div class="modal-title">เช็คอินสำเร็จ</div>
+      </div>
+      <div class="modal-body">
+        <div class="modal-name">นาย ทดสอบ เครือข่าย</div>
+        <div class="modal-detail">
+          <div class="detail-row"><span class="detail-label">เวลาเช็คอิน</span><span class="detail-val">10:22:15</span></div>
+          <div class="detail-row"><span class="detail-label">🍱 คูปองอาหาร</span><span class="detail-val ok">รับได้ ✓</span></div>
+          <div class="detail-row"><span class="detail-label">หน่วยงาน</span><span class="detail-val" style="color:#0891b2;">สถาบันเครือข่ายกรม</span></div>
+        </div>
+        <div class="modal-note mn-teal">หากต้องการสิ่งใดเพิ่มเติม<br>ติดต่อ กองแผนงานและวิชาการ</div>
+      </div>
+      <div class="modal-btns"><button class="btn-cancel">ยกเลิกเช็คอิน</button><button class="btn-ok network">ตกลง</button></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ci-3: Staff ลงทะเบียนล่วงหน้า -->
+<div class="slide" data-sys="checkin">
+<div class="card-wrap">
+  <div class="info-panel">
+    <div class="case-num"><span class="sys-dot sd-checkin"></span>ระบบเช็คอิน · 3/11</div>
     <div class="info-title">👥 กองแผนงาน<br>(ลงทะเบียนล่วงหน้า)</div>
     <div class="info-desc">is_walkin = false<br>dept = กองแผนงานฯ<br>→ ขึ้นการ์ด Staff <b>แต่ไม่นับ</b></div>
     <div class="info-note">ไม่บันทึก DB<br>ไม่มีปุ่มยกเลิก</div>
@@ -423,11 +454,11 @@ body::before{
 </div>
 </div>
 
-<!-- ci-3 -->
+<!-- ci-4: Staff Walk-in -->
 <div class="slide" data-sys="checkin">
 <div class="card-wrap">
   <div class="info-panel">
-    <div class="case-num"><span class="sys-dot sd-checkin"></span>ระบบเช็คอิน · 3/10</div>
+    <div class="case-num"><span class="sys-dot sd-checkin"></span>ระบบเช็คอิน · 4/11</div>
     <div class="info-title">👥 กองแผนงาน Walk-in<br>(การ์ดเหมือนกัน — แต่นับ)</div>
     <div class="info-desc">is_walkin = true<br>dept = กองแผนงานฯ<br>→ บันทึก checkin + นับ count</div>
     <div class="info-note">✅ บันทึก DB แล้ว<br>count เพิ่มขึ้น 1<br>ไม่มีปุ่มยกเลิก</div>
@@ -454,11 +485,11 @@ body::before{
 </div>
 </div>
 
-<!-- ci-4 -->
+<!-- ci-5: ไม่พบ -->
 <div class="slide" data-sys="checkin">
 <div class="card-wrap">
   <div class="info-panel">
-    <div class="case-num"><span class="sys-dot sd-checkin"></span>ระบบเช็คอิน · 4/10</div>
+    <div class="case-num"><span class="sys-dot sd-checkin"></span>ระบบเช็คอิน · 5/11</div>
     <div class="info-title">❌ ไม่พบในระบบ</div>
     <div class="info-desc">ค้นหาด้วย id_card / passport ไม่พบใน participants เลย</div>
     <div class="info-note">ไม่มีปุ่มยกเลิก</div>
@@ -477,11 +508,11 @@ body::before{
 </div>
 </div>
 
-<!-- ci-5 -->
+<!-- ci-6: Walk-in ปกติ -->
 <div class="slide" data-sys="checkin">
 <div class="card-wrap">
   <div class="info-panel">
-    <div class="case-num"><span class="sys-dot sd-checkin"></span>ระบบเช็คอิน · 5/10</div>
+    <div class="case-num"><span class="sys-dot sd-checkin"></span>ระบบเช็คอิน · 6/11</div>
     <div class="info-title">✅ เช็คอินสำเร็จ<br>Walk-in</div>
     <div class="info-desc">is_walkin = true<br>→ ไม่แสดงของที่ระลึก แค่ประเภท: Walk-in</div>
     <div class="info-note">✅ มีปุ่มยกเลิก</div>
@@ -508,11 +539,45 @@ body::before{
 </div>
 </div>
 
-<!-- ci-6 -->
+<!-- ci-7: ครบ 3 อย่าง ยังไม่รับเลย [NEW] -->
 <div class="slide" data-sys="checkin">
 <div class="card-wrap">
   <div class="info-panel">
-    <div class="case-num"><span class="sys-dot sd-checkin"></span>ระบบเช็คอิน · 6/10</div>
+    <div class="case-num"><span class="sys-dot sd-checkin"></span>ระบบเช็คอิน · 7/11</div>
+    <div class="info-title">✅ เช็คอินสำเร็จ<br>กระเป๋า+บทคัดย่อ+เสื้อ ยังไม่รับเลย</div>
+    <div class="info-desc">bag_received = false<br>shirt_received = false<br>→ ทุกรายการขึ้น "รับได้ ✓" สีเขียว</div>
+    <div class="info-note">คูปองสีเขียว<br>✅ มีปุ่มยกเลิก</div>
+  </div>
+  <div class="modal-stage">
+    <div class="modal">
+      <div class="modal-header success">
+      <div class="modal-icon">✅</div>
+      <div class="modal-status">เช็คอินสำเร็จ</div>
+      <div class="modal-title">วันที่ 1 — วันที่หนึ่ง</div>
+    </div>
+<div class="modal-body">
+      <div class="modal-name">นาย ทดสอบ กองแผน</div>
+      <div class="modal-dept">กองชีวเคมีคลินิก</div>
+      <div class="modal-detail">
+        <div class="detail-row"><span class="detail-label">เวลา</span><span class="detail-val">08:10:07</span></div>
+        <div class="detail-row"><span class="detail-label">คูปองอาหาร</span><span class="detail-val ok">รับได้ ✓</span></div>
+        <div class="detail-row"><span class="detail-label">ของที่ระลึก (1) <span style="color:#16a34a;font-weight:700">คูปองกระเป๋า (สีเขียว)</span></span><span class="detail-val ok">รับได้ ✓</span></div>
+        <div class="detail-row"><span class="detail-label">ของที่ระลึก (2) <span style="color:#2563eb;font-weight:700">บทคัดย่อ</span> <span style="color:#94a3b8;font-size:0.72em;font-weight:400;">(อยู่ในกระเป๋า)</span></span><span class="detail-val ok">รับได้ ✓</span></div>
+        <div class="detail-row"><span class="detail-label">ของที่ระลึก (3) <span style="color:#0891b2;font-weight:700">เสื้อแจ็คเก็ต (L)</span></span><span class="detail-val ok">รับได้ ✓</span></div>
+        <div class="detail-row"><span class="detail-label">ประเภท</span><span class="detail-val">participant</span></div>
+      </div>
+    </div>
+          <div class="modal-btns"><button class="btn-cancel">ยกเลิก</button><button class="btn-ok success">ตกลง</button></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ci-8: กระเป๋าอย่างเดียว ยังไม่รับ -->
+<div class="slide" data-sys="checkin">
+<div class="card-wrap">
+  <div class="info-panel">
+    <div class="case-num"><span class="sys-dot sd-checkin"></span>ระบบเช็คอิน · 8/11</div>
     <div class="info-title">✅ เช็คอินสำเร็จ<br>กระเป๋าอย่างเดียว ยังไม่รับ</div>
     <div class="info-desc">items = "กระเป๋า"<br>bag_received = false<br>→ คูปองกระเป๋า <b style="color:#bbf7d0">สีเขียว</b> "รับได้"</div>
     <div class="info-note">✅ มีปุ่มยกเลิก</div>
@@ -540,11 +605,11 @@ body::before{
 </div>
 </div>
 
-<!-- ci-7 -->
+<!-- ci-9: ครบ 3 อย่าง รับแล้วทั้งหมด -->
 <div class="slide" data-sys="checkin">
 <div class="card-wrap">
   <div class="info-panel">
-    <div class="case-num"><span class="sys-dot sd-checkin"></span>ระบบเช็คอิน · 7/10</div>
+    <div class="case-num"><span class="sys-dot sd-checkin"></span>ระบบเช็คอิน · 9/11</div>
     <div class="info-title">✅ เช็คอินสำเร็จ<br>กระเป๋า+บทคัดย่อ+เสื้อ รับแล้วทั้งหมด</div>
     <div class="info-desc">bag_received = true<br>shirt_received = true<br>→ ทุกอย่าง "รับไปแล้ว"</div>
     <div class="info-note">คูปองสีส้ม<br>✅ มีปุ่มยกเลิก</div>
@@ -574,11 +639,11 @@ body::before{
 </div>
 </div>
 
-<!-- ci-8 -->
+<!-- ci-10: ซ้ำ Walk-in -->
 <div class="slide" data-sys="checkin">
 <div class="card-wrap">
   <div class="info-panel">
-    <div class="case-num"><span class="sys-dot sd-checkin"></span>ระบบเช็คอิน · 8/10</div>
+    <div class="case-num"><span class="sys-dot sd-checkin"></span>ระบบเช็คอิน · 10/11</div>
     <div class="info-title">⚠️ เช็คอินซ้ำ<br>Walk-in</div>
     <div class="info-desc">checkin วันนี้มีอยู่ใน DB แล้ว<br>is_walkin = true</div>
     <div class="info-note">ไม่มีปุ่มยกเลิก</div>
@@ -605,11 +670,11 @@ body::before{
 </div>
 </div>
 
-<!-- ci-9 -->
+<!-- ci-11: ซ้ำ ครบ 3 อย่าง -->
 <div class="slide" data-sys="checkin">
 <div class="card-wrap">
   <div class="info-panel">
-    <div class="case-num"><span class="sys-dot sd-checkin"></span>ระบบเช็คอิน · 9/10</div>
+    <div class="case-num"><span class="sys-dot sd-checkin"></span>ระบบเช็คอิน · 11/11</div>
     <div class="info-title">⚠️ เช็คอินซ้ำ<br>กระเป๋า+บทคัดย่อ+เสื้อ</div>
     <div class="info-desc">บุคลากรภายในที่มีของครบ 3 อย่าง เช็คอินซ้ำในวันเดิม</div>
     <div class="info-note">แสดงสถานะปัจจุบัน<br>ไม่มีปุ่มยกเลิก</div>
@@ -634,37 +699,6 @@ body::before{
       </div>
     </div>
           <div class="modal-btns"><button class="btn-ok warning">ตกลง</button></div>
-    </div>
-  </div>
-</div>
-</div>
-
-<!-- ci-10 -->
-<div class="slide" data-sys="checkin">
-<div class="card-wrap">
-  <div class="info-panel">
-    <div class="case-num"><span class="sys-dot sd-checkin"></span>ระบบเช็คอิน · 10/10</div>
-    <div class="info-title">🤝 เครือข่ายกรม</div>
-    <div class="info-desc">NETWORK_DEPTS.has(dept) = true<br>→ บันทึก checkin + นับ count<br>ไม่แสดงของที่ระลึก<br>แค่เวลา + คูปองอาหาร</div>
-    <div class="info-note">✅ บันทึก DB<br>มีปุ่มยกเลิก</div>
-  </div>
-  <div class="modal-stage">
-    <div class="modal">
-      <div class="modal-header network">
-        <div class="modal-icon">🤝</div>
-        <div class="modal-status">เครือข่ายกรม</div>
-        <div class="modal-title">เช็คอินสำเร็จ</div>
-      </div>
-      <div class="modal-body">
-        <div class="modal-name">นาย ทดสอบ เครือข่าย</div>
-        <div class="modal-detail">
-          <div class="detail-row"><span class="detail-label">เวลาเช็คอิน</span><span class="detail-val">10:22:15</span></div>
-          <div class="detail-row"><span class="detail-label">🍱 คูปองอาหาร</span><span class="detail-val ok">รับได้ ✓</span></div>
-          <div class="detail-row"><span class="detail-label">หน่วยงาน</span><span class="detail-val" style="color:#0891b2;">สถาบันเครือข่ายกรม</span></div>
-        </div>
-        <div class="modal-note mn-teal">หากต้องการสิ่งใดเพิ่มเติม<br>ติดต่อ กองแผนงานและวิชาการ</div>
-      </div>
-      <div class="modal-btns"><button class="btn-cancel">ยกเลิกเช็คอิน</button><button class="btn-ok network">ตกลง</button></div>
     </div>
   </div>
 </div>
