@@ -250,18 +250,27 @@
 
     <!-- External zone table card -->
     <div class="dept-card" id="extZoneNewCard" style="margin-bottom:16px;">
-      <div class="dept-card-header" style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;">
-        <div>
-          <div class="dept-card-title">บุคลากรภายนอกกรม แยกตามเขตสุขภาพ</div>
-          <div class="dept-card-sub" id="extZoneCardSub">ข้อมูลจากการเช็คอินจริง — อัปเดตอัตโนมัติทุก 1 นาที</div>
+      <div class="dept-card-header" style="display:flex;flex-direction:column;gap:8px;">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+          <div>
+            <div class="dept-card-title">บุคลากรภายนอกกรม แยกตามเขตสุขภาพ</div>
+            <div class="dept-card-sub" id="extZoneCardSub">ข้อมูลจากการเช็คอินจริง — อัปเดตอัตโนมัติทุก 1 นาที</div>
+          </div>
+          <div style="display:flex;gap:6px;flex-shrink:0;">
+            <button class="share-btn" id="shareExtZoneImgBtn" onclick="shareExtZoneImage()" style="margin-top:0;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              📤 แชร์รูป
+            </button>
+            <button class="share-btn" id="shareExtZoneTextBtn" onclick="shareExtZoneText()" style="margin-top:0;">📋 ข้อความ</button>
+          </div>
         </div>
-        <div style="display:flex;gap:6px;flex-shrink:0;">
-          <button class="share-btn" id="shareExtZoneImgBtn" onclick="shareExtZoneImage()" style="margin-top:0;">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            📤 แชร์รูป
-          </button>
-          <button class="share-btn" id="shareExtZoneTextBtn" onclick="shareExtZoneText()" style="margin-top:0;">📋 ข้อความ</button>
+        <div style="display:flex;gap:4px;">
+          <button id="ezfAll" onclick="setExecDay(null)" style="padding:5px 10px;border-radius:8px;border:1.5px solid #1F3540;background:#1F3540;color:#fff;font-family:'Sarabun',sans-serif;font-size:0.75rem;font-weight:700;cursor:pointer;">รวม</button>
+          <button id="ezfD1" onclick="setExecDay(1)" style="padding:5px 10px;border-radius:8px;border:1.5px solid #C8DDE8;background:#fff;color:#2563eb;font-family:'Sarabun',sans-serif;font-size:0.75rem;font-weight:600;cursor:pointer;">24 มิ.ย.</button>
+          <button id="ezfD2" onclick="setExecDay(2)" style="padding:5px 10px;border-radius:8px;border:1.5px solid #C8DDE8;background:#fff;color:#7c3aed;font-family:'Sarabun',sans-serif;font-size:0.75rem;font-weight:600;cursor:pointer;">25 มิ.ย.</button>
+          <button id="ezfD3" onclick="setExecDay(3)" style="padding:5px 10px;border-radius:8px;border:1.5px solid #C8DDE8;background:#fff;color:#0891b2;font-family:'Sarabun',sans-serif;font-size:0.75rem;font-weight:600;cursor:pointer;">26 มิ.ย.</button>
         </div>
+      </div>
       </div>
       <div class="scroll-wrap">
         <table>
@@ -535,13 +544,14 @@ function setExecDay(day) {
       (i === 0 && execDay === null) || (i > 0 && execDay === i));
   });
   const dfColors = ['#1F3540','#2563eb','#7c3aed','#0891b2'];
-  ['dfAll','dfD1','dfD2','dfD3'].forEach((id, i) => {
+  ['dfAll','dfD1','dfD2','dfD3','ezfAll','ezfD1','ezfD2','ezfD3'].forEach((id, i) => {
     const btn = document.getElementById(id);
     if(!btn) return;
-    const isActive = (i===0 && execDay===null) || (i>0 && execDay===i);
-    btn.style.background = isActive ? dfColors[i] : '#fff';
-    btn.style.color = isActive ? '#fff' : dfColors[i];
-    btn.style.borderColor = isActive ? dfColors[i] : '#C8DDE8';
+    const ci = i % 4;
+    const isActive = (ci===0 && execDay===null) || (ci>0 && execDay===ci);
+    btn.style.background = isActive ? dfColors[ci] : '#fff';
+    btn.style.color = isActive ? '#fff' : dfColors[ci];
+    btn.style.borderColor = isActive ? dfColors[ci] : '#C8DDE8';
   });
   renderExecTable();
 }
