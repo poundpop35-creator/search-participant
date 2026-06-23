@@ -522,9 +522,9 @@ function renderExecTable() {
   document.getElementById('execTableHead').innerHTML = `<tr>
     <th style="width:30px;">#</th>
     <th>หน่วยงาน</th>
-    <th class="num" style="color:${dc};min-width:64px;">${dl}</th>
-    <th class="num" style="color:#94a3b8;min-width:64px;">เป้าหมาย</th>
-    <th class="num" style="min-width:52px;">%</th>
+    <th class="num" style="color:#1F3540;min-width:64px;">เป้าหมาย</th>
+    <th class="num" style="color:#1F3540;min-width:64px;">${dl}</th>
+    <th class="num" style="color:#1F3540;min-width:52px;">%</th>
   </tr>`;
   let idx = 0, grandTotal = 0, grandTarget = 0;
   const rows = DEPTS.map(dept => {
@@ -535,29 +535,29 @@ function renderExecTable() {
     return `<tr>
       <td style="font-weight:700;color:#94a3b8;font-size:0.8rem;">${idx}</td>
       <td class="dept-name-cell">${dept}</td>
-      <td class="total-cell" style="color:${dc};">${count>0?count.toLocaleString():'<span class="zero">—</span>'}</td>
       <td class="total-cell" style="color:#94a3b8;">${target>0?target.toLocaleString():'<span class="zero">—</span>'}</td>
+      <td class="total-cell" style="color:${dc};">${count>0?count.toLocaleString():'<span class="zero">—</span>'}</td>
       <td class="total-cell">${fmtPct(count,target)}</td>
     </tr>`;
   });
   rows.push(`<tr style="background:#dcfce7;border-top:2px solid #86efac;">
     <td colspan="2" style="padding:11px 14px;font-weight:800;font-size:0.88rem;color:#15803d;">รวมบุคลากรภายใน</td>
-    <td style="text-align:right;padding:11px 14px;font-weight:800;font-size:1.1rem;color:#15803d;">${grandTotal.toLocaleString()}</td>
     <td style="text-align:right;padding:11px 14px;font-weight:700;font-size:0.95rem;color:#4ade80;">${grandTarget>0?grandTarget.toLocaleString():'—'}</td>
+    <td style="text-align:right;padding:11px 14px;font-weight:800;font-size:1.1rem;color:#15803d;">${grandTotal.toLocaleString()}</td>
     <td style="text-align:right;padding:11px 14px;font-weight:800;font-size:1rem;color:#15803d;">${grandTarget>0?Math.round(grandTotal/grandTarget*100)+'%':'—'}</td>
   </tr>`);
   const extCount = dk ? (execExternal[dk]||0) : execExternal.d1+execExternal.d2+execExternal.d3;
   rows.push(`<tr style="background:#dbeafe;border-top:2px solid #93c5fd;">
     <td colspan="2" style="padding:11px 14px;font-weight:800;font-size:0.88rem;color:#1d4ed8;">บุคคลภายนอกกรม</td>
-    <td style="text-align:right;padding:11px 14px;font-weight:800;font-size:1.1rem;color:#1d4ed8;">${extCount.toLocaleString()}</td>
     <td style="text-align:right;padding:11px 14px;color:#93c5fd;">—</td>
+    <td style="text-align:right;padding:11px 14px;font-weight:800;font-size:1.1rem;color:#1d4ed8;">${extCount.toLocaleString()}</td>
     <td style="text-align:right;padding:11px 14px;color:#93c5fd;">—</td>
   </tr>`);
   const grandAllTotal = grandTotal + extCount;
   rows.push(`<tr style="background:#f1f5f9;border-top:2px solid #cbd5e1;">
     <td colspan="2" style="padding:11px 14px;font-weight:800;font-size:0.88rem;color:#1F3540;">รวมทั้งหมด</td>
-    <td style="text-align:right;padding:11px 14px;font-weight:800;font-size:1.25rem;color:#1F3540;">${grandAllTotal.toLocaleString()}</td>
     <td style="text-align:right;padding:11px 14px;color:#94a3b8;">—</td>
+    <td style="text-align:right;padding:11px 14px;font-weight:800;font-size:1.25rem;color:#1F3540;">${grandAllTotal.toLocaleString()}</td>
     <td style="text-align:right;padding:11px 14px;color:#94a3b8;">—</td>
   </tr>`);
   document.getElementById('execDeptBody').innerHTML = rows.join('');
@@ -1287,22 +1287,22 @@ async function shareDeptTable() {
       const bg = idx % 2 === 0 ? '#eef5fa' : '#ffffff';
       const pctHtml = target ? `${Math.round(count/target*100)}%` : '—';
       const pctColor = !target ? '#94a3b8' : (count/target>=1?'#16a34a':count/target>=0.8?'#65a30d':count/target>=0.5?'#d97706':'#dc2626');
-      return `<tr><td style="padding:8px 10px;font-size:11px;background:${bg};color:#7a9aae;font-weight:700;">${idx}</td><td style="padding:8px 10px;font-size:12px;background:${bg};color:#1F3540;font-weight:600;">${dept}</td><td style="padding:8px 10px;font-size:12px;background:${bg};text-align:right;font-weight:700;color:${dc};">${count>0?count.toLocaleString():'—'}</td><td style="padding:8px 10px;font-size:12px;background:${bg};text-align:right;color:#94a3b8;">${target>0?target.toLocaleString():'—'}</td><td style="padding:8px 10px;font-size:12px;background:${bg};text-align:right;font-weight:700;color:${pctColor};">${pctHtml}</td></tr>`;
+      return `<tr><td style="padding:8px 10px;font-size:11px;background:${bg};color:#7a9aae;font-weight:700;">${idx}</td><td style="padding:8px 10px;font-size:12px;background:${bg};color:#1F3540;font-weight:600;">${dept}</td><td style="padding:8px 10px;font-size:12px;background:${bg};text-align:right;color:#94a3b8;">${target>0?target.toLocaleString():'—'}</td><td style="padding:8px 10px;font-size:12px;background:${bg};text-align:right;font-weight:700;color:${dc};">${count>0?count.toLocaleString():'—'}</td><td style="padding:8px 10px;font-size:12px;background:${bg};text-align:right;font-weight:700;color:${pctColor};">${pctHtml}</td></tr>`;
     });
     const extCount = dk ? (execExternal[dk]||0) : execExternal.d1+execExternal.d2+execExternal.d3;
     const grandAll = grandInt + extCount;
     const grandPct = grandTgt ? Math.round(grandInt/grandTgt*100)+'%' : '—';
-    deptRows.push(`<tr style="background:#dcfce7;border-top:2px solid #86efac;"><td colspan="2" style="padding:10px 12px;font-size:13px;font-weight:800;color:#15803d;">รวมบุคลากรภายใน</td><td style="padding:10px 12px;font-size:13px;font-weight:800;color:#15803d;text-align:right;">${grandInt.toLocaleString()}</td><td style="padding:10px 12px;font-size:12px;font-weight:700;color:#4ade80;text-align:right;">${grandTgt>0?grandTgt.toLocaleString():'—'}</td><td style="padding:10px 12px;font-size:13px;font-weight:800;color:#15803d;text-align:right;">${grandPct}</td></tr>`);
-    deptRows.push(`<tr style="background:#dbeafe;border-top:2px solid #93c5fd;"><td colspan="2" style="padding:10px 12px;font-size:13px;font-weight:800;color:#1d4ed8;">บุคคลภายนอกกรม</td><td style="padding:10px 12px;font-size:13px;font-weight:800;color:#1d4ed8;text-align:right;">${extCount.toLocaleString()}</td><td style="padding:10px 12px;color:#93c5fd;text-align:right;">—</td><td style="padding:10px 12px;color:#93c5fd;text-align:right;">—</td></tr>`);
-    deptRows.push(`<tr style="background:#f1f5f9;border-top:2px solid #cbd5e1;"><td colspan="2" style="padding:10px 12px;font-size:13px;font-weight:800;color:#1F3540;">รวมทั้งหมด</td><td style="padding:10px 12px;font-size:14px;font-weight:800;color:#1F3540;text-align:right;">${grandAll.toLocaleString()}</td><td style="padding:10px 12px;color:#94a3b8;text-align:right;">—</td><td style="padding:10px 12px;color:#94a3b8;text-align:right;">—</td></tr>`);
+    deptRows.push(`<tr style="background:#dcfce7;border-top:2px solid #86efac;"><td colspan="2" style="padding:10px 12px;font-size:13px;font-weight:800;color:#15803d;">รวมบุคลากรภายใน</td><td style="padding:10px 12px;font-size:12px;font-weight:700;color:#4ade80;text-align:right;">${grandTgt>0?grandTgt.toLocaleString():'—'}</td><td style="padding:10px 12px;font-size:13px;font-weight:800;color:#15803d;text-align:right;">${grandInt.toLocaleString()}</td><td style="padding:10px 12px;font-size:13px;font-weight:800;color:#15803d;text-align:right;">${grandPct}</td></tr>`);
+    deptRows.push(`<tr style="background:#dbeafe;border-top:2px solid #93c5fd;"><td colspan="2" style="padding:10px 12px;font-size:13px;font-weight:800;color:#1d4ed8;">บุคคลภายนอกกรม</td><td style="padding:10px 12px;color:#93c5fd;text-align:right;">—</td><td style="padding:10px 12px;font-size:13px;font-weight:800;color:#1d4ed8;text-align:right;">${extCount.toLocaleString()}</td><td style="padding:10px 12px;color:#93c5fd;text-align:right;">—</td></tr>`);
+    deptRows.push(`<tr style="background:#f1f5f9;border-top:2px solid #cbd5e1;"><td colspan="2" style="padding:10px 12px;font-size:13px;font-weight:800;color:#1F3540;">รวมทั้งหมด</td><td style="padding:10px 12px;color:#94a3b8;text-align:right;">—</td><td style="padding:10px 12px;font-size:14px;font-weight:800;color:#1F3540;text-align:right;">${grandAll.toLocaleString()}</td><td style="padding:10px 12px;color:#94a3b8;text-align:right;">—</td></tr>`);
 
     document.getElementById('a4TableSlot').innerHTML = `
       <table style="width:100%;border-collapse:collapse;font-family:'Sarabun',sans-serif;">
         <thead><tr>
           <th style="background:#1F3540;padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:#fff;border:none;width:32px;">#</th>
           <th style="background:#1F3540;padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:#fff;border:none;">หน่วยงาน</th>
-          <th style="background:#1F3540;padding:10px 12px;text-align:right;font-size:11px;font-weight:700;color:#e2e8f0;border:none;min-width:70px;">${dl}</th>
           <th style="background:#1F3540;padding:10px 12px;text-align:right;font-size:11px;font-weight:700;color:#94a3b8;border:none;min-width:70px;">เป้าหมาย</th>
+          <th style="background:#1F3540;padding:10px 12px;text-align:right;font-size:11px;font-weight:700;color:#e2e8f0;border:none;min-width:70px;">${dl}</th>
           <th style="background:#1F3540;padding:10px 12px;text-align:right;font-size:11px;font-weight:700;color:#e2e8f0;border:none;min-width:48px;">%</th>
         </tr></thead>
         <tbody>${deptRows.join('')}</tbody>
