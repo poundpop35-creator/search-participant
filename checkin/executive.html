@@ -51,8 +51,8 @@
     .s-d2 .stat-num{color:#1F3540;}
     .s-d3 .stat-num{color:#1F3540;}
 
-    .dept-card{background:var(--white);border-radius:18px;box-shadow:var(--shadow);overflow:hidden;margin-bottom:24px;border:1px solid #C8DDE8;}
-    .dept-card-header{padding:18px 24px;border-bottom:1px solid #C8DDE8;}
+    .dept-card{background:var(--white);border-radius:18px;box-shadow:0 4px 16px rgba(31,53,64,0.12);overflow:hidden;margin-bottom:28px;border:1px solid #C8DDE8;}
+    .dept-card-header{padding:18px 24px;padding-left:20px;border-bottom:1px solid #C8DDE8;}
     .dept-card-title{font-size:1rem;font-weight:700;color:#1F3540;}
     .dept-card-sub{font-size:0.8rem;color:#7a9aae;margin-top:2px;}
     .share-btn{display:inline-flex;align-items:center;gap:6px;font-size:0.8rem;font-weight:600;color:#1F3540;background:#e8f4f8;border:1.5px solid #C8DDE8;border-radius:10px;padding:7px 16px;cursor:pointer;white-space:nowrap;transition:background 0.15s;margin-top:12px;}
@@ -131,7 +131,7 @@
     </div>
 
     <!-- ── SUMMARY CARD ── -->
-    <div class="dept-card" style="margin-bottom:16px;">
+    <div class="dept-card" style="margin-bottom:16px;display:none;">
       <div class="dept-card-header" style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
         <div>
           <div class="dept-card-title">สรุปผู้เข้าร่วมงาน (เช็คอินแล้ว)</div>
@@ -184,7 +184,7 @@
     </div>
 
     <!-- ── ZONE MAP CARD ── -->
-    <div class="dept-card" id="execZoneCard" style="margin-bottom:16px;">
+    <div class="dept-card" id="execZoneCard" style="margin-bottom:16px;display:none;">
       <div class="dept-card-header" style="display:flex;flex-direction:column;gap:10px;">
         <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;">
           <div>
@@ -249,8 +249,8 @@
     </div>
 
     <!-- External zone table card -->
-    <div class="dept-card" id="extZoneNewCard" style="margin-bottom:16px;">
-      <div class="dept-card-header" style="display:flex;flex-direction:column;gap:8px;">
+    <div class="dept-card" id="extZoneNewCard">
+      <div class="dept-card-header" style="display:flex;flex-direction:column;gap:8px;border-left:4px solid #1d4ed8;">
         <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;">
           <div>
             <div class="dept-card-title">บุคลากรภายนอกกรม แยกตามเขตสุขภาพ</div>
@@ -287,7 +287,7 @@
     </div>
 
     <div class="dept-card" id="deptShareCard">
-      <div class="dept-card-header" style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+      <div class="dept-card-header" style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;border-left:4px solid #15803d;">
         <div>
           <div class="dept-card-title" id="execCardTitle">จำนวนผู้เข้าร่วมงานแยกตามหน่วยงานภายใน (กรมวิทยาศาสตร์การแพทย์)</div>
           <div class="dept-card-sub">ข้อมูลจากการเช็คอินจริง — อัปเดตอัตโนมัติทุก 1 นาที</div>
@@ -374,7 +374,7 @@
 
     <!-- Hourly trend chart -->
     <div class="dept-card">
-      <div class="dept-card-header">
+      <div class="dept-card-header" style="border-left:4px solid #7c3aed;">
         <div class="dept-card-title">แนวโน้มผู้เข้าร่วมงาน (รายชั่วโมง)</div>
         <div class="dept-card-sub" id="execTrendSub">จำนวนผู้เข้าร่วมงานในแต่ละชั่วโมง — ทุกวัน</div>
       </div>
