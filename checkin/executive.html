@@ -137,10 +137,18 @@
           <div class="dept-card-title">สรุปผู้เข้าร่วมงาน (เช็คอินแล้ว)</div>
           <div class="dept-card-sub">รวม pre-reg + walk-in — อัปเดตอัตโนมัติทุก 1 นาที</div>
         </div>
-        <button class="share-btn" onclick="shareSummary()" id="shareSummaryBtn" style="margin-top:0;">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          📤 แชร์รูป
-        </button>
+        <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;">
+          <button class="share-btn" onclick="shareSummary()" id="shareSummaryBtn" style="margin-top:0;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            📤 แชร์รูป
+          </button>
+          <div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;">
+            <button onclick="shareTextSummary(1)" style="padding:5px 10px;border-radius:8px;border:1.5px solid #C8DDE8;background:#f0f9ff;font-family:'Sarabun',sans-serif;font-size:0.75rem;font-weight:600;color:#1F3540;cursor:pointer;">📋 24 มิ.ย.</button>
+            <button onclick="shareTextSummary(2)" style="padding:5px 10px;border-radius:8px;border:1.5px solid #C8DDE8;background:#f0f9ff;font-family:'Sarabun',sans-serif;font-size:0.75rem;font-weight:600;color:#1F3540;cursor:pointer;">📋 25 มิ.ย.</button>
+            <button onclick="shareTextSummary(3)" style="padding:5px 10px;border-radius:8px;border:1.5px solid #C8DDE8;background:#f0f9ff;font-family:'Sarabun',sans-serif;font-size:0.75rem;font-weight:600;color:#1F3540;cursor:pointer;">📋 26 มิ.ย.</button>
+            <button onclick="shareTextSummary(null)" style="padding:5px 10px;border-radius:8px;border:1.5px solid #C8DDE8;background:#f0f9ff;font-family:'Sarabun',sans-serif;font-size:0.75rem;font-weight:600;color:#1F3540;cursor:pointer;">📋 รวม</button>
+          </div>
+        </div>
       </div>
       <div style="padding:16px 16px 8px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
         <div style="text-align:center;padding:18px 8px;background:linear-gradient(135deg,#f0f9ff,#e0f2fe);border-radius:14px;border:2px solid #7dd3fc;">
@@ -275,6 +283,32 @@
       </div>
     </div>
 
+    <!-- External dept table -->
+    <div class="dept-card" id="extShareCard">
+      <div class="dept-card-header" style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+        <div>
+          <div class="dept-card-title" id="extCardTitle">จำนวนผู้เข้าร่วมงานแยกตามหน่วยงานภายนอก</div>
+          <div class="dept-card-sub">ข้อมูลจากการเช็คอินจริง — อัปเดตอัตโนมัติทุก 1 นาที</div>
+        </div>
+        <button class="share-btn" onclick="shareExtTable()" id="shareExtBtn" style="margin-top:0;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          📤 แชร์รูป
+        </button>
+      </div>
+      <div class="scroll-wrap">
+        <table>
+          <thead id="extTableHead">
+            <tr>
+              <th style="width:36px;">#</th>
+              <th>หน่วยงาน</th>
+              <th class="num" style="color:#15803d;min-width:80px;">รวม (ทุกวัน)</th>
+            </tr>
+          </thead>
+          <tbody id="extDeptBody"></tbody>
+        </table>
+      </div>
+    </div>
+
     <!-- Hourly trend chart -->
     <div class="dept-card">
       <div class="dept-card-header">
@@ -373,6 +407,7 @@ function num(v) {
 let execDay = null;
 let execMap = {};
 let execExternal = {d1:0,d2:0,d3:0};
+let execExtMap = {};
 let execView = 'table';
 let barChartInst = null, trendChartInst = null;
 let execRows = [];
@@ -397,51 +432,68 @@ function setExecDay(day) {
 }
 
 function renderExecTable() {
-  if(execDay === null) {
-    const maxTot = Math.max(1, ...DEPTS.map(d => { const c=execMap[d]; return c.d1+c.d2+c.d3; }));
-    document.getElementById('execTableHead').innerHTML = `<tr>
-      <th style="width:36px;">#</th>
-      <th>หน่วยงาน</th>
-      <th class="num" style="color:#2563eb;min-width:70px;">24 มิ.ย.</th>
-      <th class="num" style="color:#7c3aed;min-width:70px;">25 มิ.ย.</th>
-      <th class="num" style="color:#0891b2;min-width:70px;">26 มิ.ย.</th>
-      <th class="num" style="min-width:60px;">รวม</th>
+  const dk = execDay ? `d${execDay}` : null;
+  const dc = execDay ? ['','#2563eb','#7c3aed','#0891b2'][execDay] : '#1F3540';
+  const dl = execDay ? ['','24 มิ.ย.','25 มิ.ย.','26 มิ.ย.'][execDay] : 'รวม (ทุกวัน)';
+  const titleEl = document.getElementById('execCardTitle');
+  if(titleEl) titleEl.textContent = execDay
+    ? `จำนวนผู้เข้าร่วมงานแยกตามหน่วยงานภายใน — ${dl}`
+    : 'จำนวนผู้เข้าร่วมงานแยกตามหน่วยงานภายใน (กรมวิทยาศาสตร์การแพทย์)';
+  document.getElementById('execTableHead').innerHTML = `<tr>
+    <th style="width:36px;">#</th>
+    <th>หน่วยงาน</th>
+    <th class="num" style="color:${dc};min-width:80px;">${dl}</th>
+  </tr>`;
+  let idx = 0, grandTotal = 0;
+  const rows = DEPTS.map(dept => {
+    const c = execMap[dept];
+    const count = dk ? c[dk] : (c.d1+c.d2+c.d3);
+    grandTotal += count; idx++;
+    return `<tr>
+      <td style="font-weight:700;color:#94a3b8;font-size:0.8rem;">${idx}</td>
+      <td class="dept-name-cell">${dept}</td>
+      <td class="total-cell" style="color:${dc};">${count>0?count.toLocaleString():'<span class="zero">—</span>'}</td>
     </tr>`;
-    let idx = 0;
-    const extTot = execExternal.d1+execExternal.d2+execExternal.d3;
-    document.getElementById('execDeptBody').innerHTML = DEPTS.map(dept => {
-      const c = execMap[dept]; idx++;
-      const tot = c.d1 + c.d2 + c.d3;
-      return `<tr>
-        <td style="font-weight:700;color:#94a3b8;font-size:0.8rem;">${idx}</td>
-        <td class="dept-name-cell">${dept}</td>
-        <td style="text-align:right;" class="d1-num">${c.d1||'<span class="zero">—</span>'}</td>
-        <td style="text-align:right;" class="d2-num">${c.d2||'<span class="zero">—</span>'}</td>
-        <td style="text-align:right;" class="d3-num">${c.d3||'<span class="zero">—</span>'}</td>
-        <td class="total-cell">${tot>0?tot.toLocaleString():'<span class="zero">0</span>'}</td>
-      </tr>`;
-    }).join('');
-  } else {
-    const dk = `d${execDay}`;
-    const dc = ['','#2563eb','#7c3aed','#0891b2'][execDay];
-    const dl = ['','24 มิ.ย.','25 มิ.ย.','26 มิ.ย.'][execDay];
-    document.getElementById('execTableHead').innerHTML = `<tr>
-      <th style="width:36px;">#</th>
-      <th>หน่วยงาน</th>
-      <th class="num" style="color:${dc};min-width:80px;">${dl}</th>
-    </tr>`;
-    let idx = 0;
-    document.getElementById('execDeptBody').innerHTML = DEPTS.map(dept => {
-      const count = execMap[dept][dk]; idx++;
-      return `<tr>
-        <td style="font-weight:700;color:#94a3b8;font-size:0.8rem;">${idx}</td>
-        <td class="dept-name-cell">${dept}</td>
-        <td class="total-cell" style="color:${dc};">${count>0?count.toLocaleString():'<span class="zero">—</span>'}</td>
-      </tr>`;
-    }).join('');
-  }
+  });
+  rows.push(`<tr style="background:#1F3540;">
+    <td colspan="2" style="padding:11px 14px;font-weight:800;font-size:0.88rem;color:#ffffff;">รวมบุคลากรภายใน</td>
+    <td style="text-align:right;padding:11px 14px;font-weight:800;font-size:1.15rem;color:#ffffff;">${grandTotal.toLocaleString()}</td>
+  </tr>`);
+  document.getElementById('execDeptBody').innerHTML = rows.join('');
+  renderExecExtTable();
   if(execView === 'chart') renderExecChart();
   renderTrendChart();
+}
+
+function renderExecExtTable() {
+  const dk = execDay ? `d${execDay}` : null;
+  const dc = '#15803d';
+  const dl = execDay ? ['','24 มิ.ย.','25 มิ.ย.','26 มิ.ย.'][execDay] : 'รวม (ทุกวัน)';
+  const extTitle = document.getElementById('extCardTitle');
+  if(extTitle) extTitle.textContent = execDay
+    ? `จำนวนผู้เข้าร่วมงานแยกตามหน่วยงานภายนอก — ${['','24 มิ.ย.','25 มิ.ย.','26 มิ.ย.'][execDay]}`
+    : 'จำนวนผู้เข้าร่วมงานแยกตามหน่วยงานภายนอก';
+  const extHead = document.getElementById('extTableHead');
+  if(!extHead) return;
+  extHead.innerHTML = `<tr>
+    <th style="width:36px;">#</th>
+    <th>หน่วยงาน</th>
+    <th class="num" style="color:${dc};min-width:80px;">${dl}</th>
+  </tr>`;
+  const entries = Object.entries(execExtMap)
+    .map(([dept,c]) => ({name:dept, count:dk?c[dk]:(c.d1+c.d2+c.d3)}))
+    .filter(e=>e.count>0).sort((a,b)=>b.count-a.count);
+  const grandExt = entries.reduce((s,e)=>s+e.count,0);
+  const extBody = document.getElementById('extDeptBody');
+  if(!extBody) return;
+  extBody.innerHTML = entries.map((e,i)=>`<tr>
+    <td style="font-weight:700;color:#94a3b8;font-size:0.8rem;">${i+1}</td>
+    <td class="dept-name-cell">${e.name}</td>
+    <td class="total-cell" style="color:${dc};">${e.count.toLocaleString()}</td>
+  </tr>`).join('')+`<tr style="background:#15803d;">
+    <td colspan="2" style="padding:11px 14px;font-weight:800;font-size:0.88rem;color:#ffffff;">รวมบุคคลภายนอก</td>
+    <td style="text-align:right;padding:11px 14px;font-weight:800;font-size:1.15rem;color:#ffffff;">${grandExt.toLocaleString()}</td>
+  </tr>`;
 }
 
 function renderSummary() {
@@ -1053,7 +1105,7 @@ async function loadData() {
   const yr = encodeURIComponent(activeYear);
   try {
     const [rows, planRows] = await Promise.all([
-      fetchAll(`/rest/v1/checkins?event_year=eq.${yr}&select=day,checkin_time,participants(dept,internal_external,is_walkin,province)&order=checkin_time.desc`),
+      fetchAll(`/rest/v1/checkins?event_year=eq.${yr}&select=day,checkin_time,participants(dept,internal_external,is_walkin,province,ext_dept)&order=checkin_time.desc`),
       fetchAll('/rest/v1/participants?dept=eq.' + encodeURIComponent('กองแผนงานและวิชาการ') + `&event_year=eq.${yr}&select=id`)
     ]);
     const planPreReg = planRows.length;
@@ -1087,6 +1139,7 @@ async function loadData() {
     DEPTS.forEach(d => { execMap[d] = {d1:0, d2:0, d3:0}; });
 
     execExternal = {d1:0,d2:0,d3:0};
+    execExtMap = {};
     cleanRows.forEach(r => {
       const p = r.participants;
       if(!p) return;
@@ -1103,6 +1156,11 @@ async function loadData() {
         if(r.day === 1) execExternal.d1++;
         else if(r.day === 2) execExternal.d2++;
         else if(r.day === 3) execExternal.d3++;
+        const extDept = (p.ext_dept || p.dept || '(ไม่ระบุหน่วยงาน)').trim();
+        if(!execExtMap[extDept]) execExtMap[extDept] = {d1:0,d2:0,d3:0};
+        if(r.day === 1) execExtMap[extDept].d1++;
+        else if(r.day === 2) execExtMap[extDept].d2++;
+        else if(r.day === 3) execExtMap[extDept].d3++;
       }
     });
 
@@ -1186,6 +1244,73 @@ async function shareDeptTable() {
     btn.disabled = false;
   }
 }
+
+async function shareExtTable() {
+  const btn = document.getElementById('shareExtBtn');
+  btn.disabled = true; btn.innerHTML = '⏳ กำลังสร้างรูป...';
+  try {
+    const a4 = document.getElementById('a4ExtExport');
+    document.getElementById('a4ExtExportTime').textContent =
+      new Date().toLocaleString('th-TH', {timeZone:'Asia/Bangkok', dateStyle:'medium', timeStyle:'short'});
+    const dk = execDay ? `d${execDay}` : null;
+    const dl = execDay ? ['','24 มิ.ย. 2569','25 มิ.ย. 2569','26 มิ.ย. 2569'][execDay] : 'ทุกวัน (รวม)';
+    document.getElementById('a4ExtColLabel').textContent = execDay ? dl : 'รวม (ทุกวัน)';
+    const entries = Object.entries(execExtMap)
+      .map(([dept,c])=>({name:dept,count:dk?c[dk]:(c.d1+c.d2+c.d3)}))
+      .filter(e=>e.count>0).sort((a,b)=>b.count-a.count);
+    const grandExt = entries.reduce((s,e)=>s+e.count,0);
+    const tbodyHtml = entries.map((e,i)=>{
+      const bg = i%2===0?'#ffffff':'#eef5fa';
+      return `<tr><td style="padding:8px 12px;font-size:12.5px;background:${bg};color:#7a9aae;">${i+1}</td><td style="padding:8px 12px;font-size:12.5px;background:${bg};font-weight:600;color:#1F3540;">${e.name}</td><td style="padding:8px 12px;font-size:12.5px;background:${bg};text-align:right;font-weight:700;color:#15803d;">${e.count.toLocaleString()}</td></tr>`;
+    }).join('')+`<tr style="background:#15803d;"><td colspan="2" style="padding:10px 12px;font-size:13px;font-weight:800;color:#fff;">รวมบุคคลภายนอก</td><td style="padding:10px 12px;font-size:14px;font-weight:800;color:#fff;text-align:right;">${grandExt.toLocaleString()}</td></tr>`;
+    document.getElementById('a4ExtTableSlot').innerHTML = `<table style="width:100%;border-collapse:collapse;font-family:'Sarabun',sans-serif;">
+      <thead><tr>
+        <th style="background:#15803d;padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:#fff;width:36px;">#</th>
+        <th style="background:#15803d;padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:#fff;">หน่วยงาน</th>
+        <th style="background:#15803d;padding:10px 12px;text-align:right;font-size:11px;font-weight:700;color:#bbf7d0;min-width:80px;" id="a4ExtColLabel2">${dl}</th>
+      </tr></thead><tbody>${tbodyHtml}</tbody></table>`;
+    const canvas = await html2canvas(a4, {scale:2,useCORS:true,backgroundColor:'#ffffff',logging:false,windowWidth:794});
+    canvas.toBlob(async (blob) => {
+      const file = new File([blob],'ext-dept-summary-'+new Date().toISOString().slice(0,10)+'.png',{type:'image/png'});
+      if(navigator.canShare&&navigator.canShare({files:[file]})){
+        try{await navigator.share({files:[file],title:'สถิติผู้เข้าร่วมงานแยกหน่วยงานภายนอก'});}
+        catch(e){if(e.name!=='AbortError'){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=file.name;a.click();}}
+      } else {
+        const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=file.name;a.click();
+        setTimeout(()=>URL.revokeObjectURL(a.href),5000);
+      }
+    },'image/png');
+  } catch(e){alert('ไม่สามารถสร้างรูปภาพได้: '+e.message);}
+  finally{btn.innerHTML='📤 แชร์รูป';btn.disabled=false;}
+}
+
+async function shareTextSummary(day) {
+  const now = new Date().toLocaleString('th-TH',{timeZone:'Asia/Bangkok',timeStyle:'short'});
+  const dayNames = {1:'วันที่ 24 มิถุนายน 2569',2:'วันที่ 25 มิถุนายน 2569',3:'วันที่ 26 มิถุนายน 2569'};
+  const dk = day ? `d${day}` : null;
+  const intTotal = dk
+    ? DEPTS.reduce((s,d)=>s+(execMap[d]?.[dk]||0),0)
+    : DEPTS.reduce((s,d)=>s+(execMap[d]?.d1||0)+(execMap[d]?.d2||0)+(execMap[d]?.d3||0),0);
+  const extTotal = dk ? execExternal[dk]||0 : execExternal.d1+execExternal.d2+execExternal.d3;
+  const allTotal = intTotal + extTotal;
+  let dayLine;
+  if(day) {
+    dayLine = dayNames[day];
+  } else {
+    const d1=DEPTS.reduce((s,d)=>s+(execMap[d]?.d1||0),0)+execExternal.d1;
+    const d2=DEPTS.reduce((s,d)=>s+(execMap[d]?.d2||0),0)+execExternal.d2;
+    const d3=DEPTS.reduce((s,d)=>s+(execMap[d]?.d3||0),0)+execExternal.d3;
+    dayLine = `วันที่ 1 (24 มิ.ย.): ${d1.toLocaleString()} คน\nวันที่ 2 (25 มิ.ย.): ${d2.toLocaleString()} คน\nวันที่ 3 (26 มิ.ย.): ${d3.toLocaleString()} คน`;
+  }
+  const text = day
+    ? `สรุปจำนวนผู้เข้าประชุมวิชาการวิทยาศาสตร์การแพทย์ ครั้งที่ 34\n\n${dayLine}\n- บุคลากรภายในกรม ${intTotal.toLocaleString()} คน\n- บุคคลภายนอกกรม ${extTotal.toLocaleString()} คน\nรวม ${allTotal.toLocaleString()} คน\n\nข้อมูล ณ เวลา ${now} น.`
+    : `สรุปจำนวนผู้เข้าประชุมวิชาการวิทยาศาสตร์การแพทย์ ครั้งที่ 34\n\n${dayLine}\n\nรวมทั้งหมด\n- บุคลากรภายในกรม ${intTotal.toLocaleString()} คน\n- บุคคลภายนอกกรม ${extTotal.toLocaleString()} คน\nรวม ${allTotal.toLocaleString()} คน\n\nข้อมูล ณ เวลา ${now} น.`;
+  if(navigator.share){
+    try{ await navigator.share({text}); return; }catch(e){if(e.name==='AbortError')return;}
+  }
+  try{ await navigator.clipboard.writeText(text); alert('คัดลอกข้อความแล้ว! 📋\nวางใน LINE ได้เลย'); }
+  catch(e){ prompt('คัดลอกข้อความ:',text); }
+}
 </script>
 
 <!-- A4 export container — off-screen, always rendered so html2canvas can capture it -->
@@ -1202,6 +1327,22 @@ async function shareDeptTable() {
     </div>
   </div>
   <div id="a4TableSlot"></div>
+  <div style="margin-top:18px;font-size:10px;color:#b0c4ce;text-align:center;letter-spacing:0.04em;">กรมวิทยาศาสตร์การแพทย์ · Department of Medical Sciences</div>
+</div>
+
+<!-- A4 external export container — off-screen -->
+<div id="a4ExtExport" style="position:fixed;left:-9999px;top:0;width:794px;background:#fff;padding:44px 52px;font-family:'Sarabun',sans-serif;line-height:1.6;">
+  <div style="border-bottom:3px solid #15803d;padding-bottom:14px;margin-bottom:22px;display:flex;justify-content:space-between;align-items:flex-end;gap:16px;">
+    <div>
+      <div style="font-size:16px;font-weight:800;color:#15803d;line-height:1.4;">จำนวนผู้เข้าร่วมงานแยกตามหน่วยงานภายนอก</div>
+      <div style="font-size:11px;color:#7a9aae;margin-top:4px;">ข้อมูลจากการเช็คอินจริง — อัปเดตอัตโนมัติทุก 1 นาที</div>
+    </div>
+    <div style="text-align:right;flex-shrink:0;">
+      <div style="font-size:11px;font-weight:700;color:#1F3540;">ประชุมวิชาการวิทยาศาสตร์การแพทย์ ครั้งที่ 34</div>
+      <div style="font-size:10.5px;color:#7a9aae;margin-top:3px;" id="a4ExtExportTime"></div>
+    </div>
+  </div>
+  <div id="a4ExtTableSlot"></div>
   <div style="margin-top:18px;font-size:10px;color:#b0c4ce;text-align:center;letter-spacing:0.04em;">กรมวิทยาศาสตร์การแพทย์ · Department of Medical Sciences</div>
 </div>
 
