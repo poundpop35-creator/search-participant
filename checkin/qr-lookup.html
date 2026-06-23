@@ -457,6 +457,7 @@ let ciTotalLoaded = 0, wiTotalLoaded = 0;
     ]);
     const wiCnt = wiRes.headers.get('content-range'); if(wiCnt){ wiTotalLoaded=parseInt(wiCnt.split('/')[1])||0; document.getElementById('wiCount').textContent=`(${wiTotalLoaded.toLocaleString()} คน)`; }
     const ciCnt = ciRes.headers.get('content-range'); if(ciCnt){ ciTotalLoaded=parseInt(ciCnt.split('/')[1])||0; document.getElementById('ciCount').textContent=`(${ciTotalLoaded.toLocaleString()} คน)`; }
+    if(ciTotalLoaded||wiTotalLoaded) document.getElementById('allCount').textContent=`(${(ciTotalLoaded+wiTotalLoaded).toLocaleString()} คน)`;
   } catch(e) {}
 })();
 
@@ -706,7 +707,7 @@ function ciApplyFilters() {
     const as = ad === -1 ? CI_DEPT_ORDER.length : ad, bs = bd === -1 ? CI_DEPT_ORDER.length : bd;
     return as !== bs ? as - bs : a.name.localeCompare(b.name, 'th');
   });
-  document.getElementById('ciCount').textContent = `(${ciFiltered.length.toLocaleString()} คน)`;
+  document.getElementById('ciCount').textContent = `(${allCIData.length.toLocaleString()} คน)`;
   ciPage = 1;
   renderCITable();
 }
@@ -806,7 +807,7 @@ function wiApplyFilters() {
   const q = (document.getElementById('wiSearch').value || '').toLowerCase();
   const dept = document.getElementById('wiDeptFilter').value;
   wiFiltered = allWIData.filter(r => (!q || r.name.toLowerCase().includes(q) || r.dept.toLowerCase().includes(q) || r.province.toLowerCase().includes(q)) && (!dept || r.dept === dept));
-  document.getElementById('wiCount').textContent = `(${wiFiltered.length.toLocaleString()} คน)`;
+  document.getElementById('wiCount').textContent = `(${allWIData.length.toLocaleString()} คน)`;
   wiPage = 1;
   renderWITable();
 }
@@ -897,7 +898,7 @@ function allApplyFilters() {
     const as = ad===-1?CI_DEPT_ORDER.length:ad, bs = bd===-1?CI_DEPT_ORDER.length:bd;
     return as!==bs ? as-bs : a.name.localeCompare(b.name,'th');
   });
-  document.getElementById('allCount').textContent = `(${allAllFiltered.length.toLocaleString()} คน)`;
+  document.getElementById('allCount').textContent = `(${allAllData.length.toLocaleString()} คน)`;
   allAllPage = 1;
   renderAllTable();
 }
