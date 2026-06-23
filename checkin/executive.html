@@ -51,8 +51,8 @@
     .s-d2 .stat-num{color:#1F3540;}
     .s-d3 .stat-num{color:#1F3540;}
 
-    .dept-card{background:var(--white);border-radius:18px;box-shadow:0 4px 16px rgba(31,53,64,0.12);overflow:hidden;margin-bottom:28px;border:1px solid #C8DDE8;}
-    .dept-card-header{padding:18px 24px;padding-left:20px;border-bottom:1px solid #C8DDE8;}
+    .dept-card{background:var(--white);border-radius:18px;box-shadow:0 4px 20px rgba(31,53,64,0.10);overflow:hidden;margin-bottom:32px;border:1px solid #C8DDE8;}
+    .dept-card-header{padding:16px 20px;border-bottom:2px solid #e8f0f5;background:#f8fbfd;}
     .dept-card-title{font-size:1rem;font-weight:700;color:#1F3540;}
     .dept-card-sub{font-size:0.8rem;color:#7a9aae;margin-top:2px;}
     .share-btn{display:inline-flex;align-items:center;gap:6px;font-size:0.8rem;font-weight:600;color:#1F3540;background:#e8f4f8;border:1.5px solid #C8DDE8;border-radius:10px;padding:7px 16px;cursor:pointer;white-space:nowrap;transition:background 0.15s;margin-top:12px;}
@@ -270,7 +270,6 @@
           <button id="ezfD2" onclick="setExecDay(2)" style="padding:5px 10px;border-radius:8px;border:1.5px solid #C8DDE8;background:#fff;color:#7c3aed;font-family:'Sarabun',sans-serif;font-size:0.75rem;font-weight:600;cursor:pointer;">25 มิ.ย.</button>
           <button id="ezfD3" onclick="setExecDay(3)" style="padding:5px 10px;border-radius:8px;border:1.5px solid #C8DDE8;background:#fff;color:#0891b2;font-family:'Sarabun',sans-serif;font-size:0.75rem;font-weight:600;cursor:pointer;">26 มิ.ย.</button>
         </div>
-      </div>
       </div>
       <div class="scroll-wrap">
         <table>
@@ -591,20 +590,6 @@ function renderExecTable() {
     <td style="text-align:right;padding:11px 14px;font-weight:700;font-size:0.95rem;color:#4ade80;">${grandTarget>0?grandTarget.toLocaleString():'—'}</td>
     <td style="text-align:right;padding:11px 14px;font-weight:800;font-size:1.1rem;color:#15803d;">${grandTotal.toLocaleString()}</td>
     <td style="text-align:right;padding:11px 14px;font-weight:800;font-size:1rem;color:#15803d;">${grandTarget>0?Math.round(grandTotal/grandTarget*100)+'%':'—'}</td>
-  </tr>`);
-  const extCount = dk ? (execExternal[dk]||0) : execExternal.d1+execExternal.d2+execExternal.d3;
-  rows.push(`<tr style="background:#dbeafe;border-top:2px solid #93c5fd;">
-    <td colspan="2" style="padding:11px 14px;font-weight:800;font-size:0.88rem;color:#1d4ed8;">บุคคลภายนอกกรม</td>
-    <td style="text-align:right;padding:11px 14px;color:#93c5fd;">—</td>
-    <td style="text-align:right;padding:11px 14px;font-weight:800;font-size:1.1rem;color:#1d4ed8;">${extCount.toLocaleString()}</td>
-    <td style="text-align:right;padding:11px 14px;color:#93c5fd;">—</td>
-  </tr>`);
-  const grandAllTotal = grandTotal + extCount;
-  rows.push(`<tr style="background:#f1f5f9;border-top:2px solid #cbd5e1;">
-    <td colspan="2" style="padding:11px 14px;font-weight:800;font-size:0.88rem;color:#1F3540;">รวมทั้งหมด</td>
-    <td style="text-align:right;padding:11px 14px;color:#94a3b8;">—</td>
-    <td style="text-align:right;padding:11px 14px;font-weight:800;font-size:1.25rem;color:#1F3540;">${grandAllTotal.toLocaleString()}</td>
-    <td style="text-align:right;padding:11px 14px;color:#94a3b8;">—</td>
   </tr>`);
   document.getElementById('execDeptBody').innerHTML = rows.join('');
   renderExecExtTable();
@@ -1382,8 +1367,6 @@ async function shareDeptTable() {
     const grandAll = grandInt + extCount;
     const grandPct = grandTgt ? Math.round(grandInt/grandTgt*100)+'%' : '—';
     deptRows.push(`<tr style="background:#dcfce7;border-top:2px solid #86efac;"><td colspan="2" style="padding:10px 12px;font-size:13px;font-weight:800;color:#15803d;">รวมบุคลากรภายใน</td><td style="padding:10px 12px;font-size:12px;font-weight:700;color:#4ade80;text-align:right;">${grandTgt>0?grandTgt.toLocaleString():'—'}</td><td style="padding:10px 12px;font-size:13px;font-weight:800;color:#15803d;text-align:right;">${grandInt.toLocaleString()}</td><td style="padding:10px 12px;font-size:13px;font-weight:800;color:#15803d;text-align:right;">${grandPct}</td></tr>`);
-    deptRows.push(`<tr style="background:#dbeafe;border-top:2px solid #93c5fd;"><td colspan="2" style="padding:10px 12px;font-size:13px;font-weight:800;color:#1d4ed8;">บุคคลภายนอกกรม</td><td style="padding:10px 12px;color:#93c5fd;text-align:right;">—</td><td style="padding:10px 12px;font-size:13px;font-weight:800;color:#1d4ed8;text-align:right;">${extCount.toLocaleString()}</td><td style="padding:10px 12px;color:#93c5fd;text-align:right;">—</td></tr>`);
-    deptRows.push(`<tr style="background:#f1f5f9;border-top:2px solid #cbd5e1;"><td colspan="2" style="padding:10px 12px;font-size:13px;font-weight:800;color:#1F3540;">รวมทั้งหมด</td><td style="padding:10px 12px;color:#94a3b8;text-align:right;">—</td><td style="padding:10px 12px;font-size:14px;font-weight:800;color:#1F3540;text-align:right;">${grandAll.toLocaleString()}</td><td style="padding:10px 12px;color:#94a3b8;text-align:right;">—</td></tr>`);
 
     document.getElementById('a4TableSlot').innerHTML = `
       <table style="width:100%;border-collapse:collapse;font-family:'Sarabun',sans-serif;">
@@ -1401,8 +1384,8 @@ async function shareDeptTable() {
     const nowStr = now.toLocaleString('th-TH',{timeZone:'Asia/Bangkok',hour:'2-digit',minute:'2-digit'});
     const dayNames = ['','24 มิถุนายน 2569','25 มิถุนายน 2569','26 มิถุนายน 2569'];
     const shareText = execDay
-      ? `สรุปจำนวนผู้เข้าร่วมงานประชุมวิชาการฯ\n\nวันที่ ${dayNames[execDay]}\n- บุคลากรภายในกรม ${grandInt.toLocaleString()} คน\n\nข้อมูล ณ เวลา ${nowStr} น.`
-      : `สรุปจำนวนผู้เข้าร่วมงานประชุมวิชาการฯ\n\nรวม 3 วัน (24-26 มิถุนายน 2569)\n- บุคลากรภายในกรม ${grandInt.toLocaleString()} คน\n\nข้อมูล ณ เวลา ${nowStr} น.`;
+      ? `ประชุมวิชาการวิทยาศาสตร์การแพทย์ ครั้งที่ 34\n📅 วันที่ ${dayNames[execDay]}\n\n👥 บุคลากรภายในกรม: ${grandInt.toLocaleString()} คน\n\n⏰ ณ เวลา ${nowStr} น.`
+      : `ประชุมวิชาการวิทยาศาสตร์การแพทย์ ครั้งที่ 34\n📅 รวม 3 วัน (24-26 มิถุนายน 2569)\n\n👥 บุคลากรภายในกรม: ${grandInt.toLocaleString()} คน\n\n⏰ ณ เวลา ${nowStr} น.`;
 
     const canvas = await html2canvas(a4, {
       scale: 2,
@@ -1439,7 +1422,7 @@ async function shareExtZoneText() {
     const total = Object.values(zoneCounts).reduce((s,n)=>s+n,0);
     const dl = execDay ? ['','วันที่ 24 มิถุนายน 2569','วันที่ 25 มิถุนายน 2569','วันที่ 26 มิถุนายน 2569'][execDay] : 'รวม 3 วัน (24-26 มิถุนายน 2569)';
     const now = new Date().toLocaleString('th-TH',{timeZone:'Asia/Bangkok',hour:'2-digit',minute:'2-digit'});
-    const text = `สรุปจำนวนผู้เข้าร่วมงานประชุมวิชาการฯ\n\n${dl}\n- บุคลากรภายนอกกรม ${total.toLocaleString()} คน\n\nข้อมูล ณ เวลา ${now} น.`;
+    const text = `ประชุมวิชาการวิทยาศาสตร์การแพทย์ ครั้งที่ 34\n📅 ${dl}\n\n👥 บุคลากรภายนอกกรม: ${total.toLocaleString()} คน\n\n⏰ ณ เวลา ${now} น.`;
     if(navigator.share){ await navigator.share({text}); }
     else { await navigator.clipboard.writeText(text); alert('คัดลอกข้อความแล้ว!'); }
   } catch(e){ if(e.name!=='AbortError') alert('เกิดข้อผิดพลาด: '+e.message); }
