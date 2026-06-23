@@ -523,52 +523,11 @@ document.addEventListener('DOMContentLoaded', function() {
       </div>
     </div>
     <div id="pRegSection" style="display:none;">
-      <!-- View toggle: รายชื่อ ↔ แผนที่เขตสุขภาพ -->
-      <div style="display:flex;gap:0;border-bottom:2px solid var(--border);padding:0 8px;">
-        <button id="pVListBtn" class="ptab active" onclick="event.stopPropagation();setPRegView('list')">☰ รายชื่อ</button>
-        <button id="pVZoneBtn" class="ptab" onclick="event.stopPropagation();setPRegView('zone')">📊 แผนที่แยกตามเขตสุขภาพ</button>
-      </div>
       <!-- LIST VIEW -->
       <div id="pListView">
         <div style="display:flex;border-bottom:2px solid var(--border);padding:0 8px;">
           <button class="ptab active" id="ptab0" onclick="event.stopPropagation();switchPTab(0)">ลงทะเบียนล่วงหน้า <span id="pPreCount"></span></button>
-          <button class="ptab" id="ptab2" onclick="event.stopPropagation();switchPTab(2)">Chart แยกเขตสุขภาพ (ลงทะเบียนล่วงหน้า)</button>
           <button class="ptab" id="ptab1" onclick="event.stopPropagation();switchPTab(1)">Walk-in <span id="pWiCount"></span></button>
-          <button class="ptab" id="ptab3" onclick="event.stopPropagation();switchPTab(3)">Chart แยกเขตสุขภาพ (Walk-in)</button>
-        </div>
-        <!-- Zone tab content -->
-        <div id="pZoneTabContent" style="display:none;padding:20px;">
-          <div style="display:flex;gap:4px;margin-bottom:12px;">
-            <button class="vbtn active zie-reg" data-v="" onclick="setZoneIEFilter('reg','')">ทั้งหมด</button>
-            <button class="vbtn zie-reg" data-v="in" onclick="setZoneIEFilter('reg','in')">ภายใน</button>
-            <button class="vbtn zie-reg" data-v="out" onclick="setZoneIEFilter('reg','out')">ภายนอก</button>
-          </div>
-          <div style="display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap;">
-            <div style="flex:0 0 200px;max-width:220px;margin:0 auto;"><canvas id="zoneSumChart"></canvas></div>
-            <div style="flex:1;min-width:220px;overflow-x:auto;">
-              <table class="dtable">
-                <thead><tr><th>เขตสุขภาพ</th><th style="text-align:right;">คน</th><th style="text-align:right;">%</th></tr></thead>
-                <tbody id="zoneSumBody"></tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-        <!-- Walk-in zone tab content -->
-        <div id="pZoneWiTabContent" style="display:none;padding:20px;">
-          <div style="display:flex;gap:4px;margin-bottom:12px;">
-            <button class="vbtn active zie-wi" data-v="" onclick="setZoneIEFilter('wi','')">ทั้งหมด</button>
-            <button class="vbtn zie-wi" data-v="in" onclick="setZoneIEFilter('wi','in')">ภายใน</button>
-            <button class="vbtn zie-wi" data-v="out" onclick="setZoneIEFilter('wi','out')">ภายนอก</button>
-          </div>
-          <div style="display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap;">
-            <div style="flex:0 0 200px;max-width:220px;margin:0 auto;"><canvas id="zoneWiChart"></canvas></div>
-            <div style="flex:1;min-width:220px;overflow-x:auto;">
-              <table class="dtable">
-                <thead><tr><th>เขตสุขภาพ</th><th style="text-align:right;">คน</th><th style="text-align:right;">%</th></tr></thead>
-                <tbody id="zoneWiBody"></tbody>
-              </table>
-            </div>
-          </div>
         </div>
         <!-- List content -->
         <div id="pListContent">
@@ -668,64 +627,6 @@ document.addEventListener('DOMContentLoaded', function() {
           </div>
         </div>
         </div><!-- end pListContent -->
-      </div>
-      <!-- ZONE CHART VIEW -->
-      <div id="pZoneView" style="display:none;">
-        <!-- Zone filters -->
-        <div style="padding:10px 16px;background:#f8fafc;border-bottom:1px solid var(--border);display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;">
-          <div class="p-filter-group">
-            <div class="p-filter-label">ประเภทการเข้าร่วม</div>
-            <select class="p-filter-select" id="zFIntExt" onchange="renderZoneChart()">
-              <option value="">ทั้งหมด</option>
-              <option value="ภายใน">ภายใน</option>
-              <option value="ภายนอก">ภายนอก</option>
-            </select>
-          </div>
-          <div class="p-filter-group">
-            <div class="p-filter-label">TAG</div>
-            <select class="p-filter-select" id="zFTag" onchange="renderZoneChart()">
-              <option value="">ทั้งหมด</option>
-            </select>
-          </div>
-          <div class="p-filter-group">
-            <div class="p-filter-label">ประเภท</div>
-            <select class="p-filter-select" id="zFPType" onchange="renderZoneChart()">
-              <option value="">ทั้งหมด</option>
-            </select>
-          </div>
-          <button class="p-reset-btn" onclick="resetZoneFilters()">↺ รีเซ็ต</button>
-        </div>
-        <!-- Zone sub-tabs -->
-        <div style="display:flex;border-bottom:2px solid var(--border);padding:0 8px;">
-          <button class="ptab active" id="zoneTabPre" onclick="setZoneTab('pre')">ลงทะเบียนล่วงหน้า <span id="zonePreCount" style="font-size:0.8rem;color:#64748b;font-weight:400;"></span></button>
-          <button class="ptab" id="zoneTabWi" onclick="setZoneTab('wi')">Walk-in <span id="zoneWiCount" style="font-size:0.8rem;color:#64748b;font-weight:400;"></span></button>
-        </div>
-        <!-- Pre panel -->
-        <div id="zonePanelPre" style="padding:20px;">
-          <div style="display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;">
-            <div id="zoneMapPre" style="position:relative;flex:0 0 220px;min-width:160px;max-width:260px;">
-              <div id="zoneMapPreLabel" style="display:none;position:absolute;left:8px;top:8px;z-index:10;background:rgba(15,23,42,0.82);color:#fff;padding:5px 9px;border-radius:8px;font-size:0.72rem;line-height:1.5;pointer-events:none;font-family:Sarabun,sans-serif;"></div>
-              <button id="zoneMapPreClear" onclick="resetDashMap('pre')" style="display:none;position:absolute;right:6px;top:6px;z-index:10;background:rgba(255,255,255,0.92);border:1.5px solid #e2e8f0;border-radius:8px;padding:3px 10px;font-family:Sarabun,sans-serif;font-size:0.72rem;cursor:pointer;color:#334155;">✕ ล้าง</button>
-            </div>
-            <div style="flex:1;min-width:240px;overflow-x:auto;">
-              <table class="dtable"><thead><tr><th>เขตสุขภาพ</th><th style="text-align:right;">คน</th><th style="text-align:right;">%</th></tr></thead>
-                <tbody id="zoneBodyPre"></tbody></table>
-            </div>
-          </div>
-        </div>
-        <!-- Walk-in panel -->
-        <div id="zonePanelWi" style="padding:20px;display:none;">
-          <div style="display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;">
-            <div id="zoneMapWi" style="position:relative;flex:0 0 220px;min-width:160px;max-width:260px;">
-              <div id="zoneMapWiLabel" style="display:none;position:absolute;left:8px;top:8px;z-index:10;background:rgba(15,23,42,0.82);color:#fff;padding:5px 9px;border-radius:8px;font-size:0.72rem;line-height:1.5;pointer-events:none;font-family:Sarabun,sans-serif;"></div>
-              <button id="zoneMapWiClear" onclick="resetDashMap('wi')" style="display:none;position:absolute;right:6px;top:6px;z-index:10;background:rgba(255,255,255,0.92);border:1.5px solid #e2e8f0;border-radius:8px;padding:3px 10px;font-family:Sarabun,sans-serif;font-size:0.72rem;cursor:pointer;color:#334155;">✕ ล้าง</button>
-            </div>
-            <div style="flex:1;min-width:240px;overflow-x:auto;">
-              <table class="dtable"><thead><tr><th>เขตสุขภาพ</th><th style="text-align:right;">คน</th><th style="text-align:right;">%</th></tr></thead>
-                <tbody id="zoneBodyWi"></tbody></table>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   </div>
@@ -835,7 +736,7 @@ let allData=[], filtered=[], curTab=0, curPage=1;
 let selPT=new Set(), selDPT=new Set(), selDDept=new Set(), selFDept=new Set();
 let deptRaw=[], dView='table', dChart=null;
 let totalPreReg=0, totalAll=0;
-let allParticipants=[], curPTab=0, curPPage=1, zoneChartPreInst=null, zoneChartWiInst=null, zoneSumInst=null, zoneWiInst=null;
+let allParticipants=[], curPTab=0, curPPage=1;
 const P_PAGE=20;
 const HEALTH_ZONE={
   'เชียงราย':1,'น่าน':1,'พะเยา':1,'แพร่':1,'เชียงใหม่':1,'แม่ฮ่องสอน':1,'ลำปาง':1,'ลำพูน':1,
@@ -1102,14 +1003,6 @@ async function loadParticipants(){
       dd.appendChild(lbl);
     });
   });
-  // Populate zone chart filter dropdowns
-  const fillZSel=(id,opts)=>{
-    const sel=document.getElementById(id);
-    opts.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;sel.appendChild(o);});
-  };
-  fillZSel('zFTag',tags);
-  fillZSel('zFPType',ptypes);
-  renderZoneChart();
 }
 
 function toggleParticipants(){
@@ -1198,13 +1091,8 @@ function toggleDeptCard(){
 
 function switchPTab(t){
   curPTab=t; curPPage=1;
-  [0,1,2,3].forEach(i=>{const b=document.getElementById('ptab'+i);if(b)b.classList.toggle('active',i===t);});
-  document.getElementById('pListContent').style.display=(t===0||t===1)?'block':'none';
-  document.getElementById('pZoneTabContent').style.display=t===2?'block':'none';
-  document.getElementById('pZoneWiTabContent').style.display=t===3?'block':'none';
-  if(t===2) renderZoneRegSummary();
-  else if(t===3) renderZoneWiSummary();
-  else renderParticipants();
+  [0,1].forEach(i=>{const b=document.getElementById('ptab'+i);if(b)b.classList.toggle('active',i===t);});
+  renderParticipants();
 }
 
 function resetPFilters(){
@@ -1293,82 +1181,6 @@ function renderParticipants(){
 }
 
 function changePPage(d){curPPage+=d;renderParticipants();}
-
-function renderZoneRegSummary(){
-  const ie=window['zoneIE_reg']||'';
-  const pre=allParticipants.filter(p=>!p.is_walkin).filter(p=>!ie||(ie==='in'?(p.internal_external||'').includes('ภายใน'):!(p.internal_external||'').includes('ภายใน')));
-  const total=pre.length;
-  const scEl=document.getElementById('zoneSumCount');if(scEl)scEl.textContent=`(${total.toLocaleString()} คน)`;
-  const counts={},provByZone={};
-  pre.forEach(p=>{
-    const prov=(p.province||'').trim();
-    const z=getZone(prov)||0;
-    counts[z]=(counts[z]||0)+1;
-    if(!provByZone[z]) provByZone[z]={};
-    const k=prov||'(ว่าง)';
-    provByZone[z][k]=(provByZone[z][k]||0)+1;
-  });
-  const entries=Object.entries(counts).map(([z,n])=>({z:Number(z),n})).sort((a,b)=>a.z-b.z);
-  if(!total){document.getElementById('zoneSumBody').innerHTML='<tr><td colspan="3" style="text-align:center;padding:16px;color:#94a3b8;">ไม่มีข้อมูล</td></tr>';return;}
-  const labels=entries.map(e=>ZONE_NAMES[e.z]||'เขตสุขภาพที่ '+e.z);
-  const data=entries.map(e=>e.n);
-  const bgColors=entries.map(e=>ZONE_COLORS[e.z%ZONE_COLORS.length]);
-  if(zoneSumInst) zoneSumInst.destroy();
-  const ctx=document.getElementById('zoneSumChart').getContext('2d');
-  zoneSumInst=new Chart(ctx,{
-    type:'doughnut',
-    data:{labels,datasets:[{data,backgroundColor:bgColors,borderWidth:2,borderColor:'#fff',hoverOffset:6}]},
-    options:{responsive:true,cutout:'58%',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.label}: ${c.raw.toLocaleString()} คน (${Math.round(c.raw/total*100)}%)`}}}}
-  });
-  document.getElementById('zoneSumBody').innerHTML=entries.map((e,i)=>{
-    const pct=Math.round(e.n/total*100);
-    const provRows=Object.entries(provByZone[e.z]||{}).sort((a,b)=>b[1]-a[1])
-      .map(([pv,cnt])=>`<tr style="background:#f8fafc;"><td style="padding:3px 10px 3px 26px;font-size:0.78rem;color:#64748b;">${pv}</td><td style="padding:3px 10px;text-align:right;font-size:0.78rem;color:#64748b;">${cnt.toLocaleString()}</td><td style="padding:3px 10px;text-align:right;font-size:0.78rem;color:#94a3b8;">${Math.round(cnt/total*100)}%</td></tr>`).join('');
-    const detId=`zsRow-${e.z}`;
-    return`<tr style="cursor:pointer;border-bottom:1px solid #e2e8f0;" onclick="const r=document.getElementById('${detId}');r.style.display=r.style.display==='none'?'table-row':'none'">
-      <td style="padding:6px 10px;"><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:${bgColors[i]};margin-right:6px;vertical-align:middle;"></span>${ZONE_NAMES[e.z]||'เขตสุขภาพที่ '+e.z}</td>
-      <td style="padding:6px 10px;text-align:right;font-weight:700;">${e.n.toLocaleString()}</td>
-      <td style="padding:6px 10px;text-align:right;color:#64748b;">${pct}%</td>
-    </tr><tr id="${detId}" style="display:none;"><td colspan="3" style="padding:0;"><table style="width:100%;">${provRows}</table></td></tr>`;
-  }).join('');
-}
-
-function renderZoneWiSummary(){
-  const ie=window['zoneIE_wi']||'';
-  const wi=allParticipants.filter(p=>p.is_walkin===true).filter(p=>!ie||(ie==='in'?(p.internal_external||'').includes('ภายใน'):!(p.internal_external||'').includes('ภายใน')));
-  const total=wi.length;
-  const counts={},provByZone={};
-  wi.forEach(p=>{
-    const prov=(p.province||'').trim();
-    const z=getZone(prov)||0;
-    counts[z]=(counts[z]||0)+1;
-    if(!provByZone[z]) provByZone[z]={};
-    const k=prov||'(ว่าง)';
-    provByZone[z][k]=(provByZone[z][k]||0)+1;
-  });
-  const entries=Object.entries(counts).map(([z,n])=>({z:Number(z),n})).sort((a,b)=>a.z-b.z);
-  if(!total){document.getElementById('zoneWiBody').innerHTML='<tr><td colspan="3" style="text-align:center;padding:16px;color:#94a3b8;">ไม่มีข้อมูล</td></tr>';return;}
-  const labels=entries.map(e=>ZONE_NAMES[e.z]||'เขตสุขภาพที่ '+e.z);
-  const bgColors=entries.map(e=>ZONE_COLORS[e.z%ZONE_COLORS.length]);
-  if(zoneWiInst) zoneWiInst.destroy();
-  const ctx=document.getElementById('zoneWiChart').getContext('2d');
-  zoneWiInst=new Chart(ctx,{
-    type:'doughnut',
-    data:{labels,datasets:[{data:entries.map(e=>e.n),backgroundColor:bgColors,borderWidth:2,borderColor:'#fff',hoverOffset:6}]},
-    options:{responsive:true,cutout:'58%',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.label}: ${c.raw.toLocaleString()} คน (${Math.round(c.raw/total*100)}%)`}}}}
-  });
-  document.getElementById('zoneWiBody').innerHTML=entries.map((e,i)=>{
-    const pct=Math.round(e.n/total*100);
-    const detId=`zwRow-${e.z}`;
-    const provRows=Object.entries(provByZone[e.z]||{}).sort((a,b)=>b[1]-a[1])
-      .map(([pv,cnt])=>`<tr style="background:#f8fafc;"><td style="padding:3px 10px 3px 26px;font-size:0.78rem;color:#64748b;">${pv}</td><td style="padding:3px 10px;text-align:right;font-size:0.78rem;color:#64748b;">${cnt.toLocaleString()}</td><td style="padding:3px 10px;text-align:right;font-size:0.78rem;color:#94a3b8;">${Math.round(cnt/total*100)}%</td></tr>`).join('');
-    return`<tr style="cursor:pointer;border-bottom:1px solid #e2e8f0;" onclick="const r=document.getElementById('${detId}');r.style.display=r.style.display==='none'?'table-row':'none'">
-      <td style="padding:6px 10px;"><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:${bgColors[i]};margin-right:6px;vertical-align:middle;"></span>${ZONE_NAMES[e.z]||'เขตสุขภาพที่ '+e.z}</td>
-      <td style="padding:6px 10px;text-align:right;font-weight:700;">${e.n.toLocaleString()}</td>
-      <td style="padding:6px 10px;text-align:right;color:#64748b;">${pct}%</td>
-    </tr><tr id="${detId}" style="display:none;"><td colspan="3" style="padding:0;"><table style="width:100%;">${provRows}</table></td></tr>`;
-  }).join('');
-}
 
 const ZONE_COLORS=['#3b82f6','#8b5cf6','#06b6d4','#10b981','#f59e0b','#ef4444','#f97316','#84cc16','#ec4899','#6366f1','#14b8a6','#a78bfa','#0ea5e9','#94a3b8'];
 const ZONE_NAMES={1:'เขตสุขภาพที่ 1',2:'เขตสุขภาพที่ 2',3:'เขตสุขภาพที่ 3',4:'เขตสุขภาพที่ 4',5:'เขตสุขภาพที่ 5',6:'เขตสุขภาพที่ 6',7:'เขตสุขภาพที่ 7',8:'เขตสุขภาพที่ 8',9:'เขตสุขภาพที่ 9',10:'เขตสุขภาพที่ 10',11:'เขตสุขภาพที่ 11',12:'เขตสุขภาพที่ 12',13:'เขตสุขภาพที่ 13',0:'ไม่ระบุ'};
