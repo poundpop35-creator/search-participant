@@ -213,14 +213,14 @@
     <button class="sec-btn" id="allToggleBtn" onclick="toggleAll()" style="background:#7c3aed;border-color:#7c3aed;color:#fff;">▼ ดูรายชื่อ</button>
   </div>
   <div id="allBody" style="display:none;padding:16px 20px 20px;">
-    <div style="display:flex;gap:8px;margin-bottom:6px;">
+    <div style="display:flex;gap:8px;margin-bottom:6px;align-items:center;">
       <input id="allSearch" type="text" placeholder="ค้นหาชื่อ / หน่วยงาน / จังหวัด" oninput="allApplyFilters()"
-        style="flex:1;border:1.5px solid var(--border);border-radius:10px;padding:8px 12px;font-family:Sarabun,sans-serif;font-size:0.88rem;outline:none;transition:border-color .2s;"
+        style="flex:1;min-width:0;border:1.5px solid var(--border);border-radius:10px;padding:8px 12px;font-family:Sarabun,sans-serif;font-size:0.88rem;outline:none;transition:border-color .2s;"
         onfocus="this.style.borderColor='#7c3aed'" onblur="this.style.borderColor='var(--border)'">
-      <select id="allDeptFilter" onchange="allApplyFilters()" style="max-width:140px;border:1.5px solid var(--border);border-radius:10px;padding:8px 6px;font-family:Sarabun,sans-serif;font-size:0.82rem;outline:none;color:#374151;background:#fff;cursor:pointer;">
+      <select id="allDeptFilter" onchange="allApplyFilters()" style="flex-shrink:0;width:130px;border:1.5px solid var(--border);border-radius:10px;padding:8px 6px;font-family:Sarabun,sans-serif;font-size:0.82rem;outline:none;color:#374151;background:#fff;cursor:pointer;">
         <option value="">ทุกหน่วยงาน</option>
       </select>
-      <button class="sec-btn" onclick="exportAllExcel()" style="white-space:nowrap;background:#5b21b6;">⬇ Excel</button>
+      <button class="sec-btn" onclick="exportAllExcel()" style="flex-shrink:0;white-space:nowrap;background:#5b21b6;">⬇ Excel</button>
     </div>
     <div style="overflow-x:auto;">
       <table class="ci-tbl">
@@ -259,14 +259,14 @@
 
   <div id="ciBody" style="display:none;padding:16px 20px 20px;">
     <!-- Search row + Excel button -->
-    <div style="display:flex;gap:8px;margin-bottom:6px;">
+    <div style="display:flex;gap:8px;margin-bottom:6px;align-items:center;">
       <input id="ciSearch" type="text" placeholder="ค้นหาชื่อ / หน่วยงาน / จังหวัด" oninput="ciApplyFilters()"
-        style="flex:1;border:1.5px solid var(--border);border-radius:10px;padding:8px 12px;font-family:Sarabun,sans-serif;font-size:0.88rem;outline:none;transition:border-color .2s;"
+        style="flex:1;min-width:0;border:1.5px solid var(--border);border-radius:10px;padding:8px 12px;font-family:Sarabun,sans-serif;font-size:0.88rem;outline:none;transition:border-color .2s;"
         onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='var(--border)'">
-      <select id="ciDeptFilter" onchange="ciApplyFilters()" style="max-width:140px;border:1.5px solid var(--border);border-radius:10px;padding:8px 6px;font-family:Sarabun,sans-serif;font-size:0.82rem;outline:none;color:#374151;background:#fff;cursor:pointer;">
+      <select id="ciDeptFilter" onchange="ciApplyFilters()" style="flex-shrink:0;width:130px;border:1.5px solid var(--border);border-radius:10px;padding:8px 6px;font-family:Sarabun,sans-serif;font-size:0.82rem;outline:none;color:#374151;background:#fff;cursor:pointer;">
         <option value="">ทุกหน่วยงาน</option>
       </select>
-      <button class="sec-btn green" onclick="exportCheckinExcel()" style="white-space:nowrap;">⬇ Excel</button>
+      <button class="sec-btn green" onclick="exportCheckinExcel()" style="flex-shrink:0;white-space:nowrap;">⬇ Excel</button>
     </div>
     <!-- Table -->
     <div style="overflow-x:auto;">
@@ -306,14 +306,14 @@
   </div>
 
   <div id="wiBody" style="display:none;padding:16px 20px 20px;">
-    <div style="display:flex;gap:8px;margin-bottom:6px;">
+    <div style="display:flex;gap:8px;margin-bottom:6px;align-items:center;">
       <input id="wiSearch" type="text" placeholder="ค้นหาชื่อ / หน่วยงาน / จังหวัด" oninput="wiApplyFilters()"
-        style="flex:1;border:1.5px solid var(--border);border-radius:10px;padding:8px 12px;font-family:Sarabun,sans-serif;font-size:0.88rem;outline:none;transition:border-color .2s;"
+        style="flex:1;min-width:0;border:1.5px solid var(--border);border-radius:10px;padding:8px 12px;font-family:Sarabun,sans-serif;font-size:0.88rem;outline:none;transition:border-color .2s;"
         onfocus="this.style.borderColor='#ea580c'" onblur="this.style.borderColor='var(--border)'">
-      <select id="wiDeptFilter" onchange="wiApplyFilters()" style="max-width:140px;border:1.5px solid var(--border);border-radius:10px;padding:8px 6px;font-family:Sarabun,sans-serif;font-size:0.82rem;outline:none;color:#374151;background:#fff;cursor:pointer;">
+      <select id="wiDeptFilter" onchange="wiApplyFilters()" style="flex-shrink:0;width:130px;border:1.5px solid var(--border);border-radius:10px;padding:8px 6px;font-family:Sarabun,sans-serif;font-size:0.82rem;outline:none;color:#374151;background:#fff;cursor:pointer;">
         <option value="">ทุกหน่วยงาน</option>
       </select>
-      <button class="sec-btn" onclick="exportWIExcel()" style="white-space:nowrap;background:#ea580c;">⬇ Excel</button>
+      <button class="sec-btn" onclick="exportWIExcel()" style="flex-shrink:0;white-space:nowrap;background:#ea580c;">⬇ Excel</button>
     </div>
     <div style="overflow-x:auto;">
       <table class="ci-tbl">
