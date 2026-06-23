@@ -721,9 +721,6 @@ function changeCIPage(d) {
 }
 
 function exportCheckinExcel() {
-  const pw = prompt('กรุณาใส่รหัสผ่านเพื่อดาวน์โหลด:');
-  if (pw === null) return;
-  if (pw !== 'DMSc2569') { alert('รหัสผ่านไม่ถูกต้อง'); return; }
   if (!allCIData) { alert('ยังไม่มีข้อมูล — กรุณาเปิดดูรายชื่อก่อน'); return; }
   const src = ciFiltered.length > 0 ? ciFiltered : allCIData;
   const rows = src.map((r, i) => ({
@@ -822,9 +819,6 @@ function changeWIPage(d) {
 }
 
 function exportWIExcel() {
-  const pw = prompt('กรุณาใส่รหัสผ่านเพื่อดาวน์โหลด:');
-  if (pw === null) return;
-  if (pw !== 'DMSc2569') { alert('รหัสผ่านไม่ถูกต้อง'); return; }
   if (!allWIData) { alert('ยังไม่มีข้อมูล — กรุณาเปิดดูรายชื่อก่อน'); return; }
   const src = wiFiltered.length > 0 ? wiFiltered : allWIData;
   const rows = src.map((r, i) => ({
@@ -918,9 +912,6 @@ function changeAllPage(d) {
 }
 
 function exportAllExcel() {
-  const pw = prompt('กรุณาใส่รหัสผ่านเพื่อดาวน์โหลด:');
-  if (pw === null) return;
-  if (pw !== 'DMSc2569') { alert('รหัสผ่านไม่ถูกต้อง'); return; }
   if (!allAllData) { alert('ยังไม่มีข้อมูล — กรุณาเปิดดูรายชื่อก่อน'); return; }
   const src = allAllFiltered.length > 0 ? allAllFiltered : allAllData;
   const rows = src.map((r,i) => ({
