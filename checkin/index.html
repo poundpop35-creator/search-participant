@@ -252,6 +252,7 @@
     <div class="scan-hint">เล็งเครื่องยิงบาร์โค้ดที่ QR Code แล้วกดปุ่มยิง</div>
     <input class="scan-input" id="scanInput" placeholder="รอรับรหัสจากเครื่องยิง..." readonly>
     <div class="scan-status-box">พร้อมรับข้อมูลจากเครื่องยิงบาร์โค้ด</div>
+    <button onclick="resetScanner()" style="margin-top:8px;padding:7px 18px;border-radius:10px;border:1.5px solid #C8DDE8;background:#f8fbfd;color:#1F3540;font-family:'Sarabun',sans-serif;font-size:0.82rem;font-weight:600;cursor:pointer;display:block;width:100%;">🔄 รีเซ็ต (กดถ้าสแกนไม่ได้)</button>
   </div>
 
   <div class="divider">
@@ -472,6 +473,16 @@
     startCamera();
   }
 
+  function resetScanner(){
+    isProcessing=false;
+    scanBuffer='';
+    clearTimeout(scanTimer);
+    document.getElementById('scanInput').value='';
+    document.getElementById('manualInput').value='';
+    document.getElementById('modalOverlay').classList.add('hidden');
+    setStatus('พร้อมสแกน');
+  }
+
   document.addEventListener('keydown',function(e){
     if(currentMode!=='scanner'||isProcessing) return;
     if(document.activeElement===document.getElementById('manualInput')) return;
@@ -480,7 +491,9 @@
       return;
     }
     if(e.key.length===1){
-      scanBuffer+=e.key;document.getElementById('scanInput').value=scanBuffer;
+      scanBuffer+=e.key;
+      if(scanBuffer.length>30){scanBuffer='';} // auto-clear corrupted buffer
+      document.getElementById('scanInput').value=scanBuffer;
       clearTimeout(scanTimer);
       scanTimer=setTimeout(()=>{
         if(scanBuffer.length>5){const code=scanBuffer.trim();scanBuffer='';onScanSuccess(code);}
