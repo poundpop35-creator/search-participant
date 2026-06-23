@@ -130,6 +130,14 @@
       </div>
     </div>
 
+    <!-- ── COMBINED SHARE BAR ── -->
+    <div style="display:flex;justify-content:flex-end;margin-bottom:20px;">
+      <button id="shareBothBtn" onclick="shareBothImages()" style="display:inline-flex;align-items:center;gap:8px;padding:10px 22px;border-radius:12px;border:2px solid #1F3540;background:#1F3540;color:#fff;font-family:'Sarabun',sans-serif;font-size:0.88rem;font-weight:700;cursor:pointer;box-shadow:0 2px 10px rgba(31,53,64,0.18);">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        📤 แชร์รวม (ภายใน + ภายนอก)
+      </button>
+    </div>
+
     <!-- ── SUMMARY CARD ── -->
     <div class="dept-card" style="margin-bottom:16px;display:none;">
       <div class="dept-card-header" style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
@@ -1618,6 +1626,79 @@ async function shareTextSummary(day) {
   }
   try{ await navigator.clipboard.writeText(text); alert('คัดลอกข้อความแล้ว! 📋\nวางใน LINE ได้เลย'); }
   catch(e){ prompt('คัดลอกข้อความ:',text); }
+}
+
+async function shareBothImages() {
+  const btn = document.getElementById('shareBothBtn');
+  btn.disabled = true; btn.innerHTML = '⏳ กำลังสร้างรูป...';
+  try {
+    const now = new Date();
+    const dk = execDay ? `d${execDay}` : null;
+    const dl = execDay ? ['','24 มิ.ย.','25 มิ.ย.','26 มิ.ย.'][execDay] : 'รวม';
+    const dc = execDay ? ['','#2563eb','#7c3aed','#0891b2'][execDay] : '#1F3540';
+    const dayMult = execDay ? 1 : 3;
+    const dlFull = execDay ? ['','วันที่ 24 มิถุนายน 2569','วันที่ 25 มิถุนายน 2569','วันที่ 26 มิถุนายน 2569'][execDay] : 'รวม 3 วัน (24-26 มิถุนายน 2569)';
+
+    // ── Build internal A4 ──
+    document.getElementById('a4ExportTime').textContent = now.toLocaleString('th-TH',{timeZone:'Asia/Bangkok',dateStyle:'medium',timeStyle:'short'});
+    let idx=0, grandInt=0, grandTgt=0;
+    const deptRows = DEPTS.map(dept => {
+      const c = execMap[dept];
+      const count = dk ? c[dk] : (c.d1+c.d2+c.d3);
+      const target = (EXEC_TARGETS[dept]||0) * dayMult;
+      grandInt += count; grandTgt += target; idx++;
+      const bg = idx%2===0 ? '#eef5fa' : '#ffffff';
+      const pctHtml = target ? `${Math.round(count/target*100)}%` : '—';
+      const pctColor = !target ? '#475569' : (count/target>=1?'#16a34a':count/target>=0.8?'#65a30d':count/target>=0.5?'#d97706':'#dc2626');
+      return `<tr><td style="padding:8px 10px;font-size:11px;background:${bg};color:#475569;font-weight:700;">${idx}</td><td style="padding:8px 10px;font-size:12px;background:${bg};color:#1F3540;font-weight:600;">${dept}</td><td style="padding:8px 10px;font-size:12px;background:${bg};text-align:right;color:#475569;">${target>0?target.toLocaleString():'—'}</td><td style="padding:8px 10px;font-size:12px;background:${bg};text-align:right;font-weight:700;color:${dc};">${count>0?count.toLocaleString():'—'}</td><td style="padding:8px 10px;font-size:12px;background:${bg};text-align:right;font-weight:700;color:${pctColor};">${pctHtml}</td></tr>`;
+    });
+    const grandPct = grandTgt ? Math.round(grandInt/grandTgt*100)+'%' : '—';
+    deptRows.push(`<tr style="background:#dcfce7;border-top:2px solid #86efac;"><td colspan="2" style="padding:10px 12px;font-size:13px;font-weight:800;color:#15803d;">รวมบุคลากรภายใน</td><td style="padding:10px 12px;font-size:12px;font-weight:700;color:#166534;text-align:right;">${grandTgt>0?grandTgt.toLocaleString():'—'}</td><td style="padding:10px 12px;font-size:13px;font-weight:800;color:#15803d;text-align:right;">${grandInt.toLocaleString()}</td><td style="padding:10px 12px;font-size:13px;font-weight:800;color:#15803d;text-align:right;">${grandPct}</td></tr>`);
+    document.getElementById('a4TableSlot').innerHTML = `<table style="width:100%;border-collapse:collapse;font-family:'Sarabun',sans-serif;"><thead><tr><th style="background:#1F3540;padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:#fff;border:none;width:32px;">#</th><th style="background:#1F3540;padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:#fff;border:none;">หน่วยงาน</th><th style="background:#1F3540;padding:10px 12px;text-align:right;font-size:11px;font-weight:700;color:#94a3b8;border:none;min-width:70px;">เป้าหมาย</th><th style="background:#1F3540;padding:10px 12px;text-align:right;font-size:11px;font-weight:700;color:#e2e8f0;border:none;min-width:70px;">${dl}</th><th style="background:#1F3540;padding:10px 12px;text-align:right;font-size:11px;font-weight:700;color:#e2e8f0;border:none;min-width:48px;">%</th></tr></thead><tbody>${deptRows.join('')}</tbody></table>`;
+
+    // ── Build external zone A4 ──
+    const zoneCounts = getExtZoneCounts();
+    const extTotal = Object.values(zoneCounts).reduce((s,n)=>s+n,0);
+    const extDc = execDay ? ['','#2563eb','#7c3aed','#0891b2'][execDay] : '#1d4ed8';
+    const extRows = [];
+    for(let z=1;z<=13;z++){
+      const cnt=zoneCounts[z]||0;
+      const color=ZONE_COLORS_EXEC[z%ZONE_COLORS_EXEC.length];
+      const bg=(z%2===0)?'#f8fafc':'#ffffff';
+      extRows.push(`<tr><td style="padding:9px 12px;font-size:12.5px;background:${bg};display:flex;align-items:center;gap:8px;"><span style="display:inline-block;width:11px;height:11px;border-radius:2px;background:${color};flex-shrink:0;"></span>${ZONE_NAMES_EXEC[z]||'เขต '+z}</td><td style="padding:9px 12px;font-size:13px;background:${bg};text-align:right;font-weight:700;color:${extDc};">${cnt>0?cnt.toLocaleString():'—'}</td></tr>`);
+    }
+    extRows.push(`<tr style="background:#dbeafe;border-top:2px solid #93c5fd;"><td style="padding:11px 12px;font-size:13px;font-weight:800;color:#1d4ed8;">รวมบุคลากรภายนอก</td><td style="padding:11px 12px;font-size:14px;font-weight:800;color:#1d4ed8;text-align:right;">${extTotal.toLocaleString()}</td></tr>`);
+    document.getElementById('a4ExtZoneExportTime').textContent = now.toLocaleString('th-TH',{timeZone:'Asia/Bangkok',dateStyle:'medium',timeStyle:'short'});
+    document.getElementById('a4ExtZoneColLabel').textContent = dl;
+    document.getElementById('a4ExtZoneTableSlot').innerHTML = `<table style="width:100%;border-collapse:collapse;font-family:'Sarabun',sans-serif;"><thead><tr><th style="background:#1F3540;padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:#fff;border:none;">เขตสุขภาพ</th><th style="background:#1F3540;padding:10px 12px;text-align:right;font-size:11px;font-weight:700;color:#93c5fd;border:none;min-width:80px;">${dl}</th></tr></thead><tbody>${extRows.join('')}</tbody></table>`;
+
+    // ── Capture both ──
+    const [canvas1, canvas2] = await Promise.all([
+      html2canvas(document.getElementById('a4Export'),{scale:2,useCORS:true,backgroundColor:'#ffffff',logging:false,windowWidth:794}),
+      html2canvas(document.getElementById('a4ExtZoneExport'),{scale:2,useCORS:true,backgroundColor:'#ffffff',logging:false,windowWidth:794})
+    ]);
+    const [blob1, blob2] = await Promise.all([
+      new Promise(r=>canvas1.toBlob(r,'image/png')),
+      new Promise(r=>canvas2.toBlob(r,'image/png'))
+    ]);
+    const file1 = new File([blob1],'dept-internal-'+now.toISOString().slice(0,10)+'.png',{type:'image/png'});
+    const file2 = new File([blob2],'ext-zone-'+now.toISOString().slice(0,10)+'.png',{type:'image/png'});
+
+    // ── Combined text ──
+    const nowStr = now.toLocaleString('th-TH',{timeZone:'Asia/Bangkok',hour:'2-digit',minute:'2-digit'});
+    const grandAll = grandInt + extTotal;
+    const shareText = `ประชุมวิชาการวิทยาศาสตร์การแพทย์ ครั้งที่ 34\n📅 ${dlFull}\n\n👥 บุคลากรภายในกรม: ${grandInt.toLocaleString()} คน\n👥 ภายนอกกรม: ${extTotal.toLocaleString()} คน\nรวม ${grandAll.toLocaleString()} คน\n\n⏰ ณ เวลา ${nowStr} น.`;
+
+    // ── Share ──
+    if(navigator.canShare && navigator.canShare({files:[file1,file2]})){
+      try{ await navigator.share({files:[file1,file2],text:shareText}); }
+      catch(e){ if(e.name!=='AbortError'){ [blob1,blob2].forEach((b,i)=>{const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=[file1,file2][i].name;a.click();}); } }
+    } else {
+      [blob1,blob2].forEach((b,i)=>{const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=[file1,file2][i].name;a.click();});
+      try{ await navigator.clipboard.writeText(shareText); } catch(e){}
+    }
+  } catch(e){ alert('ไม่สามารถสร้างรูปภาพได้: '+e.message); }
+  finally{ btn.innerHTML='📤 แชร์รวม (ภายใน + ภายนอก)'; btn.disabled=false; }
 }
 </script>
 
