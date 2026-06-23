@@ -1672,16 +1672,13 @@ async function shareBothImages() {
     document.getElementById('a4ExtZoneColLabel').textContent = dl;
     document.getElementById('a4ExtZoneTableSlot').innerHTML = `<table style="width:100%;border-collapse:collapse;font-family:'Sarabun',sans-serif;"><thead><tr><th style="background:#1F3540;padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:#fff;border:none;">เขตสุขภาพ</th><th style="background:#1F3540;padding:10px 12px;text-align:right;font-size:11px;font-weight:700;color:#93c5fd;border:none;min-width:80px;">${dl}</th></tr></thead><tbody>${extRows.join('')}</tbody></table>`;
 
-    // ── Capture both ──
-    const [canvas1, canvas2] = await Promise.all([
-      html2canvas(document.getElementById('a4Export'),{scale:2,useCORS:true,backgroundColor:'#ffffff',logging:false,windowWidth:794}),
-      html2canvas(document.getElementById('a4ExtZoneExport'),{scale:2,useCORS:true,backgroundColor:'#ffffff',logging:false,windowWidth:794})
-    ]);
-    const [blob1, blob2] = await Promise.all([
-      new Promise(r=>canvas1.toBlob(r,'image/png')),
-      new Promise(r=>canvas2.toBlob(r,'image/png'))
-    ]);
+    // ── Capture sequentially (internal first, then external) ──
+    const canvas1 = await html2canvas(document.getElementById('a4Export'),{scale:2,useCORS:true,backgroundColor:'#ffffff',logging:false,windowWidth:794});
+    const blob1 = await new Promise(r=>canvas1.toBlob(r,'image/png'));
     const file1 = new File([blob1],'dept-internal-'+now.toISOString().slice(0,10)+'.png',{type:'image/png'});
+
+    const canvas2 = await html2canvas(document.getElementById('a4ExtZoneExport'),{scale:2,useCORS:true,backgroundColor:'#ffffff',logging:false,windowWidth:794});
+    const blob2 = await new Promise(r=>canvas2.toBlob(r,'image/png'));
     const file2 = new File([blob2],'ext-zone-'+now.toISOString().slice(0,10)+'.png',{type:'image/png'});
 
     // ── Combined text ──
@@ -1689,12 +1686,12 @@ async function shareBothImages() {
     const grandAll = grandInt + extTotal;
     const shareText = `ประชุมวิชาการวิทยาศาสตร์การแพทย์ ครั้งที่ 34\n📅 ${dlFull}\n\n🧑‍🔬 บุคลากรภายในกรม: ${grandInt.toLocaleString()} คน\n🏃‍➡️ ภายนอกกรม: ${extTotal.toLocaleString()} คน\nรวม ${grandAll.toLocaleString()} คน\n\n⏰ ณ เวลา ${nowStr} น.`;
 
-    // ── Share ──
-    if(navigator.canShare && navigator.canShare({files:[file2,file1]})){
-      try{ await navigator.share({files:[file2,file1],text:shareText}); }
-      catch(e){ if(e.name!=='AbortError'){ [blob1,blob2].forEach((b,i)=>{const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=[file1,file2][i].name;a.click();}); } }
+    // ── Share (internal first, external second) ──
+    if(navigator.canShare && navigator.canShare({files:[file1,file2]})){
+      try{ await navigator.share({files:[file1,file2],text:shareText}); }
+      catch(e){ if(e.name!=='AbortError'){ [file1,file2].forEach(f=>{const a=document.createElement('a');a.href=URL.createObjectURL(f);a.download=f.name;a.click();}); } }
     } else {
-      [blob1,blob2].forEach((b,i)=>{const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=[file1,file2][i].name;a.click();});
+      [file1,file2].forEach(f=>{const a=document.createElement('a');a.href=URL.createObjectURL(f);a.download=f.name;a.click();});
       try{ await navigator.clipboard.writeText(shareText); } catch(e){}
     }
   } catch(e){ alert('ไม่สามารถสร้างรูปภาพได้: '+e.message); }
