@@ -277,7 +277,7 @@
   </div>
 
   <a id="adminPanelBtn" class="btn-nav secondary" href="admin-control.html" style="display:none;">⚙️ Control Panel</a>
-  <a id="dashboardBtn" class="btn-nav primary" href="dashboard.html">Dashboard (สำหรับ staff)</a>
+  <a id="dashboardBtn" class="btn-nav primary" href="dashboard.html" style="display:none;">Dashboard (สำหรับ admin)</a>
   <a id="bagDashboardBtn" class="btn-nav secondary" href="bag-dashboard.html">DashBoard ผู้มารับกระเป๋าหรือเสื้อ (ก่อนวันงาน)</a>
   <a class="btn-nav secondary" href="public.html">ดู Live Dashboard (สาธารณะ)</a>
   <a class="btn-nav secondary" href="qr-lookup.html" style="background:#fff7ed;border-color:#fcd9aa;color:#c2410c;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px;"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>ค้นหา QR Code ของคุณ</a>
@@ -357,10 +357,9 @@
     const isBangkok2026June=y===2026&&m===6;
     const isAdmin=sessionStorage.getItem('dmsc_role')==='admin';
     const isStaff=sessionStorage.getItem('dmsc_role')==='staff';
-    if(isAdmin) document.getElementById('adminPanelBtn').style.display='block';
-    if(isStaff){
-      document.getElementById('dashboardBtn').style.display='none';
-      document.getElementById('bagDashboardBtn').style.display='none';
+    if(isAdmin){
+      document.getElementById('adminPanelBtn').style.display='block';
+      document.getElementById('dashboardBtn').style.display='block';
     }
     const sel=document.getElementById('day');
     const bagOpt=sel.querySelector('option[value="bag"]');

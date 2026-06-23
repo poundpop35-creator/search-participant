@@ -573,7 +573,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <!-- List content -->
         <div id="pListContent">
         <div style="padding:12px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-          <input class="sbox" id="pSearch" placeholder="ค้นหาชื่อ / หน่วยงาน" oninput="renderParticipants()" style="flex:1;min-width:160px;">
+          <input class="sbox" id="pSearch" placeholder="ค้นหาชื่อ / หน่วยงาน / เลขบัตรประชาชน" oninput="renderParticipants()" style="flex:1;min-width:160px;">
           <span id="pCountBar" style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:20px;padding:3px 12px;font-size:0.8rem;color:#1e40af;white-space:nowrap;flex-shrink:0;">พบ <b id="pCountFiltered">-</b> ราย <span id="pCountBreakdown" style="color:#94a3b8;font-size:0.75rem;"></span></span>
         </div>
         <div class="p-filter-bar">
@@ -654,10 +654,10 @@ document.addEventListener('DOMContentLoaded', function() {
               <tr>
                 <th>#</th><th>ชื่อ-นามสกุล</th><th>หน่วยงาน</th>
                 <th>จังหวัด</th><th>เขตสุขภาพ</th>
-                <th>ประเภทการเข้าร่วม</th><th>TAG</th>
+                <th>ประเภทการเข้าร่วม</th><th>TAG</th><th>บัตรประชาชน</th>
               </tr>
             </thead>
-            <tbody id="pBody"><tr><td colspan="7" class="loading-td">กำลังโหลด...</td></tr></tbody>
+            <tbody id="pBody"><tr><td colspan="8" class="loading-td">กำลังโหลด...</td></tr></tbody>
           </table>
         </div>
         <div class="pager">
@@ -1047,7 +1047,7 @@ async function loadAll(){
 
 async function loadParticipants(){
   const yr=encodeURIComponent(activeYear);
-  allParticipants=await fetchAll(`/rest/v1/participants?event_year=eq.${yr}&select=id,prefix,first_name,last_name,dept,ext_dept,internal_external,participation_type,tag,province,is_walkin&order=last_name.asc`);
+  allParticipants=await fetchAll(`/rest/v1/participants?event_year=eq.${yr}&select=id,prefix,first_name,last_name,dept,ext_dept,internal_external,participation_type,tag,province,is_walkin,id_card&order=last_name.asc`);
   const preC=allParticipants.filter(p=>!p.is_walkin).length;
   const wiC=allParticipants.filter(p=>p.is_walkin===true).length;
   document.getElementById('pRegCount').textContent=`(ล่วงหน้า ${preC.toLocaleString()} | Walk-in ${wiC.toLocaleString()})`;
@@ -1230,7 +1230,8 @@ function pMatchRow(p,q){
   const prov=(p.province||'').trim();
   const ptNorm=(p.participation_type||'').replace(/\s+/g,' ').trim();
   const name=buildName(p);
-  const matchQ=!q||name.toLowerCase().includes(q)||dept.toLowerCase().includes(q)||(prov&&prov.toLowerCase().includes(q));
+  const idCard=(p.id_card||'').trim();
+  const matchQ=!q||name.toLowerCase().includes(q)||dept.toLowerCase().includes(q)||(prov&&prov.toLowerCase().includes(q))||idCard.includes(q);
   const intExtVal=isIn?'ภายใน':'ภายนอก';
   const matchIntExt=pFSelIntExt.size===0||pFSelIntExt.has(intExtVal);
   const matchDept=pFSelDept.size===0||pFSelDept.has(dept);
@@ -1268,7 +1269,7 @@ function renderParticipants(){
   document.getElementById('pRegInfo').textContent=`แสดง ${tot===0?0:start+1}–${Math.min(start+P_PAGE,tot)} จาก ${tot.toLocaleString()} รายการ`;
   document.getElementById('pPrev').disabled=curPPage<=1;
   document.getElementById('pNext').disabled=curPPage>=totPages;
-  if(!page.length){document.getElementById('pBody').innerHTML='<tr><td colspan="7" class="loading-td">ไม่พบข้อมูล</td></tr>';return;}
+  if(!page.length){document.getElementById('pBody').innerHTML='<tr><td colspan="8" class="loading-td">ไม่พบข้อมูล</td></tr>';return;}
   document.getElementById('pBody').innerHTML=page.map((p,i)=>{
     const name=buildName(p);
     const isIn=(p.internal_external||'').includes('ภายใน');
@@ -1277,6 +1278,7 @@ function renderParticipants(){
     const zone=prov!=='-'?getZone(prov):null;
     const zoneBadge=zone?`<span class="zone-badge">เขต ${zone}</span>`:'-';
     const ptNorm=(p.participation_type||'').replace(/\s+/g,' ').trim()||'-';
+    const idCard=(p.id_card||'').trim()||'-';
     return`<tr>
       <td>${start+i+1}</td>
       <td>${name}</td>
@@ -1285,6 +1287,7 @@ function renderParticipants(){
       <td>${zoneBadge}</td>
       <td>${ptNorm}</td>
       <td>${p.tag||'-'}</td>
+      <td style="font-family:monospace;font-size:0.82rem;letter-spacing:0.03em;">${idCard}</td>
     </tr>`;
   }).join('');
 }
@@ -2029,7 +2032,8 @@ function exportParticipantsExcel(){
       'ประเภทบุคคล':isIn?'บุคลากรภายใน':'บุคคลภายนอก',
       'ประเภทการเข้าร่วม':(p.participation_type||'').trim(),
       'TAG':(p.tag||'').trim(),
-      'ประเภท':p.is_walkin?'Walk-in':'ลงทะเบียนล่วงหน้า'};
+      'ประเภท':p.is_walkin?'Walk-in':'ลงทะเบียนล่วงหน้า',
+      'เลขบัตรประชาชน':(p.id_card||'').trim()};
   });
   if(!rows.length){alert('ไม่มีข้อมูล');return;}
   const ws=XLSX.utils.json_to_sheet(rows);
