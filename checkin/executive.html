@@ -61,6 +61,7 @@
     .scroll-wrap{overflow-x:auto;}
     table{width:100%;border-collapse:collapse;}
     thead{position:sticky;top:0;z-index:1;}
+    #a4Export thead,#a4ExtExport thead,#a4ExtZoneExport thead,#a4ZoneExport thead,#summaryExport thead{position:static!important;}
     th{background:#C8DDE8;padding:10px 14px;text-align:left;font-size:0.72rem;font-weight:700;color:#1F3540;text-transform:uppercase;letter-spacing:0.04em;border-bottom:2px solid #ACC4D0;}
     th.num{text-align:right;}
     td{padding:10px 14px;font-size:0.86rem;border-bottom:1px solid #ddeaf2;color:#1F3540;}
@@ -1706,10 +1707,6 @@ async function shareBothImages() {
     </div>
   </div>
   <div id="a4TableSlot"></div>
-  <div style="margin-top:14px;text-align:center;font-family:'Sarabun',sans-serif;line-height:1.6;">
-    <div style="font-size:10px;color:#b0c4ce;letter-spacing:0.04em;">กรมวิทยาศาสตร์การแพทย์ · Department of Medical Sciences</div>
-    <div style="font-size:9.5px;color:#b0c4ce;">© 2026 Built by <span style="font-family:'Dancing Script',cursive;font-weight:700;font-size:1.15em;color:#0ABAB5;">Saharat Phetrnitchakun</span> · <span style="font-weight:800;"><span style="color:#2563eb;">D</span><span style="color:#f59e0b;">P</span><span style="color:#16a34a;">T</span><span style="color:#dc2626;">C</span></span> · DMSc</div>
-  </div>
 </div>
 
 <!-- A4 external export container — off-screen -->
@@ -1725,10 +1722,6 @@ async function shareBothImages() {
     </div>
   </div>
   <div id="a4ExtTableSlot"></div>
-  <div style="margin-top:14px;text-align:center;font-family:'Sarabun',sans-serif;line-height:1.6;">
-    <div style="font-size:10px;color:#b0c4ce;letter-spacing:0.04em;">กรมวิทยาศาสตร์การแพทย์ · Department of Medical Sciences</div>
-    <div style="font-size:9.5px;color:#b0c4ce;">© 2026 Built by <span style="font-family:'Dancing Script',cursive;font-weight:700;font-size:1.15em;color:#0ABAB5;">Saharat Phetrnitchakun</span> · <span style="font-weight:800;"><span style="color:#2563eb;">D</span><span style="color:#f59e0b;">P</span><span style="color:#16a34a;">T</span><span style="color:#dc2626;">C</span></span> · DMSc</div>
-  </div>
 </div>
 
 <!-- A4 external zone table export — off-screen -->
@@ -1745,10 +1738,6 @@ async function shareBothImages() {
     </div>
   </div>
   <div id="a4ExtZoneTableSlot"></div>
-  <div style="margin-top:14px;text-align:center;font-family:'Sarabun',sans-serif;line-height:1.6;">
-    <div style="font-size:10px;color:#b0c4ce;letter-spacing:0.04em;">กรมวิทยาศาสตร์การแพทย์ · Department of Medical Sciences</div>
-    <div style="font-size:9.5px;color:#b0c4ce;">© 2026 Built by <span style="font-family:'Dancing Script',cursive;font-weight:700;font-size:1.15em;color:#0ABAB5;">Saharat Phetrnitchakun</span> · <span style="font-weight:800;"><span style="color:#2563eb;">D</span><span style="color:#f59e0b;">P</span><span style="color:#16a34a;">T</span><span style="color:#dc2626;">C</span></span> · DMSc</div>
-  </div>
 </div>
 
 <!-- A4 zone map export — off-screen -->
@@ -1766,10 +1755,6 @@ async function shareBothImages() {
   <div style="display:flex;gap:20px;align-items:flex-start;">
     <div id="a4ZoneMapSlot" style="flex:0 0 280px;"></div>
     <div id="a4ZoneTableSlot" style="flex:1;"></div>
-  </div>
-  <div style="margin-top:14px;text-align:center;font-family:'Sarabun',sans-serif;line-height:1.6;">
-    <div style="font-size:10px;color:#b0c4ce;letter-spacing:0.04em;">กรมวิทยาศาสตร์การแพทย์ · Department of Medical Sciences</div>
-    <div style="font-size:9.5px;color:#b0c4ce;">© 2026 Built by <span style="font-family:'Dancing Script',cursive;font-weight:700;font-size:1.15em;color:#0ABAB5;">Saharat Phetrnitchakun</span> · <span style="font-weight:800;"><span style="color:#2563eb;">D</span><span style="color:#f59e0b;">P</span><span style="color:#16a34a;">T</span><span style="color:#dc2626;">C</span></span> · DMSc</div>
   </div>
 </div>
 
