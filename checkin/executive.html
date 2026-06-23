@@ -267,6 +267,7 @@ function num(v) {
 
 let execDay = null;
 let execMap = {};
+let execExternal = {d1:0,d2:0,d3:0};
 let execView = 'table';
 let barChartInst = null, trendChartInst = null;
 let execRows = [];
@@ -302,6 +303,7 @@ function renderExecTable() {
       <th class="num" style="min-width:60px;">รวม</th>
     </tr>`;
     let idx = 0;
+    const extTot = execExternal.d1+execExternal.d2+execExternal.d3;
     document.getElementById('execDeptBody').innerHTML = DEPTS.map(dept => {
       const c = execMap[dept]; idx++;
       const tot = c.d1 + c.d2 + c.d3;
@@ -313,12 +315,18 @@ function renderExecTable() {
         <td style="text-align:right;" class="d3-num">${c.d3||'<span class="zero">—</span>'}</td>
         <td class="total-cell">${tot>0?tot.toLocaleString():'<span class="zero">0</span>'}</td>
       </tr>`;
-    }).join('');
+    }).join('') + `<tr style="background:#f0f9f0;border-top:2px solid #86efac;">
+        <td style="font-weight:700;color:#94a3b8;font-size:0.8rem;">—</td>
+        <td class="dept-name-cell" style="color:#15803d;font-style:italic;">บุคคลภายนอก (รวม)</td>
+        <td style="text-align:right;font-weight:700;color:#15803d;">${execExternal.d1||'<span class="zero">—</span>'}</td>
+        <td style="text-align:right;font-weight:700;color:#15803d;">${execExternal.d2||'<span class="zero">—</span>'}</td>
+        <td style="text-align:right;font-weight:700;color:#15803d;">${execExternal.d3||'<span class="zero">—</span>'}</td>
+        <td class="total-cell" style="color:#15803d;">${extTot>0?extTot.toLocaleString():'<span class="zero">0</span>'}</td>
+      </tr>`;
   } else {
     const dk = `d${execDay}`;
     const dc = ['','#2563eb','#7c3aed','#0891b2'][execDay];
     const dl = ['','24 มิ.ย.','25 มิ.ย.','26 มิ.ย.'][execDay];
-    const maxC = Math.max(1, ...DEPTS.map(d => execMap[d][dk]));
     document.getElementById('execTableHead').innerHTML = `<tr>
       <th style="width:36px;">#</th>
       <th>หน่วยงาน</th>
@@ -332,7 +340,11 @@ function renderExecTable() {
         <td class="dept-name-cell">${dept}</td>
         <td class="total-cell" style="color:${dc};">${count>0?count.toLocaleString():'<span class="zero">—</span>'}</td>
       </tr>`;
-    }).join('');
+    }).join('') + `<tr style="background:#f0f9f0;border-top:2px solid #86efac;">
+        <td style="font-weight:700;color:#94a3b8;font-size:0.8rem;">—</td>
+        <td class="dept-name-cell" style="color:#15803d;font-style:italic;">บุคคลภายนอก (รวม)</td>
+        <td class="total-cell" style="color:#15803d;">${execExternal[dk]>0?execExternal[dk].toLocaleString():'<span class="zero">—</span>'}</td>
+      </tr>`;
   }
   if(execView === 'chart') renderExecChart();
   renderTrendChart();
@@ -503,14 +515,24 @@ async function loadData() {
     execMap = {};
     DEPTS.forEach(d => { execMap[d] = {d1:0, d2:0, d3:0}; });
 
+    execExternal = {d1:0,d2:0,d3:0};
     cleanRows.forEach(r => {
       const p = r.participants;
-      if(!p || p.is_walkin || !(p.internal_external||'').includes('ภายใน')) return;
-      const dept = p.dept || '';
-      if(!deptSet.has(dept)) return;
-      if(r.day === 1) execMap[dept].d1++;
-      else if(r.day === 2) execMap[dept].d2++;
-      else if(r.day === 3) execMap[dept].d3++;
+      if(!p) return;
+      const isIn = (p.internal_external||'').includes('ภายใน');
+      const isOut = (p.internal_external||'').includes('ภายนอก');
+      if(isIn) {
+        const dept = p.dept || '';
+        if(deptSet.has(dept)) {
+          if(r.day === 1) execMap[dept].d1++;
+          else if(r.day === 2) execMap[dept].d2++;
+          else if(r.day === 3) execMap[dept].d3++;
+        }
+      } else if(isOut) {
+        if(r.day === 1) execExternal.d1++;
+        else if(r.day === 2) execExternal.d2++;
+        else if(r.day === 3) execExternal.d3++;
+      }
     });
 
     renderExecTable();
