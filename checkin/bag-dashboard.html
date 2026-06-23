@@ -1038,7 +1038,9 @@ function renderTable(){
 function changePage(d){curPage+=d;renderTable();window.scrollTo({top:0,behavior:'smooth'});}
 
 async function clearBagSingle(id, name){
-  if(!confirm(`ยืนยันล้างข้อมูลกระเป๋าของ\n"${name}"\nสถานะจะกลับเป็น "ยังไม่รับ"`)) return;
+  const pw=prompt(`ล้างข้อมูลกระเป๋าของ\n"${name}"\n\nกรอกรหัสผ่านเพื่อยืนยัน:`);
+  if(pw===null) return;
+  if(pw!=='99037'){ alert('❌ รหัสผ่านไม่ถูกต้อง'); return; }
   try{
     const res=await fetch(`${SB_URL}/rest/v1/participants?id=eq.${id}`,{
       method:'PATCH',
@@ -1147,7 +1149,9 @@ function renderShirtTable(){
 function changeShirtPage(d){shirtPage+=d;renderShirtTable();window.scrollTo({top:0,behavior:'smooth'});}
 
 async function clearShirtSingle(id, name){
-  if(!confirm(`ยืนยันล้างข้อมูลเสื้อของ\n"${name}"\nสถานะจะกลับเป็น "ยังไม่รับ"`)) return;
+  const pw=prompt(`ล้างข้อมูลเสื้อของ\n"${name}"\n\nกรอกรหัสผ่านเพื่อยืนยัน:`);
+  if(pw===null) return;
+  if(pw!=='99037'){ alert('❌ รหัสผ่านไม่ถูกต้อง'); return; }
   try{
     const res=await fetch(`${SB_URL}/rest/v1/participants?id=eq.${id}`,{
       method:'PATCH',
