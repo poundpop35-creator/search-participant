@@ -1680,9 +1680,9 @@ async function shareBothImages() {
     const grandAll = grandInt + extTotal;
     const shareText = `ประชุมวิชาการวิทยาศาสตร์การแพทย์ ครั้งที่ 34\n📅 ${dlFull}\n\n🧑‍🔬 บุคลากรภายในกรม: ${grandInt.toLocaleString()} คน\n🏃 ภายนอกกรม: ${extTotal.toLocaleString()} คน\nรวม ${grandAll.toLocaleString()} คน\n\n⏰ ณ เวลา ${nowStr} น.`;
 
-    // ── Share (internal first, external second) ──
-    if(navigator.canShare && navigator.canShare({files:[file1,file2]})){
-      try{ await navigator.share({files:[file1,file2],text:shareText}); }
+    // ── Share (pass external first → LINE reverses → internal shows on top) ──
+    if(navigator.canShare && navigator.canShare({files:[file2,file1]})){
+      try{ await navigator.share({files:[file2,file1],text:shareText}); }
       catch(e){ if(e.name!=='AbortError'){ [file1,file2].forEach(f=>{const a=document.createElement('a');a.href=URL.createObjectURL(f);a.download=f.name;a.click();}); } }
     } else {
       [file1,file2].forEach(f=>{const a=document.createElement('a');a.href=URL.createObjectURL(f);a.download=f.name;a.click();});
