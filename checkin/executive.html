@@ -248,6 +248,35 @@
       </div>
     </div>
 
+    <!-- External zone table card -->
+    <div class="dept-card" id="extZoneNewCard" style="margin-bottom:16px;">
+      <div class="dept-card-header" style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+        <div>
+          <div class="dept-card-title">บุคลากรภายนอกกรม แยกตามเขตสุขภาพ</div>
+          <div class="dept-card-sub" id="extZoneCardSub">ข้อมูลจากการเช็คอินจริง — อัปเดตอัตโนมัติทุก 1 นาที</div>
+        </div>
+        <div style="display:flex;gap:6px;flex-shrink:0;">
+          <button class="share-btn" id="shareExtZoneImgBtn" onclick="shareExtZoneImage()" style="margin-top:0;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            📤 แชร์รูป
+          </button>
+          <button class="share-btn" id="shareExtZoneTextBtn" onclick="shareExtZoneText()" style="margin-top:0;">📋 ข้อความ</button>
+        </div>
+      </div>
+      <div class="scroll-wrap">
+        <table>
+          <thead id="extZoneTableHead">
+            <tr>
+              <th>เขตสุขภาพ</th>
+              <th class="num">จำนวน (คน)</th>
+              <th class="num">%</th>
+            </tr>
+          </thead>
+          <tbody id="extZoneTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
     <div class="dept-card" id="deptShareCard">
       <div class="dept-card-header" style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;">
         <div>
@@ -484,6 +513,7 @@ let execDay = null;
 let execMap = {};
 let execExternal = {d1:0,d2:0,d3:0};
 let execExtMap = {};
+let execExtProvByDay = {d1:{},d2:{},d3:{}};
 let execView = 'table';
 let barChartInst = null, trendChartInst = null;
 let execRows = [];
@@ -568,8 +598,48 @@ function renderExecTable() {
   </tr>`);
   document.getElementById('execDeptBody').innerHTML = rows.join('');
   renderExecExtTable();
+  renderExtZoneCard();
   if(execView === 'chart') renderExecChart();
   renderTrendChart();
+}
+
+function getExtZoneCounts() {
+  const dk = execDay ? `d${execDay}` : null;
+  const provCounts = dk ? execExtProvByDay[dk] : (() => {
+    const c = {};
+    ['d1','d2','d3'].forEach(d => Object.entries(execExtProvByDay[d]).forEach(([p,n]) => c[p]=(c[p]||0)+n));
+    return c;
+  })();
+  const z = {};
+  Object.entries(provCounts).forEach(([prov,cnt]) => { const zn=getZoneExec(prov)||0; z[zn]=(z[zn]||0)+cnt; });
+  return z;
+}
+
+function renderExtZoneCard() {
+  const dl = execDay ? ['','24 มิ.ย.','25 มิ.ย.','26 มิ.ย.'][execDay] : 'รวม (ทุกวัน)';
+  const dc = execDay ? ['','#2563eb','#7c3aed','#0891b2'][execDay] : '#1d4ed8';
+  const zoneCounts = getExtZoneCounts();
+  const total = Object.values(zoneCounts).reduce((s,n)=>s+n,0);
+  const rows = [];
+  for(let z=1;z<=13;z++){
+    const cnt=zoneCounts[z]||0;
+    const pct=total?Math.round(cnt/total*100):0;
+    const color=ZONE_COLORS_EXEC[z%ZONE_COLORS_EXEC.length];
+    rows.push(`<tr>
+      <td style="display:flex;align-items:center;gap:8px;"><span style="display:inline-block;width:11px;height:11px;border-radius:2px;background:${color};flex-shrink:0;"></span>${ZONE_NAMES_EXEC[z]||'เขต '+z}</td>
+      <td class="total-cell" style="color:${dc};">${cnt>0?cnt.toLocaleString():'<span class="zero">—</span>'}</td>
+      <td class="total-cell" style="color:#64748b;font-size:0.85rem;">${cnt>0?pct+'%':'—'}</td>
+    </tr>`);
+  }
+  rows.push(`<tr style="background:#dbeafe;border-top:2px solid #93c5fd;">
+    <td style="padding:11px 14px;font-weight:800;color:#1d4ed8;">รวมบุคลากรภายนอก</td>
+    <td style="text-align:right;padding:11px 14px;font-weight:800;font-size:1.1rem;color:#1d4ed8;">${total.toLocaleString()}</td>
+    <td style="text-align:right;padding:11px 14px;color:#93c5fd;">100%</td>
+  </tr>`);
+  document.getElementById('extZoneTableHead').innerHTML=`<tr><th>เขตสุขภาพ</th><th class="num" style="color:${dc};">${dl} (คน)</th><th class="num">%</th></tr>`;
+  document.getElementById('extZoneTableBody').innerHTML=rows.join('');
+  const sub=document.getElementById('extZoneCardSub');
+  if(sub) sub.textContent=`${dl} — บุคลากรภายนอก ${total.toLocaleString()} คน`;
 }
 
 function renderExecExtTable() {
@@ -1226,6 +1296,7 @@ async function loadData() {
 
     execExternal = {d1:0,d2:0,d3:0};
     execExtMap = {};
+    execExtProvByDay = {d1:{},d2:{},d3:{}};
     cleanRows.forEach(r => {
       const p = r.participants;
       if(!p) return;
@@ -1247,6 +1318,8 @@ async function loadData() {
         if(r.day === 1) execExtMap[extDept].d1++;
         else if(r.day === 2) execExtMap[extDept].d2++;
         else if(r.day === 3) execExtMap[extDept].d3++;
+        const prov = (p.province||'').trim();
+        if(prov) { const dk2=r.day===1?'d1':r.day===2?'d2':'d3'; execExtProvByDay[dk2][prov]=(execExtProvByDay[dk2][prov]||0)+1; }
       }
     });
 
@@ -1346,6 +1419,64 @@ async function shareDeptTable() {
     btn.innerHTML = '📤 แชร์รูป';
     btn.disabled = false;
   }
+}
+
+async function shareExtZoneText() {
+  const btn = document.getElementById('shareExtZoneTextBtn');
+  btn.disabled = true;
+  try {
+    const zoneCounts = getExtZoneCounts();
+    const total = Object.values(zoneCounts).reduce((s,n)=>s+n,0);
+    const dl = execDay ? ['','วันที่ 24 มิถุนายน 2569','วันที่ 25 มิถุนายน 2569','วันที่ 26 มิถุนายน 2569'][execDay] : 'รวม 3 วัน (24-26 มิถุนายน 2569)';
+    const now = new Date().toLocaleString('th-TH',{timeZone:'Asia/Bangkok',hour:'2-digit',minute:'2-digit'});
+    const lines = [];
+    for(let z=1;z<=13;z++){ const cnt=zoneCounts[z]||0; if(cnt) lines.push(`- ${ZONE_NAMES_EXEC[z]||'เขต '+z}: ${cnt.toLocaleString()} คน`); }
+    const text = `สรุปจำนวนบุคลากรภายนอกกรม แยกตามเขตสุขภาพ\nประชุมวิชาการวิทยาศาสตร์การแพทย์ ครั้งที่ 34\n\n${dl}\n${lines.join('\n')}\n\nรวมบุคลากรภายนอก ${total.toLocaleString()} คน\n\nข้อมูล ณ เวลา ${now} น.`;
+    if(navigator.share){ await navigator.share({text}); }
+    else { await navigator.clipboard.writeText(text); alert('คัดลอกข้อความแล้ว!'); }
+  } catch(e){ if(e.name!=='AbortError') alert('เกิดข้อผิดพลาด: '+e.message); }
+  finally { btn.disabled=false; }
+}
+
+async function shareExtZoneImage() {
+  const btn = document.getElementById('shareExtZoneImgBtn');
+  btn.disabled = true; btn.innerHTML = '⏳ กำลังสร้างรูป...';
+  try {
+    const now = new Date();
+    const zoneCounts = getExtZoneCounts();
+    const total = Object.values(zoneCounts).reduce((s,n)=>s+n,0);
+    const dl = execDay ? ['','24 มิ.ย. 2569','25 มิ.ย. 2569','26 มิ.ย. 2569'][execDay] : 'รวม 3 วัน';
+    const dc = execDay ? ['','#2563eb','#7c3aed','#0891b2'][execDay] : '#1d4ed8';
+
+    const deptRows = [];
+    for(let z=1;z<=13;z++){
+      const cnt=zoneCounts[z]||0;
+      const pct=total?Math.round(cnt/total*100):0;
+      const color=ZONE_COLORS_EXEC[z%ZONE_COLORS_EXEC.length];
+      const bg=(z%2===0)?'#f8fafc':'#ffffff';
+      deptRows.push(`<tr><td style="padding:9px 12px;font-size:12.5px;background:${bg};display:flex;align-items:center;gap:8px;"><span style="display:inline-block;width:11px;height:11px;border-radius:2px;background:${color};flex-shrink:0;"></span>${ZONE_NAMES_EXEC[z]||'เขต '+z}</td><td style="padding:9px 12px;font-size:13px;background:${bg};text-align:right;font-weight:700;color:${dc};">${cnt>0?cnt.toLocaleString():'—'}</td><td style="padding:9px 12px;font-size:12px;background:${bg};text-align:right;color:#64748b;">${cnt>0?pct+'%':'—'}</td></tr>`);
+    }
+    deptRows.push(`<tr style="background:#dbeafe;border-top:2px solid #93c5fd;"><td style="padding:11px 12px;font-size:13px;font-weight:800;color:#1d4ed8;">รวมบุคลากรภายนอก</td><td style="padding:11px 12px;font-size:14px;font-weight:800;color:#1d4ed8;text-align:right;">${total.toLocaleString()}</td><td style="padding:11px 12px;color:#93c5fd;text-align:right;">100%</td></tr>`);
+
+    document.getElementById('a4ExtZoneExportTime').textContent = now.toLocaleString('th-TH',{timeZone:'Asia/Bangkok',dateStyle:'medium',timeStyle:'short'});
+    document.getElementById('a4ExtZoneColLabel').textContent = dl;
+    document.getElementById('a4ExtZoneTableSlot').innerHTML = `<table style="width:100%;border-collapse:collapse;font-family:'Sarabun',sans-serif;">
+      <thead><tr>
+        <th style="background:#1F3540;padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:#fff;border:none;">เขตสุขภาพ</th>
+        <th style="background:#1F3540;padding:10px 12px;text-align:right;font-size:11px;font-weight:700;color:#93c5fd;border:none;min-width:80px;" id="a4ExtZoneColLabel2">${dl}</th>
+        <th style="background:#1F3540;padding:10px 12px;text-align:right;font-size:11px;font-weight:700;color:#e2e8f0;border:none;min-width:48px;">%</th>
+      </tr></thead><tbody>${deptRows.join('')}</tbody></table>`;
+
+    const canvas = await html2canvas(document.getElementById('a4ExtZoneExport'),{scale:2,useCORS:true,backgroundColor:'#ffffff',logging:false,windowWidth:794});
+    canvas.toBlob(async (blob)=>{
+      const file=new File([blob],'ext-zone-'+now.toISOString().slice(0,10)+'.png',{type:'image/png'});
+      if(navigator.canShare&&navigator.canShare({files:[file]})){
+        try{await navigator.share({files:[file],title:'สถิติบุคลากรภายนอกแยกเขตสุขภาพ'});}
+        catch(e){if(e.name!=='AbortError'){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=file.name;a.click();}}
+      } else { const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=file.name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),5000); }
+    },'image/png');
+  } catch(e){alert('ไม่สามารถสร้างรูปภาพได้: '+e.message);}
+  finally{btn.innerHTML='📤 แชร์รูป';btn.disabled=false;}
 }
 
 async function shareZoneMap() {
@@ -1531,6 +1662,23 @@ async function shareTextSummary(day) {
     </div>
   </div>
   <div id="a4ExtTableSlot"></div>
+  <div style="margin-top:18px;font-size:10px;color:#b0c4ce;text-align:center;letter-spacing:0.04em;">กรมวิทยาศาสตร์การแพทย์ · Department of Medical Sciences</div>
+</div>
+
+<!-- A4 external zone table export — off-screen -->
+<div id="a4ExtZoneExport" style="position:fixed;left:-9999px;top:0;width:794px;background:#fff;padding:44px 52px;font-family:'Sarabun',sans-serif;line-height:1.6;">
+  <div style="border-bottom:3px solid #1d4ed8;padding-bottom:14px;margin-bottom:22px;display:flex;justify-content:space-between;align-items:flex-end;gap:16px;">
+    <div>
+      <div style="font-size:16px;font-weight:800;color:#1d4ed8;line-height:1.4;">จำนวนบุคลากรภายนอกกรม แยกตามเขตสุขภาพ</div>
+      <div style="font-size:11px;color:#7a9aae;margin-top:4px;">ข้อมูลจากการเช็คอินจริง — อัปเดตอัตโนมัติทุก 1 นาที</div>
+    </div>
+    <div style="text-align:right;flex-shrink:0;">
+      <div style="font-size:11px;font-weight:700;color:#1F3540;">ประชุมวิชาการวิทยาศาสตร์การแพทย์ ครั้งที่ 34</div>
+      <div style="font-size:10.5px;color:#7a9aae;margin-top:3px;" id="a4ExtZoneExportTime"></div>
+      <div style="font-size:10.5px;color:#1d4ed8;font-weight:700;margin-top:2px;" id="a4ExtZoneColLabel"></div>
+    </div>
+  </div>
+  <div id="a4ExtZoneTableSlot"></div>
   <div style="margin-top:18px;font-size:10px;color:#b0c4ce;text-align:center;letter-spacing:0.04em;">กรมวิทยาศาสตร์การแพทย์ · Department of Medical Sciences</div>
 </div>
 
