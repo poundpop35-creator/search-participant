@@ -1014,7 +1014,7 @@ function renderTable(){
     const sT=r.received?(r.scannedBy||'-'):'-';
     const pT=r.received?(r.receivedBy||'-'):'-';
     const adminAttrs=isAdmin?` data-id="${r.id}" data-raw-date="${r.rawDate||''}" data-received-by="${(r.receivedBy||'').replace(/"/g,'&quot;')}" data-received="${r.received}" data-field="bag_received_date" data-scan-by="${(r.scannedBy||'').replace(/"/g,'&quot;')}" data-editing="0" data-has-shirt="${r.shirtStatus!=='none'?'1':'0'}"`:'';
-    const actionCell=isAdmin?`<td style="white-space:nowrap;"><button class="btn-edit-row" onclick="startEdit(this)">✏️ แก้ไข</button></td>`:'';
+    const actionCell=isAdmin?`<td style="white-space:nowrap;display:flex;gap:4px;flex-wrap:wrap;"><button class="btn-edit-row" onclick="startEdit(this)">✏️ แก้ไข</button>${r.received?`<button class="btn-edit-row" style="background:#fef2f2;border-color:#fca5a5;color:#dc2626;" onclick="clearBagSingle('${r.id}','${r.name.replace(/'/g,"\\'")}')">🗑️ ล้าง</button>`:''}</td>`:'';
     const shirtBadge=r.shirtStatus==='received'?`<span class="badge b-cross-received">เสื้อ: รับแล้ว</span>`:r.shirtStatus==='pending'?`<span class="badge b-cross-pending">เสื้อ: ยังไม่รับ</span>`:`<span class="badge b-cross-none">ไม่มีสิทธิ์รับเสื้อ</span>`;
     const ptBg=r.personType==='ภายใน'?'#dbeafe':'#dcfce7';
     const ptTxt=r.personType==='ภายใน'?'#1e40af':'#166534';
@@ -1036,6 +1036,19 @@ function renderTable(){
 }
 
 function changePage(d){curPage+=d;renderTable();window.scrollTo({top:0,behavior:'smooth'});}
+
+async function clearBagSingle(id, name){
+  if(!confirm(`ยืนยันล้างข้อมูลกระเป๋าของ\n"${name}"\nสถานะจะกลับเป็น "ยังไม่รับ"`)) return;
+  try{
+    const res=await fetch(`${SB_URL}/rest/v1/participants?id=eq.${id}`,{
+      method:'PATCH',
+      headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify({bag_received:false,bag_received_date:null,bag_received_by:null,bag_scanned_by:null})
+    });
+    if(res.ok||res.status===204){ loadAll(); }
+    else{ alert('เกิดข้อผิดพลาด: '+res.status); }
+  }catch(e){ alert('เกิดข้อผิดพลาด: '+e.message); }
+}
 
 function resetFilters(){
   document.getElementById('fPersonType').value='';
