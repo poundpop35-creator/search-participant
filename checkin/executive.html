@@ -1401,8 +1401,8 @@ async function shareDeptTable() {
     const nowStr = now.toLocaleString('th-TH',{timeZone:'Asia/Bangkok',hour:'2-digit',minute:'2-digit'});
     const dayNames = ['','24 มิถุนายน 2569','25 มิถุนายน 2569','26 มิถุนายน 2569'];
     const shareText = execDay
-      ? `สรุปจำนวนผู้เข้าประชุมวิชาการวิทยาศาสตร์การแพทย์ ครั้งที่ 34\n\nวันที่ ${dayNames[execDay]}\n- บุคลากรภายในกรม ${grandInt.toLocaleString()} คน\n- บุคคลภายนอกกรม ${extCount.toLocaleString()} คน\nรวม ${grandAll.toLocaleString()} คน\n\nข้อมูล ณ เวลา ${nowStr} น.`
-      : `สรุปจำนวนผู้เข้าประชุมวิชาการวิทยาศาสตร์การแพทย์ ครั้งที่ 34\n\nรวม 3 วัน (24-26 มิถุนายน 2569)\n- บุคลากรภายในกรม ${grandInt.toLocaleString()} คน\n- บุคคลภายนอกกรม ${extCount.toLocaleString()} คน\nรวม ${grandAll.toLocaleString()} คน\n\nข้อมูล ณ เวลา ${nowStr} น.`;
+      ? `สรุปจำนวนบุคลากรภายในกรม แยกตามหน่วยงาน\nประชุมวิชาการวิทยาศาสตร์การแพทย์ ครั้งที่ 34\n\nวันที่ ${dayNames[execDay]}\n- บุคลากรภายในกรม ${grandInt.toLocaleString()} คน\n\nข้อมูล ณ เวลา ${nowStr} น.`
+      : `สรุปจำนวนบุคลากรภายในกรม แยกตามหน่วยงาน\nประชุมวิชาการวิทยาศาสตร์การแพทย์ ครั้งที่ 34\n\nรวม 3 วัน (24-26 มิถุนายน 2569)\n- บุคลากรภายในกรม ${grandInt.toLocaleString()} คน\n\nข้อมูล ณ เวลา ${nowStr} น.`;
 
     const canvas = await html2canvas(a4, {
       scale: 2,
