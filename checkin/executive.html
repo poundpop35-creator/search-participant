@@ -483,17 +483,17 @@ function renderExecTable() {
       <td class="total-cell" style="color:${dc};">${count>0?count.toLocaleString():'<span class="zero">—</span>'}</td>
     </tr>`;
   });
-  rows.push(`<tr style="background:#1F3540;">
+  rows.push(`<tr style="background:#64748b;">
     <td colspan="2" style="padding:11px 14px;font-weight:800;font-size:0.88rem;color:#ffffff;">รวมบุคลากรภายใน</td>
     <td style="text-align:right;padding:11px 14px;font-weight:800;font-size:1.15rem;color:#ffffff;">${grandTotal.toLocaleString()}</td>
   </tr>`);
   const extCount = dk ? (execExternal[dk]||0) : execExternal.d1+execExternal.d2+execExternal.d3;
-  rows.push(`<tr style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border-top:2px solid #86efac;">
-    <td colspan="2" style="padding:11px 14px;font-weight:800;font-size:0.88rem;color:#15803d;">บุคคลภายนอกกรม</td>
-    <td style="text-align:right;padding:11px 14px;font-weight:800;font-size:1.15rem;color:#15803d;">${extCount.toLocaleString()}</td>
+  rows.push(`<tr style="background:#16a34a;">
+    <td colspan="2" style="padding:11px 14px;font-weight:800;font-size:0.88rem;color:#ffffff;">บุคคลภายนอกกรม</td>
+    <td style="text-align:right;padding:11px 14px;font-weight:800;font-size:1.15rem;color:#ffffff;">${extCount.toLocaleString()}</td>
   </tr>`);
   const grandAllTotal = grandTotal + extCount;
-  rows.push(`<tr style="background:#0e7490;">
+  rows.push(`<tr style="background:#2563eb;">
     <td colspan="2" style="padding:11px 14px;font-weight:800;font-size:0.88rem;color:#ffffff;">รวมทั้งหมด</td>
     <td style="text-align:right;padding:11px 14px;font-weight:800;font-size:1.3rem;color:#ffffff;">${grandAllTotal.toLocaleString()}</td>
   </tr>`);
@@ -1224,9 +1224,9 @@ async function shareDeptTable() {
     });
     const extCount = dk ? (execExternal[dk]||0) : execExternal.d1+execExternal.d2+execExternal.d3;
     const grandAll = grandInt + extCount;
-    deptRows.push(`<tr style="background:#1F3540;"><td colspan="2" style="padding:11px 12px;font-size:13px;font-weight:800;color:#fff;">รวมบุคลากรภายใน</td><td style="padding:11px 12px;font-size:14px;font-weight:800;color:#fff;text-align:right;">${grandInt.toLocaleString()}</td></tr>`);
-    deptRows.push(`<tr style="background:#f0fdf4;border-top:2px solid #86efac;"><td colspan="2" style="padding:11px 12px;font-size:13px;font-weight:800;color:#15803d;">บุคคลภายนอกกรม</td><td style="padding:11px 12px;font-size:14px;font-weight:800;color:#15803d;text-align:right;">${extCount.toLocaleString()}</td></tr>`);
-    deptRows.push(`<tr style="background:#0e7490;"><td colspan="2" style="padding:11px 12px;font-size:13px;font-weight:800;color:#fff;">รวมทั้งหมด</td><td style="padding:11px 12px;font-size:15px;font-weight:800;color:#fff;text-align:right;">${grandAll.toLocaleString()}</td></tr>`);
+    deptRows.push(`<tr style="background:#64748b;"><td colspan="2" style="padding:11px 12px;font-size:13px;font-weight:800;color:#fff;">รวมบุคลากรภายใน</td><td style="padding:11px 12px;font-size:14px;font-weight:800;color:#fff;text-align:right;">${grandInt.toLocaleString()}</td></tr>`);
+    deptRows.push(`<tr style="background:#16a34a;"><td colspan="2" style="padding:11px 12px;font-size:13px;font-weight:800;color:#fff;">บุคคลภายนอกกรม</td><td style="padding:11px 12px;font-size:14px;font-weight:800;color:#fff;text-align:right;">${extCount.toLocaleString()}</td></tr>`);
+    deptRows.push(`<tr style="background:#2563eb;"><td colspan="2" style="padding:11px 12px;font-size:13px;font-weight:800;color:#fff;">รวมทั้งหมด</td><td style="padding:11px 12px;font-size:15px;font-weight:800;color:#fff;text-align:right;">${grandAll.toLocaleString()}</td></tr>`);
 
     document.getElementById('a4TableSlot').innerHTML = `
       <table style="width:100%;border-collapse:collapse;font-family:'Sarabun',sans-serif;">
