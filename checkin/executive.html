@@ -186,9 +186,15 @@
     <!-- ── ZONE MAP CARD ── -->
     <div class="dept-card" id="execZoneCard" style="margin-bottom:16px;">
       <div class="dept-card-header" style="display:flex;flex-direction:column;gap:10px;">
-        <div>
-          <div class="dept-card-title">สถิติผู้เข้าร่วมงานแยกตามเขตสุขภาพ</div>
-          <div class="dept-card-sub">จากผู้ที่เช็คอินแล้ว — กดปุ่มเพื่อสลับมุมมอง</div>
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;">
+          <div>
+            <div class="dept-card-title">สถิติผู้เข้าร่วมงานแยกตามเขตสุขภาพ</div>
+            <div class="dept-card-sub">จากผู้ที่เช็คอินแล้ว — กดปุ่มเพื่อสลับมุมมอง</div>
+          </div>
+          <button class="share-btn" id="shareZoneBtn" onclick="shareZoneMap()" style="margin-top:0;flex-shrink:0;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            📤 แชร์รูป
+          </button>
         </div>
         <div style="display:flex;gap:6px;">
           <button id="execZoneTabExt" onclick="execSwitchZoneTab('ext')" style="flex:1;padding:8px 14px;border-radius:20px;border:1.5px solid #ea580c;background:#ea580c;color:#fff;font-family:'Sarabun',sans-serif;font-size:0.82rem;font-weight:700;cursor:pointer;transition:all .15s;display:flex;flex-direction:column;align-items:center;gap:1px;">🌏 บุคคลภายนอก<span id="execZoneCountExt" style="font-size:0.78rem;font-weight:400;opacity:0.85;"></span></button>
@@ -1342,6 +1348,91 @@ async function shareDeptTable() {
   }
 }
 
+async function shareZoneMap() {
+  const btn = document.getElementById('shareZoneBtn');
+  btn.disabled = true; btn.innerHTML = '⏳ กำลังสร้างรูป...';
+  try {
+    const isExt = document.getElementById('execZoneViewExt').style.display !== 'none';
+    const mapId  = isExt ? 'execZoneMapExt'  : 'execZoneMapInt';
+    const bodyId = isExt ? 'execZoneBodyExt' : 'execZoneBodyInt';
+    const tabLabel = isExt ? 'บุคคลภายนอกกรม' : 'บุคลากรภายใน';
+    const colColor = isExt ? '#ea580c' : '#1F3540';
+
+    const mapDiv = document.getElementById(mapId);
+    const origSvg = mapDiv.querySelector('svg');
+    if (!origSvg) { alert('แผนที่ยังโหลดไม่เสร็จ'); return; }
+
+    // Clone SVG and reset zoom so full Thailand shows
+    const origW = parseFloat(origSvg.getAttribute('width')) || 200;
+    const origH = parseFloat(origSvg.getAttribute('height')) || 330;
+    const svgClone = origSvg.cloneNode(true);
+    svgClone.setAttribute('viewBox', `0 0 ${origW} ${origH}`);
+    svgClone.setAttribute('width',  '280');
+    svgClone.setAttribute('height', Math.round(280 * origH / origW));
+    svgClone.style.cssText = 'display:block;border-radius:8px;';
+    const zoomG = svgClone.querySelector('.map-zoom-g');
+    if (zoomG) { zoomG.removeAttribute('transform'); zoomG.querySelectorAll('path').forEach(p => p.setAttribute('stroke-width','0.6')); }
+
+    // Build zone table from existing zone rows
+    const tbody = document.getElementById(bodyId);
+    const zoneRows = Array.from(tbody.querySelectorAll('tr[data-zone]'));
+    const total = zoneRows.reduce((s, tr) => {
+      const cnt = parseInt((tr.querySelectorAll('td')[isExt?2:2]||{}).textContent||'0', 10);
+      return s + (isNaN(cnt)?0:cnt);
+    }, 0);
+
+    const tableHtml = `<table style="width:100%;border-collapse:collapse;font-family:'Sarabun',sans-serif;">
+      <thead><tr>
+        <th style="background:#1F3540;padding:8px 12px;text-align:left;font-size:11px;font-weight:700;color:#fff;">เขตสุขภาพ</th>
+        <th style="background:#1F3540;padding:8px 12px;text-align:right;font-size:11px;font-weight:700;color:#e2e8f0;min-width:55px;">คน</th>
+        <th style="background:#1F3540;padding:8px 12px;text-align:right;font-size:11px;font-weight:700;color:#e2e8f0;min-width:44px;">%</th>
+      </tr></thead>
+      <tbody>
+        ${zoneRows.map((tr, i) => {
+          const tds = tr.querySelectorAll('td');
+          const nameTd = isExt ? tds[1] : tds[0];
+          const cntTd  = isExt ? tds[2] : tds[2];
+          const name = nameTd ? nameTd.textContent.trim() : '';
+          const cnt  = parseInt(cntTd ? cntTd.textContent.replace(/,/g,'') : '0', 10)||0;
+          const pct  = total ? Math.round(cnt/total*100)+'%' : '—';
+          const bg   = i%2===0 ? '#ffffff' : '#f8fafc';
+          return `<tr><td style="padding:8px 12px;font-size:12.5px;background:${bg};font-weight:600;color:#1F3540;">${name}</td><td style="padding:8px 12px;font-size:12.5px;background:${bg};text-align:right;font-weight:700;color:${colColor};">${cnt.toLocaleString()}</td><td style="padding:8px 12px;font-size:12px;background:${bg};text-align:right;color:#64748b;">${pct}</td></tr>`;
+        }).join('')}
+        <tr style="background:${isExt?'#fff7ed':'#f0f9ff'};border-top:2px solid ${colColor};">
+          <td style="padding:10px 12px;font-size:13px;font-weight:800;color:${colColor};">รวม${tabLabel}</td>
+          <td style="padding:10px 12px;font-size:13px;font-weight:800;color:${colColor};text-align:right;">${total.toLocaleString()}</td>
+          <td style="padding:10px 12px;font-size:12px;color:${colColor};text-align:right;">100%</td>
+        </tr>
+      </tbody>
+    </table>`;
+
+    const now = new Date();
+    document.getElementById('a4ZoneExportTime').textContent =
+      now.toLocaleString('th-TH',{timeZone:'Asia/Bangkok',dateStyle:'medium',timeStyle:'short'});
+    document.getElementById('a4ZoneLabel').textContent =
+      `สถิติผู้เข้าร่วมงานแยกตามเขตสุขภาพ — ${tabLabel}`;
+    const mapSlot = document.getElementById('a4ZoneMapSlot');
+    mapSlot.innerHTML = '';
+    mapSlot.appendChild(svgClone);
+    document.getElementById('a4ZoneTableSlot').innerHTML = tableHtml;
+
+    const canvas = await html2canvas(document.getElementById('a4ZoneExport'), {
+      scale:2, useCORS:true, backgroundColor:'#ffffff', logging:false, windowWidth:794
+    });
+    canvas.toBlob(async (blob) => {
+      const file = new File([blob],'zone-map-'+now.toISOString().slice(0,10)+'.png',{type:'image/png'});
+      if (navigator.canShare && navigator.canShare({files:[file]})) {
+        try { await navigator.share({files:[file],title:'สถิติแยกตามเขตสุขภาพ'}); }
+        catch(e){ if(e.name!=='AbortError'){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=file.name;a.click();} }
+      } else {
+        const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=file.name;a.click();
+        setTimeout(()=>URL.revokeObjectURL(a.href),5000);
+      }
+    },'image/png');
+  } catch(e) { alert('ไม่สามารถสร้างรูปภาพได้: '+e.message); }
+  finally { btn.innerHTML='📤 แชร์รูป'; btn.disabled=false; }
+}
+
 async function shareExtTable() {
   const btn = document.getElementById('shareExtBtn');
   btn.disabled = true; btn.innerHTML = '⏳ กำลังสร้างรูป...';
@@ -1440,6 +1531,25 @@ async function shareTextSummary(day) {
     </div>
   </div>
   <div id="a4ExtTableSlot"></div>
+  <div style="margin-top:18px;font-size:10px;color:#b0c4ce;text-align:center;letter-spacing:0.04em;">กรมวิทยาศาสตร์การแพทย์ · Department of Medical Sciences</div>
+</div>
+
+<!-- A4 zone map export — off-screen -->
+<div id="a4ZoneExport" style="position:fixed;left:-9999px;top:0;width:794px;background:#fff;padding:36px 44px;font-family:'Sarabun',sans-serif;line-height:1.6;">
+  <div style="border-bottom:3px solid #1F3540;padding-bottom:12px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:flex-end;gap:16px;">
+    <div>
+      <div style="font-size:15px;font-weight:800;color:#1F3540;line-height:1.4;" id="a4ZoneLabel">สถิติผู้เข้าร่วมงานแยกตามเขตสุขภาพ</div>
+      <div style="font-size:11px;color:#7a9aae;margin-top:3px;">ข้อมูลจากการเช็คอินจริง — อัปเดตอัตโนมัติทุก 1 นาที</div>
+    </div>
+    <div style="text-align:right;flex-shrink:0;">
+      <div style="font-size:11px;font-weight:700;color:#1F3540;">ประชุมวิชาการวิทยาศาสตร์การแพทย์ ครั้งที่ 34</div>
+      <div style="font-size:10.5px;color:#7a9aae;margin-top:3px;" id="a4ZoneExportTime"></div>
+    </div>
+  </div>
+  <div style="display:flex;gap:20px;align-items:flex-start;">
+    <div id="a4ZoneMapSlot" style="flex:0 0 280px;"></div>
+    <div id="a4ZoneTableSlot" style="flex:1;"></div>
+  </div>
   <div style="margin-top:18px;font-size:10px;color:#b0c4ce;text-align:center;letter-spacing:0.04em;">กรมวิทยาศาสตร์การแพทย์ · Department of Medical Sciences</div>
 </div>
 
