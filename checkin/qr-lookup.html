@@ -349,6 +349,14 @@
     <p style="font-size:0.8rem;color:#92400e;background:#fff7ed;border-radius:8px;padding:8px 12px;margin-bottom:10px;line-height:1.6;">
       รายชื่อเหล่านี้ถูกข้ามไปตอนนำเข้า Walk-in เนื่องจากเลขบัตรประชาชนซ้ำกับผู้ลงทะเบียนล่วงหน้า ระบบนับรายชื่อดังกล่าวเป็นผู้ลงทะเบียนล่วงหน้าอยู่แล้ว
     </p>
+    <div style="display:flex;gap:8px;margin-bottom:8px;align-items:center;">
+      <input id="dupSearch" type="text" placeholder="ค้นหาชื่อ / หน่วยงาน" oninput="dupApplyFilters()"
+        style="flex:1;min-width:0;border:1.5px solid var(--border);border-radius:10px;padding:8px 12px;font-family:Sarabun,sans-serif;font-size:0.88rem;outline:none;transition:border-color .2s;"
+        onfocus="this.style.borderColor='#d97706'" onblur="this.style.borderColor='var(--border)'">
+      <select id="dupDeptFilter" onchange="dupApplyFilters()" style="flex-shrink:0;width:130px;border:1.5px solid var(--border);border-radius:10px;padding:8px 6px;font-family:Sarabun,sans-serif;font-size:0.82rem;outline:none;color:#374151;background:#fff;cursor:pointer;">
+        <option value="">ทุกหน่วยงาน</option>
+      </select>
+    </div>
     <div style="overflow-x:auto;">
       <table style="width:100%;border-collapse:collapse;font-size:0.82rem;">
         <thead>
@@ -362,6 +370,13 @@
           <tr><td colspan="3" style="text-align:center;padding:20px;color:#94a3b8;">กำลังโหลด...</td></tr>
         </tbody>
       </table>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;font-size:0.82rem;color:#92400e;">
+      <span id="dupInfo"></span>
+      <div style="display:flex;gap:6px;">
+        <button class="page-btn" id="dupPrev" onclick="changeDupPage(-1)" disabled>◀</button>
+        <button class="page-btn" id="dupNext" onclick="changeDupPage(1)">▶</button>
+      </div>
     </div>
   </div>
   <div id="dupEmptyMsg" style="display:none;padding:12px 20px 16px;font-size:0.82rem;color:#94a3b8;text-align:center;">ไม่มีรายการ Walk-in ที่ซ้ำกัน</div>
@@ -1582,6 +1597,9 @@ wiMapRendered = true;
 loadWIMapData();
 
 // ─── WALKIN DUPLICATES ───
+let allDupData = [], dupFiltered = [], dupPage = 1;
+const DUP_PAGE = 50;
+
 async function loadWalkinDuplicates() {
   try {
     const H = { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY };
@@ -1599,7 +1617,6 @@ async function loadWalkinDuplicates() {
       emptyMsg.style.display = 'block';
       return;
     }
-    // ดึงชื่อจาก pre-reg โดยใช้ id_card
     const idCards = dups.map(row => (row.id_card||'').replace(/\D/g,'')).filter(Boolean);
     let preRegMap = {};
     if (idCards.length) {
@@ -1609,21 +1626,51 @@ async function loadWalkinDuplicates() {
         if (Array.isArray(prData)) prData.forEach(p => { preRegMap[(p.id_card||'').replace(/\D/g,'')] = p; });
       } catch(e) {}
     }
-    countEl.textContent = `(${dups.length} คน)`;
-    toggleBtn.style.display = '';
-    document.getElementById('dupTBody').innerHTML = dups.map((row, i) => {
+    allDupData = dups.map(row => {
       const key = (row.id_card||'').replace(/\D/g,'');
       const src = preRegMap[key] || row;
       const name = `${(src.prefix||'').trim()} ${(src.first_name||'').trim()} ${(src.last_name||'').trim()}`.trim().replace(/\s+/g,' ');
       const dept = src.dept || row.dept || '';
-      return `<tr style="border-bottom:1px solid #fef3c7;">
-        <td style="padding:7px 10px;color:#92400e;font-weight:700;">${i+1}</td>
-        <td style="padding:7px 10px;">${name||'—'}</td>
-        <td style="padding:7px 10px;color:#64748b;">${dept||'—'}</td>
-      </tr>`;
-    }).join('');
+      return { name: name||'—', dept: dept||'—' };
+    });
+    countEl.textContent = `(${allDupData.length} คน)`;
+    toggleBtn.style.display = '';
+    _populateDeptSelect('dupDeptFilter', allDupData);
+    dupApplyFilters();
   } catch(e) {}
 }
+
+function dupApplyFilters() {
+  if (!allDupData.length) return;
+  _populateDeptSelect('dupDeptFilter', allDupData);
+  const q = (document.getElementById('dupSearch').value || '').toLowerCase();
+  const dept = document.getElementById('dupDeptFilter').value;
+  dupFiltered = allDupData.filter(r =>
+    (!q || r.name.toLowerCase().includes(q) || r.dept.toLowerCase().includes(q)) &&
+    (!dept || r.dept === dept)
+  );
+  dupPage = 1;
+  renderDupTable();
+}
+
+function renderDupTable() {
+  const start = (dupPage - 1) * DUP_PAGE;
+  const page = dupFiltered.slice(start, start + DUP_PAGE);
+  const tot = dupFiltered.length;
+  const totPages = Math.ceil(tot / DUP_PAGE) || 1;
+  document.getElementById('dupInfo').textContent = tot === 0 ? 'ไม่พบข้อมูล' : `แสดง ${start+1}–${Math.min(start+DUP_PAGE,tot)} จาก ${tot.toLocaleString()} คน`;
+  document.getElementById('dupPrev').disabled = dupPage <= 1;
+  document.getElementById('dupNext').disabled = dupPage >= totPages;
+  document.getElementById('dupTBody').innerHTML = page.length
+    ? page.map((r, i) => `<tr style="border-bottom:1px solid #fef3c7;">
+        <td style="padding:7px 10px;color:#92400e;font-weight:700;">${start+i+1}</td>
+        <td style="padding:7px 10px;">${r.name}</td>
+        <td style="padding:7px 10px;color:#64748b;">${r.dept}</td>
+      </tr>`).join('')
+    : '<tr><td colspan="3" style="text-align:center;padding:20px;color:#94a3b8;">ไม่พบข้อมูล</td></tr>';
+}
+
+function changeDupPage(d) { dupPage += d; renderDupTable(); }
 
 function toggleDupCard() {
   const body = document.getElementById('dupCardBody');
