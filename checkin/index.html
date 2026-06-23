@@ -246,6 +246,7 @@
 
   <div id="cameraMode" style="display:none">
     <div id="reader-container"><div class="spinner"></div></div>
+    <button onclick="resetCamera()" style="margin-top:8px;padding:7px 18px;border-radius:10px;border:1.5px solid #C8DDE8;background:#f8fbfd;color:#1F3540;font-family:'Sarabun',sans-serif;font-size:0.82rem;font-weight:600;cursor:pointer;display:block;width:100%;">🔄 รีเซ็ตกล้อง (กดถ้าสแกนไม่ได้)</button>
   </div>
   <div class="scanner-mode" id="scannerMode">
     <div class="scan-hint">เล็งเครื่องยิงบาร์โค้ดที่ QR Code แล้วกดปุ่มยิง</div>
@@ -464,6 +465,13 @@
       });
   }
 
+  async function resetCamera(){
+    isProcessing=false;
+    setStatus('รีเซ็ตกล้อง...');
+    try{if(qrCode){await qrCode.stop().catch(()=>{});qrCode=null;}}catch(e){}
+    startCamera();
+  }
+
   document.addEventListener('keydown',function(e){
     if(currentMode!=='scanner'||isProcessing) return;
     if(document.activeElement===document.getElementById('manualInput')) return;
@@ -496,9 +504,19 @@
     showModal('loading','กำลังดำเนินการ','กำลังบันทึกข้อมูล','',null);
     try{
       const keyword=decodedText.trim();
-      const searchRes=await sbFetch(`/rest/v1/participants?event_year=eq.${encodeURIComponent(activeYear)}&or=(id_card.eq.${encodeURIComponent(keyword)},passport.eq.${encodeURIComponent(keyword)})&select=id,prefix,first_name,last_name,tag,items,is_walkin,internal_external,participation_type,bag_received,bag_received_date,shirt_size,shirt_received,shirt_received_date,dept`,'GET');
+      // ป้องกัน partial scan — เลขบัตรไทย 13 หลัก, passport ≥7; ถ้าสั้นกว่า = สแกนไม่ชัด
+      if(keyword.replace(/\D/g,'').length<7){showModal('error','สแกนไม่ชัด','กรุณาสแกนใหม่อีกครั้ง\n(QR อาจเบลอหรือแสงน้อยเกินไป)','',null);return;}
+      let searchRes=await sbFetch(`/rest/v1/participants?event_year=eq.${encodeURIComponent(activeYear)}&or=(id_card.eq.${encodeURIComponent(keyword)},passport.eq.${encodeURIComponent(keyword)})&select=id,prefix,first_name,last_name,tag,items,is_walkin,internal_external,participation_type,bag_received,bag_received_date,shirt_size,shirt_received,shirt_received_date,dept`,'GET');
       if(!searchRes.ok){showModal('error','ข้อผิดพลาด','ไม่สามารถค้นหาข้อมูลได้','',null);return;}
-      const participants=await searchRes.json();
+      let participants=await searchRes.json();
+      // Fallback: ถ้าไม่เจอ ลองค้นด้วย digits-only (รองรับ id_card ที่มี dash/space ต่างกัน)
+      if((!participants||participants.length===0)&&/\D/.test(keyword)){
+        const digitsOnly=keyword.replace(/\D/g,'');
+        if(digitsOnly.length>=10){
+          const r2=await sbFetch(`/rest/v1/participants?event_year=eq.${encodeURIComponent(activeYear)}&or=(id_card.eq.${encodeURIComponent(digitsOnly)},passport.eq.${encodeURIComponent(digitsOnly)})&select=id,prefix,first_name,last_name,tag,items,is_walkin,internal_external,participation_type,bag_received,bag_received_date,shirt_size,shirt_received,shirt_received_date,dept`,'GET');
+          if(r2.ok) participants=await r2.json();
+        }
+      }
       if(!participants||participants.length===0){
         if(day==='bag'){
           showModal('error','ไม่มีสิทธิ์','ท่านไม่มีสิทธิ์รับกระเป๋าก่อนวันงาน','',null);
