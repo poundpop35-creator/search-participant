@@ -317,19 +317,21 @@
         <div class="export-btns">
           <button class="btn-xl green" onclick="exportExcel()">⬇ Excel</button>
           <button class="btn-xl teal"  onclick="exportCSV()">⬇ CSV</button>
+          <button id="bagBulkClearBtn" class="btn-xl" style="display:none;background:#dc2626;color:#fff;" onclick="bulkClearBag()">🗑️ ล้างที่เลือก</button>
         </div>
       </div>
       <div style="overflow-x:auto;">
         <table>
           <thead>
             <tr>
+              <th id="thBagCb" style="display:none;width:32px;"><input type="checkbox" id="bagCbAll" onchange="toggleAllBagCb(this)" style="cursor:pointer;width:15px;height:15px;"></th>
               <th>#</th><th>ประเภท</th><th>ชื่อ-นามสกุล</th><th>หน่วยงาน</th>
               <th>ประเภทการเข้าร่วม</th><th>TAG</th>
               <th>สถานะกระเป๋า</th><th>วันที่รับ</th><th>เวลา</th><th>สแกนโดย</th><th>ผู้มารับแทน</th>
               <th id="thBagAction" style="display:none;width:88px;"></th>
             </tr>
           </thead>
-          <tbody id="tBody"><tr><td colspan="11" class="loading-td">กำลังโหลด...</td></tr></tbody>
+          <tbody id="tBody"><tr><td colspan="12" class="loading-td">กำลังโหลด...</td></tr></tbody>
         </table>
       </div>
       <div class="pager">
@@ -408,19 +410,21 @@
           <button class="btn-xl green" onclick="exportShirtExcel()">⬇ Excel</button>
           <button class="btn-xl teal"  onclick="exportShirtCSV()">⬇ CSV</button>
           <button class="btn-xl" style="background:#7c3aed;color:white;" onclick="exportShirtStickers()">🏷️ สติกเกอร์</button>
+          <button id="shirtBulkClearBtn" class="btn-xl" style="display:none;background:#dc2626;color:#fff;" onclick="bulkClearShirt()">🗑️ ล้างที่เลือก</button>
         </div>
       </div>
       <div style="overflow-x:auto;">
         <table>
           <thead>
             <tr>
+              <th id="thShirtCb" style="display:none;width:32px;"><input type="checkbox" id="shirtCbAll" onchange="toggleAllShirtCb(this)" style="cursor:pointer;width:15px;height:15px;"></th>
               <th>#</th><th>ชื่อ-นามสกุล</th><th>หน่วยงาน</th>
               <th>ไซต์เสื้อ</th>
               <th>สถานะเสื้อ</th><th>วันที่รับ</th><th>เวลา</th><th>สแกนโดย</th><th>ผู้มารับแทน</th>
               <th id="thShirtAction" style="display:none;width:88px;"></th>
             </tr>
           </thead>
-          <tbody id="stBody"><tr><td colspan="10" class="loading-td">กำลังโหลด...</td></tr></tbody>
+          <tbody id="stBody"><tr><td colspan="11" class="loading-td">กำลังโหลด...</td></tr></tbody>
 
         </table>
       </div>
@@ -1019,6 +1023,7 @@ function renderTable(){
     const ptBg=r.personType==='ภายใน'?'#dbeafe':'#dcfce7';
     const ptTxt=r.personType==='ภายใน'?'#1e40af':'#166534';
     return `<tr${adminAttrs}>
+      ${isAdmin?`<td style="text-align:center;"><input type="checkbox" class="bag-cb" data-id="${r.id}" onchange="updateBagBulkBtn()" style="cursor:pointer;width:15px;height:15px;"></td>`:''}
       <td>${start+i+1}</td>
       <td><span class="badge" style="background:${ptBg};color:${ptTxt};">${r.personType||'-'}</span></td>
       <td>${r.name}</td>
@@ -1122,7 +1127,7 @@ function renderShirtTable(){
   document.getElementById('spInfo').textContent=`แสดง ${tot===0?0:start+1}–${Math.min(start+PAGE,tot)} จาก ${tot.toLocaleString()} รายการ`;
   document.getElementById('sbPrev').disabled=shirtPage<=1;
   document.getElementById('sbNext').disabled=shirtPage>=totPages;
-  if(!page.length){document.getElementById('stBody').innerHTML=`<tr><td colspan="${isAdmin?10:9}" class="loading-td">ไม่พบข้อมูล</td></tr>`;return;}
+  if(!page.length){document.getElementById('stBody').innerHTML=`<tr><td colspan="${isAdmin?11:9}" class="loading-td">ไม่พบข้อมูล</td></tr>`;return;}
   document.getElementById('stBody').innerHTML=page.map((r,i)=>{
     const dT=r.received?r.receivedDate:'-';
     const tT=r.received?r.receivedTime:'-';
@@ -1132,6 +1137,7 @@ function renderShirtTable(){
     const actionCell=isAdmin?`<td style="white-space:nowrap;display:flex;gap:4px;flex-wrap:wrap;"><button class="btn-edit-row" onclick="startEdit(this)">✏️ แก้ไข</button>${r.received?`<button class="btn-edit-row" style="background:#fef2f2;border-color:#fca5a5;color:#dc2626;" onclick="clearShirtSingle('${r.id}','${r.name.replace(/'/g,"\\'")}')">🗑️ ล้าง</button>`:''}</td>`:'';
     const bagBadge=r.bagStatus==='received'?`<span class="badge b-cross-received">${r.bagLabel}: รับแล้ว</span>`:r.bagStatus==='pending'?`<span class="badge b-cross-pending">${r.bagLabel}: ยังไม่รับ</span>`:`<span class="badge b-cross-none">ไม่มีสิทธิ์รับกระเป๋า</span>`;
     return `<tr${adminAttrs}>
+      ${isAdmin?`<td style="text-align:center;"><input type="checkbox" class="shirt-cb" data-id="${r.id}" onchange="updateShirtBulkBtn()" style="cursor:pointer;width:15px;height:15px;"></td>`:''}
       <td>${start+i+1}</td>
       <td>${r.name}</td>
       <td style="max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${r.dept}">${r.dept}</td>
@@ -1786,6 +1792,59 @@ document.getElementById('clearOverlay').addEventListener('click',function(e){
 if(isAdmin){
   const ta=document.getElementById('thBagAction');if(ta)ta.style.display='';
   const tsa=document.getElementById('thShirtAction');if(tsa)tsa.style.display='';
+  const tbc=document.getElementById('thBagCb');if(tbc)tbc.style.display='';
+  const tsc=document.getElementById('thShirtCb');if(tsc)tsc.style.display='';
+}
+
+function toggleAllBagCb(master){
+  document.querySelectorAll('.bag-cb').forEach(cb=>cb.checked=master.checked);
+  updateBagBulkBtn();
+}
+function toggleAllShirtCb(master){
+  document.querySelectorAll('.shirt-cb').forEach(cb=>cb.checked=master.checked);
+  updateShirtBulkBtn();
+}
+function updateBagBulkBtn(){
+  const n=document.querySelectorAll('.bag-cb:checked').length;
+  const btn=document.getElementById('bagBulkClearBtn');
+  if(btn){btn.style.display=n?'':'none';btn.textContent=`🗑️ ล้างที่เลือก (${n} คน)`;}
+}
+function updateShirtBulkBtn(){
+  const n=document.querySelectorAll('.shirt-cb:checked').length;
+  const btn=document.getElementById('shirtBulkClearBtn');
+  if(btn){btn.style.display=n?'':'none';btn.textContent=`🗑️ ล้างที่เลือก (${n} คน)`;}
+}
+async function bulkClearBag(){
+  const ids=[...document.querySelectorAll('.bag-cb:checked')].map(cb=>cb.dataset.id);
+  if(!ids.length) return;
+  const pw=prompt(`ล้างข้อมูลกระเป๋า ${ids.length} คน\n\nกรอกรหัสผ่านเพื่อยืนยัน:`);
+  if(pw===null) return;
+  if(pw!=='99037'){alert('❌ รหัสผ่านไม่ถูกต้อง');return;}
+  try{
+    const res=await fetch(`${SB_URL}/rest/v1/participants?id=in.(${ids.join(',')})`,{
+      method:'PATCH',
+      headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify({bag_received:false,bag_received_date:null,bag_received_by:null,bag_scanned_by:null})
+    });
+    if(res.ok||res.status===204){loadAll();}
+    else{alert('เกิดข้อผิดพลาด: '+res.status);}
+  }catch(e){alert('เกิดข้อผิดพลาด: '+e.message);}
+}
+async function bulkClearShirt(){
+  const ids=[...document.querySelectorAll('.shirt-cb:checked')].map(cb=>cb.dataset.id);
+  if(!ids.length) return;
+  const pw=prompt(`ล้างข้อมูลเสื้อ ${ids.length} คน\n\nกรอกรหัสผ่านเพื่อยืนยัน:`);
+  if(pw===null) return;
+  if(pw!=='99037'){alert('❌ รหัสผ่านไม่ถูกต้อง');return;}
+  try{
+    const res=await fetch(`${SB_URL}/rest/v1/participants?id=in.(${ids.join(',')})`,{
+      method:'PATCH',
+      headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify({shirt_received:false,shirt_received_date:null,shirt_received_by:null,shirt_scanned_by:null})
+    });
+    if(res.ok||res.status===204){loadAll();}
+    else{alert('เกิดข้อผิดพลาด: '+res.status);}
+  }catch(e){alert('เกิดข้อผิดพลาด: '+e.message);}
 }
 loadAll();
 (function(){const c=localStorage.getItem('pageBgUrl');if(c)document.body.style.backgroundImage=`linear-gradient(rgba(232,240,254,0.55),rgba(232,240,254,0.55)),url('${c}')`;})();
