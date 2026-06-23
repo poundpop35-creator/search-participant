@@ -129,6 +129,51 @@
       </div>
     </div>
 
+    <!-- ── SUMMARY CARD ── -->
+    <div class="dept-card" style="margin-bottom:16px;">
+      <div class="dept-card-header" style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+        <div>
+          <div class="dept-card-title">สรุปผู้เข้าร่วมงาน (เช็คอินแล้ว)</div>
+          <div class="dept-card-sub">รวม pre-reg + walk-in — อัปเดตอัตโนมัติทุก 1 นาที</div>
+        </div>
+        <button class="share-btn" onclick="shareSummary()" id="shareSummaryBtn" style="margin-top:0;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          📤 แชร์รูป
+        </button>
+      </div>
+      <div style="padding:16px 16px 8px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
+        <div style="text-align:center;padding:18px 8px;background:linear-gradient(135deg,#f0f9ff,#e0f2fe);border-radius:14px;border:2px solid #7dd3fc;">
+          <div style="font-size:0.68rem;font-weight:700;color:#0369a1;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">รวมทั้งหมด</div>
+          <div style="font-size:2.2rem;font-weight:800;color:#1F3540;line-height:1;" id="sumTotal">-</div>
+          <div style="font-size:0.72rem;color:#7a9aae;margin-top:4px;">คน</div>
+        </div>
+        <div style="text-align:center;padding:18px 8px;background:linear-gradient(135deg,#eff6ff,#dbeafe);border-radius:14px;border:2px solid #93c5fd;">
+          <div style="font-size:0.68rem;font-weight:700;color:#1d4ed8;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">บุคลากรภายใน</div>
+          <div style="font-size:2.2rem;font-weight:800;color:#1d4ed8;line-height:1;" id="sumInternal">-</div>
+          <div style="font-size:0.72rem;color:#7a9aae;margin-top:4px;">คน</div>
+        </div>
+        <div style="text-align:center;padding:18px 8px;background:linear-gradient(135deg,#f0fdf4,#dcfce7);border-radius:14px;border:2px solid #86efac;">
+          <div style="font-size:0.68rem;font-weight:700;color:#15803d;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">บุคคลภายนอก</div>
+          <div style="font-size:2.2rem;font-weight:800;color:#15803d;line-height:1;" id="sumExternal">-</div>
+          <div style="font-size:0.72rem;color:#7a9aae;margin-top:4px;">คน</div>
+        </div>
+      </div>
+      <div style="padding:0 16px 16px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
+        <div style="text-align:center;padding:10px;background:#f8fafc;border-radius:10px;border:1.5px solid #dbeafe;">
+          <div style="font-size:0.68rem;font-weight:700;color:#2563eb;margin-bottom:3px;">วันที่ 1 · 24 มิ.ย.</div>
+          <div style="font-size:1.6rem;font-weight:800;color:#1F3540;" id="sumD1">-</div>
+        </div>
+        <div style="text-align:center;padding:10px;background:#f8fafc;border-radius:10px;border:1.5px solid #ede9fe;">
+          <div style="font-size:0.68rem;font-weight:700;color:#7c3aed;margin-bottom:3px;">วันที่ 2 · 25 มิ.ย.</div>
+          <div style="font-size:1.6rem;font-weight:800;color:#1F3540;" id="sumD2">-</div>
+        </div>
+        <div style="text-align:center;padding:10px;background:#f8fafc;border-radius:10px;border:1.5px solid #cffafe;">
+          <div style="font-size:0.68rem;font-weight:700;color:#0891b2;margin-bottom:3px;">วันที่ 3 · 26 มิ.ย.</div>
+          <div style="font-size:1.6rem;font-weight:800;color:#1F3540;" id="sumD3">-</div>
+        </div>
+      </div>
+    </div>
+
     <div class="dept-card" id="deptShareCard">
       <div class="dept-card-header" style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;">
         <div>
@@ -315,14 +360,7 @@ function renderExecTable() {
         <td style="text-align:right;" class="d3-num">${c.d3||'<span class="zero">—</span>'}</td>
         <td class="total-cell">${tot>0?tot.toLocaleString():'<span class="zero">0</span>'}</td>
       </tr>`;
-    }).join('') + `<tr style="background:#f0f9f0;border-top:2px solid #86efac;">
-        <td style="font-weight:700;color:#94a3b8;font-size:0.8rem;">—</td>
-        <td class="dept-name-cell" style="color:#15803d;font-style:italic;">บุคคลภายนอก (รวม)</td>
-        <td style="text-align:right;font-weight:700;color:#15803d;">${execExternal.d1||'<span class="zero">—</span>'}</td>
-        <td style="text-align:right;font-weight:700;color:#15803d;">${execExternal.d2||'<span class="zero">—</span>'}</td>
-        <td style="text-align:right;font-weight:700;color:#15803d;">${execExternal.d3||'<span class="zero">—</span>'}</td>
-        <td class="total-cell" style="color:#15803d;">${extTot>0?extTot.toLocaleString():'<span class="zero">0</span>'}</td>
-      </tr>`;
+    }).join('');
   } else {
     const dk = `d${execDay}`;
     const dc = ['','#2563eb','#7c3aed','#0891b2'][execDay];
@@ -340,14 +378,59 @@ function renderExecTable() {
         <td class="dept-name-cell">${dept}</td>
         <td class="total-cell" style="color:${dc};">${count>0?count.toLocaleString():'<span class="zero">—</span>'}</td>
       </tr>`;
-    }).join('') + `<tr style="background:#f0f9f0;border-top:2px solid #86efac;">
-        <td style="font-weight:700;color:#94a3b8;font-size:0.8rem;">—</td>
-        <td class="dept-name-cell" style="color:#15803d;font-style:italic;">บุคคลภายนอก (รวม)</td>
-        <td class="total-cell" style="color:#15803d;">${execExternal[dk]>0?execExternal[dk].toLocaleString():'<span class="zero">—</span>'}</td>
-      </tr>`;
+    }).join('');
   }
   if(execView === 'chart') renderExecChart();
   renderTrendChart();
+}
+
+function renderSummary() {
+  const totalInt = DEPTS.reduce((s,d)=>s+execMap[d].d1+execMap[d].d2+execMap[d].d3, 0);
+  const totalExt = execExternal.d1+execExternal.d2+execExternal.d3;
+  const totalAll = totalInt+totalExt;
+  const d1All = DEPTS.reduce((s,d)=>s+execMap[d].d1,0)+execExternal.d1;
+  const d2All = DEPTS.reduce((s,d)=>s+execMap[d].d2,0)+execExternal.d2;
+  const d3All = DEPTS.reduce((s,d)=>s+execMap[d].d3,0)+execExternal.d3;
+  document.getElementById('sumTotal').textContent = totalAll.toLocaleString();
+  document.getElementById('sumInternal').textContent = totalInt.toLocaleString();
+  document.getElementById('sumExternal').textContent = totalExt.toLocaleString();
+  document.getElementById('sumD1').textContent = d1All.toLocaleString();
+  document.getElementById('sumD2').textContent = d2All.toLocaleString();
+  document.getElementById('sumD3').textContent = d3All.toLocaleString();
+}
+
+async function shareSummary() {
+  const btn = document.getElementById('shareSummaryBtn');
+  btn.disabled = true; btn.innerHTML = '⏳ กำลังสร้างรูป...';
+  try {
+    const el = document.getElementById('summaryExport');
+    document.getElementById('sumExportTime').textContent =
+      new Date().toLocaleString('th-TH',{timeZone:'Asia/Bangkok',dateStyle:'medium',timeStyle:'short'});
+    const tInt = document.getElementById('sumInternal').textContent;
+    const tExt = document.getElementById('sumExternal').textContent;
+    const tAll = document.getElementById('sumTotal').textContent;
+    const d1  = document.getElementById('sumD1').textContent;
+    const d2  = document.getElementById('sumD2').textContent;
+    const d3  = document.getElementById('sumD3').textContent;
+    document.getElementById('sumExportInt').textContent = tInt;
+    document.getElementById('sumExportExt').textContent = tExt;
+    document.getElementById('sumExportAll').textContent = tAll;
+    document.getElementById('sumExportD1').textContent  = d1;
+    document.getElementById('sumExportD2').textContent  = d2;
+    document.getElementById('sumExportD3').textContent  = d3;
+    const canvas = await html2canvas(el, {scale:2,useCORS:true,backgroundColor:'#ffffff',logging:false,windowWidth:680});
+    canvas.toBlob(async (blob) => {
+      const file = new File([blob], 'summary-checkin-'+new Date().toISOString().slice(0,10)+'.png',{type:'image/png'});
+      if(navigator.canShare && navigator.canShare({files:[file]})){
+        try{ await navigator.share({files:[file],title:'สรุปผู้เข้าร่วมงาน'}); }
+        catch(e){ if(e.name!=='AbortError'){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=file.name;a.click();} }
+      } else {
+        const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=file.name;a.click();
+        setTimeout(()=>URL.revokeObjectURL(a.href),5000);
+      }
+    },'image/png');
+  } catch(e){ alert('ไม่สามารถสร้างรูปภาพได้: '+e.message); }
+  finally { btn.innerHTML='📤 แชร์รูป'; btn.disabled=false; }
 }
 
 function renderTrendChart() {
@@ -536,6 +619,7 @@ async function loadData() {
     });
 
     renderExecTable();
+    renderSummary();
     document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString('th-TH', {timeZone: 'Asia/Bangkok'});
     document.getElementById('loadingArea').style.display = 'none';
     document.getElementById('contentArea').style.display = '';
@@ -710,5 +794,50 @@ async function shareDeptTable() {
 </script>
 
 <div style="text-align:center;padding:18px 0 14px;font-family:'Sarabun',sans-serif;font-size:0.78rem;color:#94a3b8;">© 2026 Built by <span style="font-family:'Dancing Script',cursive;font-weight:700;font-size:1.25em;color:#0ABAB5;letter-spacing:0.01em;">Saharat Phetrnitchakun</span> · <span style="font-weight:800;letter-spacing:0.04em;font-size:1.05em;"><span style="color:#2563eb;">D</span><span style="color:#f59e0b;">P</span><span style="color:#16a34a;">T</span><span style="color:#dc2626;">C</span></span> · DMSc</div>
+<!-- Summary export card — off-screen -->
+<div id="summaryExport" style="position:fixed;left:-9999px;top:0;width:640px;background:#fff;font-family:'Sarabun',sans-serif;border-radius:0;overflow:hidden;">
+  <div style="background:linear-gradient(135deg,#1F3540 0%,#2C4B5D 100%);padding:22px 28px 18px;display:flex;align-items:center;gap:14px;">
+    <div style="flex:1;">
+      <div style="font-size:11px;font-weight:700;color:#93c5fd;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px;">สรุปผู้เข้าร่วมงาน — เช็คอินแล้ว</div>
+      <div style="font-size:15px;font-weight:800;color:#fff;line-height:1.4;">งานประชุมวิชาการวิทยาศาสตร์การแพทย์ ครั้งที่ 34</div>
+      <div style="font-size:10.5px;color:#93c5fd;margin-top:3px;" id="sumExportTime"></div>
+    </div>
+  </div>
+  <div style="padding:20px 24px 12px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
+    <div style="text-align:center;padding:20px 8px;background:linear-gradient(135deg,#f0f9ff,#e0f2fe);border-radius:14px;border:2px solid #7dd3fc;">
+      <div style="font-size:10px;font-weight:700;color:#0369a1;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:8px;">รวมทั้งหมด</div>
+      <div style="font-size:3rem;font-weight:800;color:#1F3540;line-height:1;" id="sumExportAll">-</div>
+      <div style="font-size:11px;color:#7a9aae;margin-top:5px;">คน</div>
+    </div>
+    <div style="text-align:center;padding:20px 8px;background:linear-gradient(135deg,#eff6ff,#dbeafe);border-radius:14px;border:2px solid #93c5fd;">
+      <div style="font-size:10px;font-weight:700;color:#1d4ed8;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:8px;">บุคลากรภายใน</div>
+      <div style="font-size:3rem;font-weight:800;color:#1d4ed8;line-height:1;" id="sumExportInt">-</div>
+      <div style="font-size:11px;color:#7a9aae;margin-top:5px;">คน</div>
+    </div>
+    <div style="text-align:center;padding:20px 8px;background:linear-gradient(135deg,#f0fdf4,#dcfce7);border-radius:14px;border:2px solid #86efac;">
+      <div style="font-size:10px;font-weight:700;color:#15803d;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:8px;">บุคคลภายนอก</div>
+      <div style="font-size:3rem;font-weight:800;color:#15803d;line-height:1;" id="sumExportExt">-</div>
+      <div style="font-size:11px;color:#7a9aae;margin-top:5px;">คน</div>
+    </div>
+  </div>
+  <div style="padding:0 24px 20px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
+    <div style="text-align:center;padding:12px 8px;background:#f8fafc;border-radius:10px;border:1.5px solid #bfdbfe;">
+      <div style="font-size:10px;font-weight:700;color:#2563eb;margin-bottom:4px;">วันที่ 1 · 24 มิ.ย.</div>
+      <div style="font-size:2rem;font-weight:800;color:#1F3540;line-height:1;" id="sumExportD1">-</div>
+      <div style="font-size:10px;color:#94a3b8;margin-top:3px;">คน</div>
+    </div>
+    <div style="text-align:center;padding:12px 8px;background:#f8fafc;border-radius:10px;border:1.5px solid #ede9fe;">
+      <div style="font-size:10px;font-weight:700;color:#7c3aed;margin-bottom:4px;">วันที่ 2 · 25 มิ.ย.</div>
+      <div style="font-size:2rem;font-weight:800;color:#1F3540;line-height:1;" id="sumExportD2">-</div>
+      <div style="font-size:10px;color:#94a3b8;margin-top:3px;">คน</div>
+    </div>
+    <div style="text-align:center;padding:12px 8px;background:#f8fafc;border-radius:10px;border:1.5px solid #cffafe;">
+      <div style="font-size:10px;font-weight:700;color:#0891b2;margin-bottom:4px;">วันที่ 3 · 26 มิ.ย.</div>
+      <div style="font-size:2rem;font-weight:800;color:#1F3540;line-height:1;" id="sumExportD3">-</div>
+      <div style="font-size:10px;color:#94a3b8;margin-top:3px;">คน</div>
+    </div>
+  </div>
+  <div style="background:#f8fafc;border-top:1px solid #e2e8f0;padding:10px 24px;font-size:10px;color:#94a3b8;text-align:center;">กรมวิทยาศาสตร์การแพทย์ กระทรวงสาธารณสุข</div>
+</div>
 </body>
 </html>
