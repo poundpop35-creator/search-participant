@@ -386,7 +386,8 @@
     const isBag=day==='bag';
     const dbBtn=document.getElementById('dashboardBtn');
     const bagBtn=document.getElementById('bagDashboardBtn');
-    if(dbBtn) dbBtn.style.display=isBag?'none':'inline-block';
+    const isAdminRole=sessionStorage.getItem('dmsc_role')==='admin';
+    if(dbBtn) dbBtn.style.display=(isBag||!isAdminRole)?'none':'inline-block';
     if(bagBtn) bagBtn.style.display=isBag?'inline-block':'none';
   }
 
