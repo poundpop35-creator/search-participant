@@ -1360,13 +1360,13 @@ async function shareDeptTable() {
       grandInt += count; grandTgt += target; idx++;
       const bg = idx % 2 === 0 ? '#eef5fa' : '#ffffff';
       const pctHtml = target ? `${Math.round(count/target*100)}%` : '—';
-      const pctColor = !target ? '#94a3b8' : (count/target>=1?'#16a34a':count/target>=0.8?'#65a30d':count/target>=0.5?'#d97706':'#dc2626');
-      return `<tr><td style="padding:8px 10px;font-size:11px;background:${bg};color:#7a9aae;font-weight:700;">${idx}</td><td style="padding:8px 10px;font-size:12px;background:${bg};color:#1F3540;font-weight:600;">${dept}</td><td style="padding:8px 10px;font-size:12px;background:${bg};text-align:right;color:#94a3b8;">${target>0?target.toLocaleString():'—'}</td><td style="padding:8px 10px;font-size:12px;background:${bg};text-align:right;font-weight:700;color:${dc};">${count>0?count.toLocaleString():'—'}</td><td style="padding:8px 10px;font-size:12px;background:${bg};text-align:right;font-weight:700;color:${pctColor};">${pctHtml}</td></tr>`;
+      const pctColor = !target ? '#475569' : (count/target>=1?'#16a34a':count/target>=0.8?'#65a30d':count/target>=0.5?'#d97706':'#dc2626');
+      return `<tr><td style="padding:8px 10px;font-size:11px;background:${bg};color:#475569;font-weight:700;">${idx}</td><td style="padding:8px 10px;font-size:12px;background:${bg};color:#1F3540;font-weight:600;">${dept}</td><td style="padding:8px 10px;font-size:12px;background:${bg};text-align:right;color:#475569;">${target>0?target.toLocaleString():'—'}</td><td style="padding:8px 10px;font-size:12px;background:${bg};text-align:right;font-weight:700;color:${dc};">${count>0?count.toLocaleString():'—'}</td><td style="padding:8px 10px;font-size:12px;background:${bg};text-align:right;font-weight:700;color:${pctColor};">${pctHtml}</td></tr>`;
     });
     const extCount = dk ? (execExternal[dk]||0) : execExternal.d1+execExternal.d2+execExternal.d3;
     const grandAll = grandInt + extCount;
     const grandPct = grandTgt ? Math.round(grandInt/grandTgt*100)+'%' : '—';
-    deptRows.push(`<tr style="background:#dcfce7;border-top:2px solid #86efac;"><td colspan="2" style="padding:10px 12px;font-size:13px;font-weight:800;color:#15803d;">รวมบุคลากรภายใน</td><td style="padding:10px 12px;font-size:12px;font-weight:700;color:#4ade80;text-align:right;">${grandTgt>0?grandTgt.toLocaleString():'—'}</td><td style="padding:10px 12px;font-size:13px;font-weight:800;color:#15803d;text-align:right;">${grandInt.toLocaleString()}</td><td style="padding:10px 12px;font-size:13px;font-weight:800;color:#15803d;text-align:right;">${grandPct}</td></tr>`);
+    deptRows.push(`<tr style="background:#dcfce7;border-top:2px solid #86efac;"><td colspan="2" style="padding:10px 12px;font-size:13px;font-weight:800;color:#15803d;">รวมบุคลากรภายใน</td><td style="padding:10px 12px;font-size:12px;font-weight:700;color:#166534;text-align:right;">${grandTgt>0?grandTgt.toLocaleString():'—'}</td><td style="padding:10px 12px;font-size:13px;font-weight:800;color:#15803d;text-align:right;">${grandInt.toLocaleString()}</td><td style="padding:10px 12px;font-size:13px;font-weight:800;color:#15803d;text-align:right;">${grandPct}</td></tr>`);
 
     document.getElementById('a4TableSlot').innerHTML = `
       <table style="width:100%;border-collapse:collapse;font-family:'Sarabun',sans-serif;">
@@ -1445,9 +1445,9 @@ async function shareExtZoneImage() {
       const pct=total?Math.round(cnt/total*100):0;
       const color=ZONE_COLORS_EXEC[z%ZONE_COLORS_EXEC.length];
       const bg=(z%2===0)?'#f8fafc':'#ffffff';
-      deptRows.push(`<tr><td style="padding:9px 12px;font-size:12.5px;background:${bg};display:flex;align-items:center;gap:8px;"><span style="display:inline-block;width:11px;height:11px;border-radius:2px;background:${color};flex-shrink:0;"></span>${ZONE_NAMES_EXEC[z]||'เขต '+z}</td><td style="padding:9px 12px;font-size:13px;background:${bg};text-align:right;font-weight:700;color:${dc};">${cnt>0?cnt.toLocaleString():'—'}</td><td style="padding:9px 12px;font-size:12px;background:${bg};text-align:right;color:#64748b;">${cnt>0?pct+'%':'—'}</td></tr>`);
+      deptRows.push(`<tr><td style="padding:9px 12px;font-size:12.5px;background:${bg};display:flex;align-items:center;gap:8px;"><span style="display:inline-block;width:11px;height:11px;border-radius:2px;background:${color};flex-shrink:0;"></span>${ZONE_NAMES_EXEC[z]||'เขต '+z}</td><td style="padding:9px 12px;font-size:13px;background:${bg};text-align:right;font-weight:700;color:${dc};">${cnt>0?cnt.toLocaleString():'—'}</td><td style="padding:9px 12px;font-size:12px;background:${bg};text-align:right;color:#334155;font-weight:600;">${cnt>0?pct+'%':'—'}</td></tr>`);
     }
-    deptRows.push(`<tr style="background:#dbeafe;border-top:2px solid #93c5fd;"><td style="padding:11px 12px;font-size:13px;font-weight:800;color:#1d4ed8;">รวมบุคลากรภายนอก</td><td style="padding:11px 12px;font-size:14px;font-weight:800;color:#1d4ed8;text-align:right;">${total.toLocaleString()}</td><td style="padding:11px 12px;color:#93c5fd;text-align:right;">100%</td></tr>`);
+    deptRows.push(`<tr style="background:#dbeafe;border-top:2px solid #93c5fd;"><td style="padding:11px 12px;font-size:13px;font-weight:800;color:#1d4ed8;">รวมบุคลากรภายนอก</td><td style="padding:11px 12px;font-size:14px;font-weight:800;color:#1d4ed8;text-align:right;">${total.toLocaleString()}</td><td style="padding:11px 12px;color:#1d4ed8;font-weight:700;text-align:right;">100%</td></tr>`);
 
     document.getElementById('a4ExtZoneExportTime').textContent = now.toLocaleString('th-TH',{timeZone:'Asia/Bangkok',dateStyle:'medium',timeStyle:'short'});
     document.getElementById('a4ExtZoneColLabel').textContent = dl;
