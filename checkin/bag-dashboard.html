@@ -1114,7 +1114,7 @@ function renderShirtTable(){
     const sT=r.received?(r.scannedBy||'-'):'-';
     const pT=r.received?(r.shirtReceivedBy||'-'):'-';
     const adminAttrs=isAdmin?` data-id="${r.id}" data-raw-date="${r.rawDate||''}" data-received-by="${(r.shirtReceivedBy||'').replace(/"/g,'&quot;')}" data-received="${r.received}" data-field="shirt_received_date" data-scan-by="${(r.scannedBy||'').replace(/"/g,'&quot;')}" data-editing="0" data-has-bag="${r.bagStatus!=='none'?'1':'0'}"`:'';
-    const actionCell=isAdmin?`<td style="white-space:nowrap;"><button class="btn-edit-row" onclick="startEdit(this)">✏️ แก้ไข</button></td>`:'';
+    const actionCell=isAdmin?`<td style="white-space:nowrap;display:flex;gap:4px;flex-wrap:wrap;"><button class="btn-edit-row" onclick="startEdit(this)">✏️ แก้ไข</button>${r.received?`<button class="btn-edit-row" style="background:#fef2f2;border-color:#fca5a5;color:#dc2626;" onclick="clearShirtSingle('${r.id}','${r.name.replace(/'/g,"\\'")}')">🗑️ ล้าง</button>`:''}</td>`:'';
     const bagBadge=r.bagStatus==='received'?`<span class="badge b-cross-received">${r.bagLabel}: รับแล้ว</span>`:r.bagStatus==='pending'?`<span class="badge b-cross-pending">${r.bagLabel}: ยังไม่รับ</span>`:`<span class="badge b-cross-none">ไม่มีสิทธิ์รับกระเป๋า</span>`;
     return `<tr${adminAttrs}>
       <td>${start+i+1}</td>
@@ -1132,6 +1132,19 @@ function renderShirtTable(){
 }
 
 function changeShirtPage(d){shirtPage+=d;renderShirtTable();window.scrollTo({top:0,behavior:'smooth'});}
+
+async function clearShirtSingle(id, name){
+  if(!confirm(`ยืนยันล้างข้อมูลเสื้อของ\n"${name}"\nสถานะจะกลับเป็น "ยังไม่รับ"`)) return;
+  try{
+    const res=await fetch(`${SB_URL}/rest/v1/participants?id=eq.${id}`,{
+      method:'PATCH',
+      headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify({shirt_received:false,shirt_received_date:null,shirt_received_by:null,shirt_scanned_by:null})
+    });
+    if(res.ok||res.status===204){ loadAll(); }
+    else{ alert('เกิดข้อผิดพลาด: '+res.status); }
+  }catch(e){ alert('เกิดข้อผิดพลาด: '+e.message); }
+}
 
 function resetShirtFilters(){
   document.getElementById('sfStatus').value='';
