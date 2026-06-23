@@ -350,7 +350,7 @@ document.addEventListener('DOMContentLoaded', function() {
       <div class="stat-sub">ราย (ลงทะเบียนล่วงหน้า + Walk-in)</div>
     </div>
     <div class="stat-card" style="border-left:4px solid #16a34a;">
-      <div class="stat-label" style="margin-bottom:12px;">ความคืบหน้าการเช็คอิน <span style="font-weight:400;color:#94a3b8;">(ผู้ลงทะเบียนล่วงหน้า)</span></div>
+      <div class="stat-label" style="margin-bottom:12px;">ความคืบหน้าการเช็คอิน <span style="font-weight:400;color:#94a3b8;">(ผู้ลงทะเบียนทั้งหมด)</span></div>
       <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px;">
         <span style="font-size:0.8rem;color:#64748b;">เช็คอินแล้ว <b id="sPreReg" style="color:#16a34a;">-</b> ราย</span>
         <span style="font-size:0.75rem;color:#94a3b8;">จาก <span id="sTotalPreRegDisp">-</span> ราย (<span id="sPreRegPct" style="color:#16a34a;font-weight:700;">0%</span>)</span>
@@ -1313,19 +1313,19 @@ function applyFilters(){
   });
   curPage=1;
   const tot=filtered.length;
-  const totalAll=allData.length;
+  const totalCheckins=allData.length;
   const walkinCount=allData.filter(r=>r.isWalkin).length;
-  const preRegCount=totalAll-walkinCount;
+  const preRegCount=totalCheckins-walkinCount;
   const uniqueCheckedIn=new Set(allData.filter(r=>!r.isWalkin).map(r=>r.participantId)).size;
   const notCheckedIn=totalPreReg>0?totalPreReg-uniqueCheckedIn:'-';
   // Row 1: filter by selected day (except ยังไม่เช็คอิน = grand total)
   const filtWalkin=filtered.filter(r=>r.isWalkin).length;
   const filtPreReg=filtered.filter(r=>!r.isWalkin).length;
   document.getElementById('sTotal').textContent=tot>0?tot.toLocaleString():'-';
-  // Progress card — row 1
-  document.getElementById('sPreReg').textContent=filtPreReg.toLocaleString();
-  document.getElementById('sTotalPreRegDisp').textContent=totalPreReg>0?totalPreReg.toLocaleString():'-';
-  const preRegRaw=totalPreReg>0?filtPreReg/totalPreReg*100:0;
+  // Progress card — row 1 (all = pre-reg + walk-in)
+  document.getElementById('sPreReg').textContent=tot.toLocaleString();
+  document.getElementById('sTotalPreRegDisp').textContent=totalAll>0?totalAll.toLocaleString():'-';
+  const preRegRaw=totalAll>0?tot/totalAll*100:0;
   const preRegPctText=preRegRaw===0?'0%':preRegRaw<1?(preRegRaw.toFixed(1)+'%'):(Math.round(preRegRaw)+'%');
   document.getElementById('sPreRegPct').textContent=preRegPctText;
   document.getElementById('barPreReg').style.width=Math.min(preRegRaw,100)+'%';
