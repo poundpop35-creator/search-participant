@@ -248,43 +248,6 @@
       </div>
     </div>
 
-    <!-- External zone table card -->
-    <div class="dept-card" id="extZoneNewCard">
-      <div class="dept-card-header" style="display:flex;flex-direction:column;gap:8px;border-left:4px solid #1d4ed8;">
-        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;">
-          <div>
-            <div class="dept-card-title">บุคลากรภายนอกกรม แยกตามเขตสุขภาพ</div>
-            <div class="dept-card-sub" id="extZoneCardSub">ข้อมูลจากการเช็คอินจริง — อัปเดตอัตโนมัติทุก 1 นาที</div>
-          </div>
-          <div style="display:flex;gap:6px;flex-shrink:0;">
-            <button class="share-btn" id="shareExtZoneImgBtn" onclick="shareExtZoneImage()" style="margin-top:0;">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-              📤 แชร์รูป
-            </button>
-            <button class="share-btn" id="shareExtZoneTextBtn" onclick="shareExtZoneText()" style="margin-top:0;">📋 ข้อความ</button>
-          </div>
-        </div>
-        <div style="display:flex;gap:4px;">
-          <button id="ezfAll" onclick="setExecDay(null)" style="padding:5px 10px;border-radius:8px;border:1.5px solid #1F3540;background:#1F3540;color:#fff;font-family:'Sarabun',sans-serif;font-size:0.75rem;font-weight:700;cursor:pointer;">รวม</button>
-          <button id="ezfD1" onclick="setExecDay(1)" style="padding:5px 10px;border-radius:8px;border:1.5px solid #C8DDE8;background:#fff;color:#2563eb;font-family:'Sarabun',sans-serif;font-size:0.75rem;font-weight:600;cursor:pointer;">24 มิ.ย.</button>
-          <button id="ezfD2" onclick="setExecDay(2)" style="padding:5px 10px;border-radius:8px;border:1.5px solid #C8DDE8;background:#fff;color:#7c3aed;font-family:'Sarabun',sans-serif;font-size:0.75rem;font-weight:600;cursor:pointer;">25 มิ.ย.</button>
-          <button id="ezfD3" onclick="setExecDay(3)" style="padding:5px 10px;border-radius:8px;border:1.5px solid #C8DDE8;background:#fff;color:#0891b2;font-family:'Sarabun',sans-serif;font-size:0.75rem;font-weight:600;cursor:pointer;">26 มิ.ย.</button>
-        </div>
-      </div>
-      <div class="scroll-wrap">
-        <table>
-          <thead id="extZoneTableHead">
-            <tr>
-              <th>เขตสุขภาพ</th>
-              <th class="num">จำนวน (คน)</th>
-              <th class="num">%</th>
-            </tr>
-          </thead>
-          <tbody id="extZoneTableBody"></tbody>
-        </table>
-      </div>
-    </div>
-
     <div class="dept-card" id="deptShareCard">
       <div class="dept-card-header" style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;border-left:4px solid #15803d;">
         <div>
@@ -331,6 +294,43 @@
         <div style="overflow-y:auto;max-height:600px;">
           <canvas id="execBarChart"></canvas>
         </div>
+      </div>
+    </div>
+
+    <!-- External zone table card -->
+    <div class="dept-card" id="extZoneNewCard">
+      <div class="dept-card-header" style="display:flex;flex-direction:column;gap:8px;border-left:4px solid #1d4ed8;">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+          <div>
+            <div class="dept-card-title">บุคลากรภายนอกกรม แยกตามเขตสุขภาพ</div>
+            <div class="dept-card-sub" id="extZoneCardSub">ข้อมูลจากการเช็คอินจริง — อัปเดตอัตโนมัติทุก 1 นาที</div>
+          </div>
+          <div style="display:flex;gap:6px;flex-shrink:0;">
+            <button class="share-btn" id="shareExtZoneImgBtn" onclick="shareExtZoneImage()" style="margin-top:0;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              📤 แชร์รูป
+            </button>
+            <button class="share-btn" id="shareExtZoneTextBtn" onclick="shareExtZoneText()" style="margin-top:0;">📋 ข้อความ</button>
+          </div>
+        </div>
+        <div style="display:flex;gap:4px;">
+          <button id="ezfAll" onclick="setExecDay(null)" style="padding:5px 10px;border-radius:8px;border:1.5px solid #1F3540;background:#1F3540;color:#fff;font-family:'Sarabun',sans-serif;font-size:0.75rem;font-weight:700;cursor:pointer;">รวม</button>
+          <button id="ezfD1" onclick="setExecDay(1)" style="padding:5px 10px;border-radius:8px;border:1.5px solid #C8DDE8;background:#fff;color:#2563eb;font-family:'Sarabun',sans-serif;font-size:0.75rem;font-weight:600;cursor:pointer;">24 มิ.ย.</button>
+          <button id="ezfD2" onclick="setExecDay(2)" style="padding:5px 10px;border-radius:8px;border:1.5px solid #C8DDE8;background:#fff;color:#7c3aed;font-family:'Sarabun',sans-serif;font-size:0.75rem;font-weight:600;cursor:pointer;">25 มิ.ย.</button>
+          <button id="ezfD3" onclick="setExecDay(3)" style="padding:5px 10px;border-radius:8px;border:1.5px solid #C8DDE8;background:#fff;color:#0891b2;font-family:'Sarabun',sans-serif;font-size:0.75rem;font-weight:600;cursor:pointer;">26 มิ.ย.</button>
+        </div>
+      </div>
+      <div class="scroll-wrap">
+        <table>
+          <thead id="extZoneTableHead">
+            <tr>
+              <th>เขตสุขภาพ</th>
+              <th class="num">จำนวน (คน)</th>
+              <th class="num">%</th>
+            </tr>
+          </thead>
+          <tbody id="extZoneTableBody"></tbody>
+        </table>
       </div>
     </div>
 
