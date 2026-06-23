@@ -638,7 +638,8 @@ async function ensureCIData() {
   allCIData = data.map(p => {
     const isIn = (p.internal_external || '').includes('ภายใน');
     const prov = (p.province || '').trim();
-    return { name: _buildName(p), dept: (isIn ? (p.dept||'-') : (p.ext_dept||p.dept||'-')), province: prov||'-', zone: getZonePub(prov), isIn };
+    const rawDept = isIn ? (p.dept||'-') : (p.ext_dept||p.dept||'-');
+    return { name: _buildName(p), dept: rawDept, province: prov||'-', zone: getZonePub(prov), isIn, isStaff: (p.dept||'')==='กองแผนงานและวิชาการ' };
   });
 }
 
@@ -724,13 +725,16 @@ function renderCITable() {
     ? page.map((r, i) => {
         const zc = r.zone ? ZONE_COLORS_PUB[r.zone % ZONE_COLORS_PUB.length] : '#94a3b8';
         const zLabel = r.zone ? `เขต ${r.zone}` : '-';
+        const personBadge = r.isStaff
+          ? '<span style="background:#ede9fe;color:#7c3aed;font-size:0.7rem;font-weight:700;padding:2px 8px;border-radius:99px;">Staff</span>'
+          : `<span style="background:${r.isIn?'#dbeafe':'#dcfce7'};color:${r.isIn?'#1d4ed8':'#15803d'};font-size:0.7rem;font-weight:700;padding:2px 8px;border-radius:99px;">${r.isIn?'ภายใน':'ภายนอก'}</span>`;
         return `<tr>
           <td style="color:#94a3b8;min-width:36px;">${start+i+1}</td>
           <td style="font-weight:600;min-width:160px;">${r.name}</td>
           <td style="color:#475569;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:120px;" title="${r.dept}">${r.dept}</td>
           <td style="color:#475569;min-width:90px;">${r.province}</td>
           <td style="min-width:72px;"><span style="background:${zc}22;color:${zc};font-size:0.7rem;font-weight:700;padding:2px 8px;border-radius:99px;border:1px solid ${zc}44;">${zLabel}</span></td>
-          <td style="min-width:80px;"><span style="background:${r.isIn?'#dbeafe':'#dcfce7'};color:${r.isIn?'#1d4ed8':'#15803d'};font-size:0.7rem;font-weight:700;padding:2px 8px;border-radius:99px;">${r.isIn?'ภายใน':'ภายนอก'}</span></td>
+          <td style="min-width:80px;">${personBadge}</td>
         </tr>`;
       }).join('')
     : '<tr><td colspan="6" style="text-align:center;padding:20px;color:#94a3b8;">ไม่พบข้อมูล</td></tr>';
@@ -780,7 +784,8 @@ async function ensureWIData() {
   allWIData = data.map(p => {
     const isIn = (p.internal_external || '').includes('ภายใน');
     const prov = (p.province || '').trim();
-    return { name: _buildName(p), dept: (isIn ? (p.dept||'-') : (p.ext_dept||p.dept||'-')), province: prov||'-', zone: getZonePub(prov), isIn };
+    const rawDept = isIn ? (p.dept||'-') : (p.ext_dept||p.dept||'-');
+    return { name: _buildName(p), dept: rawDept, province: prov||'-', zone: getZonePub(prov), isIn, isStaff: (p.dept||'')==='กองแผนงานและวิชาการ' };
   });
 }
 
@@ -824,13 +829,16 @@ function renderWITable() {
     ? page.map((r, i) => {
         const zc = r.zone ? ZONE_COLORS_PUB[r.zone % ZONE_COLORS_PUB.length] : '#94a3b8';
         const zLabel = r.zone ? `เขต ${r.zone}` : '-';
+        const personBadge = r.isStaff
+          ? '<span style="background:#ede9fe;color:#7c3aed;font-size:0.7rem;font-weight:700;padding:2px 8px;border-radius:99px;">Staff</span>'
+          : `<span style="background:${r.isIn?'#dbeafe':'#dcfce7'};color:${r.isIn?'#1d4ed8':'#15803d'};font-size:0.7rem;font-weight:700;padding:2px 8px;border-radius:99px;">${r.isIn?'ภายใน':'ภายนอก'}</span>`;
         return `<tr>
           <td style="color:#94a3b8;min-width:36px;">${start+i+1}</td>
           <td style="font-weight:600;min-width:160px;">${r.name}</td>
           <td style="color:#475569;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:120px;" title="${r.dept}">${r.dept}</td>
           <td style="color:#475569;min-width:90px;">${r.province}</td>
           <td style="min-width:72px;"><span style="background:${zc}22;color:${zc};font-size:0.7rem;font-weight:700;padding:2px 8px;border-radius:99px;border:1px solid ${zc}44;">${zLabel}</span></td>
-          <td style="min-width:80px;"><span style="background:${r.isIn?'#dbeafe':'#dcfce7'};color:${r.isIn?'#1d4ed8':'#15803d'};font-size:0.7rem;font-weight:700;padding:2px 8px;border-radius:99px;">${r.isIn?'ภายใน':'ภายนอก'}</span></td>
+          <td style="min-width:80px;">${personBadge}</td>
         </tr>`;
       }).join('')
     : '<tr><td colspan="6" style="text-align:center;padding:20px;color:#94a3b8;">ไม่พบข้อมูล</td></tr>';
@@ -918,6 +926,9 @@ function renderAllTable() {
         const regBg = r.isWalkin ? '#fed7aa' : '#ccfbf1';
         const regColor = r.isWalkin ? '#c2410c' : '#0f766e';
         const regLabel = r.isWalkin ? 'Walk-in' : 'ล่วงหน้า';
+        const personBadge = r.isStaff
+          ? '<span style="background:#ede9fe;color:#7c3aed;font-size:0.7rem;font-weight:700;padding:2px 8px;border-radius:99px;">Staff</span>'
+          : `<span style="background:${r.isIn?'#dbeafe':'#dcfce7'};color:${r.isIn?'#1d4ed8':'#15803d'};font-size:0.7rem;font-weight:700;padding:2px 8px;border-radius:99px;">${r.isIn?'ภายใน':'ภายนอก'}</span>`;
         return `<tr>
           <td style="color:#94a3b8;min-width:36px;">${start+i+1}</td>
           <td style="font-weight:600;min-width:160px;">${r.name}</td>
@@ -925,7 +936,7 @@ function renderAllTable() {
           <td style="min-width:70px;"><span style="background:${regBg};color:${regColor};font-size:0.7rem;font-weight:700;padding:2px 8px;border-radius:99px;">${regLabel}</span></td>
           <td style="color:#475569;min-width:90px;">${r.province}</td>
           <td style="min-width:72px;"><span style="background:${zc}22;color:${zc};font-size:0.7rem;font-weight:700;padding:2px 8px;border-radius:99px;border:1px solid ${zc}44;">${zLabel}</span></td>
-          <td style="min-width:80px;"><span style="background:${r.isIn?'#dbeafe':'#dcfce7'};color:${r.isIn?'#1d4ed8':'#15803d'};font-size:0.7rem;font-weight:700;padding:2px 8px;border-radius:99px;">${r.isIn?'ภายใน':'ภายนอก'}</span></td>
+          <td style="min-width:80px;">${personBadge}</td>
         </tr>`;
       }).join('')
     : '<tr><td colspan="7" style="text-align:center;padding:20px;color:#94a3b8;">ไม่พบข้อมูล</td></tr>';
