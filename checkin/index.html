@@ -363,6 +363,7 @@
     }
     const sel=document.getElementById('day');
     const bagOpt=sel.querySelector('option[value="bag"]');
+    if(isStaff) bagOpt.remove();
     const bagOpenAt=new Date(2026,4,29,8,0,0); // 29 พ.ค. 08:00 น.
     if(now<bagOpenAt){
       bagOpt.disabled=true;
