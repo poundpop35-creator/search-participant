@@ -247,7 +247,6 @@
                 <th style="padding:6px 10px;width:32px;text-align:left;font-size:0.72rem;font-weight:700;color:#5a7a8e;border-bottom:2px solid #C8DDE8;">#</th>
                 <th style="padding:6px 10px;text-align:left;font-size:0.72rem;font-weight:700;color:#5a7a8e;border-bottom:2px solid #C8DDE8;">หน่วยงาน</th>
                 <th style="padding:6px 10px;text-align:right;font-size:0.72rem;font-weight:700;color:#5a7a8e;border-bottom:2px solid #C8DDE8;">คน</th>
-                <th style="padding:6px 10px;text-align:left;font-size:0.72rem;font-weight:700;color:#5a7a8e;border-bottom:2px solid #C8DDE8;">สัดส่วน</th>
               </tr></thead>
               <tbody id="execZoneBodyInt"></tbody>
             </table>
@@ -318,7 +317,6 @@
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
               📤 แชร์รูป
             </button>
-            <button class="share-btn" id="shareExtZoneTextBtn" onclick="shareExtZoneText()" style="margin-top:0;">📋 ข้อความ</button>
           </div>
         </div>
         <div style="display:flex;gap:4px;">
@@ -1203,12 +1201,6 @@ async function execRenderIntPanel(intData){
       <td style="padding:5px 10px;color:#94a3b8;font-size:0.72rem;font-weight:700;">${idx+1}</td>
       <td style="padding:5px 10px;"><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:${dc};margin-right:4px;vertical-align:middle;"></span>${dept}</td>
       <td style="padding:5px 10px;text-align:right;font-weight:700;">${cnt.toLocaleString()}</td>
-      <td style="padding:5px 14px 5px 10px;min-width:100px;">
-        <div style="display:flex;align-items:center;gap:5px;">
-          <div style="flex:1;background:#e2e8f0;border-radius:4px;height:6px;overflow:hidden;"><div style="width:${(cnt/maxN*100).toFixed(1)}%;background:${dc};height:100%;border-radius:4px;"></div></div>
-          <span style="font-size:0.7rem;color:#94a3b8;min-width:28px;">${fmtPctExec(cnt,total)}</span>
-        </div>
-      </td>
     </tr>`;
   }).join('')+`<tr style="border-top:2px solid #cbd5e1;background:#f8fafc;"><td style="padding:6px 10px;"></td><td style="padding:6px 10px;font-weight:700;font-size:0.82rem;">รวม</td><td style="padding:6px 10px;text-align:right;font-weight:700;">${total.toLocaleString()}</td><td></td></tr>`;
   const container=document.getElementById('execZoneMapInt');
@@ -1701,7 +1693,7 @@ async function shareBothImages() {
 </script>
 
 <!-- A4 export container — off-screen, always rendered so html2canvas can capture it -->
-<div id="a4Export" style="position:fixed;left:-9999px;top:0;width:794px;background:#fff;padding:44px 52px;font-family:'Sarabun',sans-serif;line-height:1.6;">
+<div id="a4Export" style="position:absolute;left:-9999px;top:0;width:794px;background:#fff;padding:44px 52px;font-family:'Sarabun',sans-serif;line-height:1.6;">
   <div style="border-bottom:3px solid #1F3540;padding-bottom:14px;margin-bottom:22px;display:flex;justify-content:space-between;align-items:flex-end;gap:16px;">
     <div>
       <div style="font-size:16px;font-weight:800;color:#1F3540;line-height:1.4;">จำนวนผู้เข้าร่วมงานแยกตามหน่วยงานภายใน</div>
@@ -1721,7 +1713,7 @@ async function shareBothImages() {
 </div>
 
 <!-- A4 external export container — off-screen -->
-<div id="a4ExtExport" style="position:fixed;left:-9999px;top:0;width:794px;background:#fff;padding:44px 52px;font-family:'Sarabun',sans-serif;line-height:1.6;">
+<div id="a4ExtExport" style="position:absolute;left:-9999px;top:0;width:794px;background:#fff;padding:44px 52px;font-family:'Sarabun',sans-serif;line-height:1.6;">
   <div style="border-bottom:3px solid #15803d;padding-bottom:14px;margin-bottom:22px;display:flex;justify-content:space-between;align-items:flex-end;gap:16px;">
     <div>
       <div style="font-size:16px;font-weight:800;color:#15803d;line-height:1.4;">จำนวนผู้เข้าร่วมงานแยกตามหน่วยงานภายนอก</div>
@@ -1740,7 +1732,7 @@ async function shareBothImages() {
 </div>
 
 <!-- A4 external zone table export — off-screen -->
-<div id="a4ExtZoneExport" style="position:fixed;left:-9999px;top:0;width:794px;background:#fff;padding:44px 52px;font-family:'Sarabun',sans-serif;line-height:1.6;">
+<div id="a4ExtZoneExport" style="position:absolute;left:-9999px;top:0;width:794px;background:#fff;padding:44px 52px;font-family:'Sarabun',sans-serif;line-height:1.6;">
   <div style="border-bottom:3px solid #1d4ed8;padding-bottom:14px;margin-bottom:22px;display:flex;justify-content:space-between;align-items:flex-end;gap:16px;">
     <div>
       <div style="font-size:16px;font-weight:800;color:#1d4ed8;line-height:1.4;">จำนวนบุคลากรภายนอกกรม แยกตามเขตสุขภาพ</div>
@@ -1760,7 +1752,7 @@ async function shareBothImages() {
 </div>
 
 <!-- A4 zone map export — off-screen -->
-<div id="a4ZoneExport" style="position:fixed;left:-9999px;top:0;width:794px;background:#fff;padding:36px 44px;font-family:'Sarabun',sans-serif;line-height:1.6;">
+<div id="a4ZoneExport" style="position:absolute;left:-9999px;top:0;width:794px;background:#fff;padding:36px 44px;font-family:'Sarabun',sans-serif;line-height:1.6;">
   <div style="border-bottom:3px solid #1F3540;padding-bottom:12px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:flex-end;gap:16px;">
     <div>
       <div style="font-size:15px;font-weight:800;color:#1F3540;line-height:1.4;" id="a4ZoneLabel">สถิติผู้เข้าร่วมงานแยกตามเขตสุขภาพ</div>
@@ -1859,7 +1851,7 @@ async function shareBothImages() {
 </script>
 
 <!-- Summary export card — off-screen -->
-<div id="summaryExport" style="position:fixed;left:-9999px;top:0;width:640px;background:#fff;font-family:'Sarabun',sans-serif;border-radius:0;overflow:hidden;">
+<div id="summaryExport" style="position:absolute;left:-9999px;top:0;width:640px;background:#fff;font-family:'Sarabun',sans-serif;border-radius:0;overflow:hidden;">
   <div style="background:linear-gradient(135deg,#1F3540 0%,#2C4B5D 100%);padding:22px 28px 18px;display:flex;align-items:center;gap:14px;">
     <div style="flex:1;">
       <div style="font-size:11px;font-weight:700;color:#93c5fd;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px;">สรุปผู้เข้าร่วมงาน — เช็คอินแล้ว</div>
