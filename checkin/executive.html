@@ -1422,7 +1422,7 @@ async function shareExtZoneText() {
     const total = Object.values(zoneCounts).reduce((s,n)=>s+n,0);
     const dl = execDay ? ['','วันที่ 24 มิถุนายน 2569','วันที่ 25 มิถุนายน 2569','วันที่ 26 มิถุนายน 2569'][execDay] : 'รวม 3 วัน (24-26 มิถุนายน 2569)';
     const now = new Date().toLocaleString('th-TH',{timeZone:'Asia/Bangkok',hour:'2-digit',minute:'2-digit'});
-    const text = `ประชุมวิชาการวิทยาศาสตร์การแพทย์ ครั้งที่ 34\n📅 ${dl}\n\n👥 บุคลากรภายนอกกรม: ${total.toLocaleString()} คน\n\n⏰ ณ เวลา ${now} น.`;
+    const text = `ประชุมวิชาการวิทยาศาสตร์การแพทย์ ครั้งที่ 34\n📅 ${dl}\n\n👥 ภายนอกกรม: ${total.toLocaleString()} คน\n\n⏰ ณ เวลา ${now} น.`;
     if(navigator.share){ await navigator.share({text}); }
     else { await navigator.clipboard.writeText(text); alert('คัดลอกข้อความแล้ว!'); }
   } catch(e){ if(e.name!=='AbortError') alert('เกิดข้อผิดพลาด: '+e.message); }
