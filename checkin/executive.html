@@ -1426,7 +1426,7 @@ async function shareExtZoneText() {
     const total = Object.values(zoneCounts).reduce((s,n)=>s+n,0);
     const dl = execDay ? ['','วันที่ 24 มิถุนายน 2569','วันที่ 25 มิถุนายน 2569','วันที่ 26 มิถุนายน 2569'][execDay] : 'รวม 3 วัน (24-26 มิถุนายน 2569)';
     const now = new Date().toLocaleString('th-TH',{timeZone:'Asia/Bangkok',hour:'2-digit',minute:'2-digit'});
-    const text = `ประชุมวิชาการวิทยาศาสตร์การแพทย์ ครั้งที่ 34\n📅 ${dl}\n\n🏃 ภายนอกกรม: ${total.toLocaleString()} คน\n\n⏰ ณ เวลา ${now} น.`;
+    const text = `ประชุมวิชาการวิทยาศาสตร์การแพทย์ ครั้งที่ 34\n📅 ${dl}\n\n🏃‍➡️ ภายนอกกรม: ${total.toLocaleString()} คน\n\n⏰ ณ เวลา ${now} น.`;
     if(navigator.share){ await navigator.share({text}); }
     else { await navigator.clipboard.writeText(text); alert('คัดลอกข้อความแล้ว!'); }
   } catch(e){ if(e.name!=='AbortError') alert('เกิดข้อผิดพลาด: '+e.message); }
@@ -1467,7 +1467,7 @@ async function shareExtZoneImage() {
       if(navigator.canShare&&navigator.canShare({files:[file]})){
         const nowStr2=now.toLocaleString('th-TH',{timeZone:'Asia/Bangkok',hour:'2-digit',minute:'2-digit'});
         const dl2=execDay?['','วันที่ 24 มิถุนายน 2569','วันที่ 25 มิถุนายน 2569','วันที่ 26 มิถุนายน 2569'][execDay]:'รวม 3 วัน (24-26 มิถุนายน 2569)';
-        const shareText2=`ประชุมวิชาการวิทยาศาสตร์การแพทย์ ครั้งที่ 34\n📅 ${dl2}\n\n🏃 ภายนอกกรม: ${total.toLocaleString()} คน\n\n⏰ ณ เวลา ${nowStr2} น.`;
+        const shareText2=`ประชุมวิชาการวิทยาศาสตร์การแพทย์ ครั้งที่ 34\n📅 ${dl2}\n\n🏃‍➡️ ภายนอกกรม: ${total.toLocaleString()} คน\n\n⏰ ณ เวลา ${nowStr2} น.`;
         try{await navigator.share({files:[file],text:shareText2});}
         catch(e){if(e.name!=='AbortError'){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=file.name;a.click();}}
       } else { const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=file.name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),5000); }
@@ -1687,7 +1687,7 @@ async function shareBothImages() {
     // ── Combined text ──
     const nowStr = now.toLocaleString('th-TH',{timeZone:'Asia/Bangkok',hour:'2-digit',minute:'2-digit'});
     const grandAll = grandInt + extTotal;
-    const shareText = `ประชุมวิชาการวิทยาศาสตร์การแพทย์ ครั้งที่ 34\n📅 ${dlFull}\n\n🧑‍🔬 บุคลากรภายในกรม: ${grandInt.toLocaleString()} คน\n🏃 ภายนอกกรม: ${extTotal.toLocaleString()} คน\nรวม ${grandAll.toLocaleString()} คน\n\n⏰ ณ เวลา ${nowStr} น.`;
+    const shareText = `ประชุมวิชาการวิทยาศาสตร์การแพทย์ ครั้งที่ 34\n📅 ${dlFull}\n\n🧑‍🔬 บุคลากรภายในกรม: ${grandInt.toLocaleString()} คน\n🏃‍➡️ ภายนอกกรม: ${extTotal.toLocaleString()} คน\nรวม ${grandAll.toLocaleString()} คน\n\n⏰ ณ เวลา ${nowStr} น.`;
 
     // ── Share ──
     if(navigator.canShare && navigator.canShare({files:[file2,file1]})){
