@@ -666,6 +666,9 @@ function renderSummary() {
   document.getElementById('sumD3').textContent = d3All.toLocaleString();
 }
 
+function isMobile(){return('ontouchstart' in window)||navigator.maxTouchPoints>0;}
+function showDesktopHint(n=1){alert(`ดาวน์โหลดรูปแล้ว ${n} ไฟล์ ✅\nไปแนบในแอป LINE Desktop ได้เลย 📎`);}
+
 async function shareSummary() {
   const btn = document.getElementById('shareSummaryBtn');
   btn.disabled = true; btn.innerHTML = '⏳ กำลังสร้างรูป...';
@@ -688,12 +691,12 @@ async function shareSummary() {
     const canvas = await html2canvas(el, {scale:2,useCORS:true,backgroundColor:'#ffffff',logging:false,windowWidth:680});
     canvas.toBlob(async (blob) => {
       const file = new File([blob], 'summary-checkin-'+new Date().toISOString().slice(0,10)+'.png',{type:'image/png'});
-      if(navigator.canShare && navigator.canShare({files:[file]})){
+      if(isMobile()&&navigator.canShare&&navigator.canShare({files:[file]})){
         try{ await navigator.share({files:[file],title:'สรุปผู้เข้าร่วมงาน'}); }
-        catch(e){ if(e.name!=='AbortError'){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=file.name;a.click();} }
+        catch(e){ if(e.name!=='AbortError'){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=file.name;a.click();showDesktopHint();} }
       } else {
         const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=file.name;a.click();
-        setTimeout(()=>URL.revokeObjectURL(a.href),5000);
+        setTimeout(()=>URL.revokeObjectURL(a.href),5000);showDesktopHint();
       }
     },'image/png');
   } catch(e){ alert('ไม่สามารถสร้างรูปภาพได้: '+e.message); }
@@ -1395,13 +1398,13 @@ async function shareDeptTable() {
 
     canvas.toBlob(async (blob) => {
       const file = new File([blob], 'dept-summary-' + now.toISOString().slice(0,10) + '.png', { type: 'image/png' });
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      if (isMobile()&&navigator.canShare&&navigator.canShare({ files: [file] })) {
         try {
           await navigator.share({ files: [file], title: 'สถิติแยกตามหน่วยงาน', text: shareText });
-        } catch(e) { if (e.name !== 'AbortError') { const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=file.name;a.click(); } }
+        } catch(e) { if (e.name !== 'AbortError') { const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=file.name;a.click();showDesktopHint(); } }
       } else {
         const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=file.name; a.click();
-        setTimeout(()=>URL.revokeObjectURL(a.href),5000);
+        setTimeout(()=>URL.revokeObjectURL(a.href),5000);showDesktopHint();
       }
     }, 'image/png');
   } catch(e) {
@@ -1458,13 +1461,13 @@ async function shareExtZoneImage() {
     const canvas = await html2canvas(document.getElementById('a4ExtZoneExport'),{scale:2,useCORS:true,backgroundColor:'#ffffff',logging:false,windowWidth:794});
     canvas.toBlob(async (blob)=>{
       const file=new File([blob],'ext-zone-'+now.toISOString().slice(0,10)+'.png',{type:'image/png'});
-      if(navigator.canShare&&navigator.canShare({files:[file]})){
+      if(isMobile()&&navigator.canShare&&navigator.canShare({files:[file]})){
         const nowStr2=now.toLocaleString('th-TH',{timeZone:'Asia/Bangkok',hour:'2-digit',minute:'2-digit'});
         const dl2=execDay?['','วันที่ 24 มิถุนายน 2569','วันที่ 25 มิถุนายน 2569','วันที่ 26 มิถุนายน 2569'][execDay]:'รวม 3 วัน (24-26 มิถุนายน 2569)';
         const shareText2=`ประชุมวิชาการวิทยาศาสตร์การแพทย์ ครั้งที่ 34\n📅 ${dl2}\n\n🏃 ภายนอกกรม: ${total.toLocaleString()} คน\n\n⏰ ณ เวลา ${nowStr2} น.`;
         try{await navigator.share({files:[file],text:shareText2});}
-        catch(e){if(e.name!=='AbortError'){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=file.name;a.click();}}
-      } else { const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=file.name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),5000); }
+        catch(e){if(e.name!=='AbortError'){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=file.name;a.click();showDesktopHint();}}
+      } else { const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=file.name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),5000);showDesktopHint(); }
     },'image/png');
   } catch(e){alert('ไม่สามารถสร้างรูปภาพได้: '+e.message);}
   finally{btn.innerHTML='📤 แชร์รูป';btn.disabled=false;}
@@ -1543,12 +1546,12 @@ async function shareZoneMap() {
     });
     canvas.toBlob(async (blob) => {
       const file = new File([blob],'zone-map-'+now.toISOString().slice(0,10)+'.png',{type:'image/png'});
-      if (navigator.canShare && navigator.canShare({files:[file]})) {
+      if (isMobile()&&navigator.canShare&&navigator.canShare({files:[file]})) {
         try { await navigator.share({files:[file],title:'สถิติแยกตามเขตสุขภาพ'}); }
-        catch(e){ if(e.name!=='AbortError'){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=file.name;a.click();} }
+        catch(e){ if(e.name!=='AbortError'){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=file.name;a.click();showDesktopHint();} }
       } else {
         const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=file.name;a.click();
-        setTimeout(()=>URL.revokeObjectURL(a.href),5000);
+        setTimeout(()=>URL.revokeObjectURL(a.href),5000);showDesktopHint();
       }
     },'image/png');
   } catch(e) { alert('ไม่สามารถสร้างรูปภาพได้: '+e.message); }
@@ -1582,12 +1585,12 @@ async function shareExtTable() {
     const canvas = await html2canvas(a4, {scale:2,useCORS:true,backgroundColor:'#ffffff',logging:false,windowWidth:794});
     canvas.toBlob(async (blob) => {
       const file = new File([blob],'ext-dept-summary-'+new Date().toISOString().slice(0,10)+'.png',{type:'image/png'});
-      if(navigator.canShare&&navigator.canShare({files:[file]})){
+      if(isMobile()&&navigator.canShare&&navigator.canShare({files:[file]})){
         try{await navigator.share({files:[file],title:'สถิติผู้เข้าร่วมงานแยกหน่วยงานภายนอก'});}
-        catch(e){if(e.name!=='AbortError'){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=file.name;a.click();}}
+        catch(e){if(e.name!=='AbortError'){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=file.name;a.click();showDesktopHint();}}
       } else {
         const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=file.name;a.click();
-        setTimeout(()=>URL.revokeObjectURL(a.href),5000);
+        setTimeout(()=>URL.revokeObjectURL(a.href),5000);showDesktopHint();
       }
     },'image/png');
   } catch(e){alert('ไม่สามารถสร้างรูปภาพได้: '+e.message);}
@@ -1681,12 +1684,13 @@ async function shareBothImages() {
     const shareText = `ประชุมวิชาการวิทยาศาสตร์การแพทย์ ครั้งที่ 34\n📅 ${dlFull}\n\n🧑‍🔬 บุคลากรภายในกรม: ${grandInt.toLocaleString()} คน\n🏃 ภายนอกกรม: ${extTotal.toLocaleString()} คน\nรวม ${grandAll.toLocaleString()} คน\n\n⏰ ณ เวลา ${nowStr} น.`;
 
     // ── Share (pass external first → LINE reverses → internal shows on top) ──
-    if(navigator.canShare && navigator.canShare({files:[file2,file1]})){
+    if(isMobile()&&navigator.canShare&&navigator.canShare({files:[file2,file1]})){
       try{ await navigator.share({files:[file2,file1],text:shareText}); }
-      catch(e){ if(e.name!=='AbortError'){ [file1,file2].forEach(f=>{const a=document.createElement('a');a.href=URL.createObjectURL(f);a.download=f.name;a.click();}); } }
+      catch(e){ if(e.name!=='AbortError'){ [file1,file2].forEach(f=>{const a=document.createElement('a');a.href=URL.createObjectURL(f);a.download=f.name;a.click();}); showDesktopHint(2); } }
     } else {
       [file1,file2].forEach(f=>{const a=document.createElement('a');a.href=URL.createObjectURL(f);a.download=f.name;a.click();});
       try{ await navigator.clipboard.writeText(shareText); } catch(e){}
+      showDesktopHint(2);
     }
   } catch(e){ alert('ไม่สามารถสร้างรูปภาพได้: '+e.message); }
   finally{ btn.innerHTML='📤 แชร์รวม (ภายใน + ภายนอก)'; btn.disabled=false; }
