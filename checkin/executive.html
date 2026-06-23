@@ -8,6 +8,7 @@
   <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
   <style>
     :root{--blue:#1F3540;--blue-mid:#2C4B5D;--blue-light:#C8DDE8;--green:#16a34a;--white:#fff;--shadow:0 2px 16px rgba(31,53,64,0.10);}
     *{box-sizing:border-box;margin:0;padding:0;}
@@ -170,6 +171,65 @@
         <div style="text-align:center;padding:10px;background:#f8fafc;border-radius:10px;border:1.5px solid #cffafe;">
           <div style="font-size:0.68rem;font-weight:700;color:#0891b2;margin-bottom:3px;">วันที่ 3 · 26 มิ.ย.</div>
           <div style="font-size:1.6rem;font-weight:800;color:#1F3540;" id="sumD3">-</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── ZONE MAP CARD ── -->
+    <div class="dept-card" id="execZoneCard" style="margin-bottom:16px;">
+      <div class="dept-card-header" style="display:flex;flex-direction:column;gap:10px;">
+        <div>
+          <div class="dept-card-title">สถิติผู้เข้าร่วมงานแยกตามเขตสุขภาพ</div>
+          <div class="dept-card-sub">จากผู้ที่เช็คอินแล้ว — กดปุ่มเพื่อสลับมุมมอง</div>
+        </div>
+        <div style="display:flex;gap:6px;">
+          <button id="execZoneTabExt" onclick="execSwitchZoneTab('ext')" style="flex:1;padding:8px 14px;border-radius:20px;border:1.5px solid #ea580c;background:#ea580c;color:#fff;font-family:'Sarabun',sans-serif;font-size:0.82rem;font-weight:700;cursor:pointer;transition:all .15s;display:flex;flex-direction:column;align-items:center;gap:1px;">🌏 บุคคลภายนอก<span id="execZoneCountExt" style="font-size:0.78rem;font-weight:400;opacity:0.85;"></span></button>
+          <button id="execZoneTabInt" onclick="execSwitchZoneTab('int')" style="flex:1;padding:8px 14px;border-radius:20px;border:1.5px solid #e2e8f0;background:transparent;color:#64748b;font-family:'Sarabun',sans-serif;font-size:0.82rem;font-weight:400;cursor:pointer;transition:all .15s;display:flex;flex-direction:column;align-items:center;gap:1px;">🏢 บุคลากรภายใน<span id="execZoneCountInt" style="font-size:0.78rem;font-weight:400;opacity:0.85;"></span></button>
+        </div>
+      </div>
+
+      <!-- External view (default) -->
+      <div id="execZoneViewExt">
+        <div style="display:flex;flex-wrap:wrap;gap:12px;padding:16px;align-items:flex-start;">
+          <div style="flex:0 0 200px;max-width:220px;margin-left:auto;margin-right:auto;">
+            <div id="execZoneMapExt" style="position:relative;width:100%;">
+              <div id="execZoneMapExt-label" style="display:none;position:absolute;bottom:10px;left:50%;transform:translateX(-50%);background:rgba(15,23,42,0.88);color:#fff;border-radius:8px;padding:6px 12px;font-size:0.78rem;font-family:'Sarabun',sans-serif;white-space:nowrap;z-index:10;pointer-events:none;text-align:center;line-height:1.5;"></div>
+              <button id="execZoneMapExtClear" onclick="execClearZoneFilter()" style="display:none;position:absolute;top:6px;right:6px;padding:2px 8px;border-radius:12px;border:1px solid #cbd5e1;background:rgba(255,255,255,0.92);color:#64748b;font-family:'Sarabun',sans-serif;font-size:0.72rem;cursor:pointer;z-index:11;">× ล้าง</button>
+            </div>
+          </div>
+          <div style="flex:1;min-width:200px;overflow-x:auto;max-height:420px;overflow-y:auto;">
+            <table style="width:100%;border-collapse:collapse;font-size:0.83rem;">
+              <thead><tr style="position:sticky;top:0;background:#fff;z-index:1;">
+                <th colspan="2" style="padding:6px 10px;text-align:left;font-size:0.72rem;font-weight:700;color:#5a7a8e;border-bottom:2px solid #C8DDE8;">เขตสุขภาพ</th>
+                <th style="padding:6px 10px;text-align:right;font-size:0.72rem;font-weight:700;color:#5a7a8e;border-bottom:2px solid #C8DDE8;">คน</th>
+                <th style="padding:6px 10px;text-align:right;font-size:0.72rem;font-weight:700;color:#5a7a8e;border-bottom:2px solid #C8DDE8;">%</th>
+              </tr></thead>
+              <tbody id="execZoneBodyExt"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Internal view (hidden by default) -->
+      <div id="execZoneViewInt" style="display:none;">
+        <div style="display:flex;flex-wrap:wrap;gap:12px;padding:16px;align-items:flex-start;">
+          <div style="flex:0 0 200px;max-width:220px;margin-left:auto;margin-right:auto;">
+            <div id="execZoneMapInt" style="position:relative;width:100%;">
+              <div id="execZoneMapInt-label" style="display:none;position:absolute;bottom:10px;left:50%;transform:translateX(-50%);background:rgba(15,23,42,0.88);color:#fff;border-radius:8px;padding:6px 12px;font-size:0.78rem;font-family:'Sarabun',sans-serif;white-space:nowrap;z-index:10;pointer-events:none;text-align:center;line-height:1.5;"></div>
+              <button id="execZoneMapIntClear" onclick="execClearIntFilter()" style="display:none;position:absolute;top:6px;right:6px;padding:2px 8px;border-radius:12px;border:1px solid #cbd5e1;background:rgba(255,255,255,0.92);color:#64748b;font-family:'Sarabun',sans-serif;font-size:0.72rem;cursor:pointer;z-index:11;">× ล้าง</button>
+            </div>
+          </div>
+          <div style="flex:1;min-width:200px;overflow-x:auto;max-height:360px;overflow-y:auto;">
+            <table style="width:100%;border-collapse:collapse;font-size:0.83rem;">
+              <thead><tr style="position:sticky;top:0;background:#fff;z-index:1;">
+                <th style="padding:6px 10px;width:32px;text-align:left;font-size:0.72rem;font-weight:700;color:#5a7a8e;border-bottom:2px solid #C8DDE8;">#</th>
+                <th style="padding:6px 10px;text-align:left;font-size:0.72rem;font-weight:700;color:#5a7a8e;border-bottom:2px solid #C8DDE8;">หน่วยงาน</th>
+                <th style="padding:6px 10px;text-align:right;font-size:0.72rem;font-weight:700;color:#5a7a8e;border-bottom:2px solid #C8DDE8;">คน</th>
+                <th style="padding:6px 10px;text-align:left;font-size:0.72rem;font-weight:700;color:#5a7a8e;border-bottom:2px solid #C8DDE8;">สัดส่วน</th>
+              </tr></thead>
+              <tbody id="execZoneBodyInt"></tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
@@ -560,12 +620,440 @@ function renderExecChart() {
   });
 }
 
+// ─── ZONE MAP CONSTANTS ───
+const HEALTH_ZONE_EXEC={
+  'เชียงราย':1,'น่าน':1,'พะเยา':1,'แพร่':1,'เชียงใหม่':1,'แม่ฮ่องสอน':1,'ลำปาง':1,'ลำพูน':1,
+  'ตาก':2,'พิษณุโลก':2,'เพชรบูรณ์':2,'สุโขทัย':2,'อุตรดิตถ์':2,
+  'กำแพงเพชร':3,'พิจิตร':3,'นครสวรรค์':3,'อุทัยธานี':3,
+  'นนทบุรี':4,'ปทุมธานี':4,'พระนครศรีอยุธยา':4,'สระบุรี':4,'ลพบุรี':4,'สิงห์บุรี':4,'อ่างทอง':4,'ชัยนาท':4,
+  'กาญจนบุรี':5,'นครปฐม':5,'ราชบุรี':5,'สุพรรณบุรี':5,'ประจวบคีรีขันธ์':5,'เพชรบุรี':5,'สมุทรสงคราม':5,'สมุทรสาคร':5,
+  'ฉะเชิงเทรา':6,'ปราจีนบุรี':6,'สระแก้ว':6,'สมุทรปราการ':6,'จันทบุรี':6,'ชลบุรี':6,'ตราด':6,'ระยอง':6,'นครนายก':6,
+  'กาฬสินธุ์':7,'ขอนแก่น':7,'มหาสารคาม':7,'ร้อยเอ็ด':7,
+  'บึงกาฬ':8,'เลย':8,'หนองคาย':8,'หนองบัวลำภู':8,'อุดรธานี':8,'นครพนม':8,'สกลนคร':8,'มุกดาหาร':8,
+  'ชัยภูมิ':9,'นครราชสีมา':9,'บุรีรัมย์':9,'สุรินทร์':9,
+  'ยโสธร':10,'ศรีสะเกษ':10,'อุบลราชธานี':10,'อำนาจเจริญ':10,
+  'ชุมพร':11,'นครศรีธรรมราช':11,'สุราษฎร์ธานี':11,'กระบี่':11,'พังงา':11,'ภูเก็ต':11,'ระนอง':11,'พัทลุง':11,'ตรัง':11,
+  'นราธิวาส':12,'ปัตตานี':12,'ยะลา':12,'สงขลา':12,'สตูล':12,
+  'กรุงเทพมหานคร':13,'กรมวิทยาศาสตร์การแพทย์':13
+};
+const ZONE_NAMES_EXEC={0:'ไม่ระบุ',1:'เขต 1',2:'เขต 2',3:'เขต 3',4:'เขต 4',5:'เขต 5',6:'เขต 6',7:'เขต 7',8:'เขต 8',9:'เขต 9',10:'เขต 10',11:'เขต 11',12:'เขต 12',13:'เขต 13 (กทม.)'};
+const ZONE_COLORS_EXEC=['#94a3b8','#3b82f6','#10b981','#f59e0b','#ef4444','#8b5cf6','#06b6d4','#84cc16','#f97316','#ec4899','#14b8a6','#a855f7','#64748b','#0ea5e9'];
+function getZoneExec(prov){if(!prov)return null;if(HEALTH_ZONE_EXEC[prov])return HEALTH_ZONE_EXEC[prov];if(prov.includes('กรมวิทยาศาสตร์'))return 13;return null;}
+function fmtPctExec(cnt,total){if(!total||!cnt)return'0%';const v=cnt/total*100;return v<1?v.toFixed(1)+'%':Math.round(v)+'%';}
+const EN_TO_TH_EXEC={
+  'Amnat Charoen':'อำนาจเจริญ','Ang Thong':'อ่างทอง','Bangkok':'กรุงเทพมหานคร',
+  'Bueng Kan':'บึงกาฬ','Buri Ram':'บุรีรัมย์','Chachoengsao':'ฉะเชิงเทรา',
+  'Chai Nat':'ชัยนาท','Chaiyaphum':'ชัยภูมิ','Chanthaburi':'จันทบุรี',
+  'Chiang Mai':'เชียงใหม่','Chiang Rai':'เชียงราย','Chon Buri':'ชลบุรี',
+  'Chumphon':'ชุมพร','Kalasin':'กาฬสินธุ์','Kamphaeng Phet':'กำแพงเพชร',
+  'Kanchanaburi':'กาญจนบุรี','Khon Kaen':'ขอนแก่น','Krabi':'กระบี่',
+  'Lampang':'ลำปาง','Lamphun':'ลำพูน','Loei':'เลย','Lop Buri':'ลพบุรี',
+  'Mae Hong Son':'แม่ฮ่องสอน','Maha Sarakham':'มหาสารคาม','Mukdahan':'มุกดาหาร',
+  'Nakhon Nayok':'นครนายก','Nakhon Pathom':'นครปฐม','Nakhon Phanom':'นครพนม',
+  'Nakhon Ratchasima':'นครราชสีมา','Nakhon Sawan':'นครสวรรค์',
+  'Nakhon Si Thammarat':'นครศรีธรรมราช','Nan':'น่าน','Narathiwat':'นราธิวาส',
+  'Nong Bua Lam Phu':'หนองบัวลำภู','Nong Khai':'หนองคาย','Nonthaburi':'นนทบุรี',
+  'Pathum Thani':'ปทุมธานี','Pattani':'ปัตตานี','Phangnga':'พังงา',
+  'Phatthalung':'พัทลุง','Phayao':'พะเยา','Phetchabun':'เพชรบูรณ์',
+  'Phetchaburi':'เพชรบุรี','Phichit':'พิจิตร','Phitsanulok':'พิษณุโลก',
+  'Phra Nakhon Si Ayutthaya':'พระนครศรีอยุธยา','Phrae':'แพร่','Phuket':'ภูเก็ต',
+  'Prachin Buri':'ปราจีนบุรี','Prachuap Khiri Khan':'ประจวบคีรีขันธ์',
+  'Ranong':'ระนอง','Ratchaburi':'ราชบุรี','Rayong':'ระยอง','Roi Et':'ร้อยเอ็ด',
+  'Sa Kaeo':'สระแก้ว','Sakon Nakhon':'สกลนคร','Samut Prakan':'สมุทรปราการ',
+  'Samut Sakhon':'สมุทรสาคร','Samut Songkhram':'สมุทรสงคราม','Saraburi':'สระบุรี',
+  'Satun':'สตูล','Si Sa Ket':'ศรีสะเกษ','Sing Buri':'สิงห์บุรี','Songkhla':'สงขลา',
+  'Sukhothai':'สุโขทัย','Suphan Buri':'สุพรรณบุรี','Surat Thani':'สุราษฎร์ธานี',
+  'Surin':'สุรินทร์','Tak':'ตาก','Trang':'ตรัง','Trat':'ตราด',
+  'Ubon Ratchathani':'อุบลราชธานี','Udon Thani':'อุดรธานี','Uthai Thani':'อุทัยธานี',
+  'Uttaradit':'อุตรดิตถ์','Yala':'ยะลา','Yasothon':'ยโสธร'
+};
+const DEPT_TO_PROVINCE_EXEC={
+  'อธิบดีกรมวิทยาศาสตร์การแพทย์':'กรุงเทพมหานคร','รองอธิบดีกรมวิทยาศาสตร์การแพทย์':'กรุงเทพมหานคร',
+  'สำนักผู้ทรงคุณวุฒิกรมวิทยาศาสตร์การแพทย์':'กรุงเทพมหานคร','กองแผนงานและวิชาการ':'กรุงเทพมหานคร',
+  'กองทดสอบความชำนาญ':'กรุงเทพมหานคร','กลุ่มพัฒนาระบบบริหาร':'กรุงเทพมหานคร',
+  'กลุ่มตรวจสอบภายใน':'กรุงเทพมหานคร','กลุ่มงานจริยธรรม':'กรุงเทพมหานคร',
+  'สำนักงานเลขานุการกรม':'กรุงเทพมหานคร','สถาบันชีววัตถุ':'กรุงเทพมหานคร',
+  'สถาบันวิจัยวิทยาศาสตร์สาธารณสุข':'กรุงเทพมหานคร','สถาบันวิจัยสมุนไพร':'กรุงเทพมหานคร',
+  'สถาบันชีววิทยาศาสตร์ทางการแพทย์':'กรุงเทพมหานคร','สำนักคุณภาพและความปลอดภัยอาหาร':'กรุงเทพมหานคร',
+  'สำนักเครื่องสำอางและวัตถุอันตราย':'กรุงเทพมหานคร','สำนักรังสีและเครื่องมือแพทย์':'กรุงเทพมหานคร',
+  'สำนักมาตรฐานห้องปฏิบัติการ':'กรุงเทพมหานคร','สำนักยาและวัตถุเสพติด':'กรุงเทพมหานคร',
+  'ศูนย์รวมบริการ':'กรุงเทพมหานคร','ศูนย์เทคโนโลยีสารสนเทศและการสื่อสาร':'กรุงเทพมหานคร',
+  'กองความร่วมมือระหว่างประเทศ':'กรุงเทพมหานคร','กองบริหารทรัพยากรบุคคล':'กรุงเทพมหานคร',
+  'กองบริหารการคลัง':'กรุงเทพมหานคร','กองประชาสัมพันธ์และสื่อสารสาธารณะ':'กรุงเทพมหานคร',
+  'ศูนย์ตอบโต้เหตุฉุกเฉินด้านห้องปฏิบัติการและรังสี':'กรุงเทพมหานคร',
+  'ศูนย์วิทยาศาสตร์การแพทย์ที่ 1 เชียงใหม่':'เชียงใหม่',
+  'ศูนย์วิทยาศาสตร์การแพทย์ที่ 1/1 เชียงราย':'เชียงราย',
+  'ศูนย์วิทยาศาสตร์การแพทย์ที่ 2 พิษณุโลก':'พิษณุโลก',
+  'ศูนย์วิทยาศาสตร์การแพทย์ที่ 3 นครสวรรค์':'นครสวรรค์',
+  'ศูนย์วิทยาศาสตร์การแพทย์ที่ 4 สระบุรี':'สระบุรี',
+  'ศูนย์วิทยาศาสตร์การแพทย์ที่ 5 สมุทรสงคราม':'สมุทรสงคราม',
+  'ศูนย์วิทยาศาสตร์การแพทย์ที่ 6 ชลบุรี':'ชลบุรี',
+  'ศูนย์วิทยาศาสตร์การแพทย์ที่ 7 ขอนแก่น':'ขอนแก่น',
+  'ศูนย์วิทยาศาสตร์การแพทย์ที่ 8 อุดรธานี':'อุดรธานี',
+  'ศูนย์วิทยาศาสตร์การแพทย์ที่ 9 นครราชสีมา':'นครราชสีมา',
+  'ศูนย์วิทยาศาสตร์การแพทย์ที่ 10 อุบลราชธานี':'อุบลราชธานี',
+  'ศูนย์วิทยาศาสตร์การแพทย์ที่ 11 สุราษฎร์ธานี':'สุราษฎร์ธานี',
+  'ศูนย์วิทยาศาสตร์การแพทย์ที่ 11/1 ภูเก็ต':'ภูเก็ต',
+  'ศูนย์วิทยาศาสตร์การแพทย์ที่ 12 สงขลา':'สงขลา',
+  'ศูนย์วิทยาศาสตร์การแพทย์ที่ 12/1 ตรัง':'ตรัง',
+};
+
+// ─── ZONE MAP STATE ───
+let execThaiGeo=null;
+let execSelZone=null, execSelProvExt=null, execSelIntProv=null;
+let execExtProvCounts={}, execIntProvCounts={};
+let execMapG=null, execMapPath=null, execMapW=0, execMapH=0, execBkkPt=null, execMapS=1;
+let execIntMapG=null, execIntMapPath=null, execIntMapW=0, execIntMapH=0, execIntBkkPt=null, execIntMapS=1;
+
+function execShowLabel(mapId,html,x){
+  const el=document.getElementById(mapId+'-label');
+  if(!el) return;
+  if(html){
+    el.innerHTML=html; el.style.display='block';
+    if(x==='tl'){el.style.left='8px';el.style.top='8px';el.style.bottom='';el.style.transform='none';}
+    else{el.style.left='50%';el.style.bottom='10px';el.style.top='';el.style.transform='translateX(-50%)';}
+  } else el.style.display='none';
+}
+function execToggleZoneRow(id,arrow){
+  const row=document.getElementById(id);
+  if(!row) return;
+  const open=row.style.display!=='none';
+  row.style.display=open?'none':'';
+  if(arrow) arrow.textContent=open?'▶':'▼';
+}
+function execSwitchZoneTab(tab){
+  document.getElementById('execZoneViewExt').style.display=tab==='ext'?'':'none';
+  document.getElementById('execZoneViewInt').style.display=tab==='int'?'':'none';
+  const bE=document.getElementById('execZoneTabExt'), bI=document.getElementById('execZoneTabInt');
+  if(tab==='ext'){
+    bE.style.cssText='flex:1;padding:8px 14px;border-radius:20px;border:1.5px solid #ea580c;background:#ea580c;color:#fff;font-family:Sarabun,sans-serif;font-size:0.82rem;font-weight:700;cursor:pointer;transition:all .15s;display:flex;flex-direction:column;align-items:center;gap:1px;';
+    bI.style.cssText='flex:1;padding:8px 14px;border-radius:20px;border:1.5px solid #e2e8f0;background:transparent;color:#64748b;font-family:Sarabun,sans-serif;font-size:0.82rem;font-weight:400;cursor:pointer;transition:all .15s;display:flex;flex-direction:column;align-items:center;gap:1px;';
+  } else {
+    bI.style.cssText='flex:1;padding:8px 14px;border-radius:20px;border:1.5px solid #1F3540;background:#1F3540;color:#fff;font-family:Sarabun,sans-serif;font-size:0.82rem;font-weight:700;cursor:pointer;transition:all .15s;display:flex;flex-direction:column;align-items:center;gap:1px;';
+    bE.style.cssText='flex:1;padding:8px 14px;border-radius:20px;border:1.5px solid #e2e8f0;background:transparent;color:#64748b;font-family:Sarabun,sans-serif;font-size:0.82rem;font-weight:400;cursor:pointer;transition:all .15s;display:flex;flex-direction:column;align-items:center;gap:1px;';
+  }
+}
+function execUpdateClearBtn(){const b=document.getElementById('execZoneMapExtClear');if(b)b.style.display=execSelZone!==null?'block':'none';}
+function execUpdateIntClearBtn(){const b=document.getElementById('execZoneMapIntClear');if(b)b.style.display=execSelIntProv!==null?'block':'none';}
+function execClearZoneFilter(){
+  if(execSelZone!==null) execHighlightZone(execSelZone);
+  document.querySelectorAll('#execZoneBodyExt tr[id^="ezext-"]').forEach(r=>{r.style.display='none';});
+  document.querySelectorAll('#execZoneBodyExt .ezarr').forEach(a=>{a.textContent='▶';});
+}
+function execClearIntFilter(){if(execSelIntProv!==null) execHighlightIntProv(execSelIntProv);}
+
+function execZoomToZone(z){
+  if(!execMapG||!execThaiGeo||!execMapPath) return;
+  let tx=0,ty=0,s=1;
+  if(z!==null){
+    const feats=execThaiGeo.features.filter(d=>{const th=EN_TO_TH_EXEC[d.properties.name];return th&&(getZoneExec(th)||13)===z;});
+    let x0,y0,x1,y1;
+    if(feats.length){const b=execMapPath.bounds({type:'FeatureCollection',features:feats});[[x0,y0],[x1,y1]]=b;}
+    if(z===13&&execBkkPt){x0=Math.min(x0??execBkkPt[0],execBkkPt[0])-8;y0=Math.min(y0??execBkkPt[1],execBkkPt[1])-8;x1=Math.max(x1??execBkkPt[0],execBkkPt[0])+8;y1=Math.max(y1??execBkkPt[1],execBkkPt[1])+8;}
+    if(x0===undefined) return;
+    const cx=(x0+x1)/2,cy=(y0+y1)/2;
+    if(x1-x0<execMapW*0.18){x0=cx-execMapW*0.09;x1=cx+execMapW*0.09;}
+    if(y1-y0<execMapH*0.18){y0=cy-execMapH*0.09;y1=cy+execMapH*0.09;}
+    const pad=22;s=Math.min(7,0.88/Math.max((x1-x0+pad*2)/execMapW,(y1-y0+pad*2)/execMapH));
+    tx=execMapW/2-s*(x0+x1)/2; ty=execMapH/2-s*(y0+y1)/2;
+  }
+  execMapS=s;
+  execMapG.transition().duration(700).attr('transform',`translate(${tx},${ty}) scale(${s})`);
+  execMapG.selectAll('path').transition().duration(700).attr('stroke-width',0.6/s);
+  if(execBkkPt){
+    d3.select('#execZoneMapExt .ebkk-marker circle').transition().duration(700).attr('r',6/s);
+    d3.select('#execZoneMapExt .ebkk-marker text').transition().duration(700).attr('font-size',(0.62/s)+'rem').attr('x',execBkkPt[0]+9/s);
+  }
+}
+
+function execZoomToProvExt(prov){
+  if(!execMapG||!execThaiGeo||!execMapPath) return;
+  if(execSelProvExt===prov){
+    execSelProvExt=null;
+    document.querySelectorAll('#execZoneBodyExt tr[data-prov]').forEach(r=>{r.style.background='';delete r.dataset.hl;});
+    let tx=0,ty=0,s=1;
+    if(execSelZone!==null){
+      const feats=execThaiGeo.features.filter(d=>{const th=EN_TO_TH_EXEC[d.properties.name];return th&&(getZoneExec(th)||13)===execSelZone;});
+      let x0,y0,x1,y1;
+      if(feats.length){const b=execMapPath.bounds({type:'FeatureCollection',features:feats});[[x0,y0],[x1,y1]]=b;}
+      if(execSelZone===13&&execBkkPt){x0=Math.min(x0??execBkkPt[0],execBkkPt[0])-8;y0=Math.min(y0??execBkkPt[1],execBkkPt[1])-8;x1=Math.max(x1??execBkkPt[0],execBkkPt[0])+8;y1=Math.max(y1??execBkkPt[1],execBkkPt[1])+8;}
+      if(x0!==undefined){
+        const cx=(x0+x1)/2,cy=(y0+y1)/2;
+        if(x1-x0<execMapW*0.18){x0=cx-execMapW*0.09;x1=cx+execMapW*0.09;} if(y1-y0<execMapH*0.18){y0=cy-execMapH*0.09;y1=cy+execMapH*0.09;}
+        const pad=22;s=Math.min(7,0.88/Math.max((x1-x0+pad*2)/execMapW,(y1-y0+pad*2)/execMapH));
+        tx=execMapW/2-s*(x0+x1)/2;ty=execMapH/2-s*(y0+y1)/2;
+      }
+    }
+    execMapS=s;
+    execMapG.transition().duration(600).attr('transform',s===1?'':(`translate(${tx},${ty}) scale(${s})`));
+    execMapG.selectAll('path').transition().duration(600)
+      .attr('fill',d=>{const th=EN_TO_TH_EXEC[d.properties.name];if(!th)return '#e8edf2';const pz=getZoneExec(th)||13;const base=ZONE_COLORS_EXEC[pz%ZONE_COLORS_EXEC.length];if(execSelZone===null){const cnt=execExtProvCounts[th]||0;if(!cnt){const c=d3.color(base);c.opacity=0.18;return c.toString();}return base;}if(pz===execSelZone)return base;const c=d3.color(base);c.opacity=0.1;return c.toString();})
+      .attr('stroke','#fff').attr('stroke-width',0.6/s);
+    if(execBkkPt){
+      const bkkBase=ZONE_COLORS_EXEC[13%ZONE_COLORS_EXEC.length],bkkCnt=execExtProvCounts['กรุงเทพมหานคร']||0;
+      const bkkFill=execSelZone===null?(bkkCnt?bkkBase:(()=>{const c=d3.color(bkkBase);c.opacity=0.18;return c.toString();})()):(execSelZone===13?bkkBase:(()=>{const c=d3.color(bkkBase);c.opacity=0.1;return c.toString();})());
+      d3.select('#execZoneMapExt .ebkk-marker circle').transition().duration(600).attr('r',6/s).attr('fill',bkkFill);
+      d3.select('#execZoneMapExt .ebkk-marker text').transition().duration(600).attr('font-size',(0.62/s)+'rem').attr('x',execBkkPt[0]+9/s);
+    }
+    if(execSelZone!==null){const zc=Object.keys(execExtProvCounts).filter(p=>(getZoneExec(p)||13)===execSelZone).reduce((s,p)=>s+(execExtProvCounts[p]||0),0);execShowLabel('execZoneMapExt',`<b>${ZONE_NAMES_EXEC[execSelZone]||'เขต '+execSelZone}</b><br>${zc.toLocaleString()} คน`);}
+    else{execShowLabel('execZoneMapExt',null);}
+    execUpdateClearBtn(); return;
+  }
+  let tx=0,ty=0,s=1,x0,y0,x1,y1;
+  if(prov==='กรุงเทพมหานคร'&&execBkkPt){x0=execBkkPt[0]-10;y0=execBkkPt[1]-10;x1=execBkkPt[0]+10;y1=execBkkPt[1]+10;}
+  else{const feat=execThaiGeo.features.find(d=>EN_TO_TH_EXEC[d.properties.name]===prov);if(!feat)return;[[x0,y0],[x1,y1]]=execMapPath.bounds(feat);}
+  const cx=(x0+x1)/2,cy=(y0+y1)/2;
+  if(x1-x0<execMapW*0.18){x0=cx-execMapW*0.09;x1=cx+execMapW*0.09;}
+  if(y1-y0<execMapH*0.12){y0=cy-execMapH*0.06;y1=cy+execMapH*0.06;}
+  s=Math.min(execMapW/(x1-x0),execMapH/(y1-y0))*0.88;
+  tx=execMapW/2-s*(x0+x1)/2; ty=execMapH/2-s*(y0+y1)/2;
+  execMapS=s;
+  execMapG.transition().duration(700).attr('transform',`translate(${tx},${ty}) scale(${s})`);
+  execMapG.selectAll('path').transition().duration(700)
+    .attr('stroke-width',d=>(EN_TO_TH_EXEC[d.properties.name]===prov?1.4:0.3)/s)
+    .attr('stroke',d=>EN_TO_TH_EXEC[d.properties.name]===prov?'#334155':'#fff')
+    .attr('fill',d=>{const th=EN_TO_TH_EXEC[d.properties.name];if(!th)return '#e8edf2';const pz=getZoneExec(th)||13;const base=ZONE_COLORS_EXEC[pz%ZONE_COLORS_EXEC.length];if(th===prov)return base;const c=d3.color(base);c.opacity=0.1;return c.toString();});
+  if(execBkkPt){
+    const isBkk=prov==='กรุงเทพมหานคร',bkkBase=ZONE_COLORS_EXEC[13%ZONE_COLORS_EXEC.length];
+    d3.select('#execZoneMapExt .ebkk-marker circle').transition().duration(700).attr('r',6/s).attr('fill',isBkk?bkkBase:'rgba(100,116,139,0.25)');
+    d3.select('#execZoneMapExt .ebkk-marker text').transition().duration(700).attr('font-size',(0.62/s)+'rem').attr('x',execBkkPt[0]+9/s);
+  }
+  execSelProvExt=prov;
+  const z2=getZoneExec(prov)||13,cnt2=execExtProvCounts[prov]||0;
+  execShowLabel('execZoneMapExt',`<b>${prov}</b> · ${ZONE_NAMES_EXEC[z2]||'เขต '+z2}<br>${cnt2.toLocaleString()} คน`,'tl');
+  const pid=`ezext-${z2}`;
+  const detRow=document.getElementById(pid),arrow=document.querySelector(`#execZoneBodyExt tr[data-zone="${z2}"] .ezarr`);
+  if(detRow&&detRow.style.display==='none'){detRow.style.display='';if(arrow)arrow.textContent='▼';}
+  document.querySelectorAll('#execZoneBodyExt tr[data-zone]').forEach(r=>{r.style.background='';r.style.fontWeight='';});
+  document.querySelectorAll('#execZoneBodyExt tr[data-prov]').forEach(r=>{r.style.background='';delete r.dataset.hl;});
+  const pvR=document.querySelector(`#execZoneBodyExt tr[data-prov="${prov.replace(/"/g,'&quot;')}"]`);
+  if(pvR){pvR.dataset.hl='1';pvR.style.background='rgba(234,88,12,0.18)';pvR.scrollIntoView({behavior:'smooth',block:'nearest'});}
+}
+
+function execHighlightZone(z){
+  execSelZone=execSelZone===z?null:z;
+  d3.select('#execZoneMapExt svg').selectAll('path')
+    .attr('fill',d=>{const th=EN_TO_TH_EXEC[d.properties.name];if(!th)return '#e8edf2';const pz=getZoneExec(th)||13;const base=ZONE_COLORS_EXEC[pz%ZONE_COLORS_EXEC.length];const cnt=execExtProvCounts[th]||0;if(execSelZone===null){if(!cnt){const c=d3.color(base);c.opacity=0.18;return c.toString();}return base;}if(pz===execSelZone)return base;const c=d3.color(base);c.opacity=0.1;return c.toString();})
+    .attr('stroke','#fff')
+    .attr('stroke-width',d=>{if(execSelZone===null)return 0.6;const th=EN_TO_TH_EXEC[d.properties.name];const pz=th?(getZoneExec(th)||13):0;return pz===execSelZone?1.4:0.3;});
+  document.querySelectorAll('#execZoneBodyExt tr[data-zone]').forEach(row=>{
+    const rz=Number(row.dataset.zone);
+    row.style.background=(execSelZone!==null&&rz===execSelZone)?'rgba(234,88,12,0.09)':'';
+    row.style.fontWeight=(execSelZone!==null&&rz===execSelZone)?'700':'';
+  });
+  execSelProvExt=null;
+  document.querySelectorAll('#execZoneBodyExt tr[data-prov]').forEach(r=>{r.style.background='';delete r.dataset.hl;});
+  if(execBkkPt){
+    const bkkBase=ZONE_COLORS_EXEC[13%ZONE_COLORS_EXEC.length],bkkCnt=execExtProvCounts['กรุงเทพมหานคร']||0;
+    const bkkFill=execSelZone===null?(bkkCnt?bkkBase:(()=>{const c=d3.color(bkkBase);c.opacity=0.18;return c.toString();})()):(execSelZone===13?bkkBase:(()=>{const c=d3.color(bkkBase);c.opacity=0.1;return c.toString();})());
+    d3.select('#execZoneMapExt .ebkk-marker circle').attr('fill',bkkFill);
+  }
+  execZoomToZone(execSelZone);
+  if(execSelZone!==null){const zc=Object.keys(execExtProvCounts).filter(p=>(getZoneExec(p)||13)===execSelZone).reduce((s,p)=>s+(execExtProvCounts[p]||0),0);execShowLabel('execZoneMapExt',`<b>${ZONE_NAMES_EXEC[execSelZone]||'เขต '+execSelZone}</b><br>${zc.toLocaleString()} คน`);}
+  else{execShowLabel('execZoneMapExt',null);}
+  execUpdateClearBtn();
+}
+
+async function execRenderExtPanel(extData){
+  const total=extData.length;
+  document.getElementById('execZoneCountExt').textContent=total?`(${total.toLocaleString()} คน)`:'';
+  execExtProvCounts={};
+  extData.forEach(r=>{const p=(r.participants?.province||'').trim();if(p)execExtProvCounts[p]=(execExtProvCounts[p]||0)+1;});
+  const provCounts=execExtProvCounts;
+  if(!total){
+    document.getElementById('execZoneBodyExt').innerHTML='<tr><td colspan="4" style="text-align:center;padding:16px;color:#94a3b8;">ยังไม่มีข้อมูล</td></tr>';
+  } else {
+    const zoneCounts={},provByZone={};
+    extData.forEach(r=>{
+      const prov=(r.participants?.province||'').trim()||'(ว่าง)';
+      const z=getZoneExec(prov==='(ว่าง)'?'':prov)||13;
+      zoneCounts[z]=(zoneCounts[z]||0)+1;
+      if(!provByZone[z])provByZone[z]={};
+      provByZone[z][prov]=(provByZone[z][prov]||0)+1;
+    });
+    const zEntries=Object.entries(zoneCounts).map(([z,n])=>({z:Number(z),n})).sort((a,b)=>a.z-b.z);
+    document.getElementById('execZoneBodyExt').innerHTML=zEntries.map(e=>{
+      const zc=ZONE_COLORS_EXEC[e.z%ZONE_COLORS_EXEC.length];
+      const pid=`ezext-${e.z}`;
+      const provRows=Object.entries(provByZone[e.z]||{}).sort((a,b)=>b[1]-a[1]).map(([prov,cnt])=>`
+        <tr data-prov="${prov.replace(/"/g,'&quot;')}" style="background:#fdf8f8;cursor:pointer;transition:background .12s;"
+            onclick="event.stopPropagation();execZoomToProvExt(this.dataset.prov)"
+            onmouseover="if(!this.dataset.hl)this.style.background='rgba(234,88,12,0.08)'" onmouseout="if(!this.dataset.hl)this.style.background=''">
+          <td style="padding:3px 10px 3px 28px;font-size:0.78rem;color:#64748b;" colspan="2">⌙ ${prov}</td>
+          <td style="padding:3px 10px;text-align:right;font-size:0.78rem;color:#64748b;">${cnt.toLocaleString()}</td>
+          <td style="padding:3px 10px;text-align:right;font-size:0.78rem;color:#94a3b8;">${fmtPctExec(cnt,total)}</td>
+        </tr>`).join('');
+      return`<tr data-zone="${e.z}" style="cursor:pointer;border-bottom:1px solid #e2e8f0;transition:background .12s;" onclick="execHighlightZone(${e.z});execToggleZoneRow('${pid}',this.querySelector('.ezarr'))">
+        <td style="padding:5px 10px;" colspan="2">
+          <span class="ezarr" style="display:inline-block;width:12px;font-size:0.65rem;color:#94a3b8;">▶</span>
+          <span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:${zc};margin:0 4px 0 2px;vertical-align:middle;"></span>
+          ${ZONE_NAMES_EXEC[e.z]||'เขต '+e.z}</td>
+        <td style="padding:5px 10px;text-align:right;font-weight:700;">${e.n.toLocaleString()}</td>
+        <td style="padding:5px 10px;text-align:right;color:#94a3b8;">${fmtPctExec(e.n,total)}</td>
+      </tr>
+      <tr id="${pid}" style="display:none;"><td colspan="4" style="padding:0;border-bottom:1px solid #e2e8f0;"><table style="width:100%;border-collapse:collapse;">${provRows}</table></td></tr>`;
+    }).join('')+`<tr style="border-top:2px solid #cbd5e1;background:#f8fafc;">
+      <td colspan="2" style="padding:6px 10px;font-weight:700;font-size:0.82rem;">รวม</td>
+      <td style="padding:6px 10px;text-align:right;font-weight:700;">${total.toLocaleString()}</td>
+      <td style="padding:6px 10px;text-align:right;font-size:0.7rem;color:#64748b;">100%</td>
+    </tr>`;
+  }
+  const container=document.getElementById('execZoneMapExt');
+  try{
+    if(!execThaiGeo) execThaiGeo=await d3.json('./thailand.json');
+    const sL=document.getElementById('execZoneMapExt-label'),sC=document.getElementById('execZoneMapExtClear');
+    container.innerHTML='';
+    if(sL)container.appendChild(sL);if(sC)container.appendChild(sC);
+    const w=container.clientWidth||200,h=Math.round(w*1.65);
+    container.style.height=h+'px';
+    const proj=d3.geoMercator().fitExtent([[12,12],[w-12,h-12]],execThaiGeo);
+    const pathGen=d3.geoPath().projection(proj);
+    const svg=d3.select(container).append('svg').attr('width',w).attr('height',h).style('display','block').style('overflow','hidden');
+    const tip=d3.select(container).append('div').style('position','absolute').style('background','rgba(15,23,42,0.9)').style('color','#fff').style('border-radius','6px').style('padding','5px 10px').style('font-size','0.78rem').style('font-family','Sarabun,sans-serif').style('pointer-events','none').style('opacity','0').style('white-space','nowrap').style('z-index','20').style('top','0').style('left','0');
+    const g=svg.append('g').attr('class','map-zoom-g');
+    g.selectAll('path').data(execThaiGeo.features).join('path').attr('d',pathGen)
+      .attr('fill',d=>{const th=EN_TO_TH_EXEC[d.properties.name];if(!th)return '#e8edf2';const z=getZoneExec(th)||13;const base=ZONE_COLORS_EXEC[z%ZONE_COLORS_EXEC.length];const cnt=provCounts[th]||0;if(!cnt){const c=d3.color(base);c.opacity=0.18;return c.toString();}return base;})
+      .attr('stroke','#fff').attr('stroke-width',0.6).attr('stroke-linejoin','round').style('cursor','pointer')
+      .on('click',function(event,d){const th=EN_TO_TH_EXEC[d.properties.name];if(!th)return;tip.style('opacity','0');execZoomToProvExt(th);})
+      .on('mouseover',function(event,d){const th=EN_TO_TH_EXEC[d.properties.name]||d.properties.name;const z=getZoneExec(th)||13;const cnt=provCounts[th]||0;tip.style('opacity','1').html(`<b>${th}</b> · ${ZONE_NAMES_EXEC[z]||'เขต '+z}<br>${cnt.toLocaleString()} คน`);if(execSelProvExt===null)d3.select(this).attr('stroke','#334155').attr('stroke-width',1.5/execMapS);})
+      .on('mousemove',function(event){const r=container.getBoundingClientRect();tip.style('left',(event.clientX-r.left+10)+'px').style('top',(event.clientY-r.top-44)+'px');})
+      .on('mouseout',function(){tip.style('opacity','0');if(execSelProvExt===null)d3.select(this).attr('stroke','#fff').attr('stroke-width',0.6/execMapS);});
+    const bkkColor=ZONE_COLORS_EXEC[13%ZONE_COLORS_EXEC.length],bkkCnt=provCounts['กรุงเทพมหานคร']||0;
+    execBkkPt=proj([100.5018,13.7563]);
+    if(execBkkPt){
+      const bkkG=g.append('g').attr('class','ebkk-marker').style('pointer-events','all');
+      bkkG.append('circle').attr('cx',execBkkPt[0]).attr('cy',execBkkPt[1]).attr('r',6).attr('fill',bkkCnt?bkkColor:(()=>{const c=d3.color(bkkColor);c.opacity=0.18;return c.toString();})).attr('stroke','#fff').attr('stroke-width',1.2);
+      bkkG.append('text').attr('x',execBkkPt[0]+9).attr('y',execBkkPt[1]+4).attr('font-size','0.62rem').attr('font-family','Sarabun,sans-serif').attr('fill','#374151').attr('font-weight','600').attr('pointer-events','none').text('กทม.');
+      bkkG.style('cursor','pointer').on('click',function(){tip.style('opacity','0');execZoomToProvExt('กรุงเทพมหานคร');})
+        .on('mouseover',function(){tip.style('opacity','1').html(`<b>กรุงเทพมหานคร</b> · เขต 13 (กทม.)<br>${bkkCnt.toLocaleString()} คน`);})
+        .on('mousemove',function(event){const r=container.getBoundingClientRect();tip.style('left',(event.clientX-r.left+10)+'px').style('top',(event.clientY-r.top-44)+'px');})
+        .on('mouseout',function(){tip.style('opacity','0');});
+    }
+    execMapG=g; execMapPath=pathGen; execMapW=w; execMapH=h; execMapS=1;
+    execUpdateClearBtn();
+  }catch(e){container.innerHTML='<div style="padding:20px;text-align:center;font-size:0.82rem;color:#94a3b8;">ไม่สามารถโหลดแผนที่ได้</div>';}
+}
+
+function execZoomToIntProv(prov){
+  if(!execIntMapG||!execThaiGeo||!execIntMapPath) return;
+  let tx=0,ty=0,s=1;
+  if(prov!==null){
+    let x0,y0,x1,y1;
+    if(prov==='กรุงเทพมหานคร'&&execIntBkkPt){x0=execIntBkkPt[0]-10;y0=execIntBkkPt[1]-10;x1=execIntBkkPt[0]+10;y1=execIntBkkPt[1]+10;}
+    else{const feat=execThaiGeo.features.find(d=>EN_TO_TH_EXEC[d.properties.name]===prov);if(!feat)return;[[x0,y0],[x1,y1]]=execIntMapPath.bounds(feat);}
+    const cx=(x0+x1)/2,cy=(y0+y1)/2;
+    if(x1-x0<execIntMapW*0.18){x0=cx-execIntMapW*0.09;x1=cx+execIntMapW*0.09;}
+    if(y1-y0<execIntMapH*0.12){y0=cy-execIntMapH*0.06;y1=cy+execIntMapH*0.06;}
+    s=Math.min(execIntMapW/(x1-x0),execIntMapH/(y1-y0))*0.88;
+    tx=execIntMapW/2-s*(x0+x1)/2;ty=execIntMapH/2-s*(y0+y1)/2;
+  }
+  execIntMapS=s;
+  execIntMapG.transition().duration(700).attr('transform',`translate(${tx},${ty}) scale(${s})`);
+  execIntMapG.selectAll('path').transition().duration(700).attr('stroke-width',0.6/s);
+  if(execIntBkkPt){
+    d3.select('#execZoneMapInt .ebkk-int-marker circle').transition().duration(700).attr('r',6/s);
+    d3.select('#execZoneMapInt .ebkk-int-marker text').transition().duration(700).attr('font-size',(0.62/s)+'rem').attr('x',execIntBkkPt[0]+9/s);
+  }
+}
+
+function execHighlightIntProv(deptOrProv){
+  const prov=deptOrProv==='กรุงเทพมหานคร'?deptOrProv:(DEPT_TO_PROVINCE_EXEC[deptOrProv]??deptOrProv);
+  if(!prov) return;
+  execSelIntProv=execSelIntProv===prov?null:prov;
+  d3.select('#execZoneMapInt svg').selectAll('path')
+    .attr('fill',d=>{const th=EN_TO_TH_EXEC[d.properties.name];if(!th)return '#e8edf2';const z=getZoneExec(th)||13;const base=ZONE_COLORS_EXEC[z%ZONE_COLORS_EXEC.length];const cnt=execIntProvCounts[th]||0;if(execSelIntProv===null){if(!cnt){const c=d3.color(base);c.opacity=0.18;return c.toString();}return base;}if(th===execSelIntProv)return base;const c=d3.color(base);c.opacity=0.1;return c.toString();})
+    .attr('stroke-width',d=>{if(execSelIntProv===null)return 0.6/execIntMapS;const th=EN_TO_TH_EXEC[d.properties.name];return(th===execSelIntProv?1.4:0.3)/execIntMapS;});
+  let firstRow=null;
+  document.querySelectorAll('#execZoneBodyInt tr[data-dept]').forEach(row=>{
+    const rowProv=DEPT_TO_PROVINCE_EXEC[row.dataset.dept];
+    const sel=execSelIntProv!==null&&rowProv===execSelIntProv;
+    row.style.background=sel?'rgba(31,53,64,0.10)':'';
+    row.style.fontWeight=sel?'700':'';
+    if(sel&&!firstRow)firstRow=row;
+  });
+  if(firstRow)firstRow.scrollIntoView({behavior:'smooth',block:'nearest'});
+  execZoomToIntProv(execSelIntProv);
+  if(execSelIntProv!==null){const z=getZoneExec(execSelIntProv)||13,cnt=execIntProvCounts[execSelIntProv]||0;execShowLabel('execZoneMapInt',`<b>${execSelIntProv}</b> · ${ZONE_NAMES_EXEC[z]||'เขต '+z}<br>${cnt.toLocaleString()} คน`,'tl');}
+  else{execShowLabel('execZoneMapInt',null);}
+  execUpdateIntClearBtn();
+}
+
+async function execRenderIntPanel(intData){
+  const deptCount={};
+  intData.forEach(r=>{const dept=(r.participants?.dept||'').trim();if(dept)deptCount[dept]=(deptCount[dept]||0)+1;});
+  execIntProvCounts={};
+  Object.entries(deptCount).forEach(([dept,cnt])=>{const prov=DEPT_TO_PROVINCE_EXEC[dept];if(prov)execIntProvCounts[prov]=(execIntProvCounts[prov]||0)+cnt;});
+  const total=intData.length;
+  document.getElementById('execZoneCountInt').textContent=total?`(${total.toLocaleString()} คน)`:'';
+  const sorted=Object.entries(deptCount).sort((a,b)=>b[1]-a[1]);
+  const maxN=sorted[0]?.[1]||1;
+  const DC=['#2563eb','#10b981','#f59e0b','#8b5cf6','#ef4444','#06b6d4','#f97316','#ec4899','#16a34a','#14b8a6','#a855f7','#64748b','#94a3b8'];
+  document.getElementById('execZoneBodyInt').innerHTML=sorted.map(([dept,cnt],idx)=>{
+    const dc=DC[Math.min(idx,DC.length-1)];
+    const prov=DEPT_TO_PROVINCE_EXEC[dept];
+    return`<tr data-dept="${dept.replace(/"/g,'&quot;')}" style="border-bottom:1px solid #e2e8f0;${prov?'cursor:pointer;transition:background .12s;':''}" ${prov?`onclick="execHighlightIntProv(this.dataset.dept)"`:''}>
+      <td style="padding:5px 10px;color:#94a3b8;font-size:0.72rem;font-weight:700;">${idx+1}</td>
+      <td style="padding:5px 10px;"><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:${dc};margin-right:4px;vertical-align:middle;"></span>${dept}</td>
+      <td style="padding:5px 10px;text-align:right;font-weight:700;">${cnt.toLocaleString()}</td>
+      <td style="padding:5px 14px 5px 10px;min-width:100px;">
+        <div style="display:flex;align-items:center;gap:5px;">
+          <div style="flex:1;background:#e2e8f0;border-radius:4px;height:6px;overflow:hidden;"><div style="width:${(cnt/maxN*100).toFixed(1)}%;background:${dc};height:100%;border-radius:4px;"></div></div>
+          <span style="font-size:0.7rem;color:#94a3b8;min-width:28px;">${fmtPctExec(cnt,total)}</span>
+        </div>
+      </td>
+    </tr>`;
+  }).join('')+`<tr style="border-top:2px solid #cbd5e1;background:#f8fafc;"><td style="padding:6px 10px;"></td><td style="padding:6px 10px;font-weight:700;font-size:0.82rem;">รวม</td><td style="padding:6px 10px;text-align:right;font-weight:700;">${total.toLocaleString()}</td><td></td></tr>`;
+  const container=document.getElementById('execZoneMapInt');
+  try{
+    if(!execThaiGeo) execThaiGeo=await d3.json('./thailand.json');
+    const sL=document.getElementById('execZoneMapInt-label'),sC=document.getElementById('execZoneMapIntClear');
+    container.innerHTML='';
+    if(sL)container.appendChild(sL);if(sC)container.appendChild(sC);
+    const w=container.clientWidth||200,h=Math.round(w*1.65);
+    container.style.height=h+'px';
+    execIntMapW=w;execIntMapH=h;execIntMapS=1;
+    const proj=d3.geoMercator().fitExtent([[12,12],[w-12,h-12]],execThaiGeo);
+    const pathGen=d3.geoPath().projection(proj);
+    execIntMapPath=pathGen;
+    const svg=d3.select(container).append('svg').attr('width',w).attr('height',h).style('display','block').style('overflow','hidden');
+    const tip=d3.select(container).append('div').style('position','absolute').style('background','rgba(15,23,42,0.9)').style('color','#fff').style('border-radius','6px').style('padding','5px 10px').style('font-size','0.78rem').style('font-family','Sarabun,sans-serif').style('pointer-events','none').style('opacity','0').style('white-space','nowrap').style('z-index','20').style('top','0').style('left','0');
+    const g=svg.append('g');
+    execIntMapG=g;
+    g.selectAll('path').data(execThaiGeo.features).join('path').attr('d',pathGen)
+      .attr('fill',d=>{const th=EN_TO_TH_EXEC[d.properties.name];if(!th)return '#e8edf2';const z=getZoneExec(th)||13;const base=ZONE_COLORS_EXEC[z%ZONE_COLORS_EXEC.length];const cnt=execIntProvCounts[th]||0;if(!cnt){const c=d3.color(base);c.opacity=0.18;return c.toString();}return base;})
+      .attr('stroke','#fff').attr('stroke-width',0.6).attr('stroke-linejoin','round').style('cursor','pointer')
+      .on('click',function(event,d){const th=EN_TO_TH_EXEC[d.properties.name];if(!th)return;tip.style('opacity','0');execHighlightIntProv(th);})
+      .on('mouseover',function(event,d){const th=EN_TO_TH_EXEC[d.properties.name]||d.properties.name;const cnt=execIntProvCounts[th]||0;if(!cnt)return;const z=getZoneExec(th)||13;tip.style('opacity','1').html(`<b>${th}</b> · ${ZONE_NAMES_EXEC[z]||'เขต '+z}<br>${cnt.toLocaleString()} คน`);d3.select(this).attr('stroke','#334155').attr('stroke-width',1.5/execIntMapS);})
+      .on('mousemove',function(event){const r=container.getBoundingClientRect();tip.style('left',(event.clientX-r.left+10)+'px').style('top',(event.clientY-r.top-44)+'px');})
+      .on('mouseout',function(){tip.style('opacity','0');d3.select(this).attr('stroke','#fff').attr('stroke-width',0.6/execIntMapS);});
+    const bkkColor=ZONE_COLORS_EXEC[13%ZONE_COLORS_EXEC.length],bkkCnt=execIntProvCounts['กรุงเทพมหานคร']||0;
+    const bkkPt2=proj([100.5018,13.7563]);
+    execIntBkkPt=bkkPt2;
+    if(bkkPt2){
+      const bkkG=g.append('g').attr('class','ebkk-int-marker').style('pointer-events','all');
+      bkkG.append('circle').attr('cx',bkkPt2[0]).attr('cy',bkkPt2[1]).attr('r',6).attr('fill',bkkCnt?bkkColor:(()=>{const c=d3.color(bkkColor);c.opacity=0.18;return c.toString();})).attr('stroke','#fff').attr('stroke-width',1.2);
+      bkkG.append('text').attr('x',bkkPt2[0]+9).attr('y',bkkPt2[1]+4).attr('font-size','0.62rem').attr('font-family','Sarabun,sans-serif').attr('fill','#374151').attr('font-weight','600').attr('pointer-events','none').text('กทม.');
+      bkkG.on('mouseover',function(){if(!bkkCnt)return;tip.style('opacity','1').html(`<b>กรุงเทพมหานคร</b> · เขต 13 (กทม.)<br>${bkkCnt.toLocaleString()} คน`);})
+        .on('mousemove',function(event){const r=container.getBoundingClientRect();tip.style('left',(event.clientX-r.left+10)+'px').style('top',(event.clientY-r.top-44)+'px');})
+        .on('mouseout',function(){tip.style('opacity','0');})
+        .on('click',function(){execHighlightIntProv('กรุงเทพมหานคร');});
+    }
+    execUpdateIntClearBtn();
+  }catch(e){container.innerHTML='<div style="padding:20px;text-align:center;font-size:0.82rem;color:#94a3b8;">ไม่สามารถโหลดแผนที่ได้</div>';}
+}
+
+async function execRenderZoneMap(){
+  const extData=execRows.filter(r=>(r.participants?.internal_external||'').includes('ภายนอก'));
+  const intData=execRows.filter(r=>(r.participants?.internal_external||'').includes('ภายใน'));
+  await Promise.all([execRenderExtPanel(extData), execRenderIntPanel(intData)]);
+}
+
 async function loadData() {
   await loadActiveYear();
   const yr = encodeURIComponent(activeYear);
   try {
     const [rows, planRows] = await Promise.all([
-      fetchAll(`/rest/v1/checkins?event_year=eq.${yr}&select=day,checkin_time,participants(dept,internal_external,is_walkin)&order=checkin_time.desc`),
+      fetchAll(`/rest/v1/checkins?event_year=eq.${yr}&select=day,checkin_time,participants(dept,internal_external,is_walkin,province)&order=checkin_time.desc`),
       fetchAll('/rest/v1/participants?dept=eq.' + encodeURIComponent('กองแผนงานและวิชาการ') + `&event_year=eq.${yr}&select=id`)
     ]);
     const planPreReg = planRows.length;
@@ -620,6 +1108,7 @@ async function loadData() {
 
     renderExecTable();
     renderSummary();
+    execRenderZoneMap();
     document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString('th-TH', {timeZone: 'Asia/Bangkok'});
     document.getElementById('loadingArea').style.display = 'none';
     document.getElementById('contentArea').style.display = '';
