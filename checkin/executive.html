@@ -248,15 +248,23 @@
           <div class="dept-card-title" id="execCardTitle">จำนวนผู้เข้าร่วมงานแยกตามหน่วยงานภายใน (กรมวิทยาศาสตร์การแพทย์)</div>
           <div class="dept-card-sub">ข้อมูลจากการเช็คอินจริง — อัปเดตอัตโนมัติทุก 1 นาที</div>
         </div>
-        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-          <div class="view-toggle">
-            <button class="vtbtn active" id="vTable" onclick="setExecView('table')">ตาราง</button>
-            <button class="vtbtn" id="vChart" onclick="setExecView('chart')">แผนภูมิ</button>
+        <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end;">
+          <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+            <div class="view-toggle">
+              <button class="vtbtn active" id="vTable" onclick="setExecView('table')">ตาราง</button>
+              <button class="vtbtn" id="vChart" onclick="setExecView('chart')">แผนภูมิ</button>
+            </div>
+            <button class="share-btn" id="shareDeptBtn" onclick="shareDeptTable()" style="margin-top:0;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              📤 แชร์รูป
+            </button>
           </div>
-          <button class="share-btn" onclick="shareDeptTable()" style="margin-top:0;">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            📤 แชร์รูป
-          </button>
+          <div style="display:flex;gap:4px;">
+            <button id="dfAll" onclick="setExecDay(null)" style="padding:5px 10px;border-radius:8px;border:1.5px solid #1F3540;background:#1F3540;color:#fff;font-family:'Sarabun',sans-serif;font-size:0.75rem;font-weight:700;cursor:pointer;">รวม</button>
+            <button id="dfD1" onclick="setExecDay(1)" style="padding:5px 10px;border-radius:8px;border:1.5px solid #C8DDE8;background:#fff;color:#2563eb;font-family:'Sarabun',sans-serif;font-size:0.75rem;font-weight:600;cursor:pointer;">24 มิ.ย.</button>
+            <button id="dfD2" onclick="setExecDay(2)" style="padding:5px 10px;border-radius:8px;border:1.5px solid #C8DDE8;background:#fff;color:#7c3aed;font-family:'Sarabun',sans-serif;font-size:0.75rem;font-weight:600;cursor:pointer;">25 มิ.ย.</button>
+            <button id="dfD3" onclick="setExecDay(3)" style="padding:5px 10px;border-radius:8px;border:1.5px solid #C8DDE8;background:#fff;color:#0891b2;font-family:'Sarabun',sans-serif;font-size:0.75rem;font-weight:600;cursor:pointer;">26 มิ.ย.</button>
+          </div>
         </div>
       </div>
       <!-- TABLE VIEW -->
@@ -283,11 +291,11 @@
       </div>
     </div>
 
-    <!-- External dept table -->
-    <div class="dept-card" id="extShareCard">
-      <div class="dept-card-header" style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+    <!-- External count card (hidden — merged into internal table) -->
+    <div class="dept-card" id="extShareCard" style="margin-bottom:16px;display:none;">
+      <div class="dept-card-header" style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
         <div>
-          <div class="dept-card-title" id="extCardTitle">จำนวนผู้เข้าร่วมงานแยกตามหน่วยงานภายนอก</div>
+          <div class="dept-card-title" id="extCardTitle">บุคคลภายนอก (เช็คอินแล้ว)</div>
           <div class="dept-card-sub">ข้อมูลจากการเช็คอินจริง — อัปเดตอัตโนมัติทุก 1 นาที</div>
         </div>
         <button class="share-btn" onclick="shareExtTable()" id="shareExtBtn" style="margin-top:0;">
@@ -295,17 +303,28 @@
           📤 แชร์รูป
         </button>
       </div>
-      <div class="scroll-wrap">
-        <table>
-          <thead id="extTableHead">
-            <tr>
-              <th style="width:36px;">#</th>
-              <th>หน่วยงาน</th>
-              <th class="num" style="color:#15803d;min-width:80px;">รวม (ทุกวัน)</th>
-            </tr>
-          </thead>
-          <tbody id="extDeptBody"></tbody>
-        </table>
+      <div style="padding:16px 16px 20px;display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">
+        <div style="text-align:center;padding:18px 8px;background:linear-gradient(135deg,#f0fdf4,#dcfce7);border-radius:14px;border:2px solid #86efac;grid-column:span 4;">
+          <div style="font-size:0.68rem;font-weight:700;color:#15803d;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;" id="extLabelAll">บุคคลภายนอก — รวมทุกวัน</div>
+          <div style="font-size:3rem;font-weight:800;color:#15803d;line-height:1;" id="extNumAll">-</div>
+          <div style="font-size:0.72rem;color:#7a9aae;margin-top:4px;">คน</div>
+        </div>
+        <div style="text-align:center;padding:12px 6px;background:#f8fafc;border-radius:10px;border:1.5px solid #dbeafe;">
+          <div style="font-size:0.65rem;font-weight:700;color:#2563eb;margin-bottom:3px;">24 มิ.ย.</div>
+          <div style="font-size:1.5rem;font-weight:800;color:#1F3540;" id="extNumD1">-</div>
+        </div>
+        <div style="text-align:center;padding:12px 6px;background:#f8fafc;border-radius:10px;border:1.5px solid #ede9fe;">
+          <div style="font-size:0.65rem;font-weight:700;color:#7c3aed;margin-bottom:3px;">25 มิ.ย.</div>
+          <div style="font-size:1.5rem;font-weight:800;color:#1F3540;" id="extNumD2">-</div>
+        </div>
+        <div style="text-align:center;padding:12px 6px;background:#f8fafc;border-radius:10px;border:1.5px solid #cffafe;">
+          <div style="font-size:0.65rem;font-weight:700;color:#0891b2;margin-bottom:3px;">26 มิ.ย.</div>
+          <div style="font-size:1.5rem;font-weight:800;color:#1F3540;" id="extNumD3">-</div>
+        </div>
+        <div style="text-align:center;padding:12px 6px;background:#f8fafc;border-radius:10px;border:1.5px solid #86efac;">
+          <div style="font-size:0.65rem;font-weight:700;color:#15803d;margin-bottom:3px;">สะสม</div>
+          <div style="font-size:1.5rem;font-weight:800;color:#15803d;" id="extNumTotal">-</div>
+        </div>
       </div>
     </div>
 
@@ -428,6 +447,15 @@ function setExecDay(day) {
     el.classList.toggle('selected',
       (i === 0 && execDay === null) || (i > 0 && execDay === i));
   });
+  const dfColors = ['#1F3540','#2563eb','#7c3aed','#0891b2'];
+  ['dfAll','dfD1','dfD2','dfD3'].forEach((id, i) => {
+    const btn = document.getElementById(id);
+    if(!btn) return;
+    const isActive = (i===0 && execDay===null) || (i>0 && execDay===i);
+    btn.style.background = isActive ? dfColors[i] : '#fff';
+    btn.style.color = isActive ? '#fff' : dfColors[i];
+    btn.style.borderColor = isActive ? dfColors[i] : '#C8DDE8';
+  });
   renderExecTable();
 }
 
@@ -459,6 +487,16 @@ function renderExecTable() {
     <td colspan="2" style="padding:11px 14px;font-weight:800;font-size:0.88rem;color:#ffffff;">รวมบุคลากรภายใน</td>
     <td style="text-align:right;padding:11px 14px;font-weight:800;font-size:1.15rem;color:#ffffff;">${grandTotal.toLocaleString()}</td>
   </tr>`);
+  const extCount = dk ? (execExternal[dk]||0) : execExternal.d1+execExternal.d2+execExternal.d3;
+  rows.push(`<tr style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border-top:2px solid #86efac;">
+    <td colspan="2" style="padding:11px 14px;font-weight:800;font-size:0.88rem;color:#15803d;">บุคคลภายนอกกรม</td>
+    <td style="text-align:right;padding:11px 14px;font-weight:800;font-size:1.15rem;color:#15803d;">${extCount.toLocaleString()}</td>
+  </tr>`);
+  const grandAllTotal = grandTotal + extCount;
+  rows.push(`<tr style="background:#0e7490;">
+    <td colspan="2" style="padding:11px 14px;font-weight:800;font-size:0.88rem;color:#ffffff;">รวมทั้งหมด</td>
+    <td style="text-align:right;padding:11px 14px;font-weight:800;font-size:1.3rem;color:#ffffff;">${grandAllTotal.toLocaleString()}</td>
+  </tr>`);
   document.getElementById('execDeptBody').innerHTML = rows.join('');
   renderExecExtTable();
   if(execView === 'chart') renderExecChart();
@@ -466,34 +504,13 @@ function renderExecTable() {
 }
 
 function renderExecExtTable() {
-  const dk = execDay ? `d${execDay}` : null;
-  const dc = '#15803d';
-  const dl = execDay ? ['','24 มิ.ย.','25 มิ.ย.','26 มิ.ย.'][execDay] : 'รวม (ทุกวัน)';
-  const extTitle = document.getElementById('extCardTitle');
-  if(extTitle) extTitle.textContent = execDay
-    ? `จำนวนผู้เข้าร่วมงานแยกตามหน่วยงานภายนอก — ${['','24 มิ.ย.','25 มิ.ย.','26 มิ.ย.'][execDay]}`
-    : 'จำนวนผู้เข้าร่วมงานแยกตามหน่วยงานภายนอก';
-  const extHead = document.getElementById('extTableHead');
-  if(!extHead) return;
-  extHead.innerHTML = `<tr>
-    <th style="width:36px;">#</th>
-    <th>หน่วยงาน</th>
-    <th class="num" style="color:${dc};min-width:80px;">${dl}</th>
-  </tr>`;
-  const entries = Object.entries(execExtMap)
-    .map(([dept,c]) => ({name:dept, count:dk?c[dk]:(c.d1+c.d2+c.d3)}))
-    .filter(e=>e.count>0).sort((a,b)=>b.count-a.count);
-  const grandExt = entries.reduce((s,e)=>s+e.count,0);
-  const extBody = document.getElementById('extDeptBody');
-  if(!extBody) return;
-  extBody.innerHTML = entries.map((e,i)=>`<tr>
-    <td style="font-weight:700;color:#94a3b8;font-size:0.8rem;">${i+1}</td>
-    <td class="dept-name-cell">${e.name}</td>
-    <td class="total-cell" style="color:${dc};">${e.count.toLocaleString()}</td>
-  </tr>`).join('')+`<tr style="background:#15803d;">
-    <td colspan="2" style="padding:11px 14px;font-weight:800;font-size:0.88rem;color:#ffffff;">รวมบุคคลภายนอก</td>
-    <td style="text-align:right;padding:11px 14px;font-weight:800;font-size:1.15rem;color:#ffffff;">${grandExt.toLocaleString()}</td>
-  </tr>`;
+  const total = execExternal.d1+execExternal.d2+execExternal.d3;
+  const el = (id) => document.getElementById(id);
+  if(el('extNumAll')) el('extNumAll').textContent = total.toLocaleString();
+  if(el('extNumD1')) el('extNumD1').textContent = execExternal.d1.toLocaleString();
+  if(el('extNumD2')) el('extNumD2').textContent = execExternal.d2.toLocaleString();
+  if(el('extNumD3')) el('extNumD3').textContent = execExternal.d3.toLocaleString();
+  if(el('extNumTotal')) el('extNumTotal').textContent = total.toLocaleString();
 }
 
 function renderSummary() {
@@ -1182,41 +1199,51 @@ async function _loadPageBg(){try{const r=await fetch(SUPABASE_URL+'/rest/v1/app_
 _loadPageBg();setInterval(_loadPageBg,30000);
 
 async function shareDeptTable() {
-  const btn = document.querySelector('.share-btn');
+  const btn = document.getElementById('shareDeptBtn');
   btn.disabled = true;
   btn.innerHTML = '⏳ กำลังสร้างรูป...';
   try {
     const a4 = document.getElementById('a4Export');
+    const now = new Date();
     document.getElementById('a4ExportTime').textContent =
-      new Date().toLocaleString('th-TH', {timeZone:'Asia/Bangkok', dateStyle:'medium', timeStyle:'short'});
+      now.toLocaleString('th-TH', {timeZone:'Asia/Bangkok', dateStyle:'medium', timeStyle:'short'});
 
-    // Build table with full inline styles (html2canvas-safe)
-    const rows = Array.from(document.querySelectorAll('#execDeptBody tr'));
-    const tbodyHtml = rows.map((tr, i) => {
-      const bg = i % 2 === 0 ? '#ffffff' : '#eef5fa';
-      const cells = Array.from(tr.querySelectorAll('td')).map((td, ci) => {
-        const isNum = ci >= 2;
-        const numStyle = isNum ? 'text-align:right;font-weight:700;' : '';
-        const colorStyle = ci === 0 ? 'color:#7a9aae;' : 'color:#1F3540;';
-        return `<td style="padding:9px 12px;font-size:12.5px;border-bottom:1px solid #ddeaf2;background:${bg};${colorStyle}${numStyle}">${td.innerHTML}</td>`;
-      }).join('');
-      return `<tr>${cells}</tr>`;
-    }).join('');
+    const dk = execDay ? `d${execDay}` : null;
+    const dl = execDay ? ['','24 มิ.ย.','25 มิ.ย.','26 มิ.ย.'][execDay] : 'รวม';
+    const dc = execDay ? ['','#2563eb','#7c3aed','#0891b2'][execDay] : '#1F3540';
+    const dayLabel = execDay ? ['','24 มิถุนายน 2569','25 มิถุนายน 2569','26 มิถุนายน 2569'][execDay] : null;
+
+    // Build table body (dept rows only, not the total/external rows from the live table)
+    let idx = 0, grandInt = 0;
+    const deptRows = DEPTS.map(dept => {
+      const c = execMap[dept];
+      const count = dk ? c[dk] : (c.d1+c.d2+c.d3);
+      grandInt += count; idx++;
+      const bg = idx % 2 === 0 ? '#eef5fa' : '#ffffff';
+      return `<tr><td style="padding:9px 12px;font-size:12px;background:${bg};color:#7a9aae;font-weight:700;">${idx}</td><td style="padding:9px 12px;font-size:12.5px;background:${bg};color:#1F3540;font-weight:600;">${dept}</td><td style="padding:9px 12px;font-size:12.5px;background:${bg};text-align:right;font-weight:700;color:${dc};">${count>0?count.toLocaleString():'—'}</td></tr>`;
+    });
+    const extCount = dk ? (execExternal[dk]||0) : execExternal.d1+execExternal.d2+execExternal.d3;
+    const grandAll = grandInt + extCount;
+    deptRows.push(`<tr style="background:#1F3540;"><td colspan="2" style="padding:11px 12px;font-size:13px;font-weight:800;color:#fff;">รวมบุคลากรภายใน</td><td style="padding:11px 12px;font-size:14px;font-weight:800;color:#fff;text-align:right;">${grandInt.toLocaleString()}</td></tr>`);
+    deptRows.push(`<tr style="background:#f0fdf4;border-top:2px solid #86efac;"><td colspan="2" style="padding:11px 12px;font-size:13px;font-weight:800;color:#15803d;">บุคคลภายนอกกรม</td><td style="padding:11px 12px;font-size:14px;font-weight:800;color:#15803d;text-align:right;">${extCount.toLocaleString()}</td></tr>`);
+    deptRows.push(`<tr style="background:#0e7490;"><td colspan="2" style="padding:11px 12px;font-size:13px;font-weight:800;color:#fff;">รวมทั้งหมด</td><td style="padding:11px 12px;font-size:15px;font-weight:800;color:#fff;text-align:right;">${grandAll.toLocaleString()}</td></tr>`);
 
     document.getElementById('a4TableSlot').innerHTML = `
       <table style="width:100%;border-collapse:collapse;font-family:'Sarabun',sans-serif;">
-        <thead>
-          <tr>
-            <th style="background:#1F3540;padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:#fff;border:none;width:36px;">#</th>
-            <th style="background:#1F3540;padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:#fff;border:none;">หน่วยงาน</th>
-            <th style="background:#1F3540;padding:10px 12px;text-align:right;font-size:11px;font-weight:700;color:#93c5fd;border:none;min-width:65px;">24 มิ.ย.</th>
-            <th style="background:#1F3540;padding:10px 12px;text-align:right;font-size:11px;font-weight:700;color:#c4b5fd;border:none;min-width:65px;">25 มิ.ย.</th>
-            <th style="background:#1F3540;padding:10px 12px;text-align:right;font-size:11px;font-weight:700;color:#67e8f9;border:none;min-width:65px;">26 มิ.ย.</th>
-            <th style="background:#1F3540;padding:10px 12px;text-align:right;font-size:11px;font-weight:700;color:#fff;border:none;min-width:65px;">รวม</th>
-          </tr>
-        </thead>
-        <tbody>${tbodyHtml}</tbody>
+        <thead><tr>
+          <th style="background:#1F3540;padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:#fff;border:none;width:36px;">#</th>
+          <th style="background:#1F3540;padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:#fff;border:none;">หน่วยงาน</th>
+          <th style="background:#1F3540;padding:10px 12px;text-align:right;font-size:11px;font-weight:700;color:#e2e8f0;border:none;min-width:80px;">${dl}</th>
+        </tr></thead>
+        <tbody>${deptRows.join('')}</tbody>
       </table>`;
+
+    // Generate LINE text
+    const nowStr = now.toLocaleString('th-TH',{timeZone:'Asia/Bangkok',hour:'2-digit',minute:'2-digit'});
+    const dayNames = ['','24 มิถุนายน 2569','25 มิถุนายน 2569','26 มิถุนายน 2569'];
+    const shareText = execDay
+      ? `สรุปจำนวนผู้เข้าประชุมวิชาการวิทยาศาสตร์การแพทย์ ครั้งที่ 34\n\nวันที่ ${dayNames[execDay]}\n- บุคลากรภายในกรม ${grandInt.toLocaleString()} คน\n- บุคคลภายนอกกรม ${extCount.toLocaleString()} คน\nรวม ${grandAll.toLocaleString()} คน\n\nข้อมูล ณ เวลา ${nowStr} น.`
+      : `สรุปจำนวนผู้เข้าประชุมวิชาการวิทยาศาสตร์การแพทย์ ครั้งที่ 34\n\nรวม 3 วัน (24-26 มิถุนายน 2569)\n- บุคลากรภายในกรม ${grandInt.toLocaleString()} คน\n- บุคคลภายนอกกรม ${extCount.toLocaleString()} คน\nรวม ${grandAll.toLocaleString()} คน\n\nข้อมูล ณ เวลา ${nowStr} น.`;
 
     const canvas = await html2canvas(a4, {
       scale: 2,
@@ -1227,10 +1254,10 @@ async function shareDeptTable() {
     });
 
     canvas.toBlob(async (blob) => {
-      const file = new File([blob], 'dept-summary-' + new Date().toISOString().slice(0,10) + '.png', { type: 'image/png' });
+      const file = new File([blob], 'dept-summary-' + now.toISOString().slice(0,10) + '.png', { type: 'image/png' });
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
         try {
-          await navigator.share({ files: [file], title: 'สถิติแยกตามหน่วยงาน', text: 'จำนวนผู้เข้าร่วมงานแยกตามหน่วยงานภายใน กรมวิทยาศาสตร์การแพทย์' });
+          await navigator.share({ files: [file], title: 'สถิติแยกตามหน่วยงาน', text: shareText });
         } catch(e) { if (e.name !== 'AbortError') { const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=file.name;a.click(); } }
       } else {
         const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=file.name; a.click();
