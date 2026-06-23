@@ -375,6 +375,57 @@ const DEPTS = [
   'ศูนย์วิทยาศาสตร์การแพทย์ที่ 12/1 ตรัง'
 ];
 
+// เป้าหมายต่อวัน (คน) — แก้ตัวเลขได้ในอนาคต
+const EXEC_TARGETS = {
+  'อธิบดีกรมวิทยาศาสตร์การแพทย์': 0,
+  'รองอธิบดีกรมวิทยาศาสตร์การแพทย์': 0,
+  'สำนักผู้ทรงคุณวุฒิกรมวิทยาศาสตร์การแพทย์': 0,
+  'กองแผนงานและวิชาการ': 0,
+  'กองทดสอบความชำนาญ': 0,
+  'กลุ่มพัฒนาระบบบริหาร': 0,
+  'กลุ่มตรวจสอบภายใน': 0,
+  'กลุ่มงานจริยธรรม': 0,
+  'สำนักงานเลขานุการกรม': 0,
+  'สถาบันชีววัตถุ': 0,
+  'สถาบันวิจัยวิทยาศาสตร์สาธารณสุข': 0,
+  'สถาบันวิจัยสมุนไพร': 0,
+  'สถาบันชีววิทยาศาสตร์ทางการแพทย์': 0,
+  'สำนักคุณภาพและความปลอดภัยอาหาร': 0,
+  'สำนักเครื่องสำอางและวัตถุอันตราย': 0,
+  'สำนักรังสีและเครื่องมือแพทย์': 0,
+  'สำนักมาตรฐานห้องปฏิบัติการ': 0,
+  'สำนักยาและวัตถุเสพติด': 0,
+  'ศูนย์รวมบริการ': 0,
+  'ศูนย์เทคโนโลยีสารสนเทศและการสื่อสาร': 0,
+  'กองความร่วมมือระหว่างประเทศ': 0,
+  'กองบริหารทรัพยากรบุคคล': 0,
+  'กองบริหารการคลัง': 0,
+  'กองประชาสัมพันธ์และสื่อสารสาธารณะ': 0,
+  'ศูนย์ตอบโต้เหตุฉุกเฉินด้านห้องปฏิบัติการและรังสี': 0,
+  'ศูนย์วิทยาศาสตร์การแพทย์ที่ 1 เชียงใหม่': 0,
+  'ศูนย์วิทยาศาสตร์การแพทย์ที่ 1/1 เชียงราย': 0,
+  'ศูนย์วิทยาศาสตร์การแพทย์ที่ 2 พิษณุโลก': 0,
+  'ศูนย์วิทยาศาสตร์การแพทย์ที่ 3 นครสวรรค์': 0,
+  'ศูนย์วิทยาศาสตร์การแพทย์ที่ 4 สระบุรี': 0,
+  'ศูนย์วิทยาศาสตร์การแพทย์ที่ 5 สมุทรสงคราม': 0,
+  'ศูนย์วิทยาศาสตร์การแพทย์ที่ 6 ชลบุรี': 0,
+  'ศูนย์วิทยาศาสตร์การแพทย์ที่ 7 ขอนแก่น': 0,
+  'ศูนย์วิทยาศาสตร์การแพทย์ที่ 8 อุดรธานี': 0,
+  'ศูนย์วิทยาศาสตร์การแพทย์ที่ 9 นครราชสีมา': 0,
+  'ศูนย์วิทยาศาสตร์การแพทย์ที่ 10 อุบลราชธานี': 0,
+  'ศูนย์วิทยาศาสตร์การแพทย์ที่ 11 สุราษฎร์ธานี': 0,
+  'ศูนย์วิทยาศาสตร์การแพทย์ที่ 11/1 ภูเก็ต': 0,
+  'ศูนย์วิทยาศาสตร์การแพทย์ที่ 12 สงขลา': 0,
+  'ศูนย์วิทยาศาสตร์การแพทย์ที่ 12/1 ตรัง': 0,
+};
+
+function fmtPct(count, target) {
+  if (!target) return '<span style="color:#94a3b8;">—</span>';
+  const p = Math.round(count / target * 100);
+  const color = p >= 100 ? '#16a34a' : p >= 80 ? '#65a30d' : p >= 50 ? '#d97706' : '#dc2626';
+  return `<span style="color:${color};font-weight:700;">${p}%</span>`;
+}
+
 async function fetchAll(path) {
   let res = [], from = 0;
   while(true) {
@@ -467,35 +518,47 @@ function renderExecTable() {
   if(titleEl) titleEl.textContent = execDay
     ? `จำนวนผู้เข้าร่วมงานแยกตามหน่วยงานภายใน — ${dl}`
     : 'จำนวนผู้เข้าร่วมงานแยกตามหน่วยงานภายใน (กรมวิทยาศาสตร์การแพทย์)';
+  const dayMult = execDay ? 1 : 3;
   document.getElementById('execTableHead').innerHTML = `<tr>
-    <th style="width:36px;">#</th>
+    <th style="width:30px;">#</th>
     <th>หน่วยงาน</th>
-    <th class="num" style="color:${dc};min-width:80px;">${dl}</th>
+    <th class="num" style="color:${dc};min-width:64px;">${dl}</th>
+    <th class="num" style="color:#94a3b8;min-width:64px;">เป้าหมาย</th>
+    <th class="num" style="min-width:52px;">%</th>
   </tr>`;
-  let idx = 0, grandTotal = 0;
+  let idx = 0, grandTotal = 0, grandTarget = 0;
   const rows = DEPTS.map(dept => {
     const c = execMap[dept];
     const count = dk ? c[dk] : (c.d1+c.d2+c.d3);
-    grandTotal += count; idx++;
+    const target = (EXEC_TARGETS[dept] || 0) * dayMult;
+    grandTotal += count; grandTarget += target; idx++;
     return `<tr>
       <td style="font-weight:700;color:#94a3b8;font-size:0.8rem;">${idx}</td>
       <td class="dept-name-cell">${dept}</td>
       <td class="total-cell" style="color:${dc};">${count>0?count.toLocaleString():'<span class="zero">—</span>'}</td>
+      <td class="total-cell" style="color:#94a3b8;">${target>0?target.toLocaleString():'<span class="zero">—</span>'}</td>
+      <td class="total-cell">${fmtPct(count,target)}</td>
     </tr>`;
   });
   rows.push(`<tr style="background:#64748b;">
     <td colspan="2" style="padding:11px 14px;font-weight:800;font-size:0.88rem;color:#ffffff;">รวมบุคลากรภายใน</td>
-    <td style="text-align:right;padding:11px 14px;font-weight:800;font-size:1.15rem;color:#ffffff;">${grandTotal.toLocaleString()}</td>
+    <td style="text-align:right;padding:11px 14px;font-weight:800;font-size:1.1rem;color:#ffffff;">${grandTotal.toLocaleString()}</td>
+    <td style="text-align:right;padding:11px 14px;font-weight:700;font-size:0.95rem;color:#cbd5e1;">${grandTarget>0?grandTarget.toLocaleString():'—'}</td>
+    <td style="text-align:right;padding:11px 14px;font-weight:800;font-size:1rem;color:#ffffff;">${grandTarget>0?Math.round(grandTotal/grandTarget*100)+'%':'—'}</td>
   </tr>`);
   const extCount = dk ? (execExternal[dk]||0) : execExternal.d1+execExternal.d2+execExternal.d3;
   rows.push(`<tr style="background:#16a34a;">
     <td colspan="2" style="padding:11px 14px;font-weight:800;font-size:0.88rem;color:#ffffff;">บุคคลภายนอกกรม</td>
-    <td style="text-align:right;padding:11px 14px;font-weight:800;font-size:1.15rem;color:#ffffff;">${extCount.toLocaleString()}</td>
+    <td style="text-align:right;padding:11px 14px;font-weight:800;font-size:1.1rem;color:#ffffff;">${extCount.toLocaleString()}</td>
+    <td style="text-align:right;padding:11px 14px;color:#bbf7d0;">—</td>
+    <td style="text-align:right;padding:11px 14px;color:#bbf7d0;">—</td>
   </tr>`);
   const grandAllTotal = grandTotal + extCount;
   rows.push(`<tr style="background:#2563eb;">
     <td colspan="2" style="padding:11px 14px;font-weight:800;font-size:0.88rem;color:#ffffff;">รวมทั้งหมด</td>
-    <td style="text-align:right;padding:11px 14px;font-weight:800;font-size:1.3rem;color:#ffffff;">${grandAllTotal.toLocaleString()}</td>
+    <td style="text-align:right;padding:11px 14px;font-weight:800;font-size:1.25rem;color:#ffffff;">${grandAllTotal.toLocaleString()}</td>
+    <td style="text-align:right;padding:11px 14px;color:#bfdbfe;">—</td>
+    <td style="text-align:right;padding:11px 14px;color:#bfdbfe;">—</td>
   </tr>`);
   document.getElementById('execDeptBody').innerHTML = rows.join('');
   renderExecExtTable();
@@ -1213,27 +1276,34 @@ async function shareDeptTable() {
     const dc = execDay ? ['','#2563eb','#7c3aed','#0891b2'][execDay] : '#1F3540';
     const dayLabel = execDay ? ['','24 มิถุนายน 2569','25 มิถุนายน 2569','26 มิถุนายน 2569'][execDay] : null;
 
-    // Build table body (dept rows only, not the total/external rows from the live table)
-    let idx = 0, grandInt = 0;
+    // Build table body
+    const dayMult = execDay ? 1 : 3;
+    let idx = 0, grandInt = 0, grandTgt = 0;
     const deptRows = DEPTS.map(dept => {
       const c = execMap[dept];
       const count = dk ? c[dk] : (c.d1+c.d2+c.d3);
-      grandInt += count; idx++;
+      const target = (EXEC_TARGETS[dept] || 0) * dayMult;
+      grandInt += count; grandTgt += target; idx++;
       const bg = idx % 2 === 0 ? '#eef5fa' : '#ffffff';
-      return `<tr><td style="padding:9px 12px;font-size:12px;background:${bg};color:#7a9aae;font-weight:700;">${idx}</td><td style="padding:9px 12px;font-size:12.5px;background:${bg};color:#1F3540;font-weight:600;">${dept}</td><td style="padding:9px 12px;font-size:12.5px;background:${bg};text-align:right;font-weight:700;color:${dc};">${count>0?count.toLocaleString():'—'}</td></tr>`;
+      const pctHtml = target ? `${Math.round(count/target*100)}%` : '—';
+      const pctColor = !target ? '#94a3b8' : (count/target>=1?'#16a34a':count/target>=0.8?'#65a30d':count/target>=0.5?'#d97706':'#dc2626');
+      return `<tr><td style="padding:8px 10px;font-size:11px;background:${bg};color:#7a9aae;font-weight:700;">${idx}</td><td style="padding:8px 10px;font-size:12px;background:${bg};color:#1F3540;font-weight:600;">${dept}</td><td style="padding:8px 10px;font-size:12px;background:${bg};text-align:right;font-weight:700;color:${dc};">${count>0?count.toLocaleString():'—'}</td><td style="padding:8px 10px;font-size:12px;background:${bg};text-align:right;color:#94a3b8;">${target>0?target.toLocaleString():'—'}</td><td style="padding:8px 10px;font-size:12px;background:${bg};text-align:right;font-weight:700;color:${pctColor};">${pctHtml}</td></tr>`;
     });
     const extCount = dk ? (execExternal[dk]||0) : execExternal.d1+execExternal.d2+execExternal.d3;
     const grandAll = grandInt + extCount;
-    deptRows.push(`<tr style="background:#64748b;"><td colspan="2" style="padding:11px 12px;font-size:13px;font-weight:800;color:#fff;">รวมบุคลากรภายใน</td><td style="padding:11px 12px;font-size:14px;font-weight:800;color:#fff;text-align:right;">${grandInt.toLocaleString()}</td></tr>`);
-    deptRows.push(`<tr style="background:#16a34a;"><td colspan="2" style="padding:11px 12px;font-size:13px;font-weight:800;color:#fff;">บุคคลภายนอกกรม</td><td style="padding:11px 12px;font-size:14px;font-weight:800;color:#fff;text-align:right;">${extCount.toLocaleString()}</td></tr>`);
-    deptRows.push(`<tr style="background:#2563eb;"><td colspan="2" style="padding:11px 12px;font-size:13px;font-weight:800;color:#fff;">รวมทั้งหมด</td><td style="padding:11px 12px;font-size:15px;font-weight:800;color:#fff;text-align:right;">${grandAll.toLocaleString()}</td></tr>`);
+    const grandPct = grandTgt ? Math.round(grandInt/grandTgt*100)+'%' : '—';
+    deptRows.push(`<tr style="background:#64748b;"><td colspan="2" style="padding:10px 12px;font-size:13px;font-weight:800;color:#fff;">รวมบุคลากรภายใน</td><td style="padding:10px 12px;font-size:13px;font-weight:800;color:#fff;text-align:right;">${grandInt.toLocaleString()}</td><td style="padding:10px 12px;font-size:12px;font-weight:700;color:#cbd5e1;text-align:right;">${grandTgt>0?grandTgt.toLocaleString():'—'}</td><td style="padding:10px 12px;font-size:13px;font-weight:800;color:#fff;text-align:right;">${grandPct}</td></tr>`);
+    deptRows.push(`<tr style="background:#16a34a;"><td colspan="2" style="padding:10px 12px;font-size:13px;font-weight:800;color:#fff;">บุคคลภายนอกกรม</td><td style="padding:10px 12px;font-size:13px;font-weight:800;color:#fff;text-align:right;">${extCount.toLocaleString()}</td><td style="padding:10px 12px;color:#bbf7d0;text-align:right;">—</td><td style="padding:10px 12px;color:#bbf7d0;text-align:right;">—</td></tr>`);
+    deptRows.push(`<tr style="background:#2563eb;"><td colspan="2" style="padding:10px 12px;font-size:13px;font-weight:800;color:#fff;">รวมทั้งหมด</td><td style="padding:10px 12px;font-size:14px;font-weight:800;color:#fff;text-align:right;">${grandAll.toLocaleString()}</td><td style="padding:10px 12px;color:#bfdbfe;text-align:right;">—</td><td style="padding:10px 12px;color:#bfdbfe;text-align:right;">—</td></tr>`);
 
     document.getElementById('a4TableSlot').innerHTML = `
       <table style="width:100%;border-collapse:collapse;font-family:'Sarabun',sans-serif;">
         <thead><tr>
-          <th style="background:#1F3540;padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:#fff;border:none;width:36px;">#</th>
+          <th style="background:#1F3540;padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:#fff;border:none;width:32px;">#</th>
           <th style="background:#1F3540;padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:#fff;border:none;">หน่วยงาน</th>
-          <th style="background:#1F3540;padding:10px 12px;text-align:right;font-size:11px;font-weight:700;color:#e2e8f0;border:none;min-width:80px;">${dl}</th>
+          <th style="background:#1F3540;padding:10px 12px;text-align:right;font-size:11px;font-weight:700;color:#e2e8f0;border:none;min-width:70px;">${dl}</th>
+          <th style="background:#1F3540;padding:10px 12px;text-align:right;font-size:11px;font-weight:700;color:#94a3b8;border:none;min-width:70px;">เป้าหมาย</th>
+          <th style="background:#1F3540;padding:10px 12px;text-align:right;font-size:11px;font-weight:700;color:#e2e8f0;border:none;min-width:48px;">%</th>
         </tr></thead>
         <tbody>${deptRows.join('')}</tbody>
       </table>`;
