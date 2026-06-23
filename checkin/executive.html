@@ -1462,7 +1462,10 @@ async function shareExtZoneImage() {
     canvas.toBlob(async (blob)=>{
       const file=new File([blob],'ext-zone-'+now.toISOString().slice(0,10)+'.png',{type:'image/png'});
       if(navigator.canShare&&navigator.canShare({files:[file]})){
-        try{await navigator.share({files:[file],title:'สถิติบุคลากรภายนอกแยกเขตสุขภาพ'});}
+        const nowStr2=now.toLocaleString('th-TH',{timeZone:'Asia/Bangkok',hour:'2-digit',minute:'2-digit'});
+        const dl2=execDay?['','วันที่ 24 มิถุนายน 2569','วันที่ 25 มิถุนายน 2569','วันที่ 26 มิถุนายน 2569'][execDay]:'รวม 3 วัน (24-26 มิถุนายน 2569)';
+        const shareText2=`ประชุมวิชาการวิทยาศาสตร์การแพทย์ ครั้งที่ 34\n📅 ${dl2}\n\n👥 ภายนอกกรม: ${total.toLocaleString()} คน\n\n⏰ ณ เวลา ${nowStr2} น.`;
+        try{await navigator.share({files:[file],text:shareText2});}
         catch(e){if(e.name!=='AbortError'){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=file.name;a.click();}}
       } else { const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=file.name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),5000); }
     },'image/png');
