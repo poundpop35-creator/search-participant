@@ -1316,8 +1316,7 @@ function applyFilters(){
   const totalCheckins=allData.length;
   const walkinCount=allData.filter(r=>r.isWalkin).length;
   const preRegCount=totalCheckins-walkinCount;
-  const uniqueCheckedIn=new Set(allData.filter(r=>!r.isWalkin).map(r=>r.participantId)).size;
-  const notCheckedIn=totalPreReg>0?totalPreReg-uniqueCheckedIn:'-';
+  const notCheckedIn=totalAll>0?totalAll-tot:'-';
   // Row 1: filter by selected day (except ยังไม่เช็คอิน = grand total)
   const filtWalkin=filtered.filter(r=>r.isWalkin).length;
   const filtPreReg=filtered.filter(r=>!r.isWalkin).length;
