@@ -21,17 +21,23 @@ button:disabled{opacity:.5;cursor:not-allowed}
 <h2>🛠 Walk-in Cleanup Tool</h2>
 <p>ใช้หน้านี้แทน admin-control จนกว่า Netlify จะ deploy ได้ใหม่</p>
 
-<div class="card">
-  <strong>ขั้นตอนที่ 1 — ลบซ้ำที่มีอยู่</strong>
-  <p>ลบ walk-in ที่ซ้ำกันออก เหลือไว้คนละ 1 record</p>
-  <button class="red" onclick="dedup()">🗑 ลบซ้ำ Walk-in ทันที</button>
+<div class="card" style="border:2px solid #dc2626">
+  <strong style="color:#dc2626;font-size:1.1rem">🚨 รีเซ็ตข้อมูล — ลบทั้งหมดแล้ว Sync ใหม่</strong>
+  <p>ใช้เมื่อมี walk-in ซ้ำเยอะมาก — จะลบออกทั้งหมดแล้วดึงใหม่จาก Sheet</p>
+  <input id="sheetUrl" type="text" placeholder="URL Google Sheet (CSV)" style="width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:8px;font-size:0.9rem;box-sizing:border-box;margin-bottom:10px">
+  <button class="red" onclick="nukeAndSync()" style="font-size:1.05rem">🔥 ลบทั้งหมด + Sync ใหม่</button>
 </div>
 
 <div class="card">
-  <strong>ขั้นตอนที่ 2 — Sync ใหม่ (ปลอดภัย)</strong>
-  <p>ดึงข้อมูลจาก Google Sheet โดยไม่สร้างซ้ำ</p>
-  <input id="sheetUrl" type="text" placeholder="URL Google Sheet (CSV)" style="width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:8px;font-size:0.9rem;box-sizing:border-box;margin-bottom:10px">
-  <button class="green" onclick="safeSync()">🔄 Sync Walk-in (ปลอดภัย)</button>
+  <strong>ลบซ้ำ (ไม่ลบทั้งหมด)</strong>
+  <p>ลบแค่ record ซ้ำ เหลือไว้คนละ 1</p>
+  <button class="gray" onclick="dedup()">🗑 ลบซ้ำเท่านั้น</button>
+</div>
+
+<div class="card">
+  <strong>Sync ใหม่ (ปลอดภัย)</strong>
+  <p>ดึงข้อมูลจาก Sheet โดยไม่สร้างซ้ำ</p>
+  <button class="green" onclick="safeSync()">🔄 Sync Walk-in</button>
 </div>
 
 <div id="log"></div>
@@ -58,6 +64,68 @@ async function loadWalkins(){
     all=all.concat(d); if(d.length<1000) break; from+=1000;
   }
   return all;
+}
+
+async function nukeAndSync(){
+  let url=document.getElementById('sheetUrl').value.trim();
+  if(!url){
+    try{
+      const rs=await fetch(`${SB_URL}/rest/v1/app_settings?key=eq.walkin_sheet_url&select=value`,{headers:H});
+      const ds=await rs.json(); url=ds[0]?.value||'';
+    }catch(e){}
+  }
+  if(!url){alert('กรอก URL Sheet ก่อน');return;}
+  if(!confirm('ลบ walk-in ทั้งหมดออกจากระบบแล้ว sync ใหม่จาก Sheet?\n\nข้อมูลการรับของ (bag/shirt) ของ walk-in จะหายหมด')) return;
+  clearLog();
+  document.querySelectorAll('button').forEach(b=>b.disabled=true);
+  try{
+    // ลบทั้งหมด
+    log('กำลังโหลด walk-in ทั้งหมด...');
+    let ids=[],f=0;
+    while(true){
+      const r=await fetch(`${SB_URL}/rest/v1/participants?is_walkin=eq.true&select=id&limit=1000&offset=`+f,{headers:H});
+      const d=await r.json();
+      if(!Array.isArray(d)||!d.length) break;
+      ids=ids.concat(d.map(p=>p.id)); if(d.length<1000) break; f+=1000;
+    }
+    log(`พบ ${ids.length} รายการ กำลังลบ...`);
+    let del=0;
+    for(let i=0;i<ids.length;i+=100){
+      const c=ids.slice(i,i+100);
+      const r=await fetch(`${SB_URL}/rest/v1/participants?id=in.(${c.join(',')})`,{method:'DELETE',headers:{...H,'Prefer':'return=minimal'}});
+      if(r.ok||r.status===204) del+=c.length;
+    }
+    log(`✅ ลบออก ${del} รายการ`);
+    // sync ใหม่
+    log('กำลังดึงข้อมูลจาก Sheet...');
+    const res=await fetch(url);
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const text=await res.text();
+    const {headers,rows}=parseCSV(text);
+    log(`Sheet มี ${rows.length} แถว`);
+    const {first:firstCol,last:lastCol}=guessName(headers||[]);
+    if(!firstCol||!lastCol) throw new Error('หาคอลัมน์ชื่อ-นามสกุลไม่เจอ: '+(headers||[]).slice(0,8).join(', '));
+    const rsy=await fetch(`${SB_URL}/rest/v1/app_settings?key=eq.event_year&select=value`,{headers:H});
+    const dsy=await rsy.json(); const syncYear=dsy[0]?.value||'';
+    const idCol=headers.find(h=>/บัตร|id.?card|citizen|national/i.test(h));
+    const toInsert=rows.filter(r=>{const fn=(r[firstCol]||'').trim(),ln=(r[lastCol]||'').trim();return fn||ln;})
+      .map(r=>{
+        const fn=(r[firstCol]||'').trim(),ln=(r[lastCol]||'').trim();
+        const obj={is_walkin:true,first_name:fn,last_name:ln};
+        if(syncYear) obj.event_year=syncYear;
+        const idRaw=idCol?(r[idCol]||'').trim():'';
+        if(idRaw) obj.id_card=idRaw;
+        return obj;
+      });
+    log(`กำลัง insert ${toInsert.length} คน...`);
+    let ok=0;
+    for(const p of toInsert){
+      const r=await fetch(`${SB_URL}/rest/v1/participants`,{method:'POST',headers:{...H,'Prefer':'return=minimal'},body:JSON.stringify(p)});
+      if(r.ok||r.status===201) ok++;
+    }
+    log(`✅ เสร็จ! เพิ่มใหม่ ${ok} คน จากทั้งหมด ${toInsert.length} คนใน Sheet`);
+  }catch(e){ log('❌ Error: '+e.message); }
+  finally{ document.querySelectorAll('button').forEach(b=>b.disabled=false); }
 }
 
 async function dedup(){
