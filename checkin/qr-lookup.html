@@ -463,7 +463,7 @@ let ciTotalLoaded = 0, wiTotalLoaded = 0;
     if(yearData && yearData.length && yearData[0].value) activeYear = yearData[0].value;
     const yr = encodeURIComponent(activeYear);
     const [wiRes, ciRes] = await Promise.all([
-      fetch(`${SB_URL}/rest/v1/participants?is_walkin=eq.true&event_year=eq.${yr}&select=id&limit=1`, { headers: { ...H, 'Prefer': 'count=exact' } }),
+      fetch(`${SB_URL}/rest/v1/participants?is_walkin=eq.true&select=id&limit=1`, { headers: { ...H, 'Prefer': 'count=exact' } }),
       fetch(`${SB_URL}/rest/v1/participants?is_walkin=eq.false&event_year=eq.${yr}&select=id&limit=1`, { headers: { ...H, 'Prefer': 'count=exact' } })
     ]);
     const wiCnt = wiRes.headers.get('content-range'); if(wiCnt){ wiTotalLoaded=parseInt(wiCnt.split('/')[1])||0; document.getElementById('wiCount').textContent=`(${wiTotalLoaded.toLocaleString()} คน)`; }
