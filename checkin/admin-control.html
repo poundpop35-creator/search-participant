@@ -407,6 +407,7 @@
         <button class="btn btn-green" id="syncNowBtn" onclick="syncWalkinNow()">🔄 ซิงค์เดี๋ยวนี้</button>
         <button class="btn btn-ghost" id="autoSyncBtn" onclick="toggleAutoSync()">▶ เปิด Auto-sync (ทุก 1 นาที)</button>
         <button class="btn btn-danger" onclick="deduplicateWalkins()" style="background:#dc2626;color:#fff;border-color:#dc2626;">🗑 ลบซ้ำ Walk-in</button>
+        <button class="btn btn-danger" onclick="deleteAllWalkins()" style="background:#7f1d1d;color:#fff;border-color:#7f1d1d;">💣 ลบ Walk-in ทั้งหมด</button>
         <span id="syncCountdown" style="font-size:0.82rem;color:#64748b;"></span>
       </div>
       <div id="walkinSyncStatus" style="margin-top:10px;"></div>
@@ -1394,6 +1395,28 @@ async function deduplicateWalkins(){
   } catch(e) {
     setStatus('walkinSyncStatus','err','❌ '+e.message);
   }
+}
+
+async function deleteAllWalkins(){
+  if(!confirm('⚠️ ลบ Walk-in ทั้งหมดออกจากระบบ?\n\nข้อมูลการเช็กอิน (รับของ/เสื้อ) จะหายหมด\n\nพิมพ์ OK เพื่อยืนยัน')) return;
+  setStatus('walkinSyncStatus','info','กำลังลบ walk-in ทั้งหมด...');
+  try{
+    let ids=[],from=0;
+    while(true){
+      const r=await fetch(`${SB_URL}/rest/v1/participants?is_walkin=eq.true&select=id&limit=1000&offset=${from}`,{headers:H});
+      const d=await r.json();
+      if(!Array.isArray(d)||!d.length) break;
+      ids=ids.concat(d.map(p=>p.id)); if(d.length<1000) break; from+=1000;
+    }
+    if(!ids.length){ setStatus('walkinSyncStatus','ok','✅ ไม่มี walk-in ในระบบแล้ว'); return; }
+    let deleted=0;
+    for(let i=0;i<ids.length;i+=100){
+      const chunk=ids.slice(i,i+100);
+      const r=await fetch(`${SB_URL}/rest/v1/participants?id=in.(${chunk.join(',')})`,{method:'DELETE',headers:{...H,'Prefer':'return=minimal'}});
+      if(r.ok||r.status===204) deleted+=chunk.length;
+    }
+    setStatus('walkinSyncStatus','ok',`✅ ลบ walk-in ทั้งหมดแล้ว ${deleted} คน — กด ซิงค์เดี๋ยวนี้ เพื่อ sync ใหม่`);
+  }catch(e){ setStatus('walkinSyncStatus','err','❌ '+e.message); }
 }
 
 function toggleAutoSync(){
