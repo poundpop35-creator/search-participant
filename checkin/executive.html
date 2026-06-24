@@ -472,7 +472,8 @@ const EXEC_TARGETS = {
 function fmtPct(count, target) {
   if (!target) return '<span style="color:#94a3b8;">—</span>';
   const p = Math.round(count / target * 100);
-  const color = p >= 100 ? '#16a34a' : '#ea580c';
+  const color = p >= 100 ? '#15803d' : p >= 90 ? '#16a34a' : p >= 80 ? '#65a30d'
+              : p >= 60  ? '#ea580c' : p >= 40 ? '#dc2626' : '#991b1b';
   return `<span style="color:${color};font-weight:700;">${p}%</span>`;
 }
 
