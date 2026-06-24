@@ -448,8 +448,8 @@
     currentMode=mode;
     document.getElementById('btnCamera').classList.toggle('active',mode==='camera');
     document.getElementById('btnScanner').classList.toggle('active',mode==='scanner');
-    document.getElementById('cameraMode').style.display=mode==='camera'?'':'none';
-    document.getElementById('scannerMode').style.display=mode==='scanner'?'':'none';
+    document.getElementById('cameraMode').style.display=mode==='camera'?'block':'none';
+    document.getElementById('scannerMode').style.display=mode==='scanner'?'block':'none';
     if(mode==='camera') startCamera();
     else{if(qrCode){qrCode.stop().catch(()=>{});qrCode=null;}setStatus('รอเครื่องยิงบาร์โค้ด');}
   }
