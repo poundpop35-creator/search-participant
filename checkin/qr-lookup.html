@@ -493,6 +493,19 @@ async function ensureNames() {
     data = data.concat(d);
     offset += 1000;
   }
+  // เพิ่ม walk-in ที่ import ก่อนแก้ bug (ไม่มี event_year)
+  let wiOffset = 0;
+  while(true) {
+    const rw = await fetch(
+      `${SB_URL}/rest/v1/participants?event_year=is.null&is_walkin=eq.true&select=id,prefix,first_name,last_name,id_card,dept,ext_dept,internal_external,is_walkin,participation_type&limit=1000&offset=${wiOffset}&order=id.asc`,
+      { headers }
+    );
+    if (!rw.ok) break;
+    const dw = await rw.json();
+    if (!Array.isArray(dw) || !dw.length) break;
+    data = data.concat(dw);
+    wiOffset += 1000;
+  }
   // Deduplicate by id_card — prefer pre-reg (is_walkin=false) over walk-in when same person
   const seen = new Map();
   data.forEach(p => {
