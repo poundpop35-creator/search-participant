@@ -478,41 +478,36 @@ let selectedP = null;
 let allNames = null;
 
 async function ensureNames() {
-  if (allNames !== null && allNames.length > 0) return; // use cache only if non-empty
+  if (allNames !== null && allNames.length > 0) return;
   const headers = { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY };
   const yr = encodeURIComponent(activeYear);
-  let data = [], offset = 0;
-  while(true) {
-    const r = await fetch(
-      `${SB_URL}/rest/v1/participants?event_year=eq.${yr}&select=id,prefix,first_name,last_name,id_card,dept,ext_dept,internal_external,is_walkin,participation_type&limit=1000&offset=${offset}&order=id.asc`,
-      { headers }
-    );
-    if (!r.ok) { const txt = await r.text().catch(()=>''); throw new Error('HTTP ' + r.status + ': ' + txt.slice(0,120)); }
-    const d = await r.json();
-    if (!Array.isArray(d) || !d.length) break;
-    data = data.concat(d);
-    offset += 1000;
+  const SEL = 'select=id,prefix,first_name,last_name,id_card,dept,ext_dept,internal_external,is_walkin,participation_type';
+
+  // ดึง pre-reg ตามปี และ walk-in ทุกคน (ไม่จำกัดปี) แบบคู่ขนาน
+  async function fetchAll(url) {
+    let data = [], offset = 0;
+    while(true) {
+      const r = await fetch(`${url}&limit=1000&offset=${offset}&order=id.asc`, { headers });
+      if (!r.ok) break;
+      const d = await r.json();
+      if (!Array.isArray(d) || !d.length) break;
+      data = data.concat(d);
+      if (d.length < 1000) break;
+      offset += 1000;
+    }
+    return data;
   }
-  // เพิ่ม walk-in ที่ event_year ไม่ตรง (null, ปีผิด, หรือ empty) — ไม่จำกัด event_year
-  const existWiIds = new Set(data.filter(p=>p.is_walkin).map(p=>(p.id_card||'').replace(/\D/g,'')||`_id_${p.id}`));
-  let wiOffset = 0;
-  while(true) {
-    const rw = await fetch(
-      `${SB_URL}/rest/v1/participants?is_walkin=eq.true&select=id,prefix,first_name,last_name,id_card,dept,ext_dept,internal_external,is_walkin,participation_type&limit=1000&offset=${wiOffset}&order=id.asc`,
-      { headers }
-    );
-    if (!rw.ok) break;
-    const dw = await rw.json();
-    if (!Array.isArray(dw) || !dw.length) break;
-    // เพิ่มเฉพาะที่ยังไม่อยู่ใน data (กัน duplicate)
-    dw.forEach(p=>{ const k=(p.id_card||'').replace(/\D/g,'')||`_id_${p.id}`; if(!existWiIds.has(k)){existWiIds.add(k);data.push(p);} });
-    wiOffset += 1000;
-  }
-  // Deduplicate by id_card — prefer pre-reg (is_walkin=false) over walk-in when same person
+
+  const [preReg, walkIns] = await Promise.all([
+    fetchAll(`${SB_URL}/rest/v1/participants?is_walkin=eq.false&event_year=eq.${yr}&${SEL}`),
+    fetchAll(`${SB_URL}/rest/v1/participants?is_walkin=eq.true&${SEL}`)
+  ]);
+
+  // Merge: prefer pre-reg over walk-in ถ้า id_card ซ้ำกัน
   const seen = new Map();
-  data.forEach(p => {
+  [...walkIns, ...preReg].forEach(p => {
     const key = (p.id_card || '').replace(/\D/g,'') || `_noid_${p.id}`;
-    if (!seen.has(key) || seen.get(key).is_walkin === true) seen.set(key, p);
+    seen.set(key, p); // preReg overwrites walkIn ถ้า key ซ้ำ
   });
   allNames = Array.from(seen.values());
 }
