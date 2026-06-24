@@ -139,8 +139,9 @@ async function dedup(){
     const groups=new Map();
     all.forEach(p=>{
       let key;
-      if(p.id_card) key='id:'+p.id_card.replace(/\D/g,'');
-      else if(p.first_name&&p.last_name) key='name:'+(p.first_name+p.last_name).replace(/\s/g,'').toLowerCase();
+      const fn=(p.first_name||'').trim(), ln=(p.last_name||'').trim(), id=(p.id_card||'').replace(/\D/g,'');
+      if(id) key='id:'+id;
+      else if(fn||ln) key='name:'+(fn+ln).replace(/\s/g,'').toLowerCase();
       else key='uid:'+p.id;
       if(!groups.has(key)) groups.set(key,[]);
       groups.get(key).push(p.id);

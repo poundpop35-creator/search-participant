@@ -1291,8 +1291,9 @@ async function syncWalkinNow(){
       const d = await r.json();
       if(!Array.isArray(d)||!d.length) break;
       d.forEach(p=>{
-        if(p.id_card) existKeys.add('id:'+p.id_card.replace(/\D/g,''));
-        if(p.first_name&&p.last_name) existKeys.add('name:'+(p.first_name+p.last_name).replace(/\s/g,'').toLowerCase());
+        const fn=(p.first_name||'').trim(), ln=(p.last_name||'').trim(), id=(p.id_card||'').replace(/\D/g,'');
+        if(id) existKeys.add('id:'+id);
+        if(fn||ln) existKeys.add('name:'+(fn+ln).replace(/\s/g,'').toLowerCase());
       });
       if(d.length<1000) break; from+=1000;
     }
@@ -1311,9 +1312,13 @@ async function syncWalkinNow(){
       throw new Error(`คอลัมน์ "ชื่อ" หรือ "นามสกุล" ไม่พบใน Sheet\nHeader ที่พบ: ${headers.slice(0,8).join(', ')}\nกรุณาตรวจสอบชื่อคอลัมน์ใน Sheet`);
     }
     const toInsert = mapped.filter(r=>{
-      if(r.id_card && existKeys.has('id:'+r.id_card.replace(/\D/g,''))) return false;
-      if(r.first_name && r.last_name && existKeys.has('name:'+(r.first_name+r.last_name).replace(/\s/g,'').toLowerCase())) return false;
-      return true;
+      // dedup หลักด้วยบัตรประชาชน
+      const id=(r.id_card||'').replace(/\D/g,'');
+      if(id) return !existKeys.has('id:'+id);
+      // คนที่ไม่มีบัตรประชาชน — dedup ด้วยชื่อ+นามสกุล
+      const fn=(r.first_name||'').trim(), ln=(r.last_name||'').trim();
+      if(fn||ln) return !existKeys.has('name:'+(fn+ln).replace(/\s/g,'').toLowerCase());
+      return false; // ไม่มีทั้งบัตรและชื่อ — ข้ามไป
     });
     let ok=0, skip=mapped.length-toInsert.length;
     // แทรกทีละ 1 คน เพื่อให้คนที่มีปัญหาไม่ทำให้คนอื่นหาย
@@ -1357,9 +1362,10 @@ async function deduplicateWalkins(){
     const groups = new Map();
     all.forEach(p=>{
       let key;
-      if(p.id_card) key = 'id:'+p.id_card.replace(/\D/g,'');
-      else if(p.first_name&&p.last_name) key = 'name:'+(p.first_name+p.last_name).replace(/\s/g,'').toLowerCase();
-      else key = 'uid:'+p.id;
+      const fn=(p.first_name||'').trim(), ln=(p.last_name||'').trim(), id=(p.id_card||'').replace(/\D/g,'');
+      if(id) key='id:'+id;
+      else if(fn||ln) key='name:'+(fn+ln).replace(/\s/g,'').toLowerCase();
+      else key='uid:'+p.id;
       if(!groups.has(key)) groups.set(key,[]);
       groups.get(key).push(p.id);
     });
