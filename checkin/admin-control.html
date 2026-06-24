@@ -406,6 +406,7 @@
       <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:8px;">
         <button class="btn btn-green" id="syncNowBtn" onclick="syncWalkinNow()">🔄 ซิงค์เดี๋ยวนี้</button>
         <button class="btn btn-ghost" id="autoSyncBtn" onclick="toggleAutoSync()">▶ เปิด Auto-sync (ทุก 1 นาที)</button>
+        <button class="btn btn-danger" onclick="deduplicateWalkins()" style="background:#dc2626;color:#fff;border-color:#dc2626;">🗑 ลบซ้ำ Walk-in</button>
         <span id="syncCountdown" style="font-size:0.82rem;color:#64748b;"></span>
       </div>
       <div id="walkinSyncStatus" style="margin-top:10px;"></div>
@@ -1283,13 +1284,16 @@ async function syncWalkinNow(){
     const {rows} = parseCSV(text);
     if(!rows.length) throw new Error('ไม่พบข้อมูลใน Sheet');
     const syncYear = await sbGetSetting('event_year') || '';
-    // โหลด id_card ของ walk-in ทุกคนในระบบ (ทุก event_year) เพื่อกัน duplicate
-    let existIds = new Set(), from = 0;
+    // โหลด id_card + ชื่อ-นามสกุล ของ walk-in ทุกคนในระบบ เพื่อกัน duplicate
+    let existKeys = new Set(), from = 0;
     while(true){
-      const r = await fetch(`${SB_URL}/rest/v1/participants?is_walkin=eq.true&select=id_card&limit=1000&offset=${from}`,{headers:H});
+      const r = await fetch(`${SB_URL}/rest/v1/participants?is_walkin=eq.true&select=id_card,first_name,last_name&limit=1000&offset=${from}`,{headers:H});
       const d = await r.json();
       if(!Array.isArray(d)||!d.length) break;
-      d.forEach(p=>{ if(p.id_card) existIds.add(p.id_card.replace(/\D/g,'')); });
+      d.forEach(p=>{
+        if(p.id_card) existKeys.add('id:'+p.id_card.replace(/\D/g,''));
+        if(p.first_name&&p.last_name) existKeys.add('name:'+(p.first_name+p.last_name).replace(/\s/g,'').toLowerCase());
+      });
       if(d.length<1000) break; from+=1000;
     }
     const headers = Object.keys(rows[0]);
@@ -1306,7 +1310,11 @@ async function syncWalkinNow(){
     if(!mapped.length && rows.length>0){
       throw new Error(`คอลัมน์ "ชื่อ" หรือ "นามสกุล" ไม่พบใน Sheet\nHeader ที่พบ: ${headers.slice(0,8).join(', ')}\nกรุณาตรวจสอบชื่อคอลัมน์ใน Sheet`);
     }
-    const toInsert = mapped.filter(r=>!r.id_card||!existIds.has((r.id_card||'').replace(/\D/g,'')));
+    const toInsert = mapped.filter(r=>{
+      if(r.id_card && existKeys.has('id:'+r.id_card.replace(/\D/g,''))) return false;
+      if(r.first_name && r.last_name && existKeys.has('name:'+(r.first_name+r.last_name).replace(/\s/g,'').toLowerCase())) return false;
+      return true;
+    });
     let ok=0, skip=mapped.length-toInsert.length;
     // แทรกทีละ 1 คน เพื่อให้คนที่มีปัญหาไม่ทำให้คนอื่นหาย
     for(const p of toInsert){
@@ -1329,6 +1337,56 @@ async function syncWalkinNow(){
     setStatus('walkinSyncStatus','err','❌ '+e.message);
   } finally {
     btn.disabled=false; btn.innerHTML='🔄 ซิงค์เดี๋ยวนี้';
+  }
+}
+
+async function deduplicateWalkins(){
+  if(!confirm('ลบ walk-in ที่ซ้ำกันออก?\n(เก็บ record ล่าสุด ลบที่เก่ากว่า)')) return;
+  setStatus('walkinSyncStatus','info','กำลังตรวจหาข้อมูลซ้ำ...');
+  try {
+    // โหลด walk-in ทั้งหมดพร้อม id เพื่อ dedup
+    let all = [], from = 0;
+    while(true){
+      const r = await fetch(`${SB_URL}/rest/v1/participants?is_walkin=eq.true&select=id,id_card,first_name,last_name&order=id.asc&limit=1000&offset=${from}`,{headers:H});
+      const d = await r.json();
+      if(!Array.isArray(d)||!d.length) break;
+      all = all.concat(d);
+      if(d.length<1000) break; from+=1000;
+    }
+    // จัดกลุ่มตาม key (id_card ถ้ามี, ไม่งั้นใช้ ชื่อ+นามสกุล)
+    const groups = new Map();
+    all.forEach(p=>{
+      let key;
+      if(p.id_card) key = 'id:'+p.id_card.replace(/\D/g,'');
+      else if(p.first_name&&p.last_name) key = 'name:'+(p.first_name+p.last_name).replace(/\s/g,'').toLowerCase();
+      else key = 'uid:'+p.id;
+      if(!groups.has(key)) groups.set(key,[]);
+      groups.get(key).push(p.id);
+    });
+    // รวบ id ที่ต้องลบ (ทุกตัวยกเว้น id สูงสุดในแต่ละกลุ่ม)
+    const toDelete = [];
+    groups.forEach(ids=>{
+      if(ids.length<=1) return;
+      const keep = Math.max(...ids);
+      ids.forEach(id=>{ if(id!==keep) toDelete.push(id); });
+    });
+    if(!toDelete.length){
+      setStatus('walkinSyncStatus','ok','✅ ไม่พบข้อมูลซ้ำ ทุกคนมีข้อมูลครั้งเดียว');
+      return;
+    }
+    // ลบเป็นชุด 100 คน
+    let deleted = 0;
+    for(let i=0;i<toDelete.length;i+=100){
+      const chunk = toDelete.slice(i,i+100);
+      const inList = chunk.join(',');
+      const r = await fetch(`${SB_URL}/rest/v1/participants?id=in.(${inList})`,{
+        method:'DELETE', headers:{...H,'Prefer':'return=minimal'}
+      });
+      if(r.ok||r.status===204) deleted+=chunk.length;
+    }
+    setStatus('walkinSyncStatus','ok',`✅ ลบซ้ำเสร็จ — ลบออก ${deleted} รายการ เหลือ ${all.length-deleted} คน`);
+  } catch(e) {
+    setStatus('walkinSyncStatus','err','❌ '+e.message);
   }
 }
 
