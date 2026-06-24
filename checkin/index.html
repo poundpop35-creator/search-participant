@@ -530,6 +530,11 @@
           if(r2.ok) participants=await r2.json();
         }
       }
+      // Fallback: walk-in ที่ import ก่อนแก้ bug (ไม่มี event_year)
+      if(!participants||participants.length===0){
+        const r3=await sbFetch(`/rest/v1/participants?event_year=is.null&is_walkin=eq.true&or=(id_card.eq.${encodeURIComponent(keyword)},passport.eq.${encodeURIComponent(keyword)})&select=id,prefix,first_name,last_name,tag,items,is_walkin,internal_external,participation_type,bag_received,bag_received_date,shirt_size,shirt_received,shirt_received_date,dept`,'GET');
+        if(r3.ok) participants=await r3.json();
+      }
       if(!participants||participants.length===0){
         if(day==='bag'){
           showModal('error','ไม่มีสิทธิ์','ท่านไม่มีสิทธิ์รับกระเป๋าก่อนวันงาน','',null);

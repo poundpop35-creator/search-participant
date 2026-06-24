@@ -1182,7 +1182,8 @@ async function doImport(mode){
         if(d.length<1000) break; from+=1000;
       }
     }
-    const mapped=csvRows.map(r=>({...getMapped(r), is_walkin: importType==='walkin'})).filter(r=>r.first_name||r.last_name);
+    const activeYear = await sbGetSetting('event_year') || '';
+    const mapped=csvRows.map(r=>({...getMapped(r), is_walkin: importType==='walkin', event_year: activeYear})).filter(r=>r.first_name||r.last_name);
     const BATCH=50;
     for(let i=0;i<mapped.length;i+=BATCH){
       setStatus('importStatus','info',`กำลังนำเข้า ${Math.min(i+BATCH,mapped.length).toLocaleString()}/${mapped.length.toLocaleString()}...`);
@@ -1289,10 +1290,11 @@ async function syncWalkinNow(){
       d.forEach(p=>{ if(p.id_card) existIds.add(p.id_card.replace(/\D/g,'')); });
       if(d.length<1000) break; from+=1000;
     }
+    const syncYear = await sbGetSetting('event_year') || '';
     const headers = Object.keys(rows[0]);
     const prevH = csvHeaders; csvHeaders = headers;
     const mapped = rows.map(r=>{
-      const obj = { is_walkin: true };
+      const obj = { is_walkin: true, event_year: syncYear };
       DB_FIELDS.forEach(f=>{
         const col = guessCol(f.key);
         if(col && r[col] !== undefined) obj[f.key] = r[col];
