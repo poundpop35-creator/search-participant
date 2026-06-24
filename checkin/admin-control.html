@@ -1303,6 +1303,9 @@ async function syncWalkinNow(){
       return obj;
     }).filter(r=>r.first_name||r.last_name);
     csvHeaders = prevH;
+    if(!mapped.length && rows.length>0){
+      throw new Error(`คอลัมน์ "ชื่อ" หรือ "นามสกุล" ไม่พบใน Sheet\nHeader ที่พบ: ${headers.slice(0,8).join(', ')}\nกรุณาตรวจสอบชื่อคอลัมน์ใน Sheet`);
+    }
     const toInsert = mapped.filter(r=>!r.id_card||!existIds.has((r.id_card||'').replace(/\D/g,'')));
     let ok=0, skip=mapped.length-toInsert.length;
     // แทรกทีละ 1 คน เพื่อให้คนที่มีปัญหาไม่ทำให้คนอื่นหาย
@@ -1319,7 +1322,9 @@ async function syncWalkinNow(){
       });
     }
     const now = new Date().toLocaleTimeString('th-TH',{timeZone:'Asia/Bangkok'});
-    setStatus('walkinSyncStatus','ok',`✅ ซิงค์สำเร็จ [${now}] — เพิ่ม <strong>${ok} คน</strong> ข้าม (ซ้ำ): ${skip} คน`);
+    const noNameCount = rows.length - mapped.length;
+    const noNameNote = noNameCount>0?` | ไม่มีชื่อ: ${noNameCount} แถว`:'';
+    setStatus('walkinSyncStatus','ok',`✅ ซิงค์สำเร็จ [${now}] — เพิ่ม <strong>${ok} คน</strong> ข้าม (ซ้ำ): ${skip} คน${noNameNote}`);
   } catch(e) {
     setStatus('walkinSyncStatus','err','❌ '+e.message);
   } finally {
