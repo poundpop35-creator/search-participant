@@ -1398,24 +1398,29 @@ async function deduplicateWalkins(){
 }
 
 async function deleteAllWalkins(){
-  if(!confirm('⚠️ ลบ Walk-in ทั้งหมดออกจากระบบ?\n\nข้อมูลการเช็กอิน (รับของ/เสื้อ) จะหายหมด\n\nพิมพ์ OK เพื่อยืนยัน')) return;
-  setStatus('walkinSyncStatus','info','กำลังลบ walk-in ทั้งหมด...');
+  if(!confirm('ลบ Walk-in ที่ยังไม่ได้สแกนออก?\n\n✅ คนที่รับของ/เสื้อไปแล้วจะยังอยู่\n🗑 ลบเฉพาะคนที่ยังไม่ได้สแกนเลย')) return;
+  setStatus('walkinSyncStatus','info','กำลังโหลด walk-in...');
   try{
-    let ids=[],from=0;
+    // โหลด walk-in ทั้งหมด พร้อมสถานะเช็กอิน
+    let all=[],from=0;
     while(true){
-      const r=await fetch(`${SB_URL}/rest/v1/participants?is_walkin=eq.true&select=id&limit=1000&offset=${from}`,{headers:H});
+      const r=await fetch(`${SB_URL}/rest/v1/participants?is_walkin=eq.true&select=id,bag_received,shirt_received&limit=1000&offset=${from}`,{headers:H});
       const d=await r.json();
       if(!Array.isArray(d)||!d.length) break;
-      ids=ids.concat(d.map(p=>p.id)); if(d.length<1000) break; from+=1000;
+      all=all.concat(d); if(d.length<1000) break; from+=1000;
     }
-    if(!ids.length){ setStatus('walkinSyncStatus','ok','✅ ไม่มี walk-in ในระบบแล้ว'); return; }
+    // ลบเฉพาะคนที่ยังไม่ได้รับของและไม่ได้รับเสื้อ
+    const toDelete=all.filter(p=>!p.bag_received&&!p.shirt_received).map(p=>p.id);
+    const kept=all.length-toDelete.length;
+    if(!toDelete.length){ setStatus('walkinSyncStatus','ok',`✅ ทุกคน (${all.length}) สแกนแล้วหมด ไม่มีอะไรต้องลบ`); return; }
+    setStatus('walkinSyncStatus','info',`กำลังลบ ${toDelete.length} คน (คงไว้ ${kept} คนที่สแกนแล้ว)...`);
     let deleted=0;
-    for(let i=0;i<ids.length;i+=100){
-      const chunk=ids.slice(i,i+100);
+    for(let i=0;i<toDelete.length;i+=100){
+      const chunk=toDelete.slice(i,i+100);
       const r=await fetch(`${SB_URL}/rest/v1/participants?id=in.(${chunk.join(',')})`,{method:'DELETE',headers:{...H,'Prefer':'return=minimal'}});
       if(r.ok||r.status===204) deleted+=chunk.length;
     }
-    setStatus('walkinSyncStatus','ok',`✅ ลบ walk-in ทั้งหมดแล้ว ${deleted} คน — กด ซิงค์เดี๋ยวนี้ เพื่อ sync ใหม่`);
+    setStatus('walkinSyncStatus','ok',`✅ ลบแล้ว ${deleted} คน | คงไว้ ${kept} คนที่สแกนแล้ว — กด ซิงค์เดี๋ยวนี้ เพื่อ sync ใหม่`);
   }catch(e){ setStatus('walkinSyncStatus','err','❌ '+e.message); }
 }
 
