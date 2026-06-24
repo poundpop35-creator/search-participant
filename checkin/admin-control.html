@@ -395,22 +395,9 @@
         <div id="presenterSheetStatus" style="margin-top:6px;font-size:0.82rem;"></div>
       </div>
 
-      <div class="field" style="margin-bottom:4px;">
-        <label>🚶 URL Walk-in <span style="color:#16a34a;font-weight:600;">(รองรับ Auto-sync)</span></label>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;">
-          <input id="walkinUrl" type="url" style="flex:1;min-width:0;" placeholder="https://docs.google.com/spreadsheets/d/e/.../pub?output=csv&gid=...">
-          <button class="btn btn-ghost btn-sm" onclick="saveWalkinUrl()">💾 บันทึก</button>
-          <button class="btn btn-primary btn-sm" onclick="importFromUrl('walkin','walkinUrl')">📥 นำเข้า</button>
-        </div>
+      <div style="background:#f1f5f9;border-radius:8px;padding:12px;color:#64748b;font-size:0.88rem;">
+        ℹ️ Walk-in Sync จัดการผ่าน <strong>Google Apps Script</strong> โดยตรง
       </div>
-      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:8px;">
-        <button class="btn btn-green" id="syncNowBtn" onclick="syncWalkinNow()">🔄 ซิงค์เดี๋ยวนี้</button>
-        <button class="btn btn-ghost" id="autoSyncBtn" onclick="toggleAutoSync()">▶ เปิด Auto-sync (ทุก 1 นาที)</button>
-        <button class="btn btn-danger" onclick="deduplicateWalkins()" style="background:#dc2626;color:#fff;border-color:#dc2626;">🗑 ลบซ้ำ Walk-in</button>
-        <button class="btn btn-danger" onclick="deleteAllWalkins()" style="background:#7f1d1d;color:#fff;border-color:#7f1d1d;">💣 ลบ Walk-in ทั้งหมด</button>
-        <span id="syncCountdown" style="font-size:0.82rem;color:#64748b;"></span>
-      </div>
-      <div id="walkinSyncStatus" style="margin-top:10px;"></div>
 
       <!-- hidden elements used by fetchSheet() internals -->
       <input id="sheetUrl" type="hidden">
@@ -609,7 +596,6 @@ let importType = 'pre';
 let csvHeaders = [], csvRows = [];
 let staffList = [], editIdx = null;
 let vipList = [], exemptList = [], networkList = [];
-let _syncTimer = null, _syncCountdown = null;
 
 // ─── AUTH ───
 const _aRole=sessionStorage.getItem('dmsc_role');
@@ -867,11 +853,11 @@ async function createNewEvent(){
   try {
     await sbSetSetting('event_name', name);
     await sbSetSetting('event_year', year);
-    await sbSetSetting('walkin_sheet_url', '');
+    
     await sbSetSetting('pre_sheet_url', '');
     await sbSetSetting('presenter_sheet_url', '');
     await sbAddToYearsList(year); // เพิ่มปีนี้ใน list ถาวร
-    ['walkinUrl','preSheetUrl','presenterSheetUrl'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+    ['preSheetUrl','presenterSheetUrl'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
     setStatus('newEventStatus','ok',`✅ สร้างงาน "${name} (${year})" สำเร็จ — พร้อมนำเข้าข้อมูลใหม่`);
     loadCurrentEvent();
     loadYears();
@@ -1014,14 +1000,12 @@ function downloadTemplate() {
 }
 
 async function loadImportTab(){
-  const [preUrl, presenterUrl, walkinUrl] = await Promise.all([
+  const [preUrl, presenterUrl] = await Promise.all([
     sbGetSetting('pre_sheet_url'),
     sbGetSetting('presenter_sheet_url'),
-    sbGetSetting('walkin_sheet_url'),
   ]);
   if(preUrl) document.getElementById('preSheetUrl').value = preUrl;
   if(presenterUrl) document.getElementById('presenterSheetUrl').value = presenterUrl;
-  if(walkinUrl) document.getElementById('walkinUrl').value = walkinUrl;
 }
 
 setImportType('pre');
@@ -1264,188 +1248,6 @@ async function importFromUrl(type, inputId) {
   }
 }
 
-async function saveWalkinUrl(){
-  const url = document.getElementById('walkinUrl').value.trim();
-  if(!url){ setStatus('walkinSyncStatus','warn','กรุณาใส่ URL ก่อน'); return; }
-  await sbSetSetting('walkin_sheet_url', url);
-  setStatus('walkinSyncStatus','ok','✅ บันทึก URL แล้ว');
-}
-
-async function syncWalkinNow(){
-  const btn = document.getElementById('syncNowBtn');
-  btn.disabled = true; btn.innerHTML = '<span class="sp"></span>กำลังซิงค์...';
-  setStatus('walkinSyncStatus','info','กำลังดึงข้อมูล Walk-in...');
-  try {
-    const url = document.getElementById('walkinUrl').value.trim()
-      || await sbGetSetting('walkin_sheet_url');
-    if(!url) throw new Error('ยังไม่ได้บันทึก URL — กรอก URL Walk-in Sheet ก่อน');
-    const res = await fetch(url);
-    if(!res.ok) throw new Error(`HTTP ${res.status}`);
-    const text = await res.text();
-    const {rows} = parseCSV(text);
-    if(!rows.length) throw new Error('ไม่พบข้อมูลใน Sheet');
-    const syncYear = await sbGetSetting('event_year') || '';
-    // โหลด id_card + ชื่อ-นามสกุล ของ walk-in ทุกคนในระบบ เพื่อกัน duplicate
-    let existKeys = new Set(), from = 0;
-    while(true){
-      const r = await fetch(`${SB_URL}/rest/v1/participants?is_walkin=eq.true&select=id_card,first_name,last_name&limit=1000&offset=${from}`,{headers:H});
-      const d = await r.json();
-      if(!Array.isArray(d)||!d.length) break;
-      d.forEach(p=>{
-        const fn=(p.first_name||'').trim(), ln=(p.last_name||'').trim(), id=(p.id_card||'').replace(/\D/g,'');
-        if(id) existKeys.add('id:'+id);
-        if(fn||ln) existKeys.add('name:'+(fn+ln).replace(/\s/g,'').toLowerCase());
-      });
-      if(d.length<1000) break; from+=1000;
-    }
-    const headers = Object.keys(rows[0]);
-    const prevH = csvHeaders; csvHeaders = headers;
-    const mapped = rows.map(r=>{
-      const obj = { is_walkin: true, event_year: syncYear };
-      DB_FIELDS.forEach(f=>{
-        const col = guessCol(f.key);
-        if(col && r[col] !== undefined) obj[f.key] = r[col];
-      });
-      return obj;
-    }).filter(r=>r.first_name||r.last_name);
-    csvHeaders = prevH;
-    if(!mapped.length && rows.length>0){
-      throw new Error(`คอลัมน์ "ชื่อ" หรือ "นามสกุล" ไม่พบใน Sheet\nHeader ที่พบ: ${headers.slice(0,8).join(', ')}\nกรุณาตรวจสอบชื่อคอลัมน์ใน Sheet`);
-    }
-    const toInsert = mapped.filter(r=>{
-      // dedup หลักด้วยบัตรประชาชน
-      const id=(r.id_card||'').replace(/\D/g,'');
-      if(id) return !existKeys.has('id:'+id);
-      // คนที่ไม่มีบัตรประชาชน — dedup ด้วยชื่อ+นามสกุล
-      const fn=(r.first_name||'').trim(), ln=(r.last_name||'').trim();
-      if(fn||ln) return !existKeys.has('name:'+(fn+ln).replace(/\s/g,'').toLowerCase());
-      return false; // ไม่มีทั้งบัตรและชื่อ — ข้ามไป
-    });
-    let ok=0, skip=mapped.length-toInsert.length;
-    // แทรกทีละ 1 คน เพื่อให้คนที่มีปัญหาไม่ทำให้คนอื่นหาย
-    for(const p of toInsert){
-      const r=await fetch(`${SB_URL}/rest/v1/participants`,{
-        method:'POST', headers:{...H,'Prefer':'return=minimal'}, body:JSON.stringify(p)
-      });
-      if(r.ok||r.status===201) ok++;
-    }
-    // แก้ event_year ของ walk-in เก่าที่ sync รอบก่อน (null year) ให้ตรงปีปัจจุบัน
-    if(syncYear){
-      await fetch(`${SB_URL}/rest/v1/participants?is_walkin=eq.true&event_year=is.null`,{
-        method:'PATCH', headers:{...H,'Prefer':'return=minimal'}, body:JSON.stringify({event_year:syncYear})
-      });
-    }
-    const now = new Date().toLocaleTimeString('th-TH',{timeZone:'Asia/Bangkok'});
-    const noNameCount = rows.length - mapped.length;
-    const noNameNote = noNameCount>0?` | ไม่มีชื่อ: ${noNameCount} แถว`:'';
-    setStatus('walkinSyncStatus','ok',`✅ ซิงค์สำเร็จ [${now}] — เพิ่ม <strong>${ok} คน</strong> ข้าม (ซ้ำ): ${skip} คน${noNameNote}`);
-  } catch(e) {
-    setStatus('walkinSyncStatus','err','❌ '+e.message);
-  } finally {
-    btn.disabled=false; btn.innerHTML='🔄 ซิงค์เดี๋ยวนี้';
-  }
-}
-
-async function deduplicateWalkins(){
-  if(!confirm('ลบ walk-in ที่ซ้ำกันออก?\n(เก็บ record ล่าสุด ลบที่เก่ากว่า)')) return;
-  setStatus('walkinSyncStatus','info','กำลังตรวจหาข้อมูลซ้ำ...');
-  try {
-    // โหลด walk-in ทั้งหมดพร้อม id เพื่อ dedup
-    let all = [], from = 0;
-    while(true){
-      const r = await fetch(`${SB_URL}/rest/v1/participants?is_walkin=eq.true&select=id,id_card,first_name,last_name&order=id.asc&limit=1000&offset=${from}`,{headers:H});
-      const d = await r.json();
-      if(!Array.isArray(d)||!d.length) break;
-      all = all.concat(d);
-      if(d.length<1000) break; from+=1000;
-    }
-    // จัดกลุ่มตาม key (id_card ถ้ามี, ไม่งั้นใช้ ชื่อ+นามสกุล)
-    const groups = new Map();
-    all.forEach(p=>{
-      let key;
-      const fn=(p.first_name||'').trim(), ln=(p.last_name||'').trim(), id=(p.id_card||'').replace(/\D/g,'');
-      if(id) key='id:'+id;
-      else if(fn||ln) key='name:'+(fn+ln).replace(/\s/g,'').toLowerCase();
-      else key='uid:'+p.id;
-      if(!groups.has(key)) groups.set(key,[]);
-      groups.get(key).push(p.id);
-    });
-    // รวบ id ที่ต้องลบ (ทุกตัวยกเว้น id สูงสุดในแต่ละกลุ่ม)
-    const toDelete = [];
-    groups.forEach(ids=>{
-      if(ids.length<=1) return;
-      const keep = Math.max(...ids);
-      ids.forEach(id=>{ if(id!==keep) toDelete.push(id); });
-    });
-    if(!toDelete.length){
-      setStatus('walkinSyncStatus','ok','✅ ไม่พบข้อมูลซ้ำ ทุกคนมีข้อมูลครั้งเดียว');
-      return;
-    }
-    // ลบเป็นชุด 100 คน
-    let deleted = 0;
-    for(let i=0;i<toDelete.length;i+=100){
-      const chunk = toDelete.slice(i,i+100);
-      const inList = chunk.join(',');
-      const r = await fetch(`${SB_URL}/rest/v1/participants?id=in.(${inList})`,{
-        method:'DELETE', headers:{...H,'Prefer':'return=minimal'}
-      });
-      if(r.ok||r.status===204) deleted+=chunk.length;
-    }
-    setStatus('walkinSyncStatus','ok',`✅ ลบซ้ำเสร็จ — ลบออก ${deleted} รายการ เหลือ ${all.length-deleted} คน`);
-  } catch(e) {
-    setStatus('walkinSyncStatus','err','❌ '+e.message);
-  }
-}
-
-async function deleteAllWalkins(){
-  if(!confirm('ลบ Walk-in ที่ยังไม่ได้สแกนออก?\n\n✅ คนที่รับของ/เสื้อไปแล้วจะยังอยู่\n🗑 ลบเฉพาะคนที่ยังไม่ได้สแกนเลย')) return;
-  setStatus('walkinSyncStatus','info','กำลังโหลด walk-in...');
-  try{
-    // โหลด walk-in ทั้งหมด พร้อมสถานะเช็กอิน
-    let all=[],from=0;
-    while(true){
-      const r=await fetch(`${SB_URL}/rest/v1/participants?is_walkin=eq.true&select=id,bag_received,shirt_received&limit=1000&offset=${from}`,{headers:H});
-      const d=await r.json();
-      if(!Array.isArray(d)||!d.length) break;
-      all=all.concat(d); if(d.length<1000) break; from+=1000;
-    }
-    // ลบเฉพาะคนที่ยังไม่ได้รับของและไม่ได้รับเสื้อ
-    const toDelete=all.filter(p=>!p.bag_received&&!p.shirt_received).map(p=>p.id);
-    const kept=all.length-toDelete.length;
-    if(!toDelete.length){ setStatus('walkinSyncStatus','ok',`✅ ทุกคน (${all.length}) สแกนแล้วหมด ไม่มีอะไรต้องลบ`); return; }
-    setStatus('walkinSyncStatus','info',`กำลังลบ ${toDelete.length} คน (คงไว้ ${kept} คนที่สแกนแล้ว)...`);
-    let deleted=0;
-    for(let i=0;i<toDelete.length;i+=100){
-      const chunk=toDelete.slice(i,i+100);
-      const r=await fetch(`${SB_URL}/rest/v1/participants?id=in.(${chunk.join(',')})`,{method:'DELETE',headers:{...H,'Prefer':'return=minimal'}});
-      if(r.ok||r.status===204) deleted+=chunk.length;
-    }
-    setStatus('walkinSyncStatus','ok',`✅ ลบแล้ว ${deleted} คน | คงไว้ ${kept} คนที่สแกนแล้ว — กด ซิงค์เดี๋ยวนี้ เพื่อ sync ใหม่`);
-  }catch(e){ setStatus('walkinSyncStatus','err','❌ '+e.message); }
-}
-
-function toggleAutoSync(){
-  const btn = document.getElementById('autoSyncBtn');
-  if(_syncTimer){
-    clearInterval(_syncTimer); clearInterval(_syncCountdown);
-    _syncTimer=null; _syncCountdown=null;
-    btn.textContent='▶ เปิด Auto-sync (ทุก 1 นาที)';
-    btn.style.background=''; btn.style.color=''; btn.style.borderColor='';
-    document.getElementById('syncCountdown').textContent='';
-  } else {
-    syncWalkinNow();
-    let secs=60;
-    _syncCountdown=setInterval(()=>{
-      secs--;
-      if(secs<=0){ secs=60; syncWalkinNow(); }
-      const m=Math.floor(secs/60), s=secs%60;
-      document.getElementById('syncCountdown').textContent=`ซิงค์ถัดไป: ${m}:${String(s).padStart(2,'0')}`;
-    },1000);
-    _syncTimer=true;
-    btn.textContent='⏹ ปิด Auto-sync';
-    btn.style.background='#dc2626'; btn.style.color='white'; btn.style.borderColor='#dc2626';
-  }
-}
 
 // ══════════════════════════════════════════
 // ─── STAFF MANAGEMENT ───
