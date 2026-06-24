@@ -1282,15 +1282,15 @@ async function syncWalkinNow(){
     const text = await res.text();
     const {rows} = parseCSV(text);
     if(!rows.length) throw new Error('ไม่พบข้อมูลใน Sheet');
+    const syncYear = await sbGetSetting('event_year') || '';
     let existIds = new Set(), from = 0;
     while(true){
-      const r = await fetch(`${SB_URL}/rest/v1/participants?is_walkin=eq.true&select=id_card&limit=1000&offset=${from}`,{headers:H});
+      const r = await fetch(`${SB_URL}/rest/v1/participants?is_walkin=eq.true&event_year=eq.${encodeURIComponent(syncYear)}&select=id_card&limit=1000&offset=${from}`,{headers:H});
       const d = await r.json();
       if(!Array.isArray(d)||!d.length) break;
       d.forEach(p=>{ if(p.id_card) existIds.add(p.id_card.replace(/\D/g,'')); });
       if(d.length<1000) break; from+=1000;
     }
-    const syncYear = await sbGetSetting('event_year') || '';
     const headers = Object.keys(rows[0]);
     const prevH = csvHeaders; csvHeaders = headers;
     const mapped = rows.map(r=>{

@@ -518,6 +518,7 @@ async function ensureNames() {
 async function doSearch() {
   const q = document.getElementById('searchInput').value.trim();
   document.getElementById('resultsWrap').innerHTML = '<div class="loading-msg">กำลังโหลดข้อมูล...</div>';
+  allNames = null; // clear cache เพื่อดึงข้อมูลสดทุกครั้ง
   try {
     await ensureNames();
     const total = allNames.length;
