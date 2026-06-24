@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Walk-in Cleanup & Safe Sync</title>
+<style>
+body{font-family:sans-serif;max-width:600px;margin:40px auto;padding:20px;background:#f8fafc}
+h2{color:#1e293b;margin-bottom:4px}
+p{color:#64748b;font-size:0.9rem;margin-top:4px}
+button{width:100%;padding:14px;font-size:1rem;border:none;border-radius:10px;cursor:pointer;margin-bottom:12px;font-weight:600}
+.red{background:#dc2626;color:#fff}
+.green{background:#16a34a;color:#fff}
+.gray{background:#e2e8f0;color:#334155}
+button:disabled{opacity:.5;cursor:not-allowed}
+#log{background:#1e293b;color:#a3e635;padding:16px;border-radius:10px;font-size:0.85rem;font-family:monospace;min-height:80px;white-space:pre-wrap;margin-top:12px;display:none}
+.card{background:#fff;border-radius:12px;padding:20px;margin-bottom:16px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+</style>
+</head>
+<body>
+<h2>🛠 Walk-in Cleanup Tool</h2>
+<p>ใช้หน้านี้แทน admin-control จนกว่า Netlify จะ deploy ได้ใหม่</p>
+
+<div class="card">
+  <strong>ขั้นตอนที่ 1 — ลบซ้ำที่มีอยู่</strong>
+  <p>ลบ walk-in ที่ซ้ำกันออก เหลือไว้คนละ 1 record</p>
+  <button class="red" onclick="dedup()">🗑 ลบซ้ำ Walk-in ทันที</button>
+</div>
+
+<div class="card">
+  <strong>ขั้นตอนที่ 2 — Sync ใหม่ (ปลอดภัย)</strong>
+  <p>ดึงข้อมูลจาก Google Sheet โดยไม่สร้างซ้ำ</p>
+  <input id="sheetUrl" type="text" placeholder="URL Google Sheet (CSV)" style="width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:8px;font-size:0.9rem;box-sizing:border-box;margin-bottom:10px">
+  <button class="green" onclick="safeSync()">🔄 Sync Walk-in (ปลอดภัย)</button>
+</div>
+
+<div id="log"></div>
+
+<script>
+const SB_URL="https://gvxytnjfyepqhbkmcjms.supabase.co";
+const SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2eHl0bmpmeWVwcWhia21jam1zIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3OTQzMTY0MCwiZXhwIjoyMDk1MDA3NjQwfQ.Hrfc0erkIatyVbmsOW2SU7piH3L65qbS2kdi2eYzbQk";
+const H={'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'};
+
+function log(msg){
+  const el=document.getElementById('log');
+  el.style.display='block';
+  el.textContent+=msg+'\n';
+  el.scrollTop=el.scrollHeight;
+}
+function clearLog(){document.getElementById('log').textContent='';document.getElementById('log').style.display='block';}
+
+async function loadWalkins(){
+  let all=[],from=0;
+  while(true){
+    const r=await fetch(`${SB_URL}/rest/v1/participants?is_walkin=eq.true&select=id,id_card,first_name,last_name&order=id.asc&limit=1000&offset=${from}`,{headers:H});
+    const d=await r.json();
+    if(!Array.isArray(d)||!d.length) break;
+    all=all.concat(d); if(d.length<1000) break; from+=1000;
+  }
+  return all;
+}
+
+async function dedup(){
+  if(!confirm('ลบ walk-in ที่ซ้ำกัน?\n(เก็บ record ล่าสุด ลบที่เก่ากว่า)')) return;
+  clearLog();
+  document.querySelectorAll('button').forEach(b=>b.disabled=true);
+  try{
+    log('กำลังโหลด walk-in ทั้งหมด...');
+    const all=await loadWalkins();
+    log(`โหลดมา ${all.length} คน`);
+    const groups=new Map();
+    all.forEach(p=>{
+      let key;
+      if(p.id_card) key='id:'+p.id_card.replace(/\D/g,'');
+      else if(p.first_name&&p.last_name) key='name:'+(p.first_name+p.last_name).replace(/\s/g,'').toLowerCase();
+      else key='uid:'+p.id;
+      if(!groups.has(key)) groups.set(key,[]);
+      groups.get(key).push(p.id);
+    });
+    const toDelete=[];
+    groups.forEach(ids=>{
+      if(ids.length<=1) return;
+      const keep=Math.max(...ids);
+      ids.forEach(id=>{ if(id!==keep) toDelete.push(id); });
+    });
+    if(!toDelete.length){ log('✅ ไม่พบซ้ำ ทุกคนมีข้อมูลครั้งเดียวแล้ว'); return; }
+    log(`พบซ้ำ ${toDelete.length} รายการ กำลังลบ...`);
+    let deleted=0;
+    for(let i=0;i<toDelete.length;i+=100){
+      const chunk=toDelete.slice(i,i+100);
+      const r=await fetch(`${SB_URL}/rest/v1/participants?id=in.(${chunk.join(',')})`,{method:'DELETE',headers:{...H,'Prefer':'return=minimal'}});
+      if(r.ok||r.status===204) deleted+=chunk.length;
+      log(`ลบแล้ว ${deleted}/${toDelete.length}...`);
+    }
+    log(`✅ เสร็จ! ลบออก ${deleted} คน เหลือ ${all.length-deleted} คน`);
+  }catch(e){ log('❌ Error: '+e.message); }
+  finally{ document.querySelectorAll('button').forEach(b=>b.disabled=false); }
+}
+
+function parseCSV(text){
+  const lines=text.split(/\r?\n/).filter(l=>l.trim());
+  if(!lines.length) return {rows:[]};
+  const parseRow=l=>{const cols=[];let cur='',inQ=false;for(const c of l){if(c==='"'){inQ=!inQ;}else if(c===','&&!inQ){cols.push(cur.trim());cur='';}else cur+=c;}cols.push(cur.trim());return cols;};
+  const headers=parseRow(lines[0]);
+  const rows=lines.slice(1).map(l=>{const vals=parseRow(l);const obj={};headers.forEach((h,i)=>obj[h]=vals[i]||'');return obj;});
+  return {headers,rows};
+}
+
+function guessName(headers){
+  const first=headers.find(h=>/^(ชื่อ|first.?name|firstname)/i.test(h.trim()));
+  const last=headers.find(h=>/^(นามสกุล|last.?name|lastname|surname)/i.test(h.trim()));
+  return {first,last};
+}
+
+async function safeSync(){
+  clearLog();
+  document.querySelectorAll('button').forEach(b=>b.disabled=true);
+  try{
+    let url=document.getElementById('sheetUrl').value.trim();
+    if(!url){
+      log('กำลังดึง URL จาก settings...');
+      const rs=await fetch(`${SB_URL}/rest/v1/app_settings?key=eq.walkin_sheet_url&select=value`,{headers:H});
+      const ds=await rs.json();
+      url=ds[0]?.value||'';
+    }
+    if(!url) throw new Error('ไม่พบ URL Sheet กรุณากรอก URL ในช่องด้านบน');
+    log('กำลังดึงข้อมูลจาก Sheet...');
+    const res=await fetch(url);
+    if(!res.ok) throw new Error(`HTTP ${res.status}`);
+    const text=await res.text();
+    const {headers,rows}=parseCSV(text);
+    log(`Sheet มี ${rows.length} แถว`);
+    const {first:firstCol,last:lastCol}=guessName(headers||[]);
+    if(!firstCol||!lastCol) throw new Error(`หาคอลัมน์ชื่อ-นามสกุลไม่เจอ\nHeaders: ${(headers||[]).slice(0,8).join(', ')}`);
+    log(`ใช้คอลัมน์: "${firstCol}" และ "${lastCol}"`);
+
+    // โหลด setting event_year
+    const rsy=await fetch(`${SB_URL}/rest/v1/app_settings?key=eq.event_year&select=value`,{headers:H});
+    const dsy=await rsy.json();
+    const syncYear=dsy[0]?.value||'';
+
+    // โหลด existing walk-ins
+    log('กำลังโหลด walk-in ในระบบเพื่อเช็คซ้ำ...');
+    const existing=await loadWalkins();
+    log(`มีในระบบแล้ว ${existing.length} คน`);
+    const existKeys=new Set();
+    existing.forEach(p=>{
+      if(p.id_card) existKeys.add('id:'+p.id_card.replace(/\D/g,''));
+      if(p.first_name&&p.last_name) existKeys.add('name:'+(p.first_name+p.last_name).replace(/\s/g,'').toLowerCase());
+    });
+
+    // หา id_card column
+    const idCol=headers.find(h=>/บัตร|id.?card|citizen|national/i.test(h));
+
+    const toInsert=rows.filter(r=>{
+      const fn=(r[firstCol]||'').trim();
+      const ln=(r[lastCol]||'').trim();
+      if(!fn&&!ln) return false;
+      const idRaw=idCol?r[idCol]||'':'';
+      const id=idRaw.replace(/\D/g,'');
+      if(id&&existKeys.has('id:'+id)) return false;
+      if(fn&&ln&&existKeys.has('name:'+(fn+ln).replace(/\s/g,'').toLowerCase())) return false;
+      return true;
+    }).map(r=>{
+      const fn=(r[firstCol]||'').trim();
+      const ln=(r[lastCol]||'').trim();
+      const idRaw=idCol?r[idCol]||'':'';
+      const obj={is_walkin:true,first_name:fn,last_name:ln};
+      if(syncYear) obj.event_year=syncYear;
+      if(idRaw.trim()) obj.id_card=idRaw.trim();
+      return obj;
+    });
+
+    log(`ต้องเพิ่ม ${toInsert.length} คนใหม่ (ข้าม ${rows.length-toInsert.length} ซ้ำ)`);
+    let ok=0;
+    for(const p of toInsert){
+      const r=await fetch(`${SB_URL}/rest/v1/participants`,{method:'POST',headers:{...H,'Prefer':'return=minimal'},body:JSON.stringify(p)});
+      if(r.ok||r.status===201) ok++;
+    }
+    log(`✅ เสร็จ! เพิ่ม ${ok} คน ข้าม ${toInsert.length-ok} คน (error)`);
+  }catch(e){ log('❌ Error: '+e.message); }
+  finally{ document.querySelectorAll('button').forEach(b=>b.disabled=false); }
+}
+
+// โหลด URL จาก settings อัตโนมัติ
+(async()=>{
+  try{
+    const rs=await fetch(`${SB_URL}/rest/v1/app_settings?key=eq.walkin_sheet_url&select=value`,{headers:H});
+    const ds=await rs.json();
+    if(ds[0]?.value) document.getElementById('sheetUrl').value=ds[0].value;
+  }catch(e){}
+})();
+</script>
+</body>
+</html>
