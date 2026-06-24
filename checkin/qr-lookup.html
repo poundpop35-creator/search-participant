@@ -493,17 +493,19 @@ async function ensureNames() {
     data = data.concat(d);
     offset += 1000;
   }
-  // เพิ่ม walk-in ที่ import ก่อนแก้ bug (ไม่มี event_year)
+  // เพิ่ม walk-in ที่ event_year ไม่ตรง (null, ปีผิด, หรือ empty) — ไม่จำกัด event_year
+  const existWiIds = new Set(data.filter(p=>p.is_walkin).map(p=>(p.id_card||'').replace(/\D/g,'')||`_id_${p.id}`));
   let wiOffset = 0;
   while(true) {
     const rw = await fetch(
-      `${SB_URL}/rest/v1/participants?event_year=is.null&is_walkin=eq.true&select=id,prefix,first_name,last_name,id_card,dept,ext_dept,internal_external,is_walkin,participation_type&limit=1000&offset=${wiOffset}&order=id.asc`,
+      `${SB_URL}/rest/v1/participants?is_walkin=eq.true&select=id,prefix,first_name,last_name,id_card,dept,ext_dept,internal_external,is_walkin,participation_type&limit=1000&offset=${wiOffset}&order=id.asc`,
       { headers }
     );
     if (!rw.ok) break;
     const dw = await rw.json();
     if (!Array.isArray(dw) || !dw.length) break;
-    data = data.concat(dw);
+    // เพิ่มเฉพาะที่ยังไม่อยู่ใน data (กัน duplicate)
+    dw.forEach(p=>{ const k=(p.id_card||'').replace(/\D/g,'')||`_id_${p.id}`; if(!existWiIds.has(k)){existWiIds.add(k);data.push(p);} });
     wiOffset += 1000;
   }
   // Deduplicate by id_card — prefer pre-reg (is_walkin=false) over walk-in when same person
