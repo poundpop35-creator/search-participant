@@ -514,7 +514,42 @@ async function ensureNames() {
 
 async function doSearch() {
   const q = document.getElementById('searchInput').value.trim();
-  if (q.length < 1) return;
+  if (q.length < 1) {
+    const H = { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY };
+    const yr = encodeURIComponent(activeYear);
+    document.getElementById('resultsWrap').innerHTML = '<div class="loading-msg">กำลังนับจำนวน...</div>';
+    try {
+      const [wiRes, ciRes] = await Promise.all([
+        fetch(`${SB_URL}/rest/v1/participants?is_walkin=eq.true&event_year=eq.${yr}&select=id&limit=1`, { headers: { ...H, 'Prefer': 'count=exact' } }),
+        fetch(`${SB_URL}/rest/v1/participants?is_walkin=eq.false&event_year=eq.${yr}&select=id&limit=1`, { headers: { ...H, 'Prefer': 'count=exact' } })
+      ]);
+      const wiCnt = parseInt((wiRes.headers.get('content-range')||'0/0').split('/')[1]) || 0;
+      const ciCnt = parseInt((ciRes.headers.get('content-range')||'0/0').split('/')[1]) || 0;
+      const total = ciCnt + wiCnt;
+      document.getElementById('resultsWrap').innerHTML = `
+        <div style="background:linear-gradient(135deg,#eff6ff,#e8f0fe);border:1.5px solid #bfdbfe;border-radius:14px;padding:16px 18px;margin-top:6px;">
+          <div style="font-size:0.82rem;color:#1e40af;font-weight:700;margin-bottom:12px;">📊 จำนวนผู้ลงทะเบียนทั้งหมด</div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <div style="flex:1;min-width:90px;background:white;border-radius:10px;padding:12px 14px;text-align:center;border:1.5px solid #bfdbfe;">
+              <div style="font-size:1.6rem;font-weight:800;color:#0d2b6b;">${total.toLocaleString()}</div>
+              <div style="font-size:0.75rem;color:#64748b;margin-top:2px;font-weight:600;">รวมทั้งหมด</div>
+            </div>
+            <div style="flex:1;min-width:90px;background:white;border-radius:10px;padding:12px 14px;text-align:center;border:1.5px solid #c7f7e8;">
+              <div style="font-size:1.6rem;font-weight:800;color:#0f766e;">${ciCnt.toLocaleString()}</div>
+              <div style="font-size:0.75rem;color:#64748b;margin-top:2px;font-weight:600;">ลงทะเบียนล่วงหน้า</div>
+            </div>
+            <div style="flex:1;min-width:90px;background:white;border-radius:10px;padding:12px 14px;text-align:center;border:1.5px solid #fed7aa;">
+              <div style="font-size:1.6rem;font-weight:800;color:#c2410c;">${wiCnt.toLocaleString()}</div>
+              <div style="font-size:0.75rem;color:#64748b;margin-top:2px;font-weight:600;">Walk-in</div>
+            </div>
+          </div>
+          <div style="font-size:0.74rem;color:#64748b;margin-top:10px;text-align:center;">พิมพ์ชื่อหรือนามสกุลเพื่อค้นหาบุคคล</div>
+        </div>`;
+    } catch(e) {
+      document.getElementById('resultsWrap').innerHTML = `<div class="no-result" style="color:#dc2626;font-size:0.78rem;">❌ ${e.message}</div>`;
+    }
+    return;
+  }
   document.getElementById('resultsWrap').innerHTML = '<div class="loading-msg">กำลังโหลดข้อมูล...</div>';
   try {
     const H = { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY };
