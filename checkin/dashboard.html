@@ -861,29 +861,6 @@ async function loadAll(){
       province:(p.province||'').trim()||(p.is_walkin===true&&isIn?'กรมวิทยาศาสตร์การแพทย์':'')};
   });
 
-  // Add virtual rows for VIP/exempt dept members (เช็คอินโดย admin ทุกวัน)
-  const allExemptDepts=[...VIP_DEPTS,...EXEMPT_DEPTS];
-  if(allExemptDepts.length>0){
-    try{
-      const orFilter=allExemptDepts.map(d=>`dept.eq.${encodeURIComponent(d)}`).join(',');
-      const exemptPeople=await fetchAll(`/rest/v1/participants?event_year=eq.${yr}&or=(${orFilter})&select=id,prefix,first_name,last_name,dept,tag,participation_type,internal_external,province&order=last_name.asc`);
-      const checkedIds=new Set(allData.map(r=>r.participantId));
-      exemptPeople.forEach(p=>{
-        if(checkedIds.has(p.id)) return;
-        const exemptType=VIP_DEPTS.has(p.dept)?'vip':'staff';
-        const base={name:buildName(p),dept:p.dept||'-',isIn:true,tag:p.tag||'-',items:'',
-          pt:p.participation_type||'-',isWalkin:false,
-          bagReceived:false,bagDate:null,bagTime:null,
-          shirtSize:'',shirtReceived:false,shirtDate:null,shirtTime:null,
-          province:(p.province||'').trim()||'กรุงเทพมหานคร',isVIPExempt:true,exemptType};
-        [1,2,3].forEach(day=>{
-          const t=new Date(`${DAY_ISO[day]}T06:00:00+07:00`).toISOString();
-          allData.push({...base,id:`exempt_${p.id}_d${day}`,participantId:p.id,day,time:t,scannedBy:'admin'});
-        });
-      });
-    }catch(e){}
-  }
-
   deptRaw=[...allData];
 
   // Build dropdowns
