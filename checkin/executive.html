@@ -1260,7 +1260,7 @@ async function loadData() {
   try {
     const [rows, planRows] = await Promise.all([
       fetchAll(`/rest/v1/checkins?event_year=eq.${yr}&select=day,checkin_time,participants(dept,internal_external,is_walkin,province,ext_dept)&order=checkin_time.desc`),
-      fetchAll('/rest/v1/participants?dept=eq.' + encodeURIComponent('กองแผนงานและวิชาการ') + `&event_year=eq.${yr}&select=id`)
+      fetchAll('/rest/v1/participants?dept=eq.' + encodeURIComponent('กองแผนงานและวิชาการ') + `&event_year=eq.${yr}&is_walkin=eq.false&select=id`)
     ]);
     const planPreReg = planRows.length;
 
