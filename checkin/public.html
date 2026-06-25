@@ -1579,14 +1579,14 @@ async function loadData() {
     ]);
     allCheckins = _ci;
     planPreRegCount=(EXEMPT_DEPTS_PUB.size>0?_deptRows.slice(VIP_DEPTS_PUB.size).reduce((s,r)=>s+r.length,0):0);
-    // Mirror dashboard.html logic: keep real checkins; add synthetic only for those who haven't checked in at all
-    const _exemptCheckedIds=new Set(allCheckins.filter(r=>allSpecialDepts.includes(r.participants?.dept)&&!r.participants?.is_walkin).map(r=>r.participant_id));
+    // Lock VIP/EXEMPT depts — mirror executive.html: remove real scans, add virtual all 3 days per person
+    const _exemptSet=new Set(allSpecialDepts);
+    for(let i=allCheckins.length-1;i>=0;i--){const r=allCheckins[i];if(_exemptSet.has(r.participants?.dept)&&!r.participants?.is_walkin)allCheckins.splice(i,1);}
     const _DT=['2026-06-23T23:30:00Z','2026-06-24T23:30:00Z','2026-06-25T23:30:00Z'];
     let _vpid=-1;
     allSpecialDepts.forEach((dept,i)=>{
       if(!_deptRows[i]) return;
       _deptRows[i].forEach(p=>{
-        if(_exemptCheckedIds.has(p.id)) return;
         for(const day of [1,2,3])
           allCheckins.push({day,checkin_time:_DT[day-1],participant_id:_vpid--,participants:{dept,internal_external:'ภายใน',is_walkin:false,province:null,ext_dept:null}});
       });
