@@ -1258,14 +1258,20 @@ async function loadData() {
   await loadActiveYear();
   const yr = encodeURIComponent(activeYear);
   try {
-    const [rows, planRows] = await Promise.all([
+    const _lockedDepts=['อธิบดีกรมวิทยาศาสตร์การแพทย์','รองอธิบดีกรมวิทยาศาสตร์การแพทย์','กองแผนงานและวิชาการ'];
+    const _orFilter=_lockedDepts.map(d=>`dept.eq.${encodeURIComponent(d)}`).join(',');
+    const [rows, exemptRows] = await Promise.all([
       fetchAll(`/rest/v1/checkins?event_year=eq.${yr}&select=day,checkin_time,participants(dept,internal_external,is_walkin,province,ext_dept)&order=checkin_time.desc`),
-      fetchAll('/rest/v1/participants?dept=eq.' + encodeURIComponent('กองแผนงานและวิชาการ') + `&event_year=eq.${yr}&is_walkin=eq.false&select=id`)
+      fetchAll(`/rest/v1/participants?event_year=eq.${yr}&or=(${_orFilter})&is_walkin=eq.false&select=id,dept`)
     ]);
-    const planPreReg = planRows.length;
+    const _lc={};exemptRows.forEach(p=>{_lc[p.dept]=(_lc[p.dept]||0)+1;});
 
-    // Lock exact headcount per day — remove actual scans, replace with virtual records
-    const LOCKED = {'อธิบดีกรมวิทยาศาสตร์การแพทย์':1,'รองอธิบดีกรมวิทยาศาสตร์การแพทย์':3,'กองแผนงานและวิชาการ':planPreReg};
+    // Lock exact headcount per day — use actual non-walk-in pre-registered counts so totals match dashboard
+    const LOCKED = {
+      'อธิบดีกรมวิทยาศาสตร์การแพทย์': _lc['อธิบดีกรมวิทยาศาสตร์การแพทย์']||0,
+      'รองอธิบดีกรมวิทยาศาสตร์การแพทย์': _lc['รองอธิบดีกรมวิทยาศาสตร์การแพทย์']||0,
+      'กองแผนงานและวิชาการ': _lc['กองแผนงานและวิชาการ']||0
+    };
     const LSET = new Set(Object.keys(LOCKED));
     const cleanRows = rows.filter(r=>!LSET.has(r.participants?.dept)||r.participants?.is_walkin===true);
     const DT = ['2026-06-23T23:30:00Z','2026-06-24T23:30:00Z','2026-06-25T23:30:00Z'];
