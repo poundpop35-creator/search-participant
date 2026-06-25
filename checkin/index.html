@@ -760,7 +760,7 @@
       if(otherItems) rows.push({labelHtml:`ของที่ระลึก (2) <span style="color:#2563eb;font-weight:700">${otherItems}</span> <span style="color:#94a3b8;font-size:0.72em;font-weight:400;">(อยู่ในกระเป๋า)</span>`,label:`ของที่ระลึก (2) ${otherItems} (อยู่ในกระเป๋า)`,val:bagDone?'รับไปแล้ว ✗':'รับได้',style:bagDone?'done':'ok',sub:bagDone?fmtShort(p.bag_received_date):null});
       if(hasShirt) rows.push({labelHtml:`ของที่ระลึก (3) <span style="color:#0891b2;font-weight:700">เสื้อแจ็คเก็ต (${p.shirt_size})</span>`,label:`ของที่ระลึก (3) เสื้อแจ็คเก็ต`,val:shirtDone?'รับไปแล้ว ✗':'รับได้',style:shirtDone?'done':'ok',sub:shirtDone?fmtShort(p.shirt_received_date):null});
     }
-    if(!isWalkin){rows.push({label:'ป้ายห้อยคอ',val:p.tag||'-',style:isFirst?'ok':'done',sub:isFirst?'รับได้':'รับไปแล้ว ✗'});}
+    if(!isWalkin){const _tag=p.tag==='staff'?'staff':'participant';rows.push({label:'ป้ายห้อยคอ',val:_tag,style:isFirst?'ok':'done',sub:isFirst?'รับได้':'รับไปแล้ว ✗'});}
     return rows;
   }
 
@@ -779,7 +779,7 @@
       if(otherItems) rows.push({labelHtml:`ของที่ระลึก (2) <span style="color:#2563eb;font-weight:700">${otherItems}</span> <span style="color:#94a3b8;font-size:0.72em;font-weight:400;">(อยู่ในกระเป๋า)</span>`,label:`ของที่ระลึก (2) ${otherItems} (อยู่ในกระเป๋า)`,val:'รับไปแล้ว ✗',style:'done',sub:fmtShort(p.bag_received_date)});
       if(hasShirt) rows.push({labelHtml:`ของที่ระลึก (3) <span style="color:#0891b2;font-weight:700">เสื้อแจ็คเก็ต (${p.shirt_size})</span>`,label:`ของที่ระลึก (3) เสื้อแจ็คเก็ต`,val:'รับไปแล้ว ✗',style:'done',sub:shirtDone?fmtShort(p.shirt_received_date):null});
     }
-    if(!isWalkin){rows.push(p.tag?{label:'ป้ายห้อยคอ',val:p.tag,style:'done',sub:'รับไปแล้ว ✗'}:{label:'ป้ายห้อยคอ',val:'รับไปแล้ว ✗',style:'done'});}
+    if(!isWalkin){const _tag=p.tag==='staff'?'staff':'participant';rows.push({label:'ป้ายห้อยคอ',val:_tag,style:'done',sub:'รับไปแล้ว ✗'});}
     return rows;
   }
 
