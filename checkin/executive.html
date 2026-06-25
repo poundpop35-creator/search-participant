@@ -530,6 +530,7 @@ let execMap = {};
 let execExternal = {d1:0,d2:0,d3:0};
 let execExtMap = {};
 let execExtProvByDay = {d1:{},d2:{},d3:{}};
+let execDayTotals = {d1:0, d2:0, d3:0, total:0};
 let execView = 'table';
 let barChartInst = null, trendChartInst = null;
 let execRows = [];
@@ -1282,6 +1283,7 @@ async function loadData() {
     const d2 = cleanRows.filter(r => r.day === 2).length;
     const d3 = cleanRows.filter(r => r.day === 3).length;
 
+    execDayTotals = {d1, d2, d3, total};
     document.getElementById('eTotal').textContent = total.toLocaleString();
     document.getElementById('eD1').textContent = d1.toLocaleString();
     document.getElementById('eD2').textContent = d2.toLocaleString();
@@ -1606,7 +1608,7 @@ async function shareTextSummary(day) {
     ? DEPTS.reduce((s,d)=>s+(execMap[d]?.[dk]||0),0)
     : DEPTS.reduce((s,d)=>s+(execMap[d]?.d1||0)+(execMap[d]?.d2||0)+(execMap[d]?.d3||0),0);
   const extTotal = dk ? execExternal[dk]||0 : execExternal.d1+execExternal.d2+execExternal.d3;
-  const allTotal = intTotal + extTotal;
+  const allTotal = dk ? execDayTotals[dk] : execDayTotals.total;
   let dayLine;
   if(day) {
     dayLine = dayNames[day];
