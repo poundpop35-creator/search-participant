@@ -1259,7 +1259,7 @@ function renderSummaryTable(){
     const pct=A>0?Math.round(tot/A*100):null;
     totalA+=A;totalB+=B;totalC+=C;totalD+=D;
     const pc=pct===null?'#94a3b8':pct>=100?'#15803d':pct>=80?'#65a30d':pct>=60?'#ea580c':'#dc2626';
-    return `<tr>
+    return `<tr${VIP_DEPTS.has(dept)?' style="display:none"':''}>
       <td style="text-align:center;color:#94a3b8;font-size:0.75rem;padding:7px 8px;">${i+1}</td>
       <td style="font-weight:600;padding:7px 10px;">${dept}</td>
       <td style="text-align:center;padding:7px 8px;border-right:1px solid #e2e8f0;">${A>0?A.toLocaleString():'—'}</td>
