@@ -1112,17 +1112,42 @@ async function exportTablePDF(sectionId, filename){
   btn.disabled=false;btn.innerHTML='📄 PDF';
 }
 function _buildSummaryData(){
+  // B: unique pre-reg internal people per dept (dedup by id_card)
   const preRegByDept={};
+  const preRegIdCards=new Set();
+  const seenPreReg=new Set();
   allParticipants.filter(p=>!p.is_walkin&&(p.internal_external||'').includes('ภายใน')).forEach(p=>{
     const d=(p.dept||'-').trim();
+    const ic=(p.id_card||'').trim();
+    const key=ic||String(p.id);
+    if(seenPreReg.has(key)) return;
+    seenPreReg.add(key);
     preRegByDept[d]=(preRegByDept[d]||0)+1;
+    if(ic) preRegIdCards.add(ic);
   });
+  // participantId -> id_card lookup
+  const pidToIdCard=new Map(allParticipants.map(p=>[p.id,(p.id_card||'').trim()]));
+  // C: pre-reg people who checked in (including walk-in whose id_card matches a pre-reg)
+  // D: pure walk-ins (no matching pre-reg id_card)
   const seenC=new Map(), seenD=new Map();
   allData.forEach(r=>{
     if(!r.isIn) return;
     const d=r.dept;
-    if(r.isWalkin){if(!seenD.has(d))seenD.set(d,new Set());seenD.get(d).add(r.participantId);}
-    else{if(!seenC.has(d))seenC.set(d,new Set());seenC.get(d).add(r.participantId);}
+    const ic=pidToIdCard.get(r.participantId)||'';
+    if(r.isWalkin){
+      if(ic&&preRegIdCards.has(ic)){
+        // Walk-in duplicate of a pre-reg → counts as C (pre-reg checked in)
+        if(!seenC.has(d))seenC.set(d,new Set());
+        seenC.get(d).add(ic);
+      } else {
+        if(!seenD.has(d))seenD.set(d,new Set());
+        seenD.get(d).add(r.participantId);
+      }
+    } else {
+      const key=ic||String(r.participantId);
+      if(!seenC.has(d))seenC.set(d,new Set());
+      seenC.get(d).add(key);
+    }
   });
   return {preRegByDept,seenC,seenD};
 }
