@@ -704,6 +704,36 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
   </div>
 
+  <!-- Summary table by dept -->
+  <div class="tcard" style="margin-bottom:24px;" id="summarySection">
+    <div class="thead-row">
+      <span style="font-weight:700;color:var(--blue);font-size:1rem;">ตารางสรุปผู้เข้าร่วมงานรายหน่วยงาน</span>
+      <button class="btn-xl green" onclick="exportSummaryExcel()" style="padding:7px 16px;font-size:0.82rem;">⬇ Export Excel</button>
+    </div>
+    <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
+      <table style="width:100%;border-collapse:collapse;font-size:0.82rem;min-width:700px;">
+        <thead>
+          <tr style="background:#f8fafc;">
+            <th rowspan="2" style="padding:8px 10px;text-align:center;border-bottom:2px solid #e2e8f0;border-right:1px solid #e2e8f0;color:#64748b;font-size:0.7rem;vertical-align:middle;">#</th>
+            <th rowspan="2" style="padding:8px 10px;text-align:left;border-bottom:2px solid #e2e8f0;border-right:1px solid #e2e8f0;color:#64748b;font-size:0.7rem;vertical-align:middle;">หน่วยงานภายใน</th>
+            <th rowspan="2" style="padding:8px 10px;text-align:center;border-bottom:2px solid #e2e8f0;border-right:1px solid #e2e8f0;color:#64748b;font-size:0.7rem;vertical-align:middle;">เป้าหมาย<br>(A)</th>
+            <th colspan="3" style="padding:6px 10px;text-align:center;background:#eff6ff;border-bottom:1px solid #bfdbfe;border-right:1px solid #e2e8f0;color:#1d4ed8;font-size:0.7rem;font-weight:700;">ผู้ลงทะเบียนล่วงหน้า</th>
+            <th rowspan="2" style="padding:8px 10px;text-align:center;background:#fffbeb;border-bottom:2px solid #e2e8f0;border-right:1px solid #e2e8f0;color:#92400e;font-size:0.7rem;vertical-align:middle;">Walk-in<br>(D)</th>
+            <th colspan="2" style="padding:6px 10px;text-align:center;background:#f0fdf4;border-bottom:1px solid #bbf7d0;color:#15803d;font-size:0.7rem;font-weight:700;">ยอดผู้เข้าร่วมทั้งหมด</th>
+          </tr>
+          <tr style="background:#f8fafc;">
+            <th style="padding:7px 10px;text-align:center;background:#eff6ff;border-bottom:2px solid #e2e8f0;border-right:1px solid #e2e8f0;color:#3b82f6;font-size:0.7rem;">ลงทะเบียน (B)</th>
+            <th style="padding:7px 10px;text-align:center;background:#eff6ff;border-bottom:2px solid #e2e8f0;border-right:1px solid #e2e8f0;color:#1d4ed8;font-size:0.7rem;">เช็คอินจริง (C)</th>
+            <th style="padding:7px 10px;text-align:center;background:#eff6ff;border-bottom:2px solid #e2e8f0;border-right:1px solid #e2e8f0;color:#dc2626;font-size:0.7rem;">คงเหลือ (B−C)</th>
+            <th style="padding:7px 10px;text-align:center;background:#f0fdf4;border-bottom:2px solid #e2e8f0;border-right:1px solid #e2e8f0;color:#15803d;font-size:0.7rem;">จำนวน (C+D)</th>
+            <th style="padding:7px 10px;text-align:center;background:#f0fdf4;border-bottom:2px solid #e2e8f0;color:#15803d;font-size:0.7rem;">% จากเป้า</th>
+          </tr>
+        </thead>
+        <tbody id="summaryBody"><tr><td colspan="9" style="text-align:center;padding:30px;color:#94a3b8;">กำลังโหลด...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
 </div>
 
 <script>
@@ -731,6 +761,7 @@ const DAY_L   = {1:'24 มิ.ย.',2:'25 มิ.ย.',3:'26 มิ.ย.'};
 const DAY_ISO = {1:'2026-06-24',2:'2026-06-25',3:'2026-06-26'};
 const PAGE  = 5;
 const DEPTS = ['อธิบดีกรมวิทยาศาสตร์การแพทย์','รองอธิบดีกรมวิทยาศาสตร์การแพทย์','สำนักผู้ทรงคุณวุฒิกรมวิทยาศาสตร์การแพทย์','กองแผนงานและวิชาการ','กองทดสอบความชำนาญ','กลุ่มพัฒนาระบบบริหาร','กลุ่มตรวจสอบภายใน','กลุ่มงานจริยธรรม','สำนักงานเลขานุการกรม','สถาบันชีววัตถุ','สถาบันวิจัยวิทยาศาสตร์สาธารณสุข','สถาบันวิจัยสมุนไพร','สถาบันชีววิทยาศาสตร์ทางการแพทย์','สำนักคุณภาพและความปลอดภัยอาหาร','สำนักเครื่องสำอางและวัตถุอันตราย','สำนักรังสีและเครื่องมือแพทย์','สำนักมาตรฐานห้องปฏิบัติการ','สำนักยาและวัตถุเสพติด','ศูนย์รวมบริการ','ศูนย์เทคโนโลยีสารสนเทศและการสื่อสาร','กองความร่วมมือระหว่างประเทศ','กองบริหารทรัพยากรบุคคล','กองบริหารการคลัง','กองประชาสัมพันธ์และสื่อสารสาธารณะ','ศูนย์ตอบโต้เหตุฉุกเฉินด้านห้องปฏิบัติการและรังสี','ศูนย์วิทยาศาสตร์การแพทย์ที่ 1 เชียงใหม่','ศูนย์วิทยาศาสตร์การแพทย์ที่ 1/1 เชียงราย','ศูนย์วิทยาศาสตร์การแพทย์ที่ 2 พิษณุโลก','ศูนย์วิทยาศาสตร์การแพทย์ที่ 3 นครสวรรค์','ศูนย์วิทยาศาสตร์การแพทย์ที่ 4 สระบุรี','ศูนย์วิทยาศาสตร์การแพทย์ที่ 5 สมุทรสงคราม','ศูนย์วิทยาศาสตร์การแพทย์ที่ 6 ชลบุรี','ศูนย์วิทยาศาสตร์การแพทย์ที่ 7 ขอนแก่น','ศูนย์วิทยาศาสตร์การแพทย์ที่ 8 อุดรธานี','ศูนย์วิทยาศาสตร์การแพทย์ที่ 9 นครราชสีมา','ศูนย์วิทยาศาสตร์การแพทย์ที่ 10 อุบลราชธานี','ศูนย์วิทยาศาสตร์การแพทย์ที่ 11 สุราษฎร์ธานี','ศูนย์วิทยาศาสตร์การแพทย์ที่ 11/1 ภูเก็ต','ศูนย์วิทยาศาสตร์การแพทย์ที่ 12 สงขลา','ศูนย์วิทยาศาสตร์การแพทย์ที่ 12/1 ตรัง'];
+const DASH_TARGETS={'อธิบดีกรมวิทยาศาสตร์การแพทย์':1,'รองอธิบดีกรมวิทยาศาสตร์การแพทย์':3,'สำนักผู้ทรงคุณวุฒิกรมวิทยาศาสตร์การแพทย์':5,'กองแผนงานและวิชาการ':31,'กองทดสอบความชำนาญ':7,'กลุ่มพัฒนาระบบบริหาร':6,'กลุ่มตรวจสอบภายใน':2,'กลุ่มงานจริยธรรม':2,'สำนักงานเลขานุการกรม':28,'สถาบันชีววัตถุ':29,'สถาบันวิจัยวิทยาศาสตร์สาธารณสุข':105,'สถาบันวิจัยสมุนไพร':55,'สถาบันชีววิทยาศาสตร์ทางการแพทย์':71,'สำนักคุณภาพและความปลอดภัยอาหาร':63,'สำนักเครื่องสำอางและวัตถุอันตราย':20,'สำนักรังสีและเครื่องมือแพทย์':42,'สำนักมาตรฐานห้องปฏิบัติการ':28,'สำนักยาและวัตถุเสพติด':69,'ศูนย์รวมบริการ':2,'ศูนย์เทคโนโลยีสารสนเทศและการสื่อสาร':11,'กองความร่วมมือระหว่างประเทศ':2,'กองบริหารทรัพยากรบุคคล':6,'กองบริหารการคลัง':8,'กองประชาสัมพันธ์และสื่อสารสาธารณะ':11,'ศูนย์ตอบโต้เหตุฉุกเฉินด้านห้องปฏิบัติการและรังสี':1,'ศูนย์วิทยาศาสตร์การแพทย์ที่ 1 เชียงใหม่':14,'ศูนย์วิทยาศาสตร์การแพทย์ที่ 1/1 เชียงราย':17,'ศูนย์วิทยาศาสตร์การแพทย์ที่ 2 พิษณุโลก':33,'ศูนย์วิทยาศาสตร์การแพทย์ที่ 3 นครสวรรค์':24,'ศูนย์วิทยาศาสตร์การแพทย์ที่ 4 สระบุรี':24,'ศูนย์วิทยาศาสตร์การแพทย์ที่ 5 สมุทรสงคราม':23,'ศูนย์วิทยาศาสตร์การแพทย์ที่ 6 ชลบุรี':16,'ศูนย์วิทยาศาสตร์การแพทย์ที่ 7 ขอนแก่น':13,'ศูนย์วิทยาศาสตร์การแพทย์ที่ 8 อุดรธานี':18,'ศูนย์วิทยาศาสตร์การแพทย์ที่ 9 นครราชสีมา':20,'ศูนย์วิทยาศาสตร์การแพทย์ที่ 10 อุบลราชธานี':14,'ศูนย์วิทยาศาสตร์การแพทย์ที่ 11 สุราษฎร์ธานี':15,'ศูนย์วิทยาศาสตร์การแพทย์ที่ 11/1 ภูเก็ต':11,'ศูนย์วิทยาศาสตร์การแพทย์ที่ 12 สงขลา':15,'ศูนย์วิทยาศาสตร์การแพทย์ที่ 12/1 ตรัง':15};
 
 let allData=[], filtered=[], curTab=0, curPage=1;
 let selPT=new Set(), selDPT=new Set(), selDDept=new Set(), selFDept=new Set();
@@ -982,6 +1013,7 @@ async function loadParticipants(){
   buildPFCB('pFDeptDD','pFDeptAll','pFDeptCb',onPFDeptAll,onPFDeptChange,depts);
   buildPFCB('pFTagDD','pFTagAll','pFTagCb',onPFTagAll,onPFTagChange,tags);
   buildPFCB('pFPTypeDD','pFPTypeAll','pFPTypeCb',onPFPTypeAll,onPFPTypeChange,ptypes);
+  renderSummaryTable();
   // Province dropdown grouped by health zone
   const dd=document.getElementById('pFProvDD');
   const allLbl=dd.querySelector('.all-label');
@@ -1009,6 +1041,82 @@ async function loadParticipants(){
   });
 }
 
+function _buildSummaryData(){
+  const preRegByDept={};
+  allParticipants.filter(p=>!p.is_walkin&&(p.internal_external||'').includes('ภายใน')).forEach(p=>{
+    const d=(p.dept||'-').trim();
+    preRegByDept[d]=(preRegByDept[d]||0)+1;
+  });
+  const seenC=new Map(), seenD=new Map();
+  allData.forEach(r=>{
+    if(!r.isIn) return;
+    const d=r.dept;
+    if(r.isWalkin){if(!seenD.has(d))seenD.set(d,new Set());seenD.get(d).add(r.participantId);}
+    else{if(!seenC.has(d))seenC.set(d,new Set());seenC.get(d).add(r.participantId);}
+  });
+  return {preRegByDept,seenC,seenD};
+}
+function renderSummaryTable(){
+  const {preRegByDept,seenC,seenD}=_buildSummaryData();
+  let totalA=0,totalB=0,totalC=0,totalD=0;
+  const rows=DEPTS.map((dept,i)=>{
+    const A=DASH_TARGETS[dept]||0;
+    const B=preRegByDept[dept]||0;
+    const C=seenC.has(dept)?seenC.get(dept).size:0;
+    const rem=B-C;
+    const D=seenD.has(dept)?seenD.get(dept).size:0;
+    const tot=C+D;
+    const pct=A>0?Math.round(tot/A*100):null;
+    totalA+=A;totalB+=B;totalC+=C;totalD+=D;
+    const pc=pct===null?'#94a3b8':pct>=100?'#15803d':pct>=80?'#65a30d':pct>=60?'#ea580c':'#dc2626';
+    return `<tr>
+      <td style="text-align:center;color:#94a3b8;font-size:0.75rem;padding:7px 8px;">${i+1}</td>
+      <td style="font-weight:600;padding:7px 10px;">${dept}</td>
+      <td style="text-align:center;padding:7px 8px;border-right:1px solid #e2e8f0;">${A>0?A.toLocaleString():'—'}</td>
+      <td style="text-align:center;padding:7px 8px;background:#eff6ff;">${B.toLocaleString()}</td>
+      <td style="text-align:center;padding:7px 8px;background:#eff6ff;color:#1d4ed8;font-weight:700;">${C.toLocaleString()}</td>
+      <td style="text-align:center;padding:7px 8px;background:#eff6ff;color:${rem>0?'#dc2626':'#15803d'};font-weight:600;border-right:1px solid #e2e8f0;">${rem>0?rem.toLocaleString():'0'}</td>
+      <td style="text-align:center;padding:7px 8px;background:#fffbeb;color:#92400e;font-weight:600;border-right:1px solid #e2e8f0;">${D>0?D.toLocaleString():'—'}</td>
+      <td style="text-align:center;padding:7px 8px;background:#f0fdf4;font-weight:700;">${tot.toLocaleString()}</td>
+      <td style="text-align:center;padding:7px 8px;background:#f0fdf4;font-weight:700;color:${pc};">${pct!==null?pct+'%':'—'}</td>
+    </tr>`;
+  });
+  const totTot=totalC+totalD,totRem=totalB-totalC;
+  const totPct=totalA>0?Math.round(totTot/totalA*100):null;
+  const totPc=totPct===null?'#94a3b8':totPct>=100?'#15803d':totPct>=80?'#65a30d':totPct>=60?'#ea580c':'#dc2626';
+  rows.push(`<tr style="background:#f1f5f9;font-weight:800;border-top:2px solid #94a3b8;">
+    <td colspan="2" style="padding:9px 10px;font-size:0.88rem;color:#1e293b;">รวมทั้งหมด</td>
+    <td style="text-align:center;padding:9px 8px;border-right:1px solid #e2e8f0;">${totalA.toLocaleString()}</td>
+    <td style="text-align:center;padding:9px 8px;background:#eff6ff;">${totalB.toLocaleString()}</td>
+    <td style="text-align:center;padding:9px 8px;background:#eff6ff;color:#1d4ed8;">${totalC.toLocaleString()}</td>
+    <td style="text-align:center;padding:9px 8px;background:#eff6ff;color:${totRem>0?'#dc2626':'#15803d'};border-right:1px solid #e2e8f0;">${totRem>0?totRem.toLocaleString():'0'}</td>
+    <td style="text-align:center;padding:9px 8px;background:#fffbeb;color:#92400e;border-right:1px solid #e2e8f0;">${totalD.toLocaleString()}</td>
+    <td style="text-align:center;padding:9px 8px;background:#f0fdf4;">${totTot.toLocaleString()}</td>
+    <td style="text-align:center;padding:9px 8px;background:#f0fdf4;color:${totPc};">${totPct!==null?totPct+'%':'—'}</td>
+  </tr>`);
+  document.getElementById('summaryBody').innerHTML=rows.join('');
+}
+function exportSummaryExcel(){
+  const {preRegByDept,seenC,seenD}=_buildSummaryData();
+  const data=[['#','หน่วยงานภายใน','เป้าหมาย (A)','ลงทะเบียนล่วงหน้า (B)','เช็คอินจริง (C)','คงเหลือ (B-C)','Walk-in (D)','ยอดรวม (C+D)','% จากเป้าหมาย (A)']];
+  let tA=0,tB=0,tC=0,tD=0;
+  DEPTS.forEach((dept,i)=>{
+    const A=DASH_TARGETS[dept]||0;
+    const B=preRegByDept[dept]||0;
+    const C=seenC.has(dept)?seenC.get(dept).size:0;
+    const D=seenD.has(dept)?seenD.get(dept).size:0;
+    const tot=C+D;
+    tA+=A;tB+=B;tC+=C;tD+=D;
+    data.push([i+1,dept,A||0,B,C,B-C,D,tot,A>0?+(tot/A*100).toFixed(1):'-']);
+  });
+  const tTot=tC+tD;
+  data.push(['','รวมทั้งหมด',tA,tB,tC,tB-tC,tD,tTot,tA>0?+(tTot/tA*100).toFixed(1):'-']);
+  const wb=XLSX.utils.book_new();
+  const ws=XLSX.utils.aoa_to_sheet(data);
+  ws['!cols']=[{wch:4},{wch:40},{wch:12},{wch:20},{wch:16},{wch:14},{wch:12},{wch:14},{wch:18}];
+  XLSX.utils.book_append_sheet(wb,ws,'สรุปรายหน่วยงาน');
+  XLSX.writeFile(wb,`สรุปผู้เข้าร่วมงาน_${activeYear}.xlsx`);
+}
 function toggleParticipants(){
   const sec=document.getElementById('pRegSection');
   const btn=document.getElementById('pToggleBtn');
