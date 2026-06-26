@@ -760,9 +760,10 @@ document.addEventListener('DOMContentLoaded', function() {
         <option value="">ทั้งหมด</option>
       </select>
       <label style="font-size:0.82rem;color:#64748b;font-weight:600;margin-left:8px;">ประเภท:</label>
-      <select id="remPtFilter" onchange="renderRemainingTable()" style="padding:6px 10px;border-radius:8px;border:1.5px solid #e2e8f0;font-family:'Sarabun',sans-serif;font-size:0.82rem;color:#1e293b;min-width:140px;">
-        <option value="">ทั้งหมด</option>
-      </select>
+      <div class="multi-wrap" style="display:inline-block;">
+        <button class="multi-btn" id="remPtBtn" onclick="toggleDD('remPtDD')" style="font-size:0.82rem;padding:6px 28px 6px 10px;min-width:130px;">ทั้งหมด</button>
+        <div class="multi-dd" id="remPtDD"><label class="all-label"><input type="checkbox" id="remPtAll" checked> ทั้งหมด</label></div>
+      </div>
       <label style="font-size:0.82rem;color:#64748b;font-weight:600;margin-left:8px;">ถุงของ:</label>
       <select id="remBagFilter" onchange="renderRemainingTable()" style="padding:6px 10px;border-radius:8px;border:1.5px solid #e2e8f0;font-family:'Sarabun',sans-serif;font-size:0.82rem;color:#1e293b;min-width:130px;">
         <option value="">ทั้งหมด</option>
@@ -806,9 +807,10 @@ document.addEventListener('DOMContentLoaded', function() {
         <option value="">ทั้งหมด</option>
       </select>
       <label style="font-size:0.82rem;color:#64748b;font-weight:600;margin-left:8px;">ประเภท:</label>
-      <select id="ciPtFilter" onchange="_checkedInPage=0;renderCheckedInTable()" style="padding:6px 10px;border-radius:8px;border:1.5px solid #e2e8f0;font-family:'Sarabun',sans-serif;font-size:0.82rem;color:#1e293b;min-width:140px;">
-        <option value="">ทั้งหมด</option>
-      </select>
+      <div class="multi-wrap" style="display:inline-block;">
+        <button class="multi-btn" id="ciPtBtn" onclick="toggleDD('ciPtDD')" style="font-size:0.82rem;padding:6px 28px 6px 10px;min-width:130px;">ทั้งหมด</button>
+        <div class="multi-dd" id="ciPtDD"><label class="all-label"><input type="checkbox" id="ciPtAll" checked> ทั้งหมด</label></div>
+      </div>
     </div>
     <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
       <table style="width:100%;border-collapse:collapse;font-size:0.83rem;">
@@ -846,9 +848,10 @@ document.addEventListener('DOMContentLoaded', function() {
         <option value="">ทั้งหมด</option>
       </select>
       <label style="font-size:0.82rem;color:#64748b;font-weight:600;margin-left:8px;">ประเภท:</label>
-      <select id="wiPtFilter" onchange="_walkInPage=0;renderWalkInTable()" style="padding:6px 10px;border-radius:8px;border:1.5px solid #e2e8f0;font-family:'Sarabun',sans-serif;font-size:0.82rem;color:#1e293b;min-width:140px;">
-        <option value="">ทั้งหมด</option>
-      </select>
+      <div class="multi-wrap" style="display:inline-block;">
+        <button class="multi-btn" id="wiPtBtn" onclick="toggleDD('wiPtDD')" style="font-size:0.82rem;padding:6px 28px 6px 10px;min-width:130px;">ทั้งหมด</button>
+        <div class="multi-dd" id="wiPtDD"><label class="all-label"><input type="checkbox" id="wiPtAll" checked> ทั้งหมด</label></div>
+      </div>
     </div>
     <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
       <table style="width:100%;border-collapse:collapse;font-size:0.83rem;">
@@ -1369,13 +1372,12 @@ function renderRemainingTable(){
   const curVal=sel.value;
   const depts=[...new Set(full.map(p=>p.dept||'').filter(Boolean))].sort((a,b)=>{const oa=DEPTS.indexOf(a),ob=DEPTS.indexOf(b);return(oa<0?9999:oa)-(ob<0?9999:ob);});
   sel.innerHTML='<option value="">ทั้งหมด</option>'+depts.map(d=>`<option value="${d}"${d===curVal?' selected':''}>${d}</option>`).join('');
-  const ptSel=document.getElementById('remPtFilter');
   const ptTypes=[...new Set(full.map(p=>(p.participation_type||'').replace(/\s+/g,' ').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'th'));
-  const curPt=ptSel.value;
-  ptSel.innerHTML='<option value="">ทั้งหมด</option>'+ptTypes.map(t=>`<option value="${t}"${t===curPt?' selected':''}>${t}</option>`).join('');
+  buildDD('remPtDD','remPtAll',ptTypes,()=>{updateBtn('remPtBtn',getChecked('remPtDD'));renderRemainingTable();});
+  const selPts=getChecked('remPtDD');
   const bagVal=document.getElementById('remBagFilter').value;
   let list=curVal?full.filter(p=>p.dept===curVal):full;
-  if(curPt) list=list.filter(p=>(p.participation_type||'').replace(/\s+/g,' ').trim()===curPt);
+  if(selPts.size) list=list.filter(p=>selPts.has((p.participation_type||'').replace(/\s+/g,' ').trim()));
   if(bagVal==='received') list=list.filter(p=>p.bag_received===true||p.bag_received===1||p.bag_received==='true');
   else if(bagVal==='not_received') list=list.filter(p=>!(p.bag_received===true||p.bag_received===1||p.bag_received==='true'));
   if(!list.length){
@@ -1461,11 +1463,11 @@ function renderCheckedInTable(){
   const sel=document.getElementById('ciDeptFilter'), curVal=sel.value;
   const depts=[...new Set(full.map(p=>p.dept||'').filter(Boolean))].sort((a,b)=>{const oa=DEPTS.indexOf(a),ob=DEPTS.indexOf(b);return(oa<0?9999:oa)-(ob<0?9999:ob);});
   sel.innerHTML='<option value="">ทั้งหมด</option>'+depts.map(d=>`<option value="${d}"${d===curVal?' selected':''}>${d}</option>`).join('');
-  const ptSel=document.getElementById('ciPtFilter'), curPt=ptSel.value;
   const ptTypes=[...new Set(full.map(p=>(p.participation_type||'').replace(/\s+/g,' ').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'th'));
-  ptSel.innerHTML='<option value="">ทั้งหมด</option>'+ptTypes.map(t=>`<option value="${t}"${t===curPt?' selected':''}>${t}</option>`).join('');
+  buildDD('ciPtDD','ciPtAll',ptTypes,()=>{_checkedInPage=0;updateBtn('ciPtBtn',getChecked('ciPtDD'));renderCheckedInTable();});
+  const selPts=getChecked('ciPtDD');
   let list=curVal?full.filter(p=>p.dept===curVal):full;
-  if(curPt) list=list.filter(p=>(p.participation_type||'').replace(/\s+/g,' ').trim()===curPt);
+  if(selPts.size) list=list.filter(p=>selPts.has((p.participation_type||'').replace(/\s+/g,' ').trim()));
   _paginate(list,_checkedInPage,'_checkedInPage','checkedInBody','checkedInPagination',5,(p,i)=>`<tr style="${i%2?'background:#f9fafb':''}">
     <td style="text-align:center;padding:8px 10px;color:#94a3b8;font-size:0.75rem;">${i+1}</td>
     <td style="padding:8px 10px;color:#334155;">${p.dept||'-'}</td>
@@ -1506,11 +1508,11 @@ function renderWalkInTable(){
   const sel=document.getElementById('wiDeptFilter'), curVal=sel.value;
   const depts=[...new Set(full.map(p=>(p.dept||'').trim()).filter(Boolean))].sort((a,b)=>{const oa=DEPTS.indexOf(a),ob=DEPTS.indexOf(b);return(oa<0?9999:oa)-(ob<0?9999:ob);});
   sel.innerHTML='<option value="">ทั้งหมด</option>'+depts.map(d=>`<option value="${d}"${d===curVal?' selected':''}>${d}</option>`).join('');
-  const ptSel=document.getElementById('wiPtFilter'), curPt=ptSel.value;
   const ptTypes=[...new Set(full.map(p=>(p.participation_type||'').replace(/\s+/g,' ').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'th'));
-  ptSel.innerHTML='<option value="">ทั้งหมด</option>'+ptTypes.map(t=>`<option value="${t}"${t===curPt?' selected':''}>${t}</option>`).join('');
+  buildDD('wiPtDD','wiPtAll',ptTypes,()=>{_walkInPage=0;updateBtn('wiPtBtn',getChecked('wiPtDD'));renderWalkInTable();});
+  const selPts=getChecked('wiPtDD');
   let list=curVal?full.filter(p=>(p.dept||'').trim()===curVal):full;
-  if(curPt) list=list.filter(p=>(p.participation_type||'').replace(/\s+/g,' ').trim()===curPt);
+  if(selPts.size) list=list.filter(p=>selPts.has((p.participation_type||'').replace(/\s+/g,' ').trim()));
   _paginate(list,_walkInPage,'_walkInPage','walkInBody','walkInPagination',5,(p,i)=>`<tr style="${i%2?'background:#f9fafb':''}">
     <td style="text-align:center;padding:8px 10px;color:#94a3b8;font-size:0.75rem;">${i+1}</td>
     <td style="padding:8px 10px;color:#334155;">${p.dept||'-'}</td>
