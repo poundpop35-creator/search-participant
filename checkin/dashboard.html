@@ -743,6 +743,12 @@ document.addEventListener('DOMContentLoaded', function() {
       </div>
       <button class="btn-xl green" onclick="exportRemainingExcel()" style="padding:7px 16px;font-size:0.82rem;">⬇ Export Excel</button>
     </div>
+    <div style="padding:10px 16px 4px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;border-bottom:1px solid #f1f5f9;">
+      <label style="font-size:0.82rem;color:#64748b;font-weight:600;">หน่วยงาน:</label>
+      <select id="remDeptFilter" onchange="renderRemainingTable()" style="padding:6px 10px;border-radius:8px;border:1.5px solid #e2e8f0;font-family:'Sarabun',sans-serif;font-size:0.82rem;color:#1e293b;min-width:160px;">
+        <option value="">ทั้งหมด</option>
+      </select>
+    </div>
     <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
       <table style="width:100%;border-collapse:collapse;font-size:0.83rem;">
         <thead>
@@ -750,11 +756,10 @@ document.addEventListener('DOMContentLoaded', function() {
             <th style="padding:9px 10px;text-align:center;border-bottom:2px solid #e2e8f0;color:#64748b;font-size:0.7rem;width:36px;">#</th>
             <th style="padding:9px 10px;text-align:left;border-bottom:2px solid #e2e8f0;color:#64748b;font-size:0.7rem;">หน่วยงาน</th>
             <th style="padding:9px 10px;text-align:left;border-bottom:2px solid #e2e8f0;color:#64748b;font-size:0.7rem;">เลขบัตรประชาชน</th>
-            <th style="padding:9px 10px;text-align:left;border-bottom:2px solid #e2e8f0;color:#64748b;font-size:0.7rem;">ชื่อ</th>
-            <th style="padding:9px 10px;text-align:left;border-bottom:2px solid #e2e8f0;color:#64748b;font-size:0.7rem;">นามสกุล</th>
+            <th style="padding:9px 10px;text-align:left;border-bottom:2px solid #e2e8f0;color:#64748b;font-size:0.7rem;">ชื่อ-นามสกุล</th>
           </tr>
         </thead>
-        <tbody id="remainingBody"><tr><td colspan="5" style="text-align:center;padding:30px;color:#94a3b8;">กำลังโหลด...</td></tr></tbody>
+        <tbody id="remainingBody"><tr><td colspan="4" style="text-align:center;padding:30px;color:#94a3b8;">กำลังโหลด...</td></tr></tbody>
       </table>
     </div>
   </div>
@@ -1156,28 +1161,38 @@ function _getRemainingList(){
       return (a.last_name||'').localeCompare(b.last_name||'','th');
     });
 }
+function _buildFullName(p){return [p.prefix,p.first_name,p.last_name].map(s=>(s||'').trim()).filter(Boolean).join(' ')||'-';}
 function renderRemainingTable(){
-  const list=_getRemainingList();
-  document.getElementById('remainingCount').textContent=`(${list.length.toLocaleString()} คน)`;
+  const full=_getRemainingList();
+  document.getElementById('remainingCount').textContent=`(${full.length.toLocaleString()} คน)`;
+  // populate dept filter
+  const sel=document.getElementById('remDeptFilter');
+  const curVal=sel.value;
+  const depts=[...new Set(full.map(p=>p.dept||'').filter(Boolean))].sort((a,b)=>{const oa=DEPTS.indexOf(a),ob=DEPTS.indexOf(b);return(oa<0?9999:oa)-(ob<0?9999:ob);});
+  sel.innerHTML='<option value="">ทั้งหมด</option>'+depts.map(d=>`<option value="${d}"${d===curVal?' selected':''}>${d}</option>`).join('');
+  const list=curVal?full.filter(p=>p.dept===curVal):full;
   if(!list.length){
-    document.getElementById('remainingBody').innerHTML='<tr><td colspan="5" style="text-align:center;padding:30px;color:#15803d;font-weight:700;">✓ ทุกคนเช็คอินครบแล้ว</td></tr>';
+    document.getElementById('remainingBody').innerHTML=`<tr><td colspan="4" style="text-align:center;padding:30px;color:#15803d;font-weight:700;">${full.length?'ไม่พบรายชื่อในหน่วยงานที่เลือก':'✓ ทุกคนเช็คอินครบแล้ว'}</td></tr>`;
     return;
   }
   document.getElementById('remainingBody').innerHTML=list.map((p,i)=>`<tr>
     <td style="text-align:center;padding:8px 10px;color:#94a3b8;font-size:0.75rem;">${i+1}</td>
     <td style="padding:8px 10px;color:#334155;">${p.dept||'-'}</td>
-    <td style="padding:8px 10px;color:#475569;font-size:0.8rem;font-family:monospace;">${(p.id_card||'').trim()||'—'}</td>
-    <td style="padding:8px 10px;color:#1e293b;">${((p.prefix||'').trim()+' '+(p.first_name||'').trim()).trim()||'-'}</td>
-    <td style="padding:8px 10px;color:#1e293b;">${(p.last_name||'').trim()||'-'}</td>
+    <td style="padding:8px 10px;color:#94a3b8;font-size:0.8rem;font-family:monospace;letter-spacing:0.05em;">xxxx</td>
+    <td style="padding:8px 10px;color:#1e293b;">${_buildFullName(p)}</td>
   </tr>`).join('');
 }
 function exportRemainingExcel(){
-  const list=_getRemainingList();
-  const data=[['#','หน่วยงาน','เลขบัตรประชาชน','คำนำหน้า','ชื่อ','นามสกุล']];
-  list.forEach((p,i)=>data.push([i+1,p.dept||'-',(p.id_card||'').trim()||'-',(p.prefix||'').trim()||'-',(p.first_name||'').trim()||'-',(p.last_name||'').trim()||'-']));
+  const code=prompt('ใส่รหัสเพื่อแสดงเลขบัตรประชาชน\n(กด Cancel เพื่อ export แบบซ่อน)');
+  const showID=code!==null&&code.trim()==='99037';
+  const sel=document.getElementById('remDeptFilter');
+  const full=_getRemainingList();
+  const list=sel.value?full.filter(p=>p.dept===sel.value):full;
+  const data=[['#','หน่วยงาน','เลขบัตรประชาชน','ชื่อ-นามสกุล']];
+  list.forEach((p,i)=>data.push([i+1,p.dept||'-',showID?(p.id_card||'').trim()||'-':'xxxx',_buildFullName(p)]));
   const wb=XLSX.utils.book_new();
   const ws=XLSX.utils.aoa_to_sheet(data);
-  ws['!cols']=[{wch:4},{wch:40},{wch:16},{wch:10},{wch:20},{wch:20}];
+  ws['!cols']=[{wch:4},{wch:40},{wch:16},{wch:30}];
   XLSX.utils.book_append_sheet(wb,ws,'รายชื่อคงเหลือ');
   XLSX.writeFile(wb,`รายชื่อคงเหลือ_${activeYear}.xlsx`);
 }
