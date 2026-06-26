@@ -1427,7 +1427,7 @@ function _getWalkInList(){
   const deptOrder=new Map(DEPTS.map((d,i)=>[d,i]));
   const seen=new Set();
   return allParticipants.filter(p=>{
-    if(!p.is_walkin||!deptsSet.has((p.dept||'').trim())) return false;
+    if(!p.is_walkin||!deptsSet.has((p.dept||'').trim())||!(p.internal_external||'').includes('ภายใน')) return false;
     if(!checkedWIIds.has(p.id)) return false;
     const ic=(p.id_card||'').trim(), key=ic||String(p.id);
     if(seen.has(key)) return false;
