@@ -759,6 +759,10 @@ document.addEventListener('DOMContentLoaded', function() {
       <select id="remDeptFilter" onchange="renderRemainingTable()" style="padding:6px 10px;border-radius:8px;border:1.5px solid #e2e8f0;font-family:'Sarabun',sans-serif;font-size:0.82rem;color:#1e293b;min-width:160px;">
         <option value="">ทั้งหมด</option>
       </select>
+      <label style="font-size:0.82rem;color:#64748b;font-weight:600;margin-left:8px;">ประเภท:</label>
+      <select id="remPtFilter" onchange="renderRemainingTable()" style="padding:6px 10px;border-radius:8px;border:1.5px solid #e2e8f0;font-family:'Sarabun',sans-serif;font-size:0.82rem;color:#1e293b;min-width:140px;">
+        <option value="">ทั้งหมด</option>
+      </select>
       <label style="font-size:0.82rem;color:#64748b;font-weight:600;margin-left:8px;">ถุงของ:</label>
       <select id="remBagFilter" onchange="renderRemainingTable()" style="padding:6px 10px;border-radius:8px;border:1.5px solid #e2e8f0;font-family:'Sarabun',sans-serif;font-size:0.82rem;color:#1e293b;min-width:130px;">
         <option value="">ทั้งหมด</option>
@@ -774,10 +778,11 @@ document.addEventListener('DOMContentLoaded', function() {
             <th style="padding:9px 10px;text-align:left;border-bottom:2px solid #e2e8f0;color:#64748b;font-size:0.7rem;">หน่วยงาน</th>
             <th style="padding:9px 10px;text-align:left;border-bottom:2px solid #e2e8f0;color:#64748b;font-size:0.7rem;">เลขบัตรประชาชน</th>
             <th style="padding:9px 10px;text-align:left;border-bottom:2px solid #e2e8f0;color:#64748b;font-size:0.7rem;">ชื่อ-นามสกุล</th>
+            <th style="padding:9px 10px;text-align:center;border-bottom:2px solid #e2e8f0;color:#64748b;font-size:0.7rem;">ประเภท</th>
             <th style="padding:9px 10px;text-align:center;border-bottom:2px solid #e2e8f0;color:#64748b;font-size:0.7rem;">ถุงของ</th>
           </tr>
         </thead>
-        <tbody id="remainingBody"><tr><td colspan="5" style="text-align:center;padding:30px;color:#94a3b8;">กำลังโหลด...</td></tr></tbody>
+        <tbody id="remainingBody"><tr><td colspan="6" style="text-align:center;padding:30px;color:#94a3b8;">กำลังโหลด...</td></tr></tbody>
       </table>
     </div>
   </div>
@@ -800,6 +805,10 @@ document.addEventListener('DOMContentLoaded', function() {
       <select id="ciDeptFilter" onchange="_checkedInPage=0;renderCheckedInTable()" style="padding:6px 10px;border-radius:8px;border:1.5px solid #e2e8f0;font-family:'Sarabun',sans-serif;font-size:0.82rem;color:#1e293b;min-width:160px;">
         <option value="">ทั้งหมด</option>
       </select>
+      <label style="font-size:0.82rem;color:#64748b;font-weight:600;margin-left:8px;">ประเภท:</label>
+      <select id="ciPtFilter" onchange="_checkedInPage=0;renderCheckedInTable()" style="padding:6px 10px;border-radius:8px;border:1.5px solid #e2e8f0;font-family:'Sarabun',sans-serif;font-size:0.82rem;color:#1e293b;min-width:140px;">
+        <option value="">ทั้งหมด</option>
+      </select>
     </div>
     <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
       <table style="width:100%;border-collapse:collapse;font-size:0.83rem;">
@@ -809,9 +818,10 @@ document.addEventListener('DOMContentLoaded', function() {
             <th style="padding:9px 10px;text-align:left;border-bottom:2px solid #bbf7d0;color:#64748b;font-size:0.7rem;">หน่วยงาน</th>
             <th style="padding:9px 10px;text-align:left;border-bottom:2px solid #bbf7d0;color:#64748b;font-size:0.7rem;">เลขบัตรประชาชน</th>
             <th style="padding:9px 10px;text-align:left;border-bottom:2px solid #bbf7d0;color:#64748b;font-size:0.7rem;">ชื่อ-นามสกุล</th>
+            <th style="padding:9px 10px;text-align:center;border-bottom:2px solid #bbf7d0;color:#64748b;font-size:0.7rem;">ประเภท</th>
           </tr>
         </thead>
-        <tbody id="checkedInBody"><tr><td colspan="4" style="text-align:center;padding:30px;color:#94a3b8;">กำลังโหลด...</td></tr></tbody>
+        <tbody id="checkedInBody"><tr><td colspan="5" style="text-align:center;padding:30px;color:#94a3b8;">กำลังโหลด...</td></tr></tbody>
       </table>
     </div>
     <div id="checkedInPagination" style="display:flex;justify-content:center;align-items:center;gap:6px;padding:12px 16px;border-top:1px solid #f1f5f9;flex-wrap:wrap;"></div>
@@ -835,6 +845,10 @@ document.addEventListener('DOMContentLoaded', function() {
       <select id="wiDeptFilter" onchange="_walkInPage=0;renderWalkInTable()" style="padding:6px 10px;border-radius:8px;border:1.5px solid #e2e8f0;font-family:'Sarabun',sans-serif;font-size:0.82rem;color:#1e293b;min-width:160px;">
         <option value="">ทั้งหมด</option>
       </select>
+      <label style="font-size:0.82rem;color:#64748b;font-weight:600;margin-left:8px;">ประเภท:</label>
+      <select id="wiPtFilter" onchange="_walkInPage=0;renderWalkInTable()" style="padding:6px 10px;border-radius:8px;border:1.5px solid #e2e8f0;font-family:'Sarabun',sans-serif;font-size:0.82rem;color:#1e293b;min-width:140px;">
+        <option value="">ทั้งหมด</option>
+      </select>
     </div>
     <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
       <table style="width:100%;border-collapse:collapse;font-size:0.83rem;">
@@ -844,9 +858,10 @@ document.addEventListener('DOMContentLoaded', function() {
             <th style="padding:9px 10px;text-align:left;border-bottom:2px solid #fde68a;color:#64748b;font-size:0.7rem;">หน่วยงาน</th>
             <th style="padding:9px 10px;text-align:left;border-bottom:2px solid #fde68a;color:#64748b;font-size:0.7rem;">เลขบัตรประชาชน</th>
             <th style="padding:9px 10px;text-align:left;border-bottom:2px solid #fde68a;color:#64748b;font-size:0.7rem;">ชื่อ-นามสกุล</th>
+            <th style="padding:9px 10px;text-align:center;border-bottom:2px solid #fde68a;color:#64748b;font-size:0.7rem;">ประเภท</th>
           </tr>
         </thead>
-        <tbody id="walkInBody"><tr><td colspan="4" style="text-align:center;padding:30px;color:#94a3b8;">กำลังโหลด...</td></tr></tbody>
+        <tbody id="walkInBody"><tr><td colspan="5" style="text-align:center;padding:30px;color:#94a3b8;">กำลังโหลด...</td></tr></tbody>
       </table>
     </div>
     <div id="walkInPagination" style="display:flex;justify-content:center;align-items:center;gap:6px;padding:12px 16px;border-top:1px solid #f1f5f9;flex-wrap:wrap;"></div>
@@ -1340,6 +1355,13 @@ function _getRemainingList(){
     });
 }
 function _buildFullName(p){return [p.prefix,p.first_name,p.last_name].map(s=>(s||'').trim()).filter(Boolean).join(' ')||'-';}
+function _ptBadge(pt){
+  const v=(pt||'').replace(/\s+/g,' ').trim();
+  if(!v||v==='-') return '<span style="color:#94a3b8;font-size:0.72rem;">—</span>';
+  const map={'ผู้เข้าร่วมงาน':['#dbeafe','#1d4ed8'],'กรรมการ':['#ede9fe','#6d28d9'],'ผู้บริหาร':['#fef3c7','#92400e'],'วิทยากร':['#dcfce7','#15803d'],'เจ้าหน้าที่':['#f1f5f9','#475569'],'ประธาน':['#fce7f3','#9d174d']};
+  const[bg,fg]=map[v]||['#e0f2fe','#0369a1'];
+  return `<span style="background:${bg};color:${fg};padding:2px 8px;border-radius:12px;font-size:0.72rem;font-weight:600;white-space:nowrap;">${v}</span>`;
+}
 function renderRemainingTable(){
   const full=_getRemainingList();
   document.getElementById('remainingCount').textContent=`(${full.length.toLocaleString()} คน)`;
@@ -1347,12 +1369,17 @@ function renderRemainingTable(){
   const curVal=sel.value;
   const depts=[...new Set(full.map(p=>p.dept||'').filter(Boolean))].sort((a,b)=>{const oa=DEPTS.indexOf(a),ob=DEPTS.indexOf(b);return(oa<0?9999:oa)-(ob<0?9999:ob);});
   sel.innerHTML='<option value="">ทั้งหมด</option>'+depts.map(d=>`<option value="${d}"${d===curVal?' selected':''}>${d}</option>`).join('');
+  const ptSel=document.getElementById('remPtFilter');
+  const ptTypes=[...new Set(full.map(p=>(p.participation_type||'').replace(/\s+/g,' ').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'th'));
+  const curPt=ptSel.value;
+  ptSel.innerHTML='<option value="">ทั้งหมด</option>'+ptTypes.map(t=>`<option value="${t}"${t===curPt?' selected':''}>${t}</option>`).join('');
   const bagVal=document.getElementById('remBagFilter').value;
   let list=curVal?full.filter(p=>p.dept===curVal):full;
+  if(curPt) list=list.filter(p=>(p.participation_type||'').replace(/\s+/g,' ').trim()===curPt);
   if(bagVal==='received') list=list.filter(p=>p.bag_received===true||p.bag_received===1||p.bag_received==='true');
   else if(bagVal==='not_received') list=list.filter(p=>!(p.bag_received===true||p.bag_received===1||p.bag_received==='true'));
   if(!list.length){
-    document.getElementById('remainingBody').innerHTML=`<tr><td colspan="5" style="text-align:center;padding:30px;color:#15803d;font-weight:700;">${full.length?'ไม่พบรายชื่อในหน่วยงานที่เลือก':'✓ ทุกคนเช็คอินครบแล้ว'}</td></tr>`;
+    document.getElementById('remainingBody').innerHTML=`<tr><td colspan="6" style="text-align:center;padding:30px;color:#15803d;font-weight:700;">${full.length?'ไม่พบรายชื่อในหน่วยงานที่เลือก':'✓ ทุกคนเช็คอินครบแล้ว'}</td></tr>`;
     return;
   }
   document.getElementById('remainingBody').innerHTML=list.map((p,i)=>{
@@ -1365,6 +1392,7 @@ function renderRemainingTable(){
     <td style="padding:8px 10px;color:#334155;">${p.dept||'-'}</td>
     <td style="padding:8px 10px;color:#475569;font-size:0.8rem;font-family:monospace;letter-spacing:0.05em;">${(p.id_card||'').trim()||'—'}</td>
     <td style="padding:8px 10px;color:#1e293b;">${_buildFullName(p)}</td>
+    <td style="text-align:center;padding:8px 10px;">${_ptBadge(p.participation_type)}</td>
     <td style="text-align:center;padding:8px 10px;">${bagBadge}</td>
   </tr>`;
   }).join('');
@@ -1383,14 +1411,14 @@ function exportRemainingExcel(wantID){
   let list=sel.value?full.filter(p=>p.dept===sel.value):full;
   if(bagVal==='received') list=list.filter(p=>p.bag_received===true||p.bag_received===1||p.bag_received==='true');
   else if(bagVal==='not_received') list=list.filter(p=>!(p.bag_received===true||p.bag_received===1||p.bag_received==='true'));
-  const data=[['#','หน่วยงาน','เลขบัตรประชาชน','ชื่อ-นามสกุล','ถุงของ']];
+  const data=[['#','หน่วยงาน','เลขบัตรประชาชน','ชื่อ-นามสกุล','ประเภท','ถุงของ']];
   list.forEach((p,i)=>{
     const bag=p.bag_received===true||p.bag_received===1||p.bag_received==='true';
-    data.push([i+1,p.dept||'-',showID?(p.id_card||'').trim()||'-':'xxxx',_buildFullName(p),bag?'รับแล้ว':'ยังไม่รับ']);
+    data.push([i+1,p.dept||'-',showID?(p.id_card||'').trim()||'-':'xxxx',_buildFullName(p),(p.participation_type||'').trim()||'-',bag?'รับแล้ว':'ยังไม่รับ']);
   });
   const wb=XLSX.utils.book_new();
   const ws=XLSX.utils.aoa_to_sheet(data);
-  ws['!cols']=[{wch:4},{wch:40},{wch:16},{wch:30},{wch:12}];
+  ws['!cols']=[{wch:4},{wch:40},{wch:16},{wch:30},{wch:18},{wch:12}];
   XLSX.utils.book_append_sheet(wb,ws,'รายชื่อคงเหลือ');
   XLSX.writeFile(wb,`รายชื่อคงเหลือ_${activeYear}.xlsx`);
 }
@@ -1433,22 +1461,27 @@ function renderCheckedInTable(){
   const sel=document.getElementById('ciDeptFilter'), curVal=sel.value;
   const depts=[...new Set(full.map(p=>p.dept||'').filter(Boolean))].sort((a,b)=>{const oa=DEPTS.indexOf(a),ob=DEPTS.indexOf(b);return(oa<0?9999:oa)-(ob<0?9999:ob);});
   sel.innerHTML='<option value="">ทั้งหมด</option>'+depts.map(d=>`<option value="${d}"${d===curVal?' selected':''}>${d}</option>`).join('');
-  const list=curVal?full.filter(p=>p.dept===curVal):full;
-  _paginate(list,_checkedInPage,'_checkedInPage','checkedInBody','checkedInPagination',4,(p,i)=>`<tr style="${i%2?'background:#f9fafb':''}">
+  const ptSel=document.getElementById('ciPtFilter'), curPt=ptSel.value;
+  const ptTypes=[...new Set(full.map(p=>(p.participation_type||'').replace(/\s+/g,' ').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'th'));
+  ptSel.innerHTML='<option value="">ทั้งหมด</option>'+ptTypes.map(t=>`<option value="${t}"${t===curPt?' selected':''}>${t}</option>`).join('');
+  let list=curVal?full.filter(p=>p.dept===curVal):full;
+  if(curPt) list=list.filter(p=>(p.participation_type||'').replace(/\s+/g,' ').trim()===curPt);
+  _paginate(list,_checkedInPage,'_checkedInPage','checkedInBody','checkedInPagination',5,(p,i)=>`<tr style="${i%2?'background:#f9fafb':''}">
     <td style="text-align:center;padding:8px 10px;color:#94a3b8;font-size:0.75rem;">${i+1}</td>
     <td style="padding:8px 10px;color:#334155;">${p.dept||'-'}</td>
     <td style="padding:8px 10px;color:#475569;font-size:0.8rem;font-family:monospace;">${(p.id_card||'').trim()||'—'}</td>
-    <td style="padding:8px 10px;color:#1e293b;">${_buildFullName(p)}</td></tr>`);
+    <td style="padding:8px 10px;color:#1e293b;">${_buildFullName(p)}</td>
+    <td style="text-align:center;padding:8px 10px;">${_ptBadge(p.participation_type)}</td></tr>`);
 }
 function exportCheckedInExcel(wantID){
   let showID=false;
   if(wantID){const code=prompt('ใส่รหัส 99037 เพื่อแสดงเลขบัตรประชาชน:');if(!code)return;if(code.trim()!=='99037'){alert('รหัสไม่ถูกต้อง');return;}showID=true;}
   const sel=document.getElementById('ciDeptFilter'), full=_getCheckedInList();
   const list=sel.value?full.filter(p=>p.dept===sel.value):full;
-  const data=[['#','หน่วยงาน','เลขบัตรประชาชน','ชื่อ-นามสกุล']];
-  list.forEach((p,i)=>data.push([i+1,p.dept||'-',showID?(p.id_card||'').trim()||'-':'xxxx',_buildFullName(p)]));
+  const data=[['#','หน่วยงาน','เลขบัตรประชาชน','ชื่อ-นามสกุล','ประเภท']];
+  list.forEach((p,i)=>data.push([i+1,p.dept||'-',showID?(p.id_card||'').trim()||'-':'xxxx',_buildFullName(p),(p.participation_type||'').trim()||'-']));
   const wb=XLSX.utils.book_new(), ws=XLSX.utils.aoa_to_sheet(data);
-  ws['!cols']=[{wch:4},{wch:40},{wch:16},{wch:30}];
+  ws['!cols']=[{wch:4},{wch:40},{wch:16},{wch:30},{wch:18}];
   XLSX.utils.book_append_sheet(wb,ws,'เช็คอินแล้ว');
   XLSX.writeFile(wb,`รายชื่อเช็คอินแล้ว_${activeYear}.xlsx`);
 }
@@ -1473,22 +1506,27 @@ function renderWalkInTable(){
   const sel=document.getElementById('wiDeptFilter'), curVal=sel.value;
   const depts=[...new Set(full.map(p=>(p.dept||'').trim()).filter(Boolean))].sort((a,b)=>{const oa=DEPTS.indexOf(a),ob=DEPTS.indexOf(b);return(oa<0?9999:oa)-(ob<0?9999:ob);});
   sel.innerHTML='<option value="">ทั้งหมด</option>'+depts.map(d=>`<option value="${d}"${d===curVal?' selected':''}>${d}</option>`).join('');
-  const list=curVal?full.filter(p=>(p.dept||'').trim()===curVal):full;
-  _paginate(list,_walkInPage,'_walkInPage','walkInBody','walkInPagination',4,(p,i)=>`<tr style="${i%2?'background:#f9fafb':''}">
+  const ptSel=document.getElementById('wiPtFilter'), curPt=ptSel.value;
+  const ptTypes=[...new Set(full.map(p=>(p.participation_type||'').replace(/\s+/g,' ').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'th'));
+  ptSel.innerHTML='<option value="">ทั้งหมด</option>'+ptTypes.map(t=>`<option value="${t}"${t===curPt?' selected':''}>${t}</option>`).join('');
+  let list=curVal?full.filter(p=>(p.dept||'').trim()===curVal):full;
+  if(curPt) list=list.filter(p=>(p.participation_type||'').replace(/\s+/g,' ').trim()===curPt);
+  _paginate(list,_walkInPage,'_walkInPage','walkInBody','walkInPagination',5,(p,i)=>`<tr style="${i%2?'background:#f9fafb':''}">
     <td style="text-align:center;padding:8px 10px;color:#94a3b8;font-size:0.75rem;">${i+1}</td>
     <td style="padding:8px 10px;color:#334155;">${p.dept||'-'}</td>
     <td style="padding:8px 10px;color:#475569;font-size:0.8rem;font-family:monospace;">${(p.id_card||'').trim()||'—'}</td>
-    <td style="padding:8px 10px;color:#1e293b;">${_buildFullName(p)}</td></tr>`);
+    <td style="padding:8px 10px;color:#1e293b;">${_buildFullName(p)}</td>
+    <td style="text-align:center;padding:8px 10px;">${_ptBadge(p.participation_type)}</td></tr>`);
 }
 function exportWalkInExcel(wantID){
   let showID=false;
   if(wantID){const code=prompt('ใส่รหัส 99037 เพื่อแสดงเลขบัตรประชาชน:');if(!code)return;if(code.trim()!=='99037'){alert('รหัสไม่ถูกต้อง');return;}showID=true;}
   const sel=document.getElementById('wiDeptFilter'), full=_getWalkInList();
   const list=sel.value?full.filter(p=>(p.dept||'').trim()===sel.value):full;
-  const data=[['#','หน่วยงาน','เลขบัตรประชาชน','ชื่อ-นามสกุล']];
-  list.forEach((p,i)=>data.push([i+1,p.dept||'-',showID?(p.id_card||'').trim()||'-':'xxxx',_buildFullName(p)]));
+  const data=[['#','หน่วยงาน','เลขบัตรประชาชน','ชื่อ-นามสกุล','ประเภท']];
+  list.forEach((p,i)=>data.push([i+1,p.dept||'-',showID?(p.id_card||'').trim()||'-':'xxxx',_buildFullName(p),(p.participation_type||'').trim()||'-']));
   const wb=XLSX.utils.book_new(), ws=XLSX.utils.aoa_to_sheet(data);
-  ws['!cols']=[{wch:4},{wch:40},{wch:16},{wch:30}];
+  ws['!cols']=[{wch:4},{wch:40},{wch:16},{wch:30},{wch:18}];
   XLSX.utils.book_append_sheet(wb,ws,'Walk-in');
   XLSX.writeFile(wb,`รายชื่อ Walk-in_${activeYear}.xlsx`);
 }
