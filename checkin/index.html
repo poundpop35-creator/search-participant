@@ -296,8 +296,9 @@
   document.addEventListener('click',()=>document.getElementById('navDD')?.classList.remove('open'));
   const SB_URL  = localStorage.getItem('dmsc_sb_url')  || "https://gvxytnjfyepqhbkmcjms.supabase.co";
   const SB_ANON = localStorage.getItem('dmsc_sb_anon') || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2eHl0bmpmeWVwcWhia21jam1zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0MzE2NDAsImV4cCI6MjA5NTAwNzY0MH0.RAr_ehb4cxfNliDR0h5XcihUaP-0ltZTTGIAv2Fw1kk";
-  const DAY_TH  = {1:'24 มิถุนายน 2569',2:'25 มิถุนายน 2569',3:'26 มิถุนายน 2569'};
-  const EVENT_DATE_DAY = {'2026-06-24':1,'2026-06-25':2,'2026-06-26':3};
+  let DAY_TH  = {1:'24 มิถุนายน 2569',2:'25 มิถุนายน 2569',3:'26 มิถุนายน 2569'};
+  let EVENT_DATE_DAY = {'2026-06-24':1,'2026-06-25':2,'2026-06-26':3};
+  function _thaiToISO(f){const months={'มกราคม':1,'กุมภาพันธ์':2,'มีนาคม':3,'เมษายน':4,'พฤษภาคม':5,'มิถุนายน':6,'กรกฎาคม':7,'สิงหาคม':8,'กันยายน':9,'ตุลาคม':10,'พฤศจิกายน':11,'ธันวาคม':12};const p=f.trim().split(/\s+/);if(p.length<3)return null;const d=parseInt(p[0]),m=months[p[1]],y=parseInt(p[2])-543;if(!d||!m||!y)return null;return y+'-'+String(m).padStart(2,'0')+'-'+String(d).padStart(2,'0');}
 
   if(sessionStorage.getItem('dmsc_auth')!=='ok') window.location.href='login.html';
   document.getElementById('userDisplay').textContent=sessionStorage.getItem('dmsc_user')||'';
@@ -333,11 +334,14 @@
 
   async function loadActiveYear(){
     try{
-      const [yearRes, vipRes, exemptRes, netRes] = await Promise.all([
+      const [yearRes, vipRes, exemptRes, netRes, dr1, dr2, dr3] = await Promise.all([
         fetch(`${SB_URL}/rest/v1/app_settings?key=eq.event_year&select=value`,{headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON}}),
         fetch(`${SB_URL}/rest/v1/app_settings?key=eq.vip_depts&select=value`,{headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON}}),
         fetch(`${SB_URL}/rest/v1/app_settings?key=eq.exempt_depts&select=value`,{headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON}}),
-        fetch(`${SB_URL}/rest/v1/app_settings?key=eq.network_depts&select=value`,{headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON}})
+        fetch(`${SB_URL}/rest/v1/app_settings?key=eq.network_depts&select=value`,{headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON}}),
+        fetch(`${SB_URL}/rest/v1/app_settings?key=eq.event_date_1&select=value`,{headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON}}),
+        fetch(`${SB_URL}/rest/v1/app_settings?key=eq.event_date_2&select=value`,{headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON}}),
+        fetch(`${SB_URL}/rest/v1/app_settings?key=eq.event_date_3&select=value`,{headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON}})
       ]);
       const yearData=await yearRes.json();
       if(yearData&&yearData.length&&yearData[0].value) activeYear=yearData[0].value;
@@ -347,6 +351,15 @@
       if(exemptData&&exemptData.length&&exemptData[0].value) EXEMPT_DEPTS=new Set(JSON.parse(exemptData[0].value));
       const netData=await netRes.json();
       if(netData&&netData.length&&netData[0].value) NETWORK_DEPTS=new Set(JSON.parse(netData[0].value));
+      const d1d=await dr1.json(); if(d1d&&d1d.length&&d1d[0].value) DAY_TH[1]=d1d[0].value;
+      const d2d=await dr2.json(); if(d2d&&d2d.length&&d2d[0].value) DAY_TH[2]=d2d[0].value;
+      const d3d=await dr3.json(); if(d3d&&d3d.length&&d3d[0].value) DAY_TH[3]=d3d[0].value;
+      EVENT_DATE_DAY={};
+      [1,2,3].forEach(i=>{const iso=_thaiToISO(DAY_TH[i]);if(iso)EVENT_DATE_DAY[iso]=i;});
+      const sel=document.getElementById('day');
+      if(sel){
+        for(let i=1;i<=3;i++){const opt=sel.querySelector(`option[value="${i}"]`);if(opt)opt.textContent='วันที่ '+i+' — '+DAY_TH[i];}
+      }
     }catch(e){}
   }
 
@@ -355,8 +368,7 @@
   function initDaySelect(){
     const now=new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Bangkok'}));
     const m=now.getMonth()+1, d=now.getDate(), y=now.getFullYear();
-    const confDays={24:1,25:2,26:3};
-    const isBangkok2026June=y===2026&&m===6;
+    const todayISO=y+'-'+String(m).padStart(2,'0')+'-'+String(d).padStart(2,'0');
     const isAdmin=sessionStorage.getItem('dmsc_role')==='admin';
     const isStaff=sessionStorage.getItem('dmsc_role')==='staff';
     if(isAdmin){
@@ -371,10 +383,10 @@
       bagOpt.disabled=true;
       bagOpt.textContent='รับกระเป๋า+เสื้อ — เปิด 29 พ.ค. 08:00 น.';
     }
-    if(isBangkok2026June&&confDays[d]){
-      bagOpt.disabled=true;
-      bagOpt.textContent='รับกระเป๋า+เสื้อ (ก่อนวันงาน) — ปิดแล้ว';
-      sel.value=String(confDays[d]);
+    const eventDay=EVENT_DATE_DAY[todayISO];
+    if(eventDay){
+      if(bagOpt){bagOpt.disabled=true;bagOpt.textContent='รับกระเป๋า+เสื้อ (ก่อนวันงาน) — ปิดแล้ว';}
+      sel.value=String(eventDay);
       if(!isAdmin){
         sel.disabled=true;
         sel.title='วันที่ถูกล็อกตามวันงานจริง (เฉพาะ Admin เท่านั้นที่เปลี่ยนได้)';

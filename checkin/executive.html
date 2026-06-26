@@ -486,6 +486,11 @@ const EXEC_TARGETS = {
 };
 (function(){try{const s=localStorage.getItem('exec_dept_targets');if(s){const d=JSON.parse(s);Object.keys(d).forEach(k=>{if(EXEC_TARGETS.hasOwnProperty(k))EXEC_TARGETS[k]=d[k];});}}catch(e){}})();
 
+let EVENT_DATES_FULL = ['24 มิถุนายน 2569','25 มิถุนายน 2569','26 มิถุนายน 2569'];
+let eventName = 'ประชุมวิชาการวิทยาศาสตร์การแพทย์ ครั้งที่ 34';
+function _shortDate(f){const m={'มกราคม':'ม.ค.','กุมภาพันธ์':'ก.พ.','มีนาคม':'มี.ค.','เมษายน':'เม.ย.','พฤษภาคม':'พ.ค.','มิถุนายน':'มิ.ย.','กรกฎาคม':'ก.ค.','สิงหาคม':'ส.ค.','กันยายน':'ก.ย.','ตุลาคม':'ต.ค.','พฤศจิกายน':'พ.ย.','ธันวาคม':'ธ.ค.'};const p=f.trim().split(/\s+/);return p.length>=2?p[0]+' '+(m[p[1]]||p[1]):f;}
+function _dateRange(){const p0=EVENT_DATES_FULL[0].trim().split(/\s+/),p2=EVENT_DATES_FULL[2].trim().split(/\s+/);if(p0[1]===p2[1]&&p0[2]===p2[2])return p0[0]+'-'+p2[0]+' '+p0[1]+' '+p0[2];return _shortDate(EVENT_DATES_FULL[0])+'–'+_shortDate(EVENT_DATES_FULL[2]);}
+
 function fmtPct(count, target) {
   if (!target) return '<span style="color:#94a3b8;">—</span>';
   const p = Math.round(count / target * 100);
@@ -513,14 +518,19 @@ async function fetchAll(path) {
 let activeYear = '2569';
 async function loadActiveYear(){
   try{
-    const [r,nr]=await Promise.all([
+    const [r,nr,dr1,dr2,dr3,dtr]=await Promise.all([
       fetch(`${SUPABASE_URL}/rest/v1/app_settings?key=eq.event_year&select=value`,{headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}}),
-      fetch(`${SUPABASE_URL}/rest/v1/app_settings?key=eq.event_name&select=value`,{headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}})
+      fetch(`${SUPABASE_URL}/rest/v1/app_settings?key=eq.event_name&select=value`,{headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}}),
+      fetch(`${SUPABASE_URL}/rest/v1/app_settings?key=eq.event_date_1&select=value`,{headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}}),
+      fetch(`${SUPABASE_URL}/rest/v1/app_settings?key=eq.event_date_2&select=value`,{headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}}),
+      fetch(`${SUPABASE_URL}/rest/v1/app_settings?key=eq.event_date_3&select=value`,{headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}}),
+      fetch(`${SUPABASE_URL}/rest/v1/app_settings?key=eq.dept_targets&select=value`,{headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}})
     ]);
     const d=await r.json();
     if(d&&d.length&&d[0].value) activeYear=d[0].value;
     const nd=await nr.json();
     if(nd&&nd.length&&nd[0].value){
+      eventName=nd[0].value;
       const titleEl=document.getElementById('heroEventTitle');
       if(titleEl){
         const name=nd[0].value;
@@ -534,7 +544,13 @@ async function loadActiveYear(){
         }
         document.title='Dashboard ผู้บริหาร — '+name;
       }
+      document.querySelectorAll('.a4ev').forEach(el=>{const p=el.dataset.prefix||'';el.textContent=p+eventName;});
     }
+    const d1d=await dr1.json(); if(d1d&&d1d.length&&d1d[0].value) EVENT_DATES_FULL[0]=d1d[0].value;
+    const d2d=await dr2.json(); if(d2d&&d2d.length&&d2d[0].value) EVENT_DATES_FULL[1]=d2d[0].value;
+    const d3d=await dr3.json(); if(d3d&&d3d.length&&d3d[0].value) EVENT_DATES_FULL[2]=d3d[0].value;
+    const dtd=await dtr.json();
+    if(dtd&&dtd.length&&dtd[0].value){try{const targets=JSON.parse(dtd[0].value);Object.keys(targets).forEach(k=>{if(Object.prototype.hasOwnProperty.call(EXEC_TARGETS,k))EXEC_TARGETS[k]=parseInt(targets[k])||EXEC_TARGETS[k];});}catch(e2){}}
   }catch(e){}
 }
 
@@ -755,7 +771,7 @@ function renderTrendChart() {
       backgroundColor:COLORS[i]+'22', fill:true, tension:0.4,
       pointRadius:4, pointBackgroundColor:COLORS[i], borderWidth:2.5 };
   });
-  const sub = sel===0 ? 'ทุกวัน' : ['','24 มิ.ย. 2569','25 มิ.ย. 2569','26 มิ.ย. 2569'][sel];
+  const sub = sel===0 ? 'ทุกวัน' : ['',_shortDate(EVENT_DATES_FULL[0]),_shortDate(EVENT_DATES_FULL[1]),_shortDate(EVENT_DATES_FULL[2])][sel];
   document.getElementById('execTrendSub').textContent = 'จำนวนผู้เข้าร่วมงานในแต่ละชั่วโมง — ' + sub;
   if(trendChartInst){ trendChartInst.destroy(); trendChartInst=null; }
   trendChartInst = new Chart(canvas.getContext('2d'), {
@@ -1381,9 +1397,9 @@ async function shareDeptTable() {
       now.toLocaleString('th-TH', {timeZone:'Asia/Bangkok', dateStyle:'medium', timeStyle:'short'});
 
     const dk = execDay ? `d${execDay}` : null;
-    const dl = execDay ? ['','24 มิ.ย.','25 มิ.ย.','26 มิ.ย.'][execDay] : 'รวม';
+    const dl = execDay ? ['',_shortDate(EVENT_DATES_FULL[0]),_shortDate(EVENT_DATES_FULL[1]),_shortDate(EVENT_DATES_FULL[2])][execDay] : 'รวม';
     const dc = execDay ? ['','#2563eb','#7c3aed','#0891b2'][execDay] : '#1F3540';
-    const dayLabel = execDay ? ['','24 มิถุนายน 2569','25 มิถุนายน 2569','26 มิถุนายน 2569'][execDay] : null;
+    const dayLabel = execDay ? ['',EVENT_DATES_FULL[0],EVENT_DATES_FULL[1],EVENT_DATES_FULL[2]][execDay] : null;
 
     // Build table body
     const dayMult = execDay ? 1 : 3;
@@ -1417,10 +1433,10 @@ async function shareDeptTable() {
 
     // Generate LINE text
     const nowStr = now.toLocaleString('th-TH',{timeZone:'Asia/Bangkok',hour:'2-digit',minute:'2-digit'});
-    const dayNames = ['','24 มิถุนายน 2569','25 มิถุนายน 2569','26 มิถุนายน 2569'];
+    const dayNames = ['',EVENT_DATES_FULL[0],EVENT_DATES_FULL[1],EVENT_DATES_FULL[2]];
     const shareText = execDay
-      ? `ประชุมวิชาการวิทยาศาสตร์การแพทย์ ครั้งที่ 34\n📅 วันที่ ${dayNames[execDay]}\n\n🧑‍🔬 บุคลากรภายในกรม: ${grandInt.toLocaleString()} คน\n\n⏰ ณ เวลา ${nowStr} น.`
-      : `ประชุมวิชาการวิทยาศาสตร์การแพทย์ ครั้งที่ 34\n📅 รวม 3 วัน (24-26 มิถุนายน 2569)\n\n🧑‍🔬 บุคลากรภายในกรม: ${grandInt.toLocaleString()} คน\n\n⏰ ณ เวลา ${nowStr} น.`;
+      ? `${eventName}\n📅 วันที่ ${dayNames[execDay]}\n\n🧑‍🔬 บุคลากรภายในกรม: ${grandInt.toLocaleString()} คน\n\n⏰ ณ เวลา ${nowStr} น.`
+      : `${eventName}\n📅 รวม 3 วัน (${_dateRange()})\n\n🧑‍🔬 บุคลากรภายในกรม: ${grandInt.toLocaleString()} คน\n\n⏰ ณ เวลา ${nowStr} น.`;
 
     const canvas = await html2canvas(a4, {
       scale: 2,
@@ -1455,9 +1471,9 @@ async function shareExtZoneText() {
   try {
     const zoneCounts = getExtZoneCounts();
     const total = Object.values(zoneCounts).reduce((s,n)=>s+n,0);
-    const dl = execDay ? ['','วันที่ 24 มิถุนายน 2569','วันที่ 25 มิถุนายน 2569','วันที่ 26 มิถุนายน 2569'][execDay] : 'รวม 3 วัน (24-26 มิถุนายน 2569)';
+    const dl = execDay ? ['','วันที่ '+EVENT_DATES_FULL[0],'วันที่ '+EVENT_DATES_FULL[1],'วันที่ '+EVENT_DATES_FULL[2]][execDay] : 'รวม 3 วัน ('+_dateRange()+')';
     const now = new Date().toLocaleString('th-TH',{timeZone:'Asia/Bangkok',hour:'2-digit',minute:'2-digit'});
-    const text = `ประชุมวิชาการวิทยาศาสตร์การแพทย์ ครั้งที่ 34\n📅 ${dl}\n\n🏃 ภายนอกกรม: ${total.toLocaleString()} คน\n\n⏰ ณ เวลา ${now} น.`;
+    const text = `${eventName}\n📅 ${dl}\n\n🏃 ภายนอกกรม: ${total.toLocaleString()} คน\n\n⏰ ณ เวลา ${now} น.`;
     if(navigator.share){ await navigator.share({text}); }
     else { await navigator.clipboard.writeText(text); alert('คัดลอกข้อความแล้ว!'); }
   } catch(e){ if(e.name!=='AbortError') alert('เกิดข้อผิดพลาด: '+e.message); }
@@ -1471,7 +1487,7 @@ async function shareExtZoneImage() {
     const now = new Date();
     const zoneCounts = getExtZoneCounts();
     const total = Object.values(zoneCounts).reduce((s,n)=>s+n,0);
-    const dl = execDay ? ['','24 มิ.ย. 2569','25 มิ.ย. 2569','26 มิ.ย. 2569'][execDay] : 'รวม 3 วัน';
+    const dl = execDay ? ['',_shortDate(EVENT_DATES_FULL[0]),_shortDate(EVENT_DATES_FULL[1]),_shortDate(EVENT_DATES_FULL[2])][execDay] : 'รวม 3 วัน';
     const dc = execDay ? ['','#2563eb','#7c3aed','#0891b2'][execDay] : '#1d4ed8';
 
     const deptRows = [];
@@ -1497,8 +1513,8 @@ async function shareExtZoneImage() {
       const file=new File([blob],'ext-zone-'+now.toISOString().slice(0,10)+'.png',{type:'image/png'});
       if(isMobile()&&navigator.canShare&&navigator.canShare({files:[file]})){
         const nowStr2=now.toLocaleString('th-TH',{timeZone:'Asia/Bangkok',hour:'2-digit',minute:'2-digit'});
-        const dl2=execDay?['','วันที่ 24 มิถุนายน 2569','วันที่ 25 มิถุนายน 2569','วันที่ 26 มิถุนายน 2569'][execDay]:'รวม 3 วัน (24-26 มิถุนายน 2569)';
-        const shareText2=`ประชุมวิชาการวิทยาศาสตร์การแพทย์ ครั้งที่ 34\n📅 ${dl2}\n\n🏃 ภายนอกกรม: ${total.toLocaleString()} คน\n\n⏰ ณ เวลา ${nowStr2} น.`;
+        const dl2=execDay?['','วันที่ '+EVENT_DATES_FULL[0],'วันที่ '+EVENT_DATES_FULL[1],'วันที่ '+EVENT_DATES_FULL[2]][execDay]:'รวม 3 วัน ('+_dateRange()+')';
+        const shareText2=`${eventName}\n📅 ${dl2}\n\n🏃 ภายนอกกรม: ${total.toLocaleString()} คน\n\n⏰ ณ เวลา ${nowStr2} น.`;
         try{await navigator.share({files:[file],text:shareText2});}
         catch(e){if(e.name!=='AbortError'){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=file.name;a.click();showDesktopHint();}}
       } else { const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=file.name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),5000);showDesktopHint(); }
@@ -1600,7 +1616,7 @@ async function shareExtTable() {
     document.getElementById('a4ExtExportTime').textContent =
       new Date().toLocaleString('th-TH', {timeZone:'Asia/Bangkok', dateStyle:'medium', timeStyle:'short'});
     const dk = execDay ? `d${execDay}` : null;
-    const dl = execDay ? ['','24 มิ.ย. 2569','25 มิ.ย. 2569','26 มิ.ย. 2569'][execDay] : 'ทุกวัน (รวม)';
+    const dl = execDay ? ['',_shortDate(EVENT_DATES_FULL[0]),_shortDate(EVENT_DATES_FULL[1]),_shortDate(EVENT_DATES_FULL[2])][execDay] : 'ทุกวัน (รวม)';
     document.getElementById('a4ExtColLabel').textContent = execDay ? dl : 'รวม (ทุกวัน)';
     const entries = Object.entries(execExtMap)
       .map(([dept,c])=>({name:dept,count:dk?c[dk]:(c.d1+c.d2+c.d3)}))
@@ -1633,7 +1649,7 @@ async function shareExtTable() {
 
 async function shareTextSummary(day) {
   const now = new Date().toLocaleString('th-TH',{timeZone:'Asia/Bangkok',timeStyle:'short'});
-  const dayNames = {1:'วันที่ 24 มิถุนายน 2569',2:'วันที่ 25 มิถุนายน 2569',3:'วันที่ 26 มิถุนายน 2569'};
+  const dayNames = {1:'วันที่ '+EVENT_DATES_FULL[0],2:'วันที่ '+EVENT_DATES_FULL[1],3:'วันที่ '+EVENT_DATES_FULL[2]};
   const dk = day ? `d${day}` : null;
   const intTotal = dk
     ? DEPTS.reduce((s,d)=>s+(execMap[d]?.[dk]||0),0)
@@ -1647,7 +1663,7 @@ async function shareTextSummary(day) {
     const d1=DEPTS.reduce((s,d)=>s+(execMap[d]?.d1||0),0)+execExternal.d1;
     const d2=DEPTS.reduce((s,d)=>s+(execMap[d]?.d2||0),0)+execExternal.d2;
     const d3=DEPTS.reduce((s,d)=>s+(execMap[d]?.d3||0),0)+execExternal.d3;
-    dayLine = `วันที่ 1 (24 มิ.ย.): ${d1.toLocaleString()} คน\nวันที่ 2 (25 มิ.ย.): ${d2.toLocaleString()} คน\nวันที่ 3 (26 มิ.ย.): ${d3.toLocaleString()} คน`;
+    dayLine = `วันที่ 1 (${_shortDate(EVENT_DATES_FULL[0])}): ${d1.toLocaleString()} คน\nวันที่ 2 (${_shortDate(EVENT_DATES_FULL[1])}): ${d2.toLocaleString()} คน\nวันที่ 3 (${_shortDate(EVENT_DATES_FULL[2])}): ${d3.toLocaleString()} คน`;
   }
   const text = day
     ? `สรุปจำนวนผู้เข้าร่วมงานประชุมวิชาการฯ\n\n${dayLine}\n- บุคลากรภายในกรม ${intTotal.toLocaleString()} คน\n- บุคคลภายนอกกรม ${extTotal.toLocaleString()} คน\nรวม ${allTotal.toLocaleString()} คน\n\nข้อมูล ณ เวลา ${now} น.`
@@ -1665,10 +1681,10 @@ async function shareBothImages() {
   try {
     const now = new Date();
     const dk = execDay ? `d${execDay}` : null;
-    const dl = execDay ? ['','24 มิ.ย.','25 มิ.ย.','26 มิ.ย.'][execDay] : 'รวม';
+    const dl = execDay ? ['',_shortDate(EVENT_DATES_FULL[0]),_shortDate(EVENT_DATES_FULL[1]),_shortDate(EVENT_DATES_FULL[2])][execDay] : 'รวม';
     const dc = execDay ? ['','#2563eb','#7c3aed','#0891b2'][execDay] : '#1F3540';
     const dayMult = execDay ? 1 : 3;
-    const dlFull = execDay ? ['','วันที่ 24 มิถุนายน 2569','วันที่ 25 มิถุนายน 2569','วันที่ 26 มิถุนายน 2569'][execDay] : 'รวม 3 วัน (24-26 มิถุนายน 2569)';
+    const dlFull = execDay ? ['','วันที่ '+EVENT_DATES_FULL[0],'วันที่ '+EVENT_DATES_FULL[1],'วันที่ '+EVENT_DATES_FULL[2]][execDay] : 'รวม 3 วัน ('+_dateRange()+')';
 
     // ── Build internal A4 ──
     document.getElementById('a4ExportTime').textContent = now.toLocaleString('th-TH',{timeZone:'Asia/Bangkok',dateStyle:'medium',timeStyle:'short'});
@@ -1715,7 +1731,7 @@ async function shareBothImages() {
     // ── Combined text ──
     const nowStr = now.toLocaleString('th-TH',{timeZone:'Asia/Bangkok',hour:'2-digit',minute:'2-digit'});
     const grandAll = grandInt + extTotal;
-    const shareText = `ประชุมวิชาการวิทยาศาสตร์การแพทย์ ครั้งที่ 34\n📅 ${dlFull}\n\n🧑‍🔬 บุคลากรภายในกรม: ${grandInt.toLocaleString()} คน\n🏃 ภายนอกกรม: ${extTotal.toLocaleString()} คน\nรวม ${grandAll.toLocaleString()} คน\n\n⏰ ณ เวลา ${nowStr} น.`;
+    const shareText = `${eventName}\n📅 ${dlFull}\n\n🧑‍🔬 บุคลากรภายในกรม: ${grandInt.toLocaleString()} คน\n🏃 ภายนอกกรม: ${extTotal.toLocaleString()} คน\nรวม ${grandAll.toLocaleString()} คน\n\n⏰ ณ เวลา ${nowStr} น.`;
 
     // ── Share (pass external first → LINE reverses → internal shows on top) ──
     if(isMobile()&&navigator.canShare&&navigator.canShare({files:[file2,file1]})){
@@ -1740,7 +1756,7 @@ async function shareBothImages() {
       <div style="font-size:11px;color:#7a9aae;margin-top:4px;">ข้อมูลจากการเช็คอินจริง — อัปเดตอัตโนมัติทุก 1 นาที</div>
     </div>
     <div style="text-align:right;flex-shrink:0;">
-      <div style="font-size:11px;font-weight:700;color:#1F3540;">ประชุมวิชาการวิทยาศาสตร์การแพทย์ ครั้งที่ 34</div>
+      <div class="a4ev" style="font-size:11px;font-weight:700;color:#1F3540;">ประชุมวิชาการวิทยาศาสตร์การแพทย์ ครั้งที่ 34</div>
       <div style="font-size:10.5px;color:#7a9aae;margin-top:3px;" id="a4ExportTime"></div>
     </div>
   </div>
@@ -1755,7 +1771,7 @@ async function shareBothImages() {
       <div style="font-size:11px;color:#7a9aae;margin-top:4px;">ข้อมูลจากการเช็คอินจริง — อัปเดตอัตโนมัติทุก 1 นาที</div>
     </div>
     <div style="text-align:right;flex-shrink:0;">
-      <div style="font-size:11px;font-weight:700;color:#1F3540;">ประชุมวิชาการวิทยาศาสตร์การแพทย์ ครั้งที่ 34</div>
+      <div class="a4ev" style="font-size:11px;font-weight:700;color:#1F3540;">ประชุมวิชาการวิทยาศาสตร์การแพทย์ ครั้งที่ 34</div>
       <div style="font-size:10.5px;color:#7a9aae;margin-top:3px;" id="a4ExtExportTime"></div>
     </div>
   </div>
@@ -1770,7 +1786,7 @@ async function shareBothImages() {
       <div style="font-size:11px;color:#7a9aae;margin-top:4px;">ข้อมูลจากการเช็คอินจริง — อัปเดตอัตโนมัติทุก 1 นาที</div>
     </div>
     <div style="text-align:right;flex-shrink:0;">
-      <div style="font-size:11px;font-weight:700;color:#1F3540;">ประชุมวิชาการวิทยาศาสตร์การแพทย์ ครั้งที่ 34</div>
+      <div class="a4ev" style="font-size:11px;font-weight:700;color:#1F3540;">ประชุมวิชาการวิทยาศาสตร์การแพทย์ ครั้งที่ 34</div>
       <div style="font-size:10.5px;color:#7a9aae;margin-top:3px;" id="a4ExtZoneExportTime"></div>
       <div style="font-size:10.5px;color:#1d4ed8;font-weight:700;margin-top:2px;" id="a4ExtZoneColLabel"></div>
     </div>
@@ -1786,7 +1802,7 @@ async function shareBothImages() {
       <div style="font-size:11px;color:#7a9aae;margin-top:3px;">ข้อมูลจากการเช็คอินจริง — อัปเดตอัตโนมัติทุก 1 นาที</div>
     </div>
     <div style="text-align:right;flex-shrink:0;">
-      <div style="font-size:11px;font-weight:700;color:#1F3540;">ประชุมวิชาการวิทยาศาสตร์การแพทย์ ครั้งที่ 34</div>
+      <div class="a4ev" style="font-size:11px;font-weight:700;color:#1F3540;">ประชุมวิชาการวิทยาศาสตร์การแพทย์ ครั้งที่ 34</div>
       <div style="font-size:10.5px;color:#7a9aae;margin-top:3px;" id="a4ZoneExportTime"></div>
     </div>
   </div>
@@ -1878,7 +1894,7 @@ async function shareBothImages() {
   <div style="background:linear-gradient(135deg,#1F3540 0%,#2C4B5D 100%);padding:22px 28px 18px;display:flex;align-items:center;gap:14px;">
     <div style="flex:1;">
       <div style="font-size:11px;font-weight:700;color:#93c5fd;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px;">สรุปผู้เข้าร่วมงาน — เช็คอินแล้ว</div>
-      <div style="font-size:15px;font-weight:800;color:#fff;line-height:1.4;">งานประชุมวิชาการวิทยาศาสตร์การแพทย์ ครั้งที่ 34</div>
+      <div class="a4ev" data-prefix="งาน" style="font-size:15px;font-weight:800;color:#fff;line-height:1.4;">งานประชุมวิชาการวิทยาศาสตร์การแพทย์ ครั้งที่ 34</div>
       <div style="font-size:10.5px;color:#93c5fd;margin-top:3px;" id="sumExportTime"></div>
     </div>
   </div>

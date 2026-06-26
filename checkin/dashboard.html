@@ -401,9 +401,9 @@ document.addEventListener('DOMContentLoaded', function() {
   <!-- TABS -->
   <div class="tabs">
     <button class="tab active" onclick="switchTab(0)">ทั้งหมด</button>
-    <button class="tab" onclick="switchTab(1)">วันที่ 1 — 24 มิ.ย.</button>
-    <button class="tab" onclick="switchTab(2)">วันที่ 2 — 25 มิ.ย.</button>
-    <button class="tab" onclick="switchTab(3)">วันที่ 3 — 26 มิ.ย.</button>
+    <button class="tab" id="tab1" onclick="switchTab(1)">วันที่ 1 — 24 มิ.ย.</button>
+    <button class="tab" id="tab2" onclick="switchTab(2)">วันที่ 2 — 25 มิ.ย.</button>
+    <button class="tab" id="tab3" onclick="switchTab(3)">วันที่ 3 — 26 มิ.ย.</button>
   </div>
 
   <!-- CHECKIN TABLE -->
@@ -900,8 +900,10 @@ const SB_ANON = localStorage.getItem('dmsc_sb_anon') || "eyJhbGciOiJIUzI1NiIsInR
     if(cp) cp.style.display='inline-flex';
   }
 })();
-const DAY_L   = {1:'24 มิ.ย.',2:'25 มิ.ย.',3:'26 มิ.ย.'};
+let DAY_L   = {1:'24 มิ.ย.',2:'25 มิ.ย.',3:'26 มิ.ย.'};
 const DAY_ISO = {1:'2026-06-24',2:'2026-06-25',3:'2026-06-26'};
+let EVENT_DATES_FULL = ['24 มิถุนายน 2569','25 มิถุนายน 2569','26 มิถุนายน 2569'];
+function _shortDate(f){const m={'มกราคม':'ม.ค.','กุมภาพันธ์':'ก.พ.','มีนาคม':'มี.ค.','เมษายน':'เม.ย.','พฤษภาคม':'พ.ค.','มิถุนายน':'มิ.ย.','กรกฎาคม':'ก.ค.','สิงหาคม':'ส.ค.','กันยายน':'ก.ย.','ตุลาคม':'ต.ค.','พฤศจิกายน':'พ.ย.','ธันวาคม':'ธ.ค.'};const p=f.trim().split(/\s+/);return p.length>=2?p[0]+' '+(m[p[1]]||p[1]):f;}
 const PAGE  = 5;
 const DEPTS = ['อธิบดีกรมวิทยาศาสตร์การแพทย์','รองอธิบดีกรมวิทยาศาสตร์การแพทย์','สำนักผู้ทรงคุณวุฒิกรมวิทยาศาสตร์การแพทย์','กองแผนงานและวิชาการ','กองทดสอบความชำนาญ','กลุ่มพัฒนาระบบบริหาร','กลุ่มตรวจสอบภายใน','กลุ่มงานจริยธรรม','สำนักงานเลขานุการกรม','สถาบันชีววัตถุ','สถาบันวิจัยวิทยาศาสตร์สาธารณสุข','สถาบันวิจัยสมุนไพร','สถาบันชีววิทยาศาสตร์ทางการแพทย์','สำนักคุณภาพและความปลอดภัยอาหาร','สำนักเครื่องสำอางและวัตถุอันตราย','สำนักรังสีและเครื่องมือแพทย์','สำนักมาตรฐานห้องปฏิบัติการ','สำนักยาและวัตถุเสพติด','ศูนย์รวมบริการ','ศูนย์เทคโนโลยีสารสนเทศและการสื่อสาร','กองความร่วมมือระหว่างประเทศ','กองบริหารทรัพยากรบุคคล','กองบริหารการคลัง','กองประชาสัมพันธ์และสื่อสารสาธารณะ','ศูนย์ตอบโต้เหตุฉุกเฉินด้านห้องปฏิบัติการและรังสี','ศูนย์วิทยาศาสตร์การแพทย์ที่ 1 เชียงใหม่','ศูนย์วิทยาศาสตร์การแพทย์ที่ 1/1 เชียงราย','ศูนย์วิทยาศาสตร์การแพทย์ที่ 2 พิษณุโลก','ศูนย์วิทยาศาสตร์การแพทย์ที่ 3 นครสวรรค์','ศูนย์วิทยาศาสตร์การแพทย์ที่ 4 สระบุรี','ศูนย์วิทยาศาสตร์การแพทย์ที่ 5 สมุทรสงคราม','ศูนย์วิทยาศาสตร์การแพทย์ที่ 6 ชลบุรี','ศูนย์วิทยาศาสตร์การแพทย์ที่ 7 ขอนแก่น','ศูนย์วิทยาศาสตร์การแพทย์ที่ 8 อุดรธานี','ศูนย์วิทยาศาสตร์การแพทย์ที่ 9 นครราชสีมา','ศูนย์วิทยาศาสตร์การแพทย์ที่ 10 อุบลราชธานี','ศูนย์วิทยาศาสตร์การแพทย์ที่ 11 สุราษฎร์ธานี','ศูนย์วิทยาศาสตร์การแพทย์ที่ 11/1 ภูเก็ต','ศูนย์วิทยาศาสตร์การแพทย์ที่ 12 สงขลา','ศูนย์วิทยาศาสตร์การแพทย์ที่ 12/1 ตรัง'];
 const DASH_TARGETS={'อธิบดีกรมวิทยาศาสตร์การแพทย์':1,'รองอธิบดีกรมวิทยาศาสตร์การแพทย์':3,'สำนักผู้ทรงคุณวุฒิกรมวิทยาศาสตร์การแพทย์':5,'กองแผนงานและวิชาการ':31,'กองทดสอบความชำนาญ':7,'กลุ่มพัฒนาระบบบริหาร':6,'กลุ่มตรวจสอบภายใน':2,'กลุ่มงานจริยธรรม':2,'สำนักงานเลขานุการกรม':28,'สถาบันชีววัตถุ':29,'สถาบันวิจัยวิทยาศาสตร์สาธารณสุข':105,'สถาบันวิจัยสมุนไพร':55,'สถาบันชีววิทยาศาสตร์ทางการแพทย์':71,'สำนักคุณภาพและความปลอดภัยอาหาร':63,'สำนักเครื่องสำอางและวัตถุอันตราย':20,'สำนักรังสีและเครื่องมือแพทย์':42,'สำนักมาตรฐานห้องปฏิบัติการ':28,'สำนักยาและวัตถุเสพติด':69,'ศูนย์รวมบริการ':2,'ศูนย์เทคโนโลยีสารสนเทศและการสื่อสาร':11,'กองความร่วมมือระหว่างประเทศ':2,'กองบริหารทรัพยากรบุคคล':6,'กองบริหารการคลัง':8,'กองประชาสัมพันธ์และสื่อสารสาธารณะ':11,'ศูนย์ตอบโต้เหตุฉุกเฉินด้านห้องปฏิบัติการและรังสี':1,'ศูนย์วิทยาศาสตร์การแพทย์ที่ 1 เชียงใหม่':14,'ศูนย์วิทยาศาสตร์การแพทย์ที่ 1/1 เชียงราย':17,'ศูนย์วิทยาศาสตร์การแพทย์ที่ 2 พิษณุโลก':33,'ศูนย์วิทยาศาสตร์การแพทย์ที่ 3 นครสวรรค์':24,'ศูนย์วิทยาศาสตร์การแพทย์ที่ 4 สระบุรี':24,'ศูนย์วิทยาศาสตร์การแพทย์ที่ 5 สมุทรสงคราม':23,'ศูนย์วิทยาศาสตร์การแพทย์ที่ 6 ชลบุรี':16,'ศูนย์วิทยาศาสตร์การแพทย์ที่ 7 ขอนแก่น':13,'ศูนย์วิทยาศาสตร์การแพทย์ที่ 8 อุดรธานี':18,'ศูนย์วิทยาศาสตร์การแพทย์ที่ 9 นครราชสีมา':20,'ศูนย์วิทยาศาสตร์การแพทย์ที่ 10 อุบลราชธานี':14,'ศูนย์วิทยาศาสตร์การแพทย์ที่ 11 สุราษฎร์ธานี':15,'ศูนย์วิทยาศาสตร์การแพทย์ที่ 11/1 ภูเก็ต':11,'ศูนย์วิทยาศาสตร์การแพทย์ที่ 12 สงขลา':15,'ศูนย์วิทยาศาสตร์การแพทย์ที่ 12/1 ตรัง':15};
@@ -987,16 +989,32 @@ let EXEMPT_DEPTS = new Set(['กองแผนงานและวิชาก
 let NETWORK_DEPTS = new Set([]);
 async function loadActiveYear(){
   try{
-    const [yearRes,vipRes,exemptRes,netRes]=await Promise.all([
+    const [yearRes,vipRes,exemptRes,netRes,dr1,dr2,dr3,dtr]=await Promise.all([
       fetch(`${SB_URL}/rest/v1/app_settings?key=eq.event_year&select=value`,{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}}),
       fetch(`${SB_URL}/rest/v1/app_settings?key=eq.vip_depts&select=value`,{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}}),
       fetch(`${SB_URL}/rest/v1/app_settings?key=eq.exempt_depts&select=value`,{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}}),
-      fetch(`${SB_URL}/rest/v1/app_settings?key=eq.network_depts&select=value`,{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}})
+      fetch(`${SB_URL}/rest/v1/app_settings?key=eq.network_depts&select=value`,{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}}),
+      fetch(`${SB_URL}/rest/v1/app_settings?key=eq.event_date_1&select=value`,{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}}),
+      fetch(`${SB_URL}/rest/v1/app_settings?key=eq.event_date_2&select=value`,{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}}),
+      fetch(`${SB_URL}/rest/v1/app_settings?key=eq.event_date_3&select=value`,{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}}),
+      fetch(`${SB_URL}/rest/v1/app_settings?key=eq.dept_targets&select=value`,{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}})
     ]);
     const yd=await yearRes.json(); if(yd&&yd.length&&yd[0].value) activeYear=yd[0].value;
     const vd=await vipRes.json(); if(vd&&vd.length&&vd[0].value) VIP_DEPTS=new Set(JSON.parse(vd[0].value));
     const ed=await exemptRes.json(); if(ed&&ed.length&&ed[0].value) EXEMPT_DEPTS=new Set(JSON.parse(ed[0].value));
     const nd=await netRes.json(); if(nd&&nd.length&&nd[0].value) NETWORK_DEPTS=new Set(JSON.parse(nd[0].value));
+    const d1d=await dr1.json(); if(d1d&&d1d.length&&d1d[0].value) EVENT_DATES_FULL[0]=d1d[0].value;
+    const d2d=await dr2.json(); if(d2d&&d2d.length&&d2d[0].value) EVENT_DATES_FULL[1]=d2d[0].value;
+    const d3d=await dr3.json(); if(d3d&&d3d.length&&d3d[0].value) EVENT_DATES_FULL[2]=d3d[0].value;
+    DAY_L={1:_shortDate(EVENT_DATES_FULL[0]),2:_shortDate(EVENT_DATES_FULL[1]),3:_shortDate(EVENT_DATES_FULL[2])};
+    const t1=document.getElementById('tab1');if(t1)t1.textContent='วันที่ 1 — '+DAY_L[1];
+    const t2=document.getElementById('tab2');if(t2)t2.textContent='วันที่ 2 — '+DAY_L[2];
+    const t3=document.getElementById('tab3');if(t3)t3.textContent='วันที่ 3 — '+DAY_L[3];
+    const dh1=document.getElementById('dh1');if(dh1)dh1.textContent=DAY_L[1];
+    const dh2=document.getElementById('dh2');if(dh2)dh2.textContent=DAY_L[2];
+    const dh3=document.getElementById('dh3');if(dh3)dh3.textContent=DAY_L[3];
+    const dtd=await dtr.json();
+    if(dtd&&dtd.length&&dtd[0].value){try{const targets=JSON.parse(dtd[0].value);Object.keys(targets).forEach(k=>{if(Object.prototype.hasOwnProperty.call(DASH_TARGETS,k))DASH_TARGETS[k]=parseInt(targets[k])||DASH_TARGETS[k];});}catch(e2){}}
   }catch(e){}
 }
 

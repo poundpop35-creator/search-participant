@@ -468,6 +468,59 @@
   <!-- ══════════ TAB: SETTINGS ══════════ -->
   <div id="tc-settings" style="display:none;">
 
+    <!-- วันที่งาน -->
+    <div class="card">
+      <div class="card-title">📅 วันที่งาน</div>
+      <p class="card-desc">กำหนดวันที่ของแต่ละวันงาน — จะแสดงผลในทุกหน้าของระบบ (label ปุ่มวัน, ข้อความแชร์ LINE ฯลฯ)</p>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:14px;">
+        <div class="field">
+          <label>วันที่ 1</label>
+          <input id="eventDate1" type="text" placeholder="เช่น 24 มิถุนายน 2569">
+        </div>
+        <div class="field">
+          <label>วันที่ 2</label>
+          <input id="eventDate2" type="text" placeholder="เช่น 25 มิถุนายน 2569">
+        </div>
+        <div class="field">
+          <label>วันที่ 3</label>
+          <input id="eventDate3" type="text" placeholder="เช่น 26 มิถุนายน 2569">
+        </div>
+      </div>
+      <button class="btn btn-green btn-sm" onclick="saveEventDates()">💾 บันทึกวันที่งาน</button>
+      <div id="eventDatesStatus" style="margin-top:10px;"></div>
+    </div>
+
+    <!-- เป้าหมายผู้เข้าร่วม -->
+    <div class="card">
+      <div class="card-title">🎯 เป้าหมายผู้เข้าร่วมงาน</div>
+      <p class="card-desc">จำนวนเป้าหมายรวมทุกวัน — แสดงเป็น Progress Bar ในหน้า Dashboard สาธารณะ</p>
+      <div class="field" style="max-width:200px;">
+        <label>จำนวนเป้าหมาย (คน)</label>
+        <input id="targetAttendees" type="number" min="1" placeholder="เช่น 1800">
+      </div>
+      <button class="btn btn-green btn-sm" onclick="saveTargetAttendees()">💾 บันทึกเป้าหมาย</button>
+      <div id="targetAttendeesStatus" style="margin-top:10px;"></div>
+    </div>
+
+    <!-- เป้าหมายรายหน่วยงาน -->
+    <div class="card">
+      <div class="card-title">🏢 เป้าหมายรายหน่วยงาน</div>
+      <p class="card-desc">จำนวนเป้าหมายของแต่ละหน่วยงาน — แสดงในตารางสถิติหน้าผู้บริหาร</p>
+      <div style="overflow-x:auto;margin-bottom:14px;">
+        <table style="width:100%;border-collapse:collapse;font-size:0.85rem;">
+          <thead>
+            <tr style="background:#f8fafc;">
+              <th style="padding:8px 12px;text-align:left;border-bottom:2px solid #e2e8f0;font-size:0.75rem;color:#64748b;text-transform:uppercase;">หน่วยงาน</th>
+              <th style="padding:8px 12px;text-align:center;border-bottom:2px solid #e2e8f0;font-size:0.75rem;color:#64748b;text-transform:uppercase;width:100px;">เป้าหมาย (คน)</th>
+            </tr>
+          </thead>
+          <tbody id="deptTargetsBody"></tbody>
+        </table>
+      </div>
+      <button class="btn btn-green btn-sm" onclick="saveDeptTargets()">💾 บันทึกเป้าหมายรายหน่วย</button>
+      <div id="deptTargetsStatus" style="margin-top:10px;"></div>
+    </div>
+
     <!-- Supabase / Projects -->
     <div class="card">
       <div class="card-title">🔌 โปรเจกต์ Supabase</div>
@@ -1451,29 +1504,84 @@ async function clearTextColor(){
   setStatus('textColorStatus','ok','✅ รีเซ็ตแล้ว — จะใช้สีจากธีม');
 }
 
+const DEFAULT_DEPT_TARGETS = {
+  'อธิบดีกรมวิทยาศาสตร์การแพทย์':1,'รองอธิบดีกรมวิทยาศาสตร์การแพทย์':3,
+  'สำนักผู้ทรงคุณวุฒิกรมวิทยาศาสตร์การแพทย์':5,'กองแผนงานและวิชาการ':31,
+  'กองทดสอบความชำนาญ':7,'กลุ่มพัฒนาระบบบริหาร':6,'กลุ่มตรวจสอบภายใน':2,
+  'กลุ่มงานจริยธรรม':2,'สำนักงานเลขานุการกรม':28,'สถาบันชีววัตถุ':29,
+  'สถาบันวิจัยวิทยาศาสตร์สาธารณสุข':105,'สถาบันวิจัยสมุนไพร':55,
+  'สถาบันชีววิทยาศาสตร์ทางการแพทย์':71,'สำนักคุณภาพและความปลอดภัยอาหาร':63,
+  'สำนักเครื่องสำอางและวัตถุอันตราย':20,'สำนักรังสีและเครื่องมือแพทย์':42,
+  'สำนักมาตรฐานห้องปฏิบัติการ':28,'สำนักยาและวัตถุเสพติด':69,
+  'ศูนย์รวมบริการ':2,'ศูนย์เทคโนโลยีสารสนเทศและการสื่อสาร':11,
+  'กองความร่วมมือระหว่างประเทศ':2,'กองบริหารทรัพยากรบุคคล':6,
+  'กองบริหารการคลัง':8,'กองประชาสัมพันธ์และสื่อสารสาธารณะ':11,
+  'ศูนย์ตอบโต้เหตุฉุกเฉินด้านห้องปฏิบัติการและรังสี':1,
+  'ศูนย์วิทยาศาสตร์การแพทย์ที่ 1 เชียงใหม่':14,'ศูนย์วิทยาศาสตร์การแพทย์ที่ 1/1 เชียงราย':17,
+  'ศูนย์วิทยาศาสตร์การแพทย์ที่ 2 พิษณุโลก':33,'ศูนย์วิทยาศาสตร์การแพทย์ที่ 3 นครสวรรค์':24,
+  'ศูนย์วิทยาศาสตร์การแพทย์ที่ 4 สระบุรี':24,'ศูนย์วิทยาศาสตร์การแพทย์ที่ 5 สมุทรสงคราม':23,
+  'ศูนย์วิทยาศาสตร์การแพทย์ที่ 6 ชลบุรี':16,'ศูนย์วิทยาศาสตร์การแพทย์ที่ 7 ขอนแก่น':13,
+  'ศูนย์วิทยาศาสตร์การแพทย์ที่ 8 อุดรธานี':18,'ศูนย์วิทยาศาสตร์การแพทย์ที่ 9 นครราชสีมา':20,
+  'ศูนย์วิทยาศาสตร์การแพทย์ที่ 10 อุบลราชธานี':14,'ศูนย์วิทยาศาสตร์การแพทย์ที่ 11 สุราษฎร์ธานี':15,
+  'ศูนย์วิทยาศาสตร์การแพทย์ที่ 11/1 ภูเก็ต':11,'ศูนย์วิทยาศาสตร์การแพทย์ที่ 12 สงขลา':15,
+  'ศูนย์วิทยาศาสตร์การแพทย์ที่ 12/1 ตรัง':15
+};
+function renderDeptTargetsTable(data){
+  const tbody=document.getElementById('deptTargetsBody');
+  tbody.innerHTML=Object.entries(data).map(([dept,target])=>`
+    <tr style="border-bottom:1px solid #f1f5f9;">
+      <td style="padding:7px 12px;color:#1e293b;">${dept}</td>
+      <td style="padding:7px 12px;text-align:center;">
+        <input type="number" min="0" value="${target}" data-dept="${dept.replace(/"/g,'&quot;')}"
+          style="width:70px;padding:4px 8px;border:1.5px solid #e2e8f0;border-radius:6px;font-family:'Sarabun',sans-serif;font-size:0.85rem;text-align:center;">
+      </td>
+    </tr>`).join('');
+}
+async function saveEventDates(){
+  const d1=document.getElementById('eventDate1').value.trim();
+  const d2=document.getElementById('eventDate2').value.trim();
+  const d3=document.getElementById('eventDate3').value.trim();
+  if(!d1||!d2||!d3){setStatus('eventDatesStatus','err','⚠️ กรุณากรอกวันที่งานทั้ง 3 วัน');return;}
+  await Promise.all([sbSetSetting('event_date_1',d1),sbSetSetting('event_date_2',d2),sbSetSetting('event_date_3',d3)]);
+  setStatus('eventDatesStatus','ok','✅ บันทึกวันที่งานแล้ว');
+}
+async function saveTargetAttendees(){
+  const v=parseInt(document.getElementById('targetAttendees').value);
+  if(!v||v<1){setStatus('targetAttendeesStatus','err','⚠️ กรุณากรอกจำนวนที่ถูกต้อง');return;}
+  await sbSetSetting('target_attendees',String(v));
+  setStatus('targetAttendeesStatus','ok','✅ บันทึกเป้าหมายแล้ว');
+}
+async function saveDeptTargets(){
+  const inputs=document.querySelectorAll('#deptTargetsBody input[data-dept]');
+  const obj={};
+  inputs.forEach(inp=>{const v=parseInt(inp.value);if(!isNaN(v))obj[inp.dataset.dept]=v;});
+  await sbSetSetting('dept_targets',JSON.stringify(obj));
+  setStatus('deptTargetsStatus','ok','✅ บันทึกเป้าหมายรายหน่วยแล้ว');
+}
 async function loadSettings(){
   loadSbConfig();
-  const bg=await sbGetSetting('page_bg');
+  const [bg,themeId,tc,vip,exempt,net,d1,d2,d3,target,deptTgt]=await Promise.all([
+    sbGetSetting('page_bg'),sbGetSetting('theme'),sbGetSetting('text_color'),
+    sbGetSetting('vip_depts'),sbGetSetting('exempt_depts'),sbGetSetting('network_depts'),
+    sbGetSetting('event_date_1'),sbGetSetting('event_date_2'),sbGetSetting('event_date_3'),
+    sbGetSetting('target_attendees'),sbGetSetting('dept_targets')
+  ]);
   if(bg) document.getElementById('bgUrl').value=bg;
-  const themeId=await sbGetSetting('theme');
   renderThemeSwatches(parseInt(themeId)||3);
-  const tc=await sbGetSetting('text_color');
-  if(tc){
-    document.getElementById('textColorInput').value=tc;
-    document.getElementById('textColorHex').textContent=tc;
-  }
-  document.getElementById('textColorInput').addEventListener('input',function(){
-    document.getElementById('textColorHex').textContent=this.value;
-  });
-  const vip=await sbGetSetting('vip_depts');
+  if(tc){document.getElementById('textColorInput').value=tc;document.getElementById('textColorHex').textContent=tc;}
+  document.getElementById('textColorInput').addEventListener('input',function(){document.getElementById('textColorHex').textContent=this.value;});
   vipList=vip?JSON.parse(vip):['อธิบดีกรมวิทยาศาสตร์การแพทย์','รองอธิบดีกรมวิทยาศาสตร์การแพทย์'];
   renderVip();
-  const exempt=await sbGetSetting('exempt_depts');
   exemptList=exempt?JSON.parse(exempt):['กองแผนงานและวิชาการ'];
   renderExempt();
-  const net=await sbGetSetting('network_depts');
   networkList=net?JSON.parse(net):[];
   renderNetwork();
+  if(d1) document.getElementById('eventDate1').value=d1;
+  if(d2) document.getElementById('eventDate2').value=d2;
+  if(d3) document.getElementById('eventDate3').value=d3;
+  if(target) document.getElementById('targetAttendees').value=target;
+  const deptData=deptTgt?JSON.parse(deptTgt):DEFAULT_DEPT_TARGETS;
+  renderDeptTargetsTable(deptData);
 }
 
 // ─── PROJECT PICKER ───
@@ -1727,7 +1835,12 @@ INSERT INTO app_settings (key, value) VALUES
   ('staff_accounts',   '[]'),
   ('vip_depts',        '["อธิบดีกรมวิทยาศาสตร์การแพทย์","รองอธิบดีกรมวิทยาศาสตร์การแพทย์"]'),
   ('exempt_depts',     '["กองแผนงานและวิชาการ"]'),
-  ('network_depts',    '[]')
+  ('network_depts',    '[]'),
+  ('event_date_1',     ''),
+  ('event_date_2',     ''),
+  ('event_date_3',     ''),
+  ('target_attendees', '1800'),
+  ('dept_targets',     '{}')
 ON CONFLICT (key) DO NOTHING;
 `;
   const blob = new Blob([sql], {type:'text/plain'});

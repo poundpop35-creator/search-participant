@@ -190,17 +190,17 @@
     </div>
     <div class="big-stats-row" style="margin-bottom:14px;">
       <div class="big-card d1" id="card-d1" onclick="setFilter(activeDay===1?'all':1)">
-        <div class="big-label">วันที่ 1<br>24 มิ.ย. 69</div>
+        <div class="big-label" id="pubDayLabel1">วันที่ 1<br>24 มิ.ย. 69</div>
         <div class="big-num" id="pD1">-</div>
         <div class="big-sub" id="pD1s">ราย</div>
       </div>
       <div class="big-card d2" id="card-d2" onclick="setFilter(activeDay===2?'all':2)">
-        <div class="big-label">วันที่ 2<br>25 มิ.ย. 69</div>
+        <div class="big-label" id="pubDayLabel2">วันที่ 2<br>25 มิ.ย. 69</div>
         <div class="big-num" id="pD2">-</div>
         <div class="big-sub" id="pD2s">ราย</div>
       </div>
       <div class="big-card d3" id="card-d3" onclick="setFilter(activeDay===3?'all':3)">
-        <div class="big-label">วันที่ 3<br>26 มิ.ย. 69</div>
+        <div class="big-label" id="pubDayLabel3">วันที่ 3<br>26 มิ.ย. 69</div>
         <div class="big-num" id="pD3">-</div>
         <div class="big-sub" id="pD3s">ราย</div>
       </div>
@@ -489,13 +489,26 @@ const IS_DEMO = new URLSearchParams(location.search).has('demo');
 let activeYear = '2569';
 let VIP_DEPTS_PUB = new Set(['อธิบดีกรมวิทยาศาสตร์การแพทย์','รองอธิบดีกรมวิทยาศาสตร์การแพทย์']);
 let EXEMPT_DEPTS_PUB = new Set(['กองแผนงานและวิชาการ']);
+let GOAL = 1800;
+let EVENT_DATES_FULL = ['24 มิถุนายน 2569','25 มิถุนายน 2569','26 มิถุนายน 2569'];
+function _shortDate(f){const m={'มกราคม':'ม.ค.','กุมภาพันธ์':'ก.พ.','มีนาคม':'มี.ค.','เมษายน':'เม.ย.','พฤษภาคม':'พ.ค.','มิถุนายน':'มิ.ย.','กรกฎาคม':'ก.ค.','สิงหาคม':'ส.ค.','กันยายน':'ก.ย.','ตุลาคม':'ต.ค.','พฤศจิกายน':'พ.ย.','ธันวาคม':'ธ.ค.'};const p=f.trim().split(/\s+/);return p.length>=2?p[0]+' '+(m[p[1]]||p[1]):f;}
+function _applyEventDates(){
+  for(let i=1;i<=3;i++){
+    const el=document.getElementById('pubDayLabel'+i);
+    if(el) el.innerHTML=`วันที่ ${i}<br>${_shortDate(EVENT_DATES_FULL[i-1])}`;
+  }
+}
 async function loadActiveYear(){
   try{
-    const [r,vr,er,nr]=await Promise.all([
+    const [r,vr,er,nr,dr1,dr2,dr3,tgr]=await Promise.all([
       fetch(`${SUPABASE_URL}/rest/v1/app_settings?key=eq.event_year&select=value`,{headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}}),
       fetch(`${SUPABASE_URL}/rest/v1/app_settings?key=eq.vip_depts&select=value`,{headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}}),
       fetch(`${SUPABASE_URL}/rest/v1/app_settings?key=eq.exempt_depts&select=value`,{headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}}),
-      fetch(`${SUPABASE_URL}/rest/v1/app_settings?key=eq.event_name&select=value`,{headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}})
+      fetch(`${SUPABASE_URL}/rest/v1/app_settings?key=eq.event_name&select=value`,{headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}}),
+      fetch(`${SUPABASE_URL}/rest/v1/app_settings?key=eq.event_date_1&select=value`,{headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}}),
+      fetch(`${SUPABASE_URL}/rest/v1/app_settings?key=eq.event_date_2&select=value`,{headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}}),
+      fetch(`${SUPABASE_URL}/rest/v1/app_settings?key=eq.event_date_3&select=value`,{headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}}),
+      fetch(`${SUPABASE_URL}/rest/v1/app_settings?key=eq.target_attendees&select=value`,{headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}})
     ]);
     const d=await r.json();
     if(d&&d.length&&d[0].value) activeYear=d[0].value;
@@ -503,6 +516,11 @@ async function loadActiveYear(){
     if(vd&&vd.length&&vd[0].value) VIP_DEPTS_PUB=new Set(JSON.parse(vd[0].value));
     const ed=await er.json();
     if(ed&&ed.length&&ed[0].value) EXEMPT_DEPTS_PUB=new Set(JSON.parse(ed[0].value));
+    const d1d=await dr1.json(); if(d1d&&d1d.length&&d1d[0].value) EVENT_DATES_FULL[0]=d1d[0].value;
+    const d2d=await dr2.json(); if(d2d&&d2d.length&&d2d[0].value) EVENT_DATES_FULL[1]=d2d[0].value;
+    const d3d=await dr3.json(); if(d3d&&d3d.length&&d3d[0].value) EVENT_DATES_FULL[2]=d3d[0].value;
+    _applyEventDates();
+    const tgd=await tgr.json(); if(tgd&&tgd.length&&tgd[0].value) GOAL=parseInt(tgd[0].value)||GOAL;
     const nd=await nr.json();
     if(nd&&nd.length&&nd[0].value){
       const titleEl=document.getElementById('heroEventTitle');
@@ -589,7 +607,7 @@ function renderTrendChart() {
       backgroundColor:COLORS[i]+'22', fill:true, tension:0.4,
       pointRadius:4, pointBackgroundColor:COLORS[i], borderWidth:2.5 };
   });
-  const sub = sel===0 ? 'ทุกวัน' : ['','24 มิ.ย. 2569','25 มิ.ย. 2569','26 มิ.ย. 2569'][sel];
+  const sub = sel===0 ? 'ทุกวัน' : ['',_shortDate(EVENT_DATES_FULL[0]),_shortDate(EVENT_DATES_FULL[1]),_shortDate(EVENT_DATES_FULL[2])][sel];
   document.getElementById('trendSub').textContent = 'จำนวนผู้เข้าร่วมงานในแต่ละชั่วโมง — ' + sub;
   if(trendChartInst){ trendChartInst.destroy(); trendChartInst=null; }
   trendChartInst = new Chart(canvas.getContext('2d'), {
@@ -1360,7 +1378,7 @@ function renderStats() {
     if(card) card.classList.toggle('dimmed', activeDay !== 'all' && activeDay !== d);
   });
 
-  const GOAL = 1800;
+  // GOAL is set dynamically from app_settings (target_attendees), default 1800
   const goalVal = total;
   const goalPct = Math.min(Math.round(goalVal / GOAL * 100), 100);
   const overGoal = goalVal >= GOAL;
@@ -1380,11 +1398,11 @@ function renderStats() {
     ? `${goalPct}% — เกินเป้า +${(goalVal-GOAL).toLocaleString()} คน`
     : `${goalPct}%`;
   document.getElementById('goalPct').style.color = _goalColor;
-  document.getElementById('goalExtra').textContent = 'เป้าหมาย 1,800 คน';
+  document.getElementById('goalExtra').textContent = 'เป้าหมาย '+GOAL.toLocaleString()+' คน';
 
   // Dept card subtitles
   const daySubText = activeDay === 'all' ? 'เรียงตามจำนวนผู้เข้าร่วมงานสูงสุด'
-    : `วันที่ ${activeDay === 1 ? '24 มิ.ย. 2569' : activeDay === 2 ? '25 มิ.ย. 2569' : '26 มิ.ย. 2569'} — เรียงตามจำนวนสูงสุด`;
+    : `วันที่ ${_shortDate(EVENT_DATES_FULL[activeDay-1])} — เรียงตามจำนวนสูงสุด`;
   document.getElementById('deptTitle').textContent = 'จำนวนผู้เข้าร่วมงานแยกตามหน่วยงานภายใน';
   document.getElementById('deptSub').textContent = daySubText;
   document.getElementById('extDeptTitle').textContent = 'จำนวนผู้เข้าร่วมงานแยกตามหน่วยงานภายนอก';
