@@ -748,7 +748,8 @@ document.addEventListener('DOMContentLoaded', function() {
         <span id="remainingCount" style="margin-left:8px;font-size:0.82rem;color:#dc2626;font-weight:600;"></span>
       </div>
       <div style="display:flex;gap:6px;flex-wrap:wrap;">
-        <button class="btn-xl green" onclick="exportRemainingExcel()" style="padding:7px 14px;font-size:0.82rem;">⬇ Excel</button>
+        <button class="btn-xl green" onclick="exportRemainingExcel(false)" style="padding:7px 14px;font-size:0.82rem;">⬇ Excel (ซ่อน ID)</button>
+        <button class="btn-xl" onclick="exportRemainingExcel(true)" style="padding:7px 14px;font-size:0.82rem;background:#0d2b6b;color:#fff;border:none;border-radius:8px;cursor:pointer;font-family:'Sarabun',sans-serif;font-weight:600;">⬇ Excel (เห็น ID)</button>
         <button class="btn-xl" onclick="exportTablePDF('remainingSection','รายชื่อคงเหลือ')" style="padding:7px 14px;font-size:0.82rem;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;">📄 PDF</button>
         <button class="btn-xl" onclick="exportTableImage('remainingSection','รายชื่อคงเหลือ')" style="padding:7px 14px;font-size:0.82rem;background:#7c3aed;color:#fff;border:none;border-radius:8px;cursor:pointer;">🖼 รูปภาพ</button>
       </div>
@@ -1220,9 +1221,14 @@ function renderRemainingTable(){
     <td style="padding:8px 10px;color:#1e293b;">${_buildFullName(p)}</td>
   </tr>`).join('');
 }
-function exportRemainingExcel(){
-  const code=prompt('ใส่รหัสเพื่อแสดงเลขบัตรประชาชน\n(กด Cancel เพื่อ export แบบซ่อน)');
-  const showID=code!==null&&code.trim()==='99037';
+function exportRemainingExcel(wantID){
+  let showID=false;
+  if(wantID){
+    const code=prompt('ใส่รหัส 99037 เพื่อแสดงเลขบัตรประชาชน:');
+    if(code===null) return;
+    if(code.trim()!=='99037'){alert('รหัสไม่ถูกต้อง');return;}
+    showID=true;
+  }
   const sel=document.getElementById('remDeptFilter');
   const full=_getRemainingList();
   const list=sel.value?full.filter(p=>p.dept===sel.value):full;
