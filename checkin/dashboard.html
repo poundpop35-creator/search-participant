@@ -7,6 +7,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
   <style>
     :root{--blue:#0d2b6b;--blue-mid:#1a4eb8;--blue-light:#e8f0fe;--green:#16a34a;--yellow:#d97706;--white:#fff;--border:#e2e8f0;--shadow:0 2px 12px rgba(13,43,107,0.10);}
@@ -708,7 +710,11 @@ document.addEventListener('DOMContentLoaded', function() {
   <div class="tcard" style="margin-bottom:24px;" id="summarySection">
     <div class="thead-row">
       <span style="font-weight:700;color:var(--blue);font-size:1rem;">ตารางสรุปผู้เข้าร่วมงานรายหน่วยงาน</span>
-      <button class="btn-xl green" onclick="exportSummaryExcel()" style="padding:7px 16px;font-size:0.82rem;">⬇ Export Excel</button>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;">
+        <button class="btn-xl green" onclick="exportSummaryExcel()" style="padding:7px 14px;font-size:0.82rem;">⬇ Excel</button>
+        <button class="btn-xl" onclick="exportTablePDF('summarySection','สรุปผู้เข้าร่วมงาน')" style="padding:7px 14px;font-size:0.82rem;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;">📄 PDF</button>
+        <button class="btn-xl" onclick="exportTableImage('summarySection','สรุปผู้เข้าร่วมงาน')" style="padding:7px 14px;font-size:0.82rem;background:#7c3aed;color:#fff;border:none;border-radius:8px;cursor:pointer;">🖼 รูปภาพ</button>
+      </div>
     </div>
     <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
       <table style="width:100%;border-collapse:collapse;font-size:0.82rem;min-width:700px;">
@@ -741,7 +747,11 @@ document.addEventListener('DOMContentLoaded', function() {
         <span style="font-weight:700;color:var(--blue);font-size:1rem;">รายชื่อที่ยังไม่ได้เช็คอิน</span>
         <span id="remainingCount" style="margin-left:8px;font-size:0.82rem;color:#dc2626;font-weight:600;"></span>
       </div>
-      <button class="btn-xl green" onclick="exportRemainingExcel()" style="padding:7px 16px;font-size:0.82rem;">⬇ Export Excel</button>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;">
+        <button class="btn-xl green" onclick="exportRemainingExcel()" style="padding:7px 14px;font-size:0.82rem;">⬇ Excel</button>
+        <button class="btn-xl" onclick="exportTablePDF('remainingSection','รายชื่อคงเหลือ')" style="padding:7px 14px;font-size:0.82rem;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;">📄 PDF</button>
+        <button class="btn-xl" onclick="exportTableImage('remainingSection','รายชื่อคงเหลือ')" style="padding:7px 14px;font-size:0.82rem;background:#7c3aed;color:#fff;border:none;border-radius:8px;cursor:pointer;">🖼 รูปภาพ</button>
+      </div>
     </div>
     <div style="padding:10px 16px 4px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;border-bottom:1px solid #f1f5f9;">
       <label style="font-size:0.82rem;color:#64748b;font-weight:600;">หน่วยงาน:</label>
@@ -1072,6 +1082,34 @@ async function loadParticipants(){
   });
 }
 
+async function exportTableImage(sectionId, filename){
+  const el=document.getElementById(sectionId);
+  const btn=event.target;btn.disabled=true;btn.textContent='⏳';
+  try{
+    const canvas=await html2canvas(el,{scale:2,useCORS:true,backgroundColor:'#ffffff',logging:false});
+    const a=document.createElement('a');
+    a.href=canvas.toDataURL('image/png');
+    a.download=`${filename}_${activeYear}.png`;
+    a.click();
+  }catch(e){alert('เกิดข้อผิดพลาด: '+e.message);}
+  btn.disabled=false;btn.innerHTML='🖼 รูปภาพ';
+}
+async function exportTablePDF(sectionId, filename){
+  const el=document.getElementById(sectionId);
+  const btn=event.target;btn.disabled=true;btn.textContent='⏳';
+  try{
+    const canvas=await html2canvas(el,{scale:2,useCORS:true,backgroundColor:'#ffffff',logging:false});
+    const imgW=canvas.width, imgH=canvas.height;
+    const {jsPDF}=window.jspdf;
+    // ปรับขนาด PDF ให้พอดีกับเนื้อหา โดยใช้ความกว้าง A4 (210mm) แล้วขยายความสูงตามสัดส่วน
+    const pdfW=210;
+    const pdfH=Math.ceil(imgH/imgW*pdfW);
+    const pdf=new jsPDF({orientation:pdfH>pdfW?'portrait':'landscape',unit:'mm',format:[pdfW,pdfH]});
+    pdf.addImage(canvas.toDataURL('image/png'),'PNG',0,0,pdfW,pdfH);
+    pdf.save(`${filename}_${activeYear}.pdf`);
+  }catch(e){alert('เกิดข้อผิดพลาด: '+e.message);}
+  btn.disabled=false;btn.innerHTML='📄 PDF';
+}
 function _buildSummaryData(){
   const preRegByDept={};
   allParticipants.filter(p=>!p.is_walkin&&(p.internal_external||'').includes('ภายใน')).forEach(p=>{
