@@ -775,6 +775,76 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
   </div>
 
+  <div class="tcard" style="margin-bottom:24px;" id="checkedInSection">
+    <div class="thead-row">
+      <div>
+        <span style="font-weight:700;color:#15803d;font-size:1rem;">รายชื่อที่เช็คอินแล้ว</span>
+        <span id="checkedInCount" style="margin-left:8px;font-size:0.82rem;color:#15803d;font-weight:600;"></span>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;">
+        <button class="btn-xl green" onclick="exportCheckedInExcel(false)" style="padding:7px 14px;font-size:0.82rem;">⬇ Excel (ซ่อน ID)</button>
+        <button class="btn-xl" onclick="exportCheckedInExcel(true)" style="padding:7px 14px;font-size:0.82rem;background:#0d2b6b;color:#fff;border:none;border-radius:8px;cursor:pointer;font-family:'Sarabun',sans-serif;font-weight:600;">⬇ Excel (เห็น ID)</button>
+        <button class="btn-xl" onclick="exportTablePDF('checkedInSection','รายชื่อเช็คอิน')" style="padding:7px 14px;font-size:0.82rem;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;">📄 PDF</button>
+        <button class="btn-xl" onclick="exportTableImage('checkedInSection','รายชื่อเช็คอิน')" style="padding:7px 14px;font-size:0.82rem;background:#7c3aed;color:#fff;border:none;border-radius:8px;cursor:pointer;">🖼 รูปภาพ</button>
+      </div>
+    </div>
+    <div style="padding:10px 16px 4px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;border-bottom:1px solid #f1f5f9;">
+      <label style="font-size:0.82rem;color:#64748b;font-weight:600;">หน่วยงาน:</label>
+      <select id="ciDeptFilter" onchange="_checkedInPage=0;renderCheckedInTable()" style="padding:6px 10px;border-radius:8px;border:1.5px solid #e2e8f0;font-family:'Sarabun',sans-serif;font-size:0.82rem;color:#1e293b;min-width:160px;">
+        <option value="">ทั้งหมด</option>
+      </select>
+    </div>
+    <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
+      <table style="width:100%;border-collapse:collapse;font-size:0.83rem;">
+        <thead>
+          <tr style="background:#f0fdf4;">
+            <th style="padding:9px 10px;text-align:center;border-bottom:2px solid #bbf7d0;color:#64748b;font-size:0.7rem;width:36px;">#</th>
+            <th style="padding:9px 10px;text-align:left;border-bottom:2px solid #bbf7d0;color:#64748b;font-size:0.7rem;">หน่วยงาน</th>
+            <th style="padding:9px 10px;text-align:left;border-bottom:2px solid #bbf7d0;color:#64748b;font-size:0.7rem;">เลขบัตรประชาชน</th>
+            <th style="padding:9px 10px;text-align:left;border-bottom:2px solid #bbf7d0;color:#64748b;font-size:0.7rem;">ชื่อ-นามสกุล</th>
+          </tr>
+        </thead>
+        <tbody id="checkedInBody"><tr><td colspan="4" style="text-align:center;padding:30px;color:#94a3b8;">กำลังโหลด...</td></tr></tbody>
+      </table>
+    </div>
+    <div id="checkedInPagination" style="display:flex;justify-content:center;align-items:center;gap:6px;padding:12px 16px;border-top:1px solid #f1f5f9;flex-wrap:wrap;"></div>
+  </div>
+
+  <div class="tcard" style="margin-bottom:24px;" id="walkInSection">
+    <div class="thead-row">
+      <div>
+        <span style="font-weight:700;color:#d97706;font-size:1rem;">รายชื่อ Walk-in</span>
+        <span id="walkInCount" style="margin-left:8px;font-size:0.82rem;color:#d97706;font-weight:600;"></span>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;">
+        <button class="btn-xl green" onclick="exportWalkInExcel(false)" style="padding:7px 14px;font-size:0.82rem;">⬇ Excel (ซ่อน ID)</button>
+        <button class="btn-xl" onclick="exportWalkInExcel(true)" style="padding:7px 14px;font-size:0.82rem;background:#0d2b6b;color:#fff;border:none;border-radius:8px;cursor:pointer;font-family:'Sarabun',sans-serif;font-weight:600;">⬇ Excel (เห็น ID)</button>
+        <button class="btn-xl" onclick="exportTablePDF('walkInSection','รายชื่อ Walk-in')" style="padding:7px 14px;font-size:0.82rem;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;">📄 PDF</button>
+        <button class="btn-xl" onclick="exportTableImage('walkInSection','รายชื่อ Walk-in')" style="padding:7px 14px;font-size:0.82rem;background:#7c3aed;color:#fff;border:none;border-radius:8px;cursor:pointer;">🖼 รูปภาพ</button>
+      </div>
+    </div>
+    <div style="padding:10px 16px 4px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;border-bottom:1px solid #f1f5f9;">
+      <label style="font-size:0.82rem;color:#64748b;font-weight:600;">หน่วยงาน:</label>
+      <select id="wiDeptFilter" onchange="_walkInPage=0;renderWalkInTable()" style="padding:6px 10px;border-radius:8px;border:1.5px solid #e2e8f0;font-family:'Sarabun',sans-serif;font-size:0.82rem;color:#1e293b;min-width:160px;">
+        <option value="">ทั้งหมด</option>
+      </select>
+    </div>
+    <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
+      <table style="width:100%;border-collapse:collapse;font-size:0.83rem;">
+        <thead>
+          <tr style="background:#fffbeb;">
+            <th style="padding:9px 10px;text-align:center;border-bottom:2px solid #fde68a;color:#64748b;font-size:0.7rem;width:36px;">#</th>
+            <th style="padding:9px 10px;text-align:left;border-bottom:2px solid #fde68a;color:#64748b;font-size:0.7rem;">หน่วยงาน</th>
+            <th style="padding:9px 10px;text-align:left;border-bottom:2px solid #fde68a;color:#64748b;font-size:0.7rem;">เลขบัตรประชาชน</th>
+            <th style="padding:9px 10px;text-align:left;border-bottom:2px solid #fde68a;color:#64748b;font-size:0.7rem;">ชื่อ-นามสกุล</th>
+          </tr>
+        </thead>
+        <tbody id="walkInBody"><tr><td colspan="4" style="text-align:center;padding:30px;color:#94a3b8;">กำลังโหลด...</td></tr></tbody>
+      </table>
+    </div>
+    <div id="walkInPagination" style="display:flex;justify-content:center;align-items:center;gap:6px;padding:12px 16px;border-top:1px solid #f1f5f9;flex-wrap:wrap;"></div>
+  </div>
+
 </div>
 
 <script>
@@ -1056,6 +1126,8 @@ async function loadParticipants(){
   buildPFCB('pFPTypeDD','pFPTypeAll','pFPTypeCb',onPFPTypeAll,onPFPTypeChange,ptypes);
   renderSummaryTable();
   renderRemainingTable();
+  renderCheckedInTable();
+  renderWalkInTable();
   // Province dropdown grouped by health zone
   const dd=document.getElementById('pFProvDD');
   const allLbl=dd.querySelector('.all-label');
@@ -1288,6 +1360,104 @@ function exportRemainingExcel(wantID){
   ws['!cols']=[{wch:4},{wch:40},{wch:16},{wch:30}];
   XLSX.utils.book_append_sheet(wb,ws,'รายชื่อคงเหลือ');
   XLSX.writeFile(wb,`รายชื่อคงเหลือ_${activeYear}.xlsx`);
+}
+let _checkedInPage=0, _walkInPage=0;
+const _LIST_PAGE=10;
+function _paginate(list,page,setPage,renderId,paginationId,colSpan,renderRow){
+  const total=list.length, pages=Math.ceil(total/_LIST_PAGE);
+  if(page>=pages) page=Math.max(0,pages-1);
+  const pageList=list.slice(page*_LIST_PAGE,(page+1)*_LIST_PAGE);
+  const offset=page*_LIST_PAGE;
+  document.getElementById(renderId).innerHTML=pageList.length
+    ? pageList.map((p,i)=>renderRow(p,offset+i)).join('')
+    : `<tr><td colspan="${colSpan}" style="text-align:center;padding:30px;color:#94a3b8;">ไม่พบรายชื่อ</td></tr>`;
+  const pg=document.getElementById(paginationId);
+  if(pages<=1){pg.innerHTML='';return;}
+  const btn=(label,pg2,disabled)=>`<button onclick="${setPage}=${pg2};${renderId==='checkedInBody'?'renderCheckedInTable':'renderWalkInTable'}()" ${disabled?'disabled':''} style="padding:5px 12px;border-radius:6px;border:1px solid ${pg2===page?'#1d4ed8':'#e2e8f0'};background:${pg2===page?'#1d4ed8':disabled?'#f1f5f9':'#fff'};color:${pg2===page?'#fff':'#334155'};cursor:${disabled?'default':'pointer'};font-family:'Sarabun',sans-serif;font-size:0.8rem;font-weight:${pg2===page?700:400};">${label}</button>`;
+  let btns=btn('‹',Math.max(0,page-1),page===0);
+  for(let i=Math.max(0,page-2);i<=Math.min(pages-1,page+2);i++) btns+=btn(i+1,i,false);
+  btns+=btn('›',Math.min(pages-1,page+1),page===pages-1);
+  btns+=`<span style="font-size:0.78rem;color:#94a3b8;">${offset+1}–${Math.min(offset+_LIST_PAGE,total)} จาก ${total.toLocaleString()}</span>`;
+  pg.innerHTML=btns;
+}
+function _getCheckedInList(){
+  const pidToIdCard=new Map(allParticipants.map(p=>[p.id,(p.id_card||'').trim()]));
+  const checkedIds=new Set(), checkedIdCards=new Set();
+  allData.forEach(r=>{checkedIds.add(r.participantId);const ic=pidToIdCard.get(r.participantId);if(ic)checkedIdCards.add(ic);});
+  const deptOrder=new Map(DEPTS.map((d,i)=>[d,i]));
+  const seen=new Set();
+  return allParticipants.filter(p=>{
+    if(p.is_walkin||!(p.internal_external||'').includes('ภายใน')) return false;
+    const ic=(p.id_card||'').trim(), key=ic||String(p.id);
+    if(seen.has(key)) return false;
+    if(!checkedIds.has(p.id)&&!(ic&&checkedIdCards.has(ic))) return false;
+    seen.add(key); return true;
+  }).sort((a,b)=>{const oa=deptOrder.get(a.dept)??9999,ob=deptOrder.get(b.dept)??9999;return oa!==ob?oa-ob:(a.last_name||'').localeCompare(b.last_name||'','th');});
+}
+function renderCheckedInTable(){
+  const full=_getCheckedInList();
+  document.getElementById('checkedInCount').textContent=`(${full.length.toLocaleString()} คน)`;
+  const sel=document.getElementById('ciDeptFilter'), curVal=sel.value;
+  const depts=[...new Set(full.map(p=>p.dept||'').filter(Boolean))].sort((a,b)=>{const oa=DEPTS.indexOf(a),ob=DEPTS.indexOf(b);return(oa<0?9999:oa)-(ob<0?9999:ob);});
+  sel.innerHTML='<option value="">ทั้งหมด</option>'+depts.map(d=>`<option value="${d}"${d===curVal?' selected':''}>${d}</option>`).join('');
+  const list=curVal?full.filter(p=>p.dept===curVal):full;
+  _paginate(list,_checkedInPage,'_checkedInPage','checkedInBody','checkedInPagination',4,(p,i)=>`<tr style="${i%2?'background:#f9fafb':''}">
+    <td style="text-align:center;padding:8px 10px;color:#94a3b8;font-size:0.75rem;">${i+1}</td>
+    <td style="padding:8px 10px;color:#334155;">${p.dept||'-'}</td>
+    <td style="padding:8px 10px;color:#475569;font-size:0.8rem;font-family:monospace;">${(p.id_card||'').trim()||'—'}</td>
+    <td style="padding:8px 10px;color:#1e293b;">${_buildFullName(p)}</td></tr>`);
+}
+function exportCheckedInExcel(wantID){
+  let showID=false;
+  if(wantID){const code=prompt('ใส่รหัส 99037 เพื่อแสดงเลขบัตรประชาชน:');if(!code)return;if(code.trim()!=='99037'){alert('รหัสไม่ถูกต้อง');return;}showID=true;}
+  const sel=document.getElementById('ciDeptFilter'), full=_getCheckedInList();
+  const list=sel.value?full.filter(p=>p.dept===sel.value):full;
+  const data=[['#','หน่วยงาน','เลขบัตรประชาชน','ชื่อ-นามสกุล']];
+  list.forEach((p,i)=>data.push([i+1,p.dept||'-',showID?(p.id_card||'').trim()||'-':'xxxx',_buildFullName(p)]));
+  const wb=XLSX.utils.book_new(), ws=XLSX.utils.aoa_to_sheet(data);
+  ws['!cols']=[{wch:4},{wch:40},{wch:16},{wch:30}];
+  XLSX.utils.book_append_sheet(wb,ws,'เช็คอินแล้ว');
+  XLSX.writeFile(wb,`รายชื่อเช็คอินแล้ว_${activeYear}.xlsx`);
+}
+function _getWalkInList(){
+  const pidToIdCard=new Map(allParticipants.map(p=>[p.id,(p.id_card||'').trim()]));
+  const deptsSet=new Set(DEPTS);
+  const checkedWIIds=new Set();
+  allData.forEach(r=>{if(r.isWalkin)checkedWIIds.add(r.participantId);});
+  const deptOrder=new Map(DEPTS.map((d,i)=>[d,i]));
+  const seen=new Set();
+  return allParticipants.filter(p=>{
+    if(!p.is_walkin||!deptsSet.has((p.dept||'').trim())) return false;
+    if(!checkedWIIds.has(p.id)) return false;
+    const ic=(p.id_card||'').trim(), key=ic||String(p.id);
+    if(seen.has(key)) return false;
+    seen.add(key); return true;
+  }).sort((a,b)=>{const oa=deptOrder.get((a.dept||'').trim())??9999,ob=deptOrder.get((b.dept||'').trim())??9999;return oa!==ob?oa-ob:(a.last_name||'').localeCompare(b.last_name||'','th');});
+}
+function renderWalkInTable(){
+  const full=_getWalkInList();
+  document.getElementById('walkInCount').textContent=`(${full.length.toLocaleString()} คน)`;
+  const sel=document.getElementById('wiDeptFilter'), curVal=sel.value;
+  const depts=[...new Set(full.map(p=>(p.dept||'').trim()).filter(Boolean))].sort((a,b)=>{const oa=DEPTS.indexOf(a),ob=DEPTS.indexOf(b);return(oa<0?9999:oa)-(ob<0?9999:ob);});
+  sel.innerHTML='<option value="">ทั้งหมด</option>'+depts.map(d=>`<option value="${d}"${d===curVal?' selected':''}>${d}</option>`).join('');
+  const list=curVal?full.filter(p=>(p.dept||'').trim()===curVal):full;
+  _paginate(list,_walkInPage,'_walkInPage','walkInBody','walkInPagination',4,(p,i)=>`<tr style="${i%2?'background:#f9fafb':''}">
+    <td style="text-align:center;padding:8px 10px;color:#94a3b8;font-size:0.75rem;">${i+1}</td>
+    <td style="padding:8px 10px;color:#334155;">${p.dept||'-'}</td>
+    <td style="padding:8px 10px;color:#475569;font-size:0.8rem;font-family:monospace;">${(p.id_card||'').trim()||'—'}</td>
+    <td style="padding:8px 10px;color:#1e293b;">${_buildFullName(p)}</td></tr>`);
+}
+function exportWalkInExcel(wantID){
+  let showID=false;
+  if(wantID){const code=prompt('ใส่รหัส 99037 เพื่อแสดงเลขบัตรประชาชน:');if(!code)return;if(code.trim()!=='99037'){alert('รหัสไม่ถูกต้อง');return;}showID=true;}
+  const sel=document.getElementById('wiDeptFilter'), full=_getWalkInList();
+  const list=sel.value?full.filter(p=>(p.dept||'').trim()===sel.value):full;
+  const data=[['#','หน่วยงาน','เลขบัตรประชาชน','ชื่อ-นามสกุล']];
+  list.forEach((p,i)=>data.push([i+1,p.dept||'-',showID?(p.id_card||'').trim()||'-':'xxxx',_buildFullName(p)]));
+  const wb=XLSX.utils.book_new(), ws=XLSX.utils.aoa_to_sheet(data);
+  ws['!cols']=[{wch:4},{wch:40},{wch:16},{wch:30}];
+  XLSX.utils.book_append_sheet(wb,ws,'Walk-in');
+  XLSX.writeFile(wb,`รายชื่อ Walk-in_${activeYear}.xlsx`);
 }
 function toggleParticipants(){
   const sec=document.getElementById('pRegSection');
