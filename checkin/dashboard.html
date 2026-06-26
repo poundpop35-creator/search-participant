@@ -1188,14 +1188,26 @@ function exportSummaryExcel(){
   XLSX.writeFile(wb,`สรุปผู้เข้าร่วมงาน_${activeYear}.xlsx`);
 }
 function _getRemainingList(){
+  // Build map participantId -> id_card for all participants
+  const pidToIdCard=new Map(allParticipants.map(p=>[p.id,(p.id_card||'').trim()]));
+  // Collect all id_cards that have ANY check-in record (pre-reg or walk-in)
   const checkedIds=new Set();
-  allData.forEach(r=>{if(!r.isWalkin)checkedIds.add(r.participantId);});
+  const checkedIdCards=new Set();
+  allData.forEach(r=>{
+    checkedIds.add(r.participantId);
+    const ic=pidToIdCard.get(r.participantId);
+    if(ic) checkedIdCards.add(ic);
+  });
   const deptOrder=new Map(DEPTS.map((d,i)=>[d,i]));
   const seen=new Set();
+  // Only pre-registered internal people; exclude if their id OR id_card has checked in
   return allParticipants
     .filter(p=>{
-      if(p.is_walkin||!(p.internal_external||'').includes('ภายใน')||checkedIds.has(p.id)) return false;
-      const key=(p.id_card||'').trim()||String(p.id);
+      if(p.is_walkin||!(p.internal_external||'').includes('ภายใน')) return false;
+      if(checkedIds.has(p.id)) return false;
+      const ic=(p.id_card||'').trim();
+      if(ic&&checkedIdCards.has(ic)) return false;
+      const key=ic||String(p.id);
       if(seen.has(key)) return false;
       seen.add(key);
       return true;
