@@ -715,18 +715,18 @@ document.addEventListener('DOMContentLoaded', function() {
         <thead>
           <tr style="background:#f8fafc;">
             <th rowspan="2" style="padding:8px 10px;text-align:center;border-bottom:2px solid #e2e8f0;border-right:1px solid #e2e8f0;color:#64748b;font-size:0.7rem;vertical-align:middle;">#</th>
-            <th rowspan="2" style="padding:8px 10px;text-align:left;border-bottom:2px solid #e2e8f0;border-right:1px solid #e2e8f0;color:#64748b;font-size:0.7rem;vertical-align:middle;">หน่วยงานภายใน</th>
-            <th rowspan="2" style="padding:8px 10px;text-align:center;border-bottom:2px solid #e2e8f0;border-right:1px solid #e2e8f0;color:#64748b;font-size:0.7rem;vertical-align:middle;">เป้าหมาย<br>(A)</th>
+            <th rowspan="2" style="padding:8px 10px;text-align:left;border-bottom:2px solid #e2e8f0;border-right:1px solid #e2e8f0;color:#64748b;font-size:0.7rem;vertical-align:middle;">หน่วยงานภายในกรม</th>
+            <th rowspan="2" style="padding:8px 10px;text-align:center;border-bottom:2px solid #e2e8f0;border-right:1px solid #e2e8f0;color:#64748b;font-size:0.7rem;vertical-align:middle;">เป้าหมาย</th>
             <th colspan="3" style="padding:6px 10px;text-align:center;background:#eff6ff;border-bottom:1px solid #bfdbfe;border-right:1px solid #e2e8f0;color:#1d4ed8;font-size:0.7rem;font-weight:700;">ผู้ลงทะเบียนล่วงหน้า</th>
-            <th rowspan="2" style="padding:8px 10px;text-align:center;background:#fffbeb;border-bottom:2px solid #e2e8f0;border-right:1px solid #e2e8f0;color:#92400e;font-size:0.7rem;vertical-align:middle;">Walk-in<br>(D)</th>
-            <th colspan="2" style="padding:6px 10px;text-align:center;background:#f0fdf4;border-bottom:1px solid #bbf7d0;color:#15803d;font-size:0.7rem;font-weight:700;">ยอดผู้เข้าร่วมทั้งหมด</th>
+            <th rowspan="2" style="padding:8px 10px;text-align:center;background:#fffbeb;border-bottom:2px solid #e2e8f0;border-right:1px solid #e2e8f0;color:#92400e;font-size:0.7rem;vertical-align:middle;">จำนวน<br>walk-in</th>
+            <th colspan="2" style="padding:6px 10px;text-align:center;background:#f0fdf4;border-bottom:1px solid #bbf7d0;color:#15803d;font-size:0.7rem;font-weight:700;">ผู้เข้าร่วมทั้งหมด</th>
           </tr>
           <tr style="background:#f8fafc;">
-            <th style="padding:7px 10px;text-align:center;background:#eff6ff;border-bottom:2px solid #e2e8f0;border-right:1px solid #e2e8f0;color:#3b82f6;font-size:0.7rem;">ลงทะเบียน (B)</th>
-            <th style="padding:7px 10px;text-align:center;background:#eff6ff;border-bottom:2px solid #e2e8f0;border-right:1px solid #e2e8f0;color:#1d4ed8;font-size:0.7rem;">เช็คอินจริง (C)</th>
-            <th style="padding:7px 10px;text-align:center;background:#eff6ff;border-bottom:2px solid #e2e8f0;border-right:1px solid #e2e8f0;color:#dc2626;font-size:0.7rem;">คงเหลือ (B−C)</th>
-            <th style="padding:7px 10px;text-align:center;background:#f0fdf4;border-bottom:2px solid #e2e8f0;border-right:1px solid #e2e8f0;color:#15803d;font-size:0.7rem;">จำนวน (C+D)</th>
-            <th style="padding:7px 10px;text-align:center;background:#f0fdf4;border-bottom:2px solid #e2e8f0;color:#15803d;font-size:0.7rem;">% จากเป้า</th>
+            <th style="padding:7px 10px;text-align:center;background:#eff6ff;border-bottom:2px solid #e2e8f0;border-right:1px solid #e2e8f0;color:#3b82f6;font-size:0.7rem;">ลงทะเบียน<br>ล่วงหน้าไว้</th>
+            <th style="padding:7px 10px;text-align:center;background:#eff6ff;border-bottom:2px solid #e2e8f0;border-right:1px solid #e2e8f0;color:#1d4ed8;font-size:0.7rem;">มาเช็คอินจริง</th>
+            <th style="padding:7px 10px;text-align:center;background:#eff6ff;border-bottom:2px solid #e2e8f0;border-right:1px solid #e2e8f0;color:#dc2626;font-size:0.7rem;">คงเหลือ<br>(ที่ไม่มาเช็คอิน)</th>
+            <th style="padding:7px 10px;text-align:center;background:#f0fdf4;border-bottom:2px solid #e2e8f0;border-right:1px solid #e2e8f0;color:#15803d;font-size:0.7rem;">ผู้เข้าร่วม<br>ทั้งหมด</th>
+            <th style="padding:7px 10px;text-align:center;background:#f0fdf4;border-bottom:2px solid #e2e8f0;color:#15803d;font-size:0.7rem;">ร้อยละผู้เข้าร่วม<br>ทั้งหมด</th>
           </tr>
         </thead>
         <tbody id="summaryBody"><tr><td colspan="9" style="text-align:center;padding:30px;color:#94a3b8;">กำลังโหลด...</td></tr></tbody>
@@ -1098,7 +1098,7 @@ function renderSummaryTable(){
 }
 function exportSummaryExcel(){
   const {preRegByDept,seenC,seenD}=_buildSummaryData();
-  const data=[['#','หน่วยงานภายใน','เป้าหมาย (A)','ลงทะเบียนล่วงหน้า (B)','เช็คอินจริง (C)','คงเหลือ (B-C)','Walk-in (D)','ยอดรวม (C+D)','% จากเป้าหมาย (A)']];
+  const data=[['#','หน่วยงานภายในกรม','เป้าหมาย','ลงทะเบียนล่วงหน้าไว้','มาเช็คอินจริง','คงเหลือ (ที่ไม่มาเช็คอิน)','จำนวน walk-in','ผู้เข้าร่วมทั้งหมด','ร้อยละผู้เข้าร่วมทั้งหมด']];
   let tA=0,tB=0,tC=0,tD=0;
   DEPTS.forEach((dept,i)=>{
     const A=DASH_TARGETS[dept]||0;
