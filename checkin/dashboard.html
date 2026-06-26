@@ -734,6 +734,31 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
   </div>
 
+  <!-- Remaining list (pre-registered but not checked in) -->
+  <div class="tcard" style="margin-bottom:24px;" id="remainingSection">
+    <div class="thead-row">
+      <div>
+        <span style="font-weight:700;color:var(--blue);font-size:1rem;">รายชื่อที่ยังไม่ได้เช็คอิน</span>
+        <span id="remainingCount" style="margin-left:8px;font-size:0.82rem;color:#dc2626;font-weight:600;"></span>
+      </div>
+      <button class="btn-xl green" onclick="exportRemainingExcel()" style="padding:7px 16px;font-size:0.82rem;">⬇ Export Excel</button>
+    </div>
+    <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
+      <table style="width:100%;border-collapse:collapse;font-size:0.83rem;">
+        <thead>
+          <tr style="background:#f8fafc;">
+            <th style="padding:9px 10px;text-align:center;border-bottom:2px solid #e2e8f0;color:#64748b;font-size:0.7rem;width:36px;">#</th>
+            <th style="padding:9px 10px;text-align:left;border-bottom:2px solid #e2e8f0;color:#64748b;font-size:0.7rem;">หน่วยงาน</th>
+            <th style="padding:9px 10px;text-align:left;border-bottom:2px solid #e2e8f0;color:#64748b;font-size:0.7rem;">เลขบัตรประชาชน</th>
+            <th style="padding:9px 10px;text-align:left;border-bottom:2px solid #e2e8f0;color:#64748b;font-size:0.7rem;">ชื่อ</th>
+            <th style="padding:9px 10px;text-align:left;border-bottom:2px solid #e2e8f0;color:#64748b;font-size:0.7rem;">นามสกุล</th>
+          </tr>
+        </thead>
+        <tbody id="remainingBody"><tr><td colspan="5" style="text-align:center;padding:30px;color:#94a3b8;">กำลังโหลด...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
 </div>
 
 <script>
@@ -1014,6 +1039,7 @@ async function loadParticipants(){
   buildPFCB('pFTagDD','pFTagAll','pFTagCb',onPFTagAll,onPFTagChange,tags);
   buildPFCB('pFPTypeDD','pFPTypeAll','pFPTypeCb',onPFPTypeAll,onPFPTypeChange,ptypes);
   renderSummaryTable();
+  renderRemainingTable();
   // Province dropdown grouped by health zone
   const dd=document.getElementById('pFProvDD');
   const allLbl=dd.querySelector('.all-label');
@@ -1116,6 +1142,44 @@ function exportSummaryExcel(){
   ws['!cols']=[{wch:4},{wch:40},{wch:12},{wch:20},{wch:16},{wch:14},{wch:12},{wch:14},{wch:18}];
   XLSX.utils.book_append_sheet(wb,ws,'สรุปรายหน่วยงาน');
   XLSX.writeFile(wb,`สรุปผู้เข้าร่วมงาน_${activeYear}.xlsx`);
+}
+function _getRemainingList(){
+  const checkedIds=new Set();
+  allData.forEach(r=>{if(!r.isWalkin)checkedIds.add(r.participantId);});
+  const deptOrder=new Map(DEPTS.map((d,i)=>[d,i]));
+  return allParticipants
+    .filter(p=>!p.is_walkin&&(p.internal_external||'').includes('ภายใน')&&!checkedIds.has(p.id))
+    .sort((a,b)=>{
+      const oa=deptOrder.has(a.dept)?deptOrder.get(a.dept):9999;
+      const ob=deptOrder.has(b.dept)?deptOrder.get(b.dept):9999;
+      if(oa!==ob) return oa-ob;
+      return (a.last_name||'').localeCompare(b.last_name||'','th');
+    });
+}
+function renderRemainingTable(){
+  const list=_getRemainingList();
+  document.getElementById('remainingCount').textContent=`(${list.length.toLocaleString()} คน)`;
+  if(!list.length){
+    document.getElementById('remainingBody').innerHTML='<tr><td colspan="5" style="text-align:center;padding:30px;color:#15803d;font-weight:700;">✓ ทุกคนเช็คอินครบแล้ว</td></tr>';
+    return;
+  }
+  document.getElementById('remainingBody').innerHTML=list.map((p,i)=>`<tr>
+    <td style="text-align:center;padding:8px 10px;color:#94a3b8;font-size:0.75rem;">${i+1}</td>
+    <td style="padding:8px 10px;color:#334155;">${p.dept||'-'}</td>
+    <td style="padding:8px 10px;color:#475569;font-size:0.8rem;font-family:monospace;">${(p.id_card||'').trim()||'—'}</td>
+    <td style="padding:8px 10px;color:#1e293b;">${((p.prefix||'').trim()+' '+(p.first_name||'').trim()).trim()||'-'}</td>
+    <td style="padding:8px 10px;color:#1e293b;">${(p.last_name||'').trim()||'-'}</td>
+  </tr>`).join('');
+}
+function exportRemainingExcel(){
+  const list=_getRemainingList();
+  const data=[['#','หน่วยงาน','เลขบัตรประชาชน','คำนำหน้า','ชื่อ','นามสกุล']];
+  list.forEach((p,i)=>data.push([i+1,p.dept||'-',(p.id_card||'').trim()||'-',(p.prefix||'').trim()||'-',(p.first_name||'').trim()||'-',(p.last_name||'').trim()||'-']));
+  const wb=XLSX.utils.book_new();
+  const ws=XLSX.utils.aoa_to_sheet(data);
+  ws['!cols']=[{wch:4},{wch:40},{wch:16},{wch:10},{wch:20},{wch:20}];
+  XLSX.utils.book_append_sheet(wb,ws,'รายชื่อคงเหลือ');
+  XLSX.writeFile(wb,`รายชื่อคงเหลือ_${activeYear}.xlsx`);
 }
 function toggleParticipants(){
   const sec=document.getElementById('pRegSection');
