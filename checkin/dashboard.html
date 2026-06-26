@@ -86,8 +86,12 @@
     .filter-label{font-size:0.71rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.04em;}
     .filter-select{padding:8px 12px;border-radius:8px;border:1.5px solid var(--border);font-family:'Sarabun',sans-serif;font-size:0.88rem;color:#1e293b;cursor:pointer;outline:none;}
     .filter-select:focus{border-color:var(--blue-mid);}
-    .btn-reset{padding:8px 14px;border-radius:8px;border:1.5px solid var(--border);background:white;font-family:'Sarabun',sans-serif;font-size:0.83rem;cursor:pointer;color:#64748b;}
+    .btn-reset{padding:8px 14px;border-radius:8px;border:1.5px solid var(--border);background:white;font-family:'Sarabun',sans-serif;font-size:0.83rem;cursor:pointer;color:#64748b;display:inline-flex;align-items:center;gap:6px;}
     .btn-reset:hover{background:#f1f5f9;}
+    .filter-badge{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:#1d4ed8;color:#fff;font-size:0.68rem;font-weight:700;}
+    .btn-more-filter{padding:8px 14px;border-radius:8px;border:1.5px solid var(--border);background:white;font-family:'Sarabun',sans-serif;font-size:0.83rem;cursor:pointer;color:#64748b;white-space:nowrap;}
+    .btn-more-filter:hover{background:#f1f5f9;}
+    .extra-filters{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end;}
     /* Multi select */
     .multi-wrap{position:relative;}
     .multi-btn{padding:8px 30px 8px 12px;border-radius:8px;border:1.5px solid var(--border);font-family:'Sarabun',sans-serif;font-size:0.88rem;color:#1e293b;cursor:pointer;background:white;width:100%;text-align:left;position:relative;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -471,23 +475,26 @@ document.addEventListener('DOMContentLoaded', function() {
           </div>
         </div>
       </div>
-      <div class="filter-group">
-        <div class="filter-label">TAG</div>
-        <select class="filter-select" id="fTag" onchange="applyFilters()">
-          <option value="">ทั้งหมด</option>
-          <option value="participant">participant</option>
-          <option value="Staff">Staff</option>
-        </select>
+      <button class="btn-more-filter" id="moreFilterBtn" onclick="toggleExtraFilters()">⚙ เพิ่มเติม ▾</button>
+      <button class="btn-reset" id="filterResetBtn" onclick="resetFilters()">✕ ล้าง</button>
+      <div class="extra-filters" id="extraFilters" style="display:none;width:100%;border-top:1px dashed var(--border);padding-top:10px;margin-top:2px;">
+        <div class="filter-group">
+          <div class="filter-label">TAG</div>
+          <select class="filter-select" id="fTag" onchange="applyFilters()">
+            <option value="">ทั้งหมด</option>
+            <option value="participant">participant</option>
+            <option value="Staff">Staff</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <div class="filter-label">ประเภท</div>
+          <select class="filter-select" id="fWalkin" onchange="applyFilters()">
+            <option value="">ทั้งหมด</option>
+            <option value="preReg">ลงทะเบียนล่วงหน้า</option>
+            <option value="walkin">Walk-in</option>
+          </select>
+        </div>
       </div>
-      <div class="filter-group">
-        <div class="filter-label">ประเภท</div>
-        <select class="filter-select" id="fWalkin" onchange="applyFilters()">
-          <option value="">ทั้งหมด</option>
-          <option value="preReg">ลงทะเบียนล่วงหน้า</option>
-          <option value="walkin">Walk-in</option>
-        </select>
-      </div>
-      <button class="btn-reset" onclick="resetFilters()">✕ ล้าง filter</button>
     </div>
     <div style="overflow-x:auto;">
       <table>
@@ -1809,6 +1816,39 @@ function switchTab(day){
   applyFilters();
 }
 
+function toggleExtraFilters(){
+  const el=document.getElementById('extraFilters');
+  const btn=document.getElementById('moreFilterBtn');
+  const open=el.style.display==='none';
+  el.style.display=open?'flex':'none';
+  btn.textContent=open?'⚙ เพิ่มเติม ▴':'⚙ เพิ่มเติม ▾';
+}
+function _updateFilterBadge(){
+  const ie=document.getElementById('fIntExt').value;
+  const tg=document.getElementById('fTag').value;
+  const wi=document.getElementById('fWalkin').value;
+  const q=document.getElementById('sBox').value;
+  let n=0;
+  if(ie) n++;
+  if(tg) n++;
+  if(wi) n++;
+  if(q) n++;
+  if(selPT&&selPT.size) n++;
+  if(selFDept&&selFDept.size) n++;
+  const btn=document.getElementById('filterResetBtn');
+  const badge=btn.querySelector('.filter-badge');
+  if(n>0){
+    if(badge) badge.textContent=n; else btn.insertAdjacentHTML('beforeend',`<span class="filter-badge">${n}</span>`);
+    btn.style.color='#1d4ed8';btn.style.borderColor='#93c5fd';btn.style.background='#eff6ff';
+    if(tg||wi){
+      const ef=document.getElementById('extraFilters');
+      if(ef.style.display==='none'){ef.style.display='flex';document.getElementById('moreFilterBtn').textContent='⚙ เพิ่มเติม ▴';}
+    }
+  } else {
+    if(badge) badge.remove();
+    btn.style.color='';btn.style.borderColor='';btn.style.background='';
+  }
+}
 function resetFilters(){
   document.getElementById('fIntExt').value='';
   document.getElementById('fTag').value='';
@@ -1822,7 +1862,7 @@ function resetFilters(){
   applyFilters();
 }
 
-function applyFilters(){
+function applyFilters(){_updateFilterBadge();
   const q=document.getElementById('sBox').value.toLowerCase();
   const ie=document.getElementById('fIntExt').value;
   const tg=document.getElementById('fTag').value;

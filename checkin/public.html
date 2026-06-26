@@ -107,13 +107,12 @@
 
     .progress-card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:20px 24px;box-shadow:var(--shadow);margin-bottom:20px;}
     .goal-bar-wrap{margin-bottom:4px;}
-    #goalBar{
-      background-image:repeating-linear-gradient(
-        90deg,
-        transparent 0px, transparent 13px,
-        rgba(255,255,255,0.45) 13px, rgba(255,255,255,0.45) 15px
-      ) !important;
-    }
+    #goalBar{position:relative;overflow:hidden;}
+    #goalBar::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent 60%,rgba(255,255,255,0.22));animation:barShimmer 2.4s ease-in-out infinite;}
+    @keyframes barShimmer{0%,100%{opacity:0}50%{opacity:1}}
+    .tbl-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;position:relative;}
+    .tbl-scroll::after{content:'';position:absolute;top:0;right:0;bottom:0;width:36px;background:linear-gradient(to right,transparent,rgba(255,255,255,0.88));pointer-events:none;transition:opacity .2s;}
+    .tbl-scroll.no-fade::after{opacity:0;}
     .progress-title{font-size:0.9rem;font-weight:700;color:var(--navy);margin-bottom:16px;}
     .progress-row{margin-bottom:14px;}
     .progress-row-top{display:flex;justify-content:space-between;font-size:0.85rem;margin-bottom:6px;}
@@ -364,7 +363,7 @@
           <button class="view-btn" id="dVChartBtn" onclick="setDeptView('chart')">แผนภูมิ</button>
         </div>
       </div>
-      <div id="deptTableWrap" style="overflow-x:auto;max-height:320px;overflow-y:auto;">
+      <div id="deptTableWrap" class="tbl-scroll" style="max-height:320px;overflow-y:auto;" onscroll="this.classList.toggle('no-fade',this.scrollLeft+this.clientWidth>=this.scrollWidth-4)">
         <table>
           <thead style="position:sticky;top:0;z-index:1;">
             <tr>
@@ -398,7 +397,7 @@
           <button class="view-btn" id="eVChartBtn" onclick="setExtDeptView('chart')">แผนภูมิ</button>
         </div>
       </div>
-      <div id="extDeptTableWrap" style="overflow-x:auto;max-height:320px;overflow-y:auto;">
+      <div id="extDeptTableWrap" class="tbl-scroll" style="max-height:320px;overflow-y:auto;" onscroll="this.classList.toggle('no-fade',this.scrollLeft+this.clientWidth>=this.scrollWidth-4)">
         <table>
           <thead style="position:sticky;top:0;z-index:1;">
             <tr>

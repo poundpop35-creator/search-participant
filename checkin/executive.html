@@ -57,8 +57,19 @@
     .dept-card-sub{font-size:0.8rem;color:#7a9aae;margin-top:2px;}
     .share-btn{display:inline-flex;align-items:center;gap:6px;font-size:0.8rem;font-weight:600;color:#1F3540;background:#e8f4f8;border:1.5px solid #C8DDE8;border-radius:10px;padding:7px 16px;cursor:pointer;white-space:nowrap;transition:background 0.15s;margin-top:12px;}
     .share-btn:hover{background:#C8DDE8;}
+    .share-text-wrap{position:relative;display:inline-block;}
+    .share-text-btn{display:inline-flex;align-items:center;gap:6px;font-size:0.8rem;font-weight:600;color:#1F3540;background:#f0f9ff;border:1.5px solid #C8DDE8;border-radius:10px;padding:7px 14px;cursor:pointer;white-space:nowrap;transition:background .15s;}
+    .share-text-btn:hover{background:#C8DDE8;}
+    .share-text-dd{position:absolute;top:calc(100% + 4px);right:0;z-index:300;background:#fff;border:1.5px solid #C8DDE8;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,0.12);min-width:170px;display:none;overflow:hidden;}
+    .share-text-dd.open{display:block;}
+    .share-text-dd button{display:block;width:100%;text-align:left;padding:10px 16px;background:none;border:none;font-family:'Sarabun',sans-serif;font-size:0.84rem;color:#1F3540;cursor:pointer;font-weight:500;}
+    .share-text-dd button:hover{background:#f0f9ff;}
+    .share-text-dd button:not(:last-child){border-bottom:1px solid #e8f4f8;}
 
-    .scroll-wrap{overflow-x:auto;}
+    .scroll-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;position:relative;}
+    .scroll-fade{position:relative;}
+    .scroll-fade::after{content:'';position:absolute;top:0;right:0;bottom:0;width:40px;background:linear-gradient(to right,transparent,rgba(255,255,255,0.9));pointer-events:none;border-radius:0 12px 12px 0;transition:opacity .2s;}
+    .scroll-fade.no-fade::after{opacity:0;}
     table{width:100%;border-collapse:collapse;}
     thead{position:sticky;top:0;z-index:1;}
     #a4Export thead,#a4ExtExport thead,#a4ExtZoneExport thead,#a4ZoneExport thead,#summaryExport thead{position:static!important;}
@@ -147,15 +158,20 @@
           <div class="dept-card-sub">รวม pre-reg + walk-in — อัปเดตอัตโนมัติทุก 1 นาที</div>
         </div>
         <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;">
-          <button class="share-btn" onclick="shareSummary()" id="shareSummaryBtn" style="margin-top:0;">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            📤 แชร์รูป
-          </button>
-          <div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;">
-            <button onclick="shareTextSummary(1)" style="padding:5px 10px;border-radius:8px;border:1.5px solid #C8DDE8;background:#f0f9ff;font-family:'Sarabun',sans-serif;font-size:0.75rem;font-weight:600;color:#1F3540;cursor:pointer;">📋 24 มิ.ย.</button>
-            <button onclick="shareTextSummary(2)" style="padding:5px 10px;border-radius:8px;border:1.5px solid #C8DDE8;background:#f0f9ff;font-family:'Sarabun',sans-serif;font-size:0.75rem;font-weight:600;color:#1F3540;cursor:pointer;">📋 25 มิ.ย.</button>
-            <button onclick="shareTextSummary(3)" style="padding:5px 10px;border-radius:8px;border:1.5px solid #C8DDE8;background:#f0f9ff;font-family:'Sarabun',sans-serif;font-size:0.75rem;font-weight:600;color:#1F3540;cursor:pointer;">📋 26 มิ.ย.</button>
-            <button onclick="shareTextSummary(null)" style="padding:5px 10px;border-radius:8px;border:1.5px solid #C8DDE8;background:#f0f9ff;font-family:'Sarabun',sans-serif;font-size:0.75rem;font-weight:600;color:#1F3540;cursor:pointer;">📋 รวม</button>
+          <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end;">
+            <button class="share-btn" onclick="shareSummary()" id="shareSummaryBtn" style="margin-top:0;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              📤 แชร์รูป
+            </button>
+            <div class="share-text-wrap">
+              <button class="share-text-btn" onclick="toggleShareTextDD('summaryTextDD')">📋 คัดลอกข้อความ ▾</button>
+              <div class="share-text-dd" id="summaryTextDD">
+                <button onclick="shareTextSummary(1);closeShareTextDD('summaryTextDD')">📋 วันที่ 1</button>
+                <button onclick="shareTextSummary(2);closeShareTextDD('summaryTextDD')">📋 วันที่ 2</button>
+                <button onclick="shareTextSummary(3);closeShareTextDD('summaryTextDD')">📋 วันที่ 3</button>
+                <button onclick="shareTextSummary(null);closeShareTextDD('summaryTextDD')">📋 รวม 3 วัน</button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -282,7 +298,7 @@
         </div>
       </div>
       <!-- TABLE VIEW -->
-      <div id="execTableWrap" class="scroll-wrap">
+      <div id="execTableWrap" class="scroll-wrap scroll-fade" onscroll="this.classList.toggle('no-fade',this.scrollLeft+this.clientWidth>=this.scrollWidth-4)">
         <table>
           <thead id="execTableHead">
             <tr>
@@ -327,7 +343,7 @@
           <button id="ezfD3" onclick="setExecDay(3)" style="padding:5px 10px;border-radius:8px;border:1.5px solid #C8DDE8;background:#fff;color:#0891b2;font-family:'Sarabun',sans-serif;font-size:0.75rem;font-weight:600;cursor:pointer;">26 มิ.ย.</button>
         </div>
       </div>
-      <div class="scroll-wrap">
+      <div class="scroll-wrap scroll-fade" onscroll="this.classList.toggle('no-fade',this.scrollLeft+this.clientWidth>=this.scrollWidth-4)">
         <table>
           <thead id="extZoneTableHead">
             <tr>
@@ -671,6 +687,14 @@ function renderSummary() {
 
 function isMobile(){return('ontouchstart' in window)||navigator.maxTouchPoints>0;}
 function showDesktopHint(n=1){alert(`ดาวน์โหลดรูปแล้ว ${n} ไฟล์ ✅\nไปแนบในแอป LINE Desktop ได้เลย 📎`);}
+function toggleShareTextDD(id){
+  const dd=document.getElementById(id);
+  const isOpen=dd.classList.contains('open');
+  document.querySelectorAll('.share-text-dd').forEach(d=>d.classList.remove('open'));
+  if(!isOpen) dd.classList.add('open');
+}
+function closeShareTextDD(id){document.getElementById(id).classList.remove('open');}
+document.addEventListener('click',e=>{if(!e.target.closest('.share-text-wrap'))document.querySelectorAll('.share-text-dd').forEach(d=>d.classList.remove('open'));});
 
 async function shareSummary() {
   const btn = document.getElementById('shareSummaryBtn');
