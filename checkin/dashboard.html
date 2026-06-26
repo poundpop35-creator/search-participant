@@ -1373,7 +1373,9 @@ function renderRemainingTable(){
   const depts=[...new Set(full.map(p=>p.dept||'').filter(Boolean))].sort((a,b)=>{const oa=DEPTS.indexOf(a),ob=DEPTS.indexOf(b);return(oa<0?9999:oa)-(ob<0?9999:ob);});
   sel.innerHTML='<option value="">ทั้งหมด</option>'+depts.map(d=>`<option value="${d}"${d===curVal?' selected':''}>${d}</option>`).join('');
   const ptTypes=[...new Set(full.map(p=>(p.participation_type||'').replace(/\s+/g,' ').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'th'));
+  const _prevRemPt=getChecked('remPtDD');
   buildDD('remPtDD','remPtAll',ptTypes,()=>{updateBtn('remPtBtn',getChecked('remPtDD'));renderRemainingTable();});
+  if(_prevRemPt.size){document.querySelectorAll('#remPtDD input:not(#remPtAll)').forEach(cb=>{if(!_prevRemPt.has(cb.value))cb.checked=false;});document.getElementById('remPtAll').checked=false;}
   const selPts=getChecked('remPtDD');
   const bagVal=document.getElementById('remBagFilter').value;
   let list=curVal?full.filter(p=>p.dept===curVal):full;
@@ -1464,7 +1466,9 @@ function renderCheckedInTable(){
   const depts=[...new Set(full.map(p=>p.dept||'').filter(Boolean))].sort((a,b)=>{const oa=DEPTS.indexOf(a),ob=DEPTS.indexOf(b);return(oa<0?9999:oa)-(ob<0?9999:ob);});
   sel.innerHTML='<option value="">ทั้งหมด</option>'+depts.map(d=>`<option value="${d}"${d===curVal?' selected':''}>${d}</option>`).join('');
   const ptTypes=[...new Set(full.map(p=>(p.participation_type||'').replace(/\s+/g,' ').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'th'));
+  const _prevCiPt=getChecked('ciPtDD');
   buildDD('ciPtDD','ciPtAll',ptTypes,()=>{_checkedInPage=0;updateBtn('ciPtBtn',getChecked('ciPtDD'));renderCheckedInTable();});
+  if(_prevCiPt.size){document.querySelectorAll('#ciPtDD input:not(#ciPtAll)').forEach(cb=>{if(!_prevCiPt.has(cb.value))cb.checked=false;});document.getElementById('ciPtAll').checked=false;}
   const selPts=getChecked('ciPtDD');
   let list=curVal?full.filter(p=>p.dept===curVal):full;
   if(selPts.size) list=list.filter(p=>selPts.has((p.participation_type||'').replace(/\s+/g,' ').trim()));
@@ -1509,7 +1513,9 @@ function renderWalkInTable(){
   const depts=[...new Set(full.map(p=>(p.dept||'').trim()).filter(Boolean))].sort((a,b)=>{const oa=DEPTS.indexOf(a),ob=DEPTS.indexOf(b);return(oa<0?9999:oa)-(ob<0?9999:ob);});
   sel.innerHTML='<option value="">ทั้งหมด</option>'+depts.map(d=>`<option value="${d}"${d===curVal?' selected':''}>${d}</option>`).join('');
   const ptTypes=[...new Set(full.map(p=>(p.participation_type||'').replace(/\s+/g,' ').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'th'));
+  const _prevWiPt=getChecked('wiPtDD');
   buildDD('wiPtDD','wiPtAll',ptTypes,()=>{_walkInPage=0;updateBtn('wiPtBtn',getChecked('wiPtDD'));renderWalkInTable();});
+  if(_prevWiPt.size){document.querySelectorAll('#wiPtDD input:not(#wiPtAll)').forEach(cb=>{if(!_prevWiPt.has(cb.value))cb.checked=false;});document.getElementById('wiPtAll').checked=false;}
   const selPts=getChecked('wiPtDD');
   let list=curVal?full.filter(p=>(p.dept||'').trim()===curVal):full;
   if(selPts.size) list=list.filter(p=>selPts.has((p.participation_type||'').replace(/\s+/g,' ').trim()));
