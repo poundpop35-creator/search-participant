@@ -1191,8 +1191,15 @@ function _getRemainingList(){
   const checkedIds=new Set();
   allData.forEach(r=>{if(!r.isWalkin)checkedIds.add(r.participantId);});
   const deptOrder=new Map(DEPTS.map((d,i)=>[d,i]));
+  const seen=new Set();
   return allParticipants
-    .filter(p=>!p.is_walkin&&(p.internal_external||'').includes('ภายใน')&&!checkedIds.has(p.id))
+    .filter(p=>{
+      if(p.is_walkin||!(p.internal_external||'').includes('ภายใน')||checkedIds.has(p.id)) return false;
+      const key=(p.id_card||'').trim()||String(p.id);
+      if(seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
     .sort((a,b)=>{
       const oa=deptOrder.has(a.dept)?deptOrder.get(a.dept):9999;
       const ob=deptOrder.has(b.dept)?deptOrder.get(b.dept):9999;
