@@ -1113,46 +1113,45 @@ async function exportTablePDF(sectionId, filename){
 }
 function _buildSummaryData(){
   // B: unique pre-reg internal people per dept (dedup by id_card)
+  // Also build the exact same "who is pre-reg internal" set used by _getRemainingList
   const preRegByDept={};
+  const preRegPeople=[]; // {id, ic, dept} one entry per unique pre-reg internal person
   const preRegIdCards=new Set();
-  const idCardToPreRegDept=new Map(); // id_card -> pre-reg dept (for routing walk-in duplicates to correct dept)
   const seenPreReg=new Set();
   allParticipants.filter(p=>!p.is_walkin&&(p.internal_external||'').includes('ภายใน')).forEach(p=>{
     const d=(p.dept||'-').trim();
     const ic=(p.id_card||'').trim();
     const key=ic||String(p.id);
-    if(!seenPreReg.has(key)){
-      seenPreReg.add(key);
-      preRegByDept[d]=(preRegByDept[d]||0)+1;
-    }
-    if(ic&&!idCardToPreRegDept.has(ic)){
-      preRegIdCards.add(ic);
-      idCardToPreRegDept.set(ic,d);
-    }
+    if(seenPreReg.has(key)) return;
+    seenPreReg.add(key);
+    preRegByDept[d]=(preRegByDept[d]||0)+1;
+    preRegPeople.push({id:p.id,ic,dept:d});
+    if(ic) preRegIdCards.add(ic);
   });
+  // Build same checkedIds / checkedIdCards as _getRemainingList (identical logic)
   const pidToIdCard=new Map(allParticipants.map(p=>[p.id,(p.id_card||'').trim()]));
-  // C: pre-reg checked in (same logic as _getRemainingList — no isIn filter, use pre-reg dept)
-  // D: pure internal walk-ins (id_card does not match any pre-reg)
-  const seenC=new Map(), seenD=new Map();
+  const checkedIds=new Set(), checkedIdCards=new Set();
   allData.forEach(r=>{
-    const d=r.dept;
+    checkedIds.add(r.participantId);
     const ic=pidToIdCard.get(r.participantId)||'';
-    if(r.isWalkin){
-      if(ic&&preRegIdCards.has(ic)){
-        // Walk-in duplicate of pre-reg → C in the PRE-REG's dept (not walk-in's dept)
-        const pd=idCardToPreRegDept.get(ic);
-        if(!seenC.has(pd))seenC.set(pd,new Set());
-        seenC.get(pd).add(ic);
-      } else if(r.isIn){
-        if(!seenD.has(d))seenD.set(d,new Set());
-        seenD.get(d).add(r.participantId);
-      }
-    } else {
-      // Pre-reg check-in (no isIn filter — aligned with _getRemainingList checkedIds logic)
-      const key=ic||String(r.participantId);
-      if(!seenC.has(d))seenC.set(d,new Set());
-      seenC.get(d).add(key);
-    }
+    if(ic) checkedIdCards.add(ic);
+  });
+  // C: pre-reg internal people who have checked in (id OR id_card found in allData)
+  // This is the EXACT complement of _getRemainingList → C + remaining = B always
+  const seenC=new Map();
+  preRegPeople.forEach(p=>{
+    if(!checkedIds.has(p.id)&&!(p.ic&&checkedIdCards.has(p.ic))) return;
+    if(!seenC.has(p.dept))seenC.set(p.dept,new Set());
+    seenC.get(p.dept).add(p.ic||String(p.id));
+  });
+  // D: pure walk-ins (internal, id_card NOT matching any pre-reg person)
+  const seenD=new Map();
+  allData.forEach(r=>{
+    if(!r.isWalkin||!r.isIn) return;
+    const ic=pidToIdCard.get(r.participantId)||'';
+    if(ic&&preRegIdCards.has(ic)) return; // duplicate of pre-reg → already in C
+    if(!seenD.has(r.dept))seenD.set(r.dept,new Set());
+    seenD.get(r.dept).add(r.participantId);
   });
   return {preRegByDept,seenC,seenD};
 }
