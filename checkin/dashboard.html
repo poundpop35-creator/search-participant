@@ -1144,10 +1144,11 @@ function _buildSummaryData(){
     if(!seenC.has(p.dept))seenC.set(p.dept,new Set());
     seenC.get(p.dept).add(p.ic||String(p.id));
   });
-  // D: pure walk-ins (internal, id_card NOT matching any pre-reg person)
+  // D: pure internal walk-ins (dept must be in DEPTS list, id_card NOT matching any pre-reg)
+  const deptsSet=new Set(DEPTS);
   const seenD=new Map();
   allData.forEach(r=>{
-    if(!r.isWalkin||!r.isIn) return;
+    if(!r.isWalkin||!r.isIn||!deptsSet.has(r.dept)) return;
     const ic=pidToIdCard.get(r.participantId)||'';
     if(ic&&preRegIdCards.has(ic)) return; // duplicate of pre-reg → already in C
     if(!seenD.has(r.dept))seenD.set(r.dept,new Set());
