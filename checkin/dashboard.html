@@ -1115,35 +1115,40 @@ function _buildSummaryData(){
   // B: unique pre-reg internal people per dept (dedup by id_card)
   const preRegByDept={};
   const preRegIdCards=new Set();
+  const idCardToPreRegDept=new Map(); // id_card -> pre-reg dept (for routing walk-in duplicates to correct dept)
   const seenPreReg=new Set();
   allParticipants.filter(p=>!p.is_walkin&&(p.internal_external||'').includes('ภายใน')).forEach(p=>{
     const d=(p.dept||'-').trim();
     const ic=(p.id_card||'').trim();
     const key=ic||String(p.id);
-    if(seenPreReg.has(key)) return;
-    seenPreReg.add(key);
-    preRegByDept[d]=(preRegByDept[d]||0)+1;
-    if(ic) preRegIdCards.add(ic);
+    if(!seenPreReg.has(key)){
+      seenPreReg.add(key);
+      preRegByDept[d]=(preRegByDept[d]||0)+1;
+    }
+    if(ic&&!idCardToPreRegDept.has(ic)){
+      preRegIdCards.add(ic);
+      idCardToPreRegDept.set(ic,d);
+    }
   });
-  // participantId -> id_card lookup
   const pidToIdCard=new Map(allParticipants.map(p=>[p.id,(p.id_card||'').trim()]));
-  // C: pre-reg people who checked in (including walk-in whose id_card matches a pre-reg)
-  // D: pure walk-ins (no matching pre-reg id_card)
+  // C: pre-reg checked in (same logic as _getRemainingList — no isIn filter, use pre-reg dept)
+  // D: pure internal walk-ins (id_card does not match any pre-reg)
   const seenC=new Map(), seenD=new Map();
   allData.forEach(r=>{
-    if(!r.isIn) return;
     const d=r.dept;
     const ic=pidToIdCard.get(r.participantId)||'';
     if(r.isWalkin){
       if(ic&&preRegIdCards.has(ic)){
-        // Walk-in duplicate of a pre-reg → counts as C (pre-reg checked in)
-        if(!seenC.has(d))seenC.set(d,new Set());
-        seenC.get(d).add(ic);
-      } else {
+        // Walk-in duplicate of pre-reg → C in the PRE-REG's dept (not walk-in's dept)
+        const pd=idCardToPreRegDept.get(ic);
+        if(!seenC.has(pd))seenC.set(pd,new Set());
+        seenC.get(pd).add(ic);
+      } else if(r.isIn){
         if(!seenD.has(d))seenD.set(d,new Set());
         seenD.get(d).add(r.participantId);
       }
     } else {
+      // Pre-reg check-in (no isIn filter — aligned with _getRemainingList checkedIds logic)
       const key=ic||String(r.participantId);
       if(!seenC.has(d))seenC.set(d,new Set());
       seenC.get(d).add(key);
