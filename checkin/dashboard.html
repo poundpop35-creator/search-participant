@@ -1155,11 +1155,20 @@ async function loadParticipants(){
   });
 }
 
+function _maskIdCells(el){
+  const cells=[...el.querySelectorAll('td[style*="monospace"]')];
+  const orig=cells.map(td=>td.textContent);
+  cells.forEach(td=>{if(td.textContent&&td.textContent!=='—') td.textContent='xxxx';});
+  return ()=>cells.forEach((td,i)=>td.textContent=orig[i]);
+}
 async function exportTableImage(sectionId, filename){
   const el=document.getElementById(sectionId);
   const btn=event.target;btn.disabled=true;btn.textContent='⏳';
   try{
-    const canvas=await html2canvas(el,{scale:2,useCORS:true,backgroundColor:'#ffffff',logging:false});
+    const restore=_maskIdCells(el);
+    let canvas;
+    try{canvas=await html2canvas(el,{scale:2,useCORS:true,backgroundColor:'#ffffff',logging:false});}
+    finally{restore();}
     const a=document.createElement('a');
     a.href=canvas.toDataURL('image/png');
     a.download=`${filename}_${activeYear}.png`;
@@ -1171,10 +1180,12 @@ async function exportTablePDF(sectionId, filename){
   const el=document.getElementById(sectionId);
   const btn=event.target;btn.disabled=true;btn.textContent='⏳';
   try{
-    const canvas=await html2canvas(el,{scale:2,useCORS:true,backgroundColor:'#ffffff',logging:false});
+    const restore=_maskIdCells(el);
+    let canvas;
+    try{canvas=await html2canvas(el,{scale:2,useCORS:true,backgroundColor:'#ffffff',logging:false});}
+    finally{restore();}
     const imgW=canvas.width, imgH=canvas.height;
     const {jsPDF}=window.jspdf;
-    // ปรับขนาด PDF ให้พอดีกับเนื้อหา โดยใช้ความกว้าง A4 (210mm) แล้วขยายความสูงตามสัดส่วน
     const pdfW=210;
     const pdfH=Math.ceil(imgH/imgW*pdfW);
     const pdf=new jsPDF({orientation:pdfH>pdfW?'portrait':'landscape',unit:'mm',format:[pdfW,pdfH]});
