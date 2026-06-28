@@ -227,56 +227,50 @@
       <!-- Group 1: Pre-registered -->
       <div class="progress-row" style="margin-bottom:6px;">
         <div class="progress-row-top">
-          <span class="progress-label" style="color:#2563eb;">ลงทะเบียนล่วงหน้า <span id="pPreReg" style="font-weight:700;">-</span> คน</span>
-          <span style="display:flex;align-items:center;gap:6px;">
-            <span id="pPreRegS" style="font-size:0.82rem;color:#94a3b8;">0%</span>
-            <button id="preRegSubBtn" onclick="togglePreRegSub()" class="view-btn" style="padding:2px 8px;font-size:0.72rem;">▼ แสดง</button>
-          </span>
+          <span class="progress-label" style="color:#2563eb;">📋 ลงทะเบียนล่วงหน้า <span id="pPreReg" style="font-weight:700;">-</span> คน</span>
+          <span id="pPreRegS" style="font-size:0.82rem;color:#94a3b8;">0%</span>
         </div>
         <div class="progress-bar"><div id="pBarPreReg" class="progress-fill" style="width:0%;background:#2563eb;"></div></div>
       </div>
-      <div id="preRegSubSection" style="display:none;margin-left:14px;border-left:2px solid #e2e8f0;padding-left:10px;margin-bottom:12px;margin-top:4px;">
+      <div style="margin-left:14px;border-left:2px solid #bfdbfe;padding-left:10px;margin-bottom:14px;margin-top:4px;">
         <div class="progress-row">
           <div class="progress-row-top">
-            <span style="font-size:0.8rem;color:#0891b2;">└ บุคลากรภายใน <span id="pPreRegInt" style="font-weight:700;">-</span> คน</span>
-            <span id="pPreRegIntS" style="font-size:0.78rem;color:#94a3b8;">0%</span>
+            <span style="font-size:0.8rem;color:#64748b;">↳ บุคลากรภายใน <span id="pPreRegInt" style="font-weight:700;color:#16a34a;">-</span> คน</span>
+            <span id="pPreRegIntS" style="font-size:0.75rem;color:#94a3b8;"></span>
           </div>
-          <div class="progress-bar" style="height:7px;"><div id="pBarPreRegInt" class="progress-fill" style="width:0%;background:#0891b2;"></div></div>
+          <div class="progress-bar" style="height:6px;"><div id="pBarPreRegInt" class="progress-fill" style="width:0%;background:#16a34a;"></div></div>
         </div>
         <div class="progress-row" style="margin-bottom:0;">
           <div class="progress-row-top">
-            <span style="font-size:0.8rem;color:#7c3aed;">└ บุคคลภายนอก <span id="pPreRegExt" style="font-weight:700;">-</span> คน</span>
-            <span id="pPreRegExtS" style="font-size:0.78rem;color:#94a3b8;">0%</span>
+            <span style="font-size:0.8rem;color:#64748b;">↳ บุคคลภายนอก <span id="pPreRegExt" style="font-weight:700;color:#ea580c;">-</span> คน</span>
+            <span id="pPreRegExtS" style="font-size:0.75rem;color:#94a3b8;"></span>
           </div>
-          <div class="progress-bar" style="height:7px;"><div id="pBarPreRegExt" class="progress-fill" style="width:0%;background:#7c3aed;"></div></div>
+          <div class="progress-bar" style="height:6px;"><div id="pBarPreRegExt" class="progress-fill" style="width:0%;background:#ea580c;"></div></div>
         </div>
       </div>
 
       <!-- Group 2: Walk-in -->
       <div class="progress-row" style="margin-bottom:6px;">
         <div class="progress-row-top">
-          <span class="progress-label" style="color:#db2777;">Walk-in <span id="pWalkin" style="font-weight:700;">-</span> คน</span>
-          <span style="display:flex;align-items:center;gap:6px;">
-            <span id="pWalkinS" style="font-size:0.82rem;color:#94a3b8;">0%</span>
-            <button id="walkinSubBtn" onclick="toggleWalkinSub()" class="view-btn" style="padding:2px 8px;font-size:0.72rem;">▼ แสดง</button>
-          </span>
+          <span class="progress-label" style="color:#d97706;">🚶 Walk-in <span id="pWalkin" style="font-weight:700;">-</span> คน</span>
+          <span id="pWalkinS" style="font-size:0.82rem;color:#94a3b8;">0%</span>
         </div>
-        <div class="progress-bar"><div id="pBarWalkin" class="progress-fill" style="width:0%;background:#db2777;"></div></div>
+        <div class="progress-bar"><div id="pBarWalkin" class="progress-fill" style="width:0%;background:#d97706;"></div></div>
       </div>
-      <div id="walkinSubSection" style="display:none;margin-left:14px;border-left:2px solid #e2e8f0;padding-left:10px;margin-bottom:0;margin-top:4px;">
+      <div style="margin-left:14px;border-left:2px solid #fde68a;padding-left:10px;margin-bottom:0;margin-top:4px;">
         <div class="progress-row">
           <div class="progress-row-top">
-            <span style="font-size:0.8rem;color:#0891b2;">└ บุคลากรภายใน <span id="pWalkinInt" style="font-weight:700;">-</span> คน</span>
-            <span id="pWalkinIntS" style="font-size:0.78rem;color:#94a3b8;">0%</span>
+            <span style="font-size:0.8rem;color:#64748b;">↳ บุคลากรภายใน <span id="pWalkinInt" style="font-weight:700;color:#16a34a;">-</span> คน</span>
+            <span id="pWalkinIntS" style="font-size:0.75rem;color:#94a3b8;"></span>
           </div>
-          <div class="progress-bar" style="height:7px;"><div id="pBarWalkinInt" class="progress-fill" style="width:0%;background:#0891b2;"></div></div>
+          <div class="progress-bar" style="height:6px;"><div id="pBarWalkinInt" class="progress-fill" style="width:0%;background:#16a34a;"></div></div>
         </div>
         <div class="progress-row" style="margin-bottom:0;">
           <div class="progress-row-top">
-            <span style="font-size:0.8rem;color:#7c3aed;">└ บุคคลภายนอก <span id="pWalkinExt" style="font-weight:700;">-</span> คน</span>
-            <span id="pWalkinExtS" style="font-size:0.78rem;color:#94a3b8;">0%</span>
+            <span style="font-size:0.8rem;color:#64748b;">↳ บุคคลภายนอก <span id="pWalkinExt" style="font-weight:700;color:#ea580c;">-</span> คน</span>
+            <span id="pWalkinExtS" style="font-size:0.75rem;color:#94a3b8;"></span>
           </div>
-          <div class="progress-bar" style="height:7px;"><div id="pBarWalkinExt" class="progress-fill" style="width:0%;background:#7c3aed;"></div></div>
+          <div class="progress-bar" style="height:6px;"><div id="pBarWalkinExt" class="progress-fill" style="width:0%;background:#ea580c;"></div></div>
         </div>
       </div>
     </div>
@@ -1284,19 +1278,6 @@ let deptView = 'table', extDeptView = 'table';
 let intChartInst = null, extChartInst = null, trendChartInst = null;
 let lastSorted = [], lastExtSorted = [], lastFillColor = '#9C7564';
 
-function togglePreRegSub(){
-  const sec=document.getElementById('preRegSubSection');
-  const btn=document.getElementById('preRegSubBtn');
-  if(sec.style.display==='none'){sec.style.display='block';btn.textContent='▲ ซ่อน';}
-  else{sec.style.display='none';btn.textContent='▼ แสดง';}
-}
-function toggleWalkinSub(){
-  const sec=document.getElementById('walkinSubSection');
-  const btn=document.getElementById('walkinSubBtn');
-  if(sec.style.display==='none'){sec.style.display='block';btn.textContent='▲ ซ่อน';}
-  else{sec.style.display='none';btn.textContent='▼ แสดง';}
-}
-
 function updateClearBtn(){
   const btn=document.getElementById('zoneMapExtClear');
   if(btn) btn.style.display=selectedZonePub!==null?'block':'none';
@@ -1339,29 +1320,29 @@ function renderStats() {
   _ptEl.style.fontSize = _digits <= 2 ? '7.5rem' : _digits === 3 ? '6rem' : _digits === 4 ? '5rem' : '4rem';
 
   const preRegPct    = total ? Math.round(preReg/total*100) : 0;
-  const preRegIntPct = total ? Math.round(preRegInternal/total*100) : 0;
-  const preRegExtPct = total ? Math.round(preRegExternal/total*100) : 0;
+  const preRegIntPct = preReg ? Math.round(preRegInternal/preReg*100) : 0;
+  const preRegExtPct = preReg ? Math.round(preRegExternal/preReg*100) : 0;
   const wkPct        = total ? Math.round(walkin/total*100) : 0;
-  const wkIntPct     = total ? Math.round(walkinInternal/total*100) : 0;
-  const wkExtPct     = total ? Math.round(walkinExternal/total*100) : 0;
+  const wkIntPct     = walkin ? Math.round(walkinInternal/walkin*100) : 0;
+  const wkExtPct     = walkin ? Math.round(walkinExternal/walkin*100) : 0;
 
   document.getElementById('pPreReg').textContent       = preReg.toLocaleString();
-  document.getElementById('pPreRegS').textContent      = `${preRegPct}%`;
+  document.getElementById('pPreRegS').textContent      = `${preRegPct}% ของผู้เช็คอิน`;
   document.getElementById('pBarPreReg').style.width    = preRegPct + '%';
   document.getElementById('pPreRegInt').textContent    = preRegInternal.toLocaleString();
-  document.getElementById('pPreRegIntS').textContent   = `${preRegIntPct}%`;
+  document.getElementById('pPreRegIntS').textContent   = `${preRegIntPct}% ของล่วงหน้า`;
   document.getElementById('pBarPreRegInt').style.width = preRegIntPct + '%';
   document.getElementById('pPreRegExt').textContent    = preRegExternal.toLocaleString();
-  document.getElementById('pPreRegExtS').textContent   = `${preRegExtPct}%`;
+  document.getElementById('pPreRegExtS').textContent   = `${preRegExtPct}% ของล่วงหน้า`;
   document.getElementById('pBarPreRegExt').style.width = preRegExtPct + '%';
   document.getElementById('pWalkin').textContent       = walkin.toLocaleString();
-  document.getElementById('pWalkinS').textContent      = `${wkPct}%`;
+  document.getElementById('pWalkinS').textContent      = `${wkPct}% ของผู้เช็คอิน`;
   document.getElementById('pBarWalkin').style.width    = wkPct + '%';
   document.getElementById('pWalkinInt').textContent    = walkinInternal.toLocaleString();
-  document.getElementById('pWalkinIntS').textContent   = `${wkIntPct}%`;
+  document.getElementById('pWalkinIntS').textContent   = `${wkIntPct}% ของ Walk-in`;
   document.getElementById('pBarWalkinInt').style.width = wkIntPct + '%';
   document.getElementById('pWalkinExt').textContent    = walkinExternal.toLocaleString();
-  document.getElementById('pWalkinExtS').textContent   = `${wkExtPct}%`;
+  document.getElementById('pWalkinExtS').textContent   = `${wkExtPct}% ของ Walk-in`;
   document.getElementById('pBarWalkinExt').style.width = wkExtPct + '%';
 
   // Day cards: always show all-days counts, dim non-selected
