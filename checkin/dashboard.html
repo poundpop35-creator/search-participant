@@ -372,29 +372,62 @@ document.addEventListener('DOMContentLoaded', function() {
       <div id="barWalkinCheckin" style="display:none;"></div>
     </div>
   </div>
-  <!-- แถวที่ 2: บุคลากรภายใน / ภายนอก / Walk-in (progress bars) -->
+  <!-- แถวที่ 2: ลงทะเบียนล่วงหน้า + Walk-in พร้อม sub-breakdown -->
   <div class="stat-card" style="border-left:4px solid #0891b2;padding:16px 18px;margin-bottom:10px;">
-    <div class="stat-label" style="margin-bottom:12px;">สัดส่วนผู้เข้าร่วมงาน</div>
-    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px;">
-      <span style="font-size:0.82rem;color:#64748b;">บุคลากรภายใน <b id="sInternal" style="color:#16a34a;">-</b> คน</span>
-      <span id="sInternalS" style="font-size:0.78rem;color:#94a3b8;">0%</span>
+    <div class="stat-label" style="margin-bottom:14px;">สัดส่วนผู้เข้าร่วมงาน</div>
+
+    <!-- กลุ่ม 1: ลงทะเบียนล่วงหน้า -->
+    <div style="margin-bottom:14px;">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px;">
+        <span style="font-size:0.84rem;font-weight:700;color:#1e40af;">📋 ลงทะเบียนล่วงหน้า <b id="sPreRegGroup" style="color:#2563eb;">-</b> คน</span>
+        <span id="sPreRegGroupS" style="font-size:0.78rem;color:#94a3b8;">0%</span>
+      </div>
+      <div style="height:9px;background:#e2e8f0;border-radius:5px;margin-bottom:10px;overflow:hidden;">
+        <div id="barPreRegGroup" style="height:100%;border-radius:5px;background:#3b82f6;width:0%;transition:width 0.6s ease;"></div>
+      </div>
+      <div style="padding-left:10px;border-left:2px solid #bfdbfe;">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px;">
+          <span style="font-size:0.79rem;color:#64748b;">↳ บุคลากรภายใน <b id="sInternal" style="color:#16a34a;">-</b> คน</span>
+          <span id="sInternalS" style="font-size:0.75rem;color:#94a3b8;"></span>
+        </div>
+        <div style="height:6px;background:#e2e8f0;border-radius:4px;margin-bottom:8px;overflow:hidden;">
+          <div id="barInternal" style="height:100%;border-radius:4px;background:#16a34a;width:0%;transition:width 0.6s ease;"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px;">
+          <span style="font-size:0.79rem;color:#64748b;">↳ บุคคลภายนอก <b id="sExternal" style="color:#ea580c;">-</b> คน</span>
+          <span id="sExternalS" style="font-size:0.75rem;color:#94a3b8;"></span>
+        </div>
+        <div style="height:6px;background:#e2e8f0;border-radius:4px;overflow:hidden;">
+          <div id="barExternal" style="height:100%;border-radius:4px;background:#ea580c;width:0%;transition:width 0.6s ease;"></div>
+        </div>
+      </div>
     </div>
-    <div style="height:12px;background:#e2e8f0;border-radius:6px;margin-bottom:12px;overflow:hidden;">
-      <div id="barInternal" style="height:100%;border-radius:6px;background:#16a34a;width:0%;transition:width 0.6s ease;"></div>
-    </div>
-    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px;">
-      <span style="font-size:0.82rem;color:#64748b;">บุคคลภายนอก <b id="sExternal" style="color:#ea580c;">-</b> คน</span>
-      <span id="sExternalS" style="font-size:0.78rem;color:#94a3b8;">0%</span>
-    </div>
-    <div style="height:12px;background:#e2e8f0;border-radius:6px;margin-bottom:12px;overflow:hidden;">
-      <div id="barExternal" style="height:100%;border-radius:6px;background:#ea580c;width:0%;transition:width 0.6s ease;"></div>
-    </div>
-    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px;">
-      <span style="font-size:0.82rem;color:#64748b;">Walk-in <b id="sWalkin2" style="color:#d97706;">-</b> คน</span>
-      <span id="sWalkin2S" style="font-size:0.78rem;color:#94a3b8;">0%</span>
-    </div>
-    <div style="height:12px;background:#e2e8f0;border-radius:6px;overflow:hidden;">
-      <div id="barWalkin2" style="height:100%;border-radius:6px;background:#d97706;width:0%;transition:width 0.6s ease;"></div>
+
+    <!-- กลุ่ม 2: Walk-in -->
+    <div>
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px;">
+        <span style="font-size:0.84rem;font-weight:700;color:#92400e;">🚶 Walk-in <b id="sWalkin2" style="color:#d97706;">-</b> คน</span>
+        <span id="sWalkin2S" style="font-size:0.78rem;color:#94a3b8;">0%</span>
+      </div>
+      <div style="height:9px;background:#e2e8f0;border-radius:5px;margin-bottom:10px;overflow:hidden;">
+        <div id="barWalkin2" style="height:100%;border-radius:5px;background:#d97706;width:0%;transition:width 0.6s ease;"></div>
+      </div>
+      <div style="padding-left:10px;border-left:2px solid #fde68a;">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px;">
+          <span style="font-size:0.79rem;color:#64748b;">↳ บุคลากรภายใน <b id="sWalkinInt" style="color:#16a34a;">-</b> คน</span>
+          <span id="sWalkinIntS" style="font-size:0.75rem;color:#94a3b8;"></span>
+        </div>
+        <div style="height:6px;background:#e2e8f0;border-radius:4px;margin-bottom:8px;overflow:hidden;">
+          <div id="barWalkinInt" style="height:100%;border-radius:4px;background:#16a34a;width:0%;transition:width 0.6s ease;"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px;">
+          <span style="font-size:0.79rem;color:#64748b;">↳ บุคคลภายนอก <b id="sWalkinExt" style="color:#ea580c;">-</b> คน</span>
+          <span id="sWalkinExtS" style="font-size:0.75rem;color:#94a3b8;"></span>
+        </div>
+        <div style="height:6px;background:#e2e8f0;border-radius:4px;overflow:hidden;">
+          <div id="barWalkinExt" style="height:100%;border-radius:4px;background:#ea580c;width:0%;transition:width 0.6s ease;"></div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -1913,22 +1946,37 @@ function applyFilters(){_updateFilterBadge();
   document.getElementById('sPreRegPct').textContent=preRegPctText;
   document.getElementById('barPreReg').style.width=Math.min(preRegRaw,100)+'%';
   document.getElementById('sNotChecked').textContent=typeof notCheckedIn==='number'?notCheckedIn.toLocaleString():'-';
-  // Row 2: internal/external/walk-in progress bars
+  // Row 2: pre-reg group (ภายใน+ภายนอก) + walk-in group with sub-breakdowns
   const internalCount=filtered.filter(r=>!r.isWalkin&&r.isIn).length;
   const externalCount=filtered.filter(r=>!r.isWalkin&&!r.isIn).length;
   const walkin2Count=filtered.filter(r=>r.isWalkin).length;
-  const intPct=tot?Math.round(internalCount/tot*100):0;
-  const extPct=tot?Math.round(externalCount/tot*100):0;
+  const walkinIntCount=filtered.filter(r=>r.isWalkin&&r.isIn).length;
+  const walkinExtCount=filtered.filter(r=>r.isWalkin&&!r.isIn).length;
+  const preRegGroupCount=internalCount+externalCount;
+  const preRegGrpPct=tot?Math.round(preRegGroupCount/tot*100):0;
+  const intPct=preRegGroupCount?Math.round(internalCount/preRegGroupCount*100):0;
+  const extPct=preRegGroupCount?Math.round(externalCount/preRegGroupCount*100):0;
   const wi2Pct=tot?Math.round(walkin2Count/tot*100):0;
+  const wiIntPct=walkin2Count?Math.round(walkinIntCount/walkin2Count*100):0;
+  const wiExtPct=walkin2Count?Math.round(walkinExtCount/walkin2Count*100):0;
+  document.getElementById('sPreRegGroup').textContent=preRegGroupCount.toLocaleString();
+  document.getElementById('sPreRegGroupS').textContent=preRegGrpPct+'% ของผู้เช็คอิน';
+  document.getElementById('barPreRegGroup').style.width=preRegGrpPct+'%';
   document.getElementById('sInternal').textContent=internalCount.toLocaleString();
-  document.getElementById('sExternal').textContent=externalCount.toLocaleString();
-  document.getElementById('sWalkin2').textContent=walkin2Count.toLocaleString();
-  document.getElementById('sInternalS').textContent=intPct+'% ของผู้เช็คอิน';
-  document.getElementById('sExternalS').textContent=extPct+'% ของผู้เช็คอิน';
-  document.getElementById('sWalkin2S').textContent=wi2Pct+'% ของผู้เช็คอิน';
+  document.getElementById('sInternalS').textContent=intPct+'% ของล่วงหน้า';
   document.getElementById('barInternal').style.width=intPct+'%';
+  document.getElementById('sExternal').textContent=externalCount.toLocaleString();
+  document.getElementById('sExternalS').textContent=extPct+'% ของล่วงหน้า';
   document.getElementById('barExternal').style.width=extPct+'%';
+  document.getElementById('sWalkin2').textContent=walkin2Count.toLocaleString();
+  document.getElementById('sWalkin2S').textContent=wi2Pct+'% ของผู้เช็คอิน';
   document.getElementById('barWalkin2').style.width=wi2Pct+'%';
+  document.getElementById('sWalkinInt').textContent=walkinIntCount.toLocaleString();
+  document.getElementById('sWalkinIntS').textContent=wiIntPct+'% ของ Walk-in';
+  document.getElementById('barWalkinInt').style.width=wiIntPct+'%';
+  document.getElementById('sWalkinExt').textContent=walkinExtCount.toLocaleString();
+  document.getElementById('sWalkinExtS').textContent=wiExtPct+'% ของ Walk-in';
+  document.getElementById('barWalkinExt').style.width=wiExtPct+'%';
   document.getElementById('tCount').textContent=`(${tot.toLocaleString()} รายการ)`;
   renderTable();
   if(tZoneInst!==undefined) renderCheckinZone();
