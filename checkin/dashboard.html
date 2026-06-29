@@ -788,6 +788,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <span id="remainingCount" style="margin-left:8px;font-size:0.82rem;color:#dc2626;font-weight:600;"></span>
       </div>
       <div style="display:flex;gap:6px;flex-wrap:wrap;">
+        <button class="sec-toggle-btn btn-xl" onclick="toggleSection('remainingSection')" style="padding:7px 14px;font-size:0.82rem;background:#e2e8f0;color:#334155;border:none;border-radius:8px;cursor:pointer;font-family:'Sarabun',sans-serif;font-weight:600;">▼ แสดง</button>
         <button class="idcol-btn btn-xl" onclick="toggleIdCol()" style="padding:7px 14px;font-size:0.82rem;background:#94a3b8;color:#fff;border:none;border-radius:8px;cursor:pointer;font-family:'Sarabun',sans-serif;font-weight:600;">แสดง บัตร ปชช.</button>
         <button class="btn-xl green" onclick="exportRemainingExcel(false)" style="padding:7px 14px;font-size:0.82rem;">⬇ Excel (ซ่อน ID)</button>
         <button class="btn-xl" onclick="exportRemainingExcel(true)" style="padding:7px 14px;font-size:0.82rem;background:#0d2b6b;color:#fff;border:none;border-radius:8px;cursor:pointer;font-family:'Sarabun',sans-serif;font-weight:600;">⬇ Excel (เห็น ID)</button>
@@ -795,6 +796,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <button class="btn-xl" onclick="exportTableImage('remainingSection','รายชื่อคงเหลือ')" style="padding:7px 14px;font-size:0.82rem;background:#7c3aed;color:#fff;border:none;border-radius:8px;cursor:pointer;">🖼 รูปภาพ</button>
       </div>
     </div>
+    <div class="sec-content" style="display:none;">
     <div style="padding:10px 16px 4px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;border-bottom:1px solid #f1f5f9;">
       <label style="font-size:0.82rem;color:#64748b;font-weight:600;">หน่วยงาน:</label>
       <select id="remDeptFilter" onchange="renderRemainingTable()" style="padding:6px 10px;border-radius:8px;border:1.5px solid #e2e8f0;font-family:'Sarabun',sans-serif;font-size:0.82rem;color:#1e293b;min-width:160px;">
@@ -830,6 +832,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <tbody id="remainingBody"><tr><td colspan="9" style="text-align:center;padding:30px;color:#94a3b8;">กำลังโหลด...</td></tr></tbody>
       </table>
     </div>
+    </div><!-- /sec-content -->
   </div>
 
   <div class="tcard" style="margin-bottom:24px;" id="checkedInSection">
@@ -839,6 +842,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <span id="checkedInCount" style="margin-left:8px;font-size:0.82rem;color:#15803d;font-weight:600;"></span>
       </div>
       <div style="display:flex;gap:6px;flex-wrap:wrap;">
+        <button class="sec-toggle-btn btn-xl" onclick="toggleSection('checkedInSection')" style="padding:7px 14px;font-size:0.82rem;background:#e2e8f0;color:#334155;border:none;border-radius:8px;cursor:pointer;font-family:'Sarabun',sans-serif;font-weight:600;">▼ แสดง</button>
         <button class="idcol-btn btn-xl" onclick="toggleIdCol()" style="padding:7px 14px;font-size:0.82rem;background:#94a3b8;color:#fff;border:none;border-radius:8px;cursor:pointer;font-family:'Sarabun',sans-serif;font-weight:600;">แสดง บัตร ปชช.</button>
         <button class="btn-xl green" onclick="exportCheckedInExcel(false)" style="padding:7px 14px;font-size:0.82rem;">⬇ Excel (ซ่อน ID)</button>
         <button class="btn-xl" onclick="exportCheckedInExcel(true)" style="padding:7px 14px;font-size:0.82rem;background:#0d2b6b;color:#fff;border:none;border-radius:8px;cursor:pointer;font-family:'Sarabun',sans-serif;font-weight:600;">⬇ Excel (เห็น ID)</button>
@@ -846,6 +850,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <button class="btn-xl" onclick="exportTableImage('checkedInSection','รายชื่อเช็คอิน')" style="padding:7px 14px;font-size:0.82rem;background:#7c3aed;color:#fff;border:none;border-radius:8px;cursor:pointer;">🖼 รูปภาพ</button>
       </div>
     </div>
+    <div class="sec-content" style="display:none;">
     <div style="padding:10px 16px 4px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;border-bottom:1px solid #f1f5f9;">
       <label style="font-size:0.82rem;color:#64748b;font-weight:600;">หน่วยงาน:</label>
       <select id="ciDeptFilter" onchange="_checkedInPage=0;renderCheckedInTable()" style="padding:6px 10px;border-radius:8px;border:1.5px solid #e2e8f0;font-family:'Sarabun',sans-serif;font-size:0.82rem;color:#1e293b;min-width:160px;">
@@ -875,6 +880,7 @@ document.addEventListener('DOMContentLoaded', function() {
       </table>
     </div>
     <div id="checkedInPagination" style="display:flex;justify-content:center;align-items:center;gap:6px;padding:12px 16px;border-top:1px solid #f1f5f9;flex-wrap:wrap;"></div>
+    </div><!-- /sec-content -->
   </div>
 
   <div class="tcard" style="margin-bottom:24px;" id="walkInSection">
@@ -884,12 +890,14 @@ document.addEventListener('DOMContentLoaded', function() {
         <span id="walkInCount" style="margin-left:8px;font-size:0.82rem;color:#d97706;font-weight:600;"></span>
       </div>
       <div style="display:flex;gap:6px;flex-wrap:wrap;">
+        <button class="sec-toggle-btn btn-xl" onclick="toggleSection('walkInSection')" style="padding:7px 14px;font-size:0.82rem;background:#e2e8f0;color:#334155;border:none;border-radius:8px;cursor:pointer;font-family:'Sarabun',sans-serif;font-weight:600;">▼ แสดง</button>
         <button class="btn-xl green" onclick="exportWalkInExcel(false)" style="padding:7px 14px;font-size:0.82rem;">⬇ Excel (ซ่อน ID)</button>
         <button class="btn-xl" onclick="exportWalkInExcel(true)" style="padding:7px 14px;font-size:0.82rem;background:#0d2b6b;color:#fff;border:none;border-radius:8px;cursor:pointer;font-family:'Sarabun',sans-serif;font-weight:600;">⬇ Excel (เห็น ID)</button>
         <button class="btn-xl" onclick="exportTablePDF('walkInSection','รายชื่อ Walk-in')" style="padding:7px 14px;font-size:0.82rem;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;">📄 PDF</button>
         <button class="btn-xl" onclick="exportTableImage('walkInSection','รายชื่อ Walk-in')" style="padding:7px 14px;font-size:0.82rem;background:#7c3aed;color:#fff;border:none;border-radius:8px;cursor:pointer;">🖼 รูปภาพ</button>
       </div>
     </div>
+    <div class="sec-content" style="display:none;">
     <div style="padding:10px 16px 4px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;border-bottom:1px solid #f1f5f9;">
       <label style="font-size:0.82rem;color:#64748b;font-weight:600;">หน่วยงาน:</label>
       <select id="wiDeptFilter" onchange="_walkInPage=0;renderWalkInTable()" style="padding:6px 10px;border-radius:8px;border:1.5px solid #e2e8f0;font-family:'Sarabun',sans-serif;font-size:0.82rem;color:#1e293b;min-width:160px;">
@@ -916,6 +924,57 @@ document.addEventListener('DOMContentLoaded', function() {
       </table>
     </div>
     <div id="walkInPagination" style="display:flex;justify-content:center;align-items:center;gap:6px;padding:12px 16px;border-top:1px solid #f1f5f9;flex-wrap:wrap;"></div>
+    </div><!-- /sec-content -->
+  </div>
+
+  <!-- Combined all check-in list (unique persons, walk-in + pre-reg) -->
+  <div class="tcard" style="margin-bottom:24px;" id="allCISection">
+    <div class="thead-row">
+      <div>
+        <span style="font-weight:700;color:#0369a1;font-size:1rem;">รายชื่อผู้เช็คอินทั้งหมด (รวมทุกประเภท)</span>
+        <span id="allCICount" style="margin-left:8px;font-size:0.82rem;color:#0369a1;font-weight:600;"></span>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;">
+        <button class="sec-toggle-btn btn-xl" onclick="toggleSection('allCISection')" style="padding:7px 14px;font-size:0.82rem;background:#e2e8f0;color:#334155;border:none;border-radius:8px;cursor:pointer;font-family:'Sarabun',sans-serif;font-weight:600;">▼ แสดง</button>
+        <button class="idcol-btn btn-xl" onclick="toggleIdCol()" style="padding:7px 14px;font-size:0.82rem;background:#94a3b8;color:#fff;border:none;border-radius:8px;cursor:pointer;font-family:'Sarabun',sans-serif;font-weight:600;">แสดง บัตร ปชช.</button>
+        <button class="btn-xl green" onclick="exportAllCIExcel(false)" style="padding:7px 14px;font-size:0.82rem;">⬇ Excel (ซ่อน ID)</button>
+        <button class="btn-xl" onclick="exportAllCIExcel(true)" style="padding:7px 14px;font-size:0.82rem;background:#0d2b6b;color:#fff;border:none;border-radius:8px;cursor:pointer;font-family:'Sarabun',sans-serif;font-weight:600;">⬇ Excel (เห็น ID)</button>
+      </div>
+    </div>
+    <div class="sec-content" style="display:none;">
+    <div style="padding:10px 16px 4px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;border-bottom:1px solid #f1f5f9;">
+      <label style="font-size:0.82rem;color:#64748b;font-weight:600;">หน่วยงาน:</label>
+      <select id="allCIDeptFilter" onchange="_allCIPage=0;renderAllCITable()" style="padding:6px 10px;border-radius:8px;border:1.5px solid #e2e8f0;font-family:'Sarabun',sans-serif;font-size:0.82rem;color:#1e293b;min-width:160px;">
+        <option value="">ทั้งหมด</option>
+      </select>
+      <label style="font-size:0.82rem;color:#64748b;font-weight:600;margin-left:8px;">จำนวนวัน:</label>
+      <select id="allCIDayFilter" onchange="_allCIPage=0;renderAllCITable()" style="padding:6px 10px;border-radius:8px;border:1.5px solid #e2e8f0;font-family:'Sarabun',sans-serif;font-size:0.82rem;color:#1e293b;">
+        <option value="">ทั้งหมด</option>
+        <option value="1">1 วัน</option>
+        <option value="2">2 วัน</option>
+        <option value="3">3 วัน</option>
+      </select>
+    </div>
+    <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
+      <table style="width:100%;border-collapse:collapse;font-size:0.83rem;">
+        <thead>
+          <tr style="background:#e0f2fe;">
+            <th style="padding:9px 10px;text-align:center;border-bottom:2px solid #7dd3fc;color:#64748b;font-size:0.7rem;width:36px;">#</th>
+            <th style="padding:9px 10px;text-align:left;border-bottom:2px solid #7dd3fc;color:#64748b;font-size:0.7rem;">หน่วยงาน</th>
+            <th id="thIdCardACI" class="idcard-col" style="padding:9px 10px;text-align:left;border-bottom:2px solid #7dd3fc;color:#64748b;font-size:0.7rem;display:none;">เลขบัตรประชาชน</th>
+            <th style="padding:9px 10px;text-align:left;border-bottom:2px solid #7dd3fc;color:#64748b;font-size:0.7rem;">ชื่อ-นามสกุล</th>
+            <th style="padding:9px 10px;text-align:center;border-bottom:2px solid #7dd3fc;color:#64748b;font-size:0.7rem;">ประเภท</th>
+            <th id="dh1aci" style="padding:9px 4px;text-align:center;border-bottom:2px solid #7dd3fc;color:#64748b;font-size:0.7rem;min-width:68px;">วัน 1</th>
+            <th id="dh2aci" style="padding:9px 4px;text-align:center;border-bottom:2px solid #7dd3fc;color:#64748b;font-size:0.7rem;min-width:68px;">วัน 2</th>
+            <th id="dh3aci" style="padding:9px 4px;text-align:center;border-bottom:2px solid #7dd3fc;color:#64748b;font-size:0.7rem;min-width:68px;">วัน 3</th>
+            <th style="padding:9px 6px;text-align:center;border-bottom:2px solid #7dd3fc;color:#64748b;font-size:0.7rem;">รวม</th>
+          </tr>
+        </thead>
+        <tbody id="allCIBody"><tr><td colspan="9" style="text-align:center;padding:30px;color:#94a3b8;">กำลังโหลด...</td></tr></tbody>
+      </table>
+    </div>
+    <div id="allCIPagination" style="display:flex;justify-content:center;align-items:center;gap:6px;padding:12px 16px;border-top:1px solid #f1f5f9;flex-wrap:wrap;"></div>
+    </div><!-- /sec-content -->
   </div>
 
 </div>
@@ -1224,10 +1283,11 @@ async function loadParticipants(){
   buildDD('ciPtDD','ciPtAll',_allPtTypes,()=>{_checkedInPage=0;updateBtn('ciPtBtn',getChecked('ciPtDD'));renderCheckedInTable();});
   buildDD('wiPtDD','wiPtAll',_allPtTypes,()=>{_walkInPage=0;updateBtn('wiPtBtn',getChecked('wiPtDD'));renderWalkInTable();});
   _buildDayMaps();
-  [['rem'],['ci']].forEach(([s])=>{for(let d=1;d<=3;d++){const el=document.getElementById(`dh${d}${s}`);if(el)el.textContent=DAY_L[d]||`วัน ${d}`;}});
+  ['rem','ci','aci'].forEach(s=>{for(let d=1;d<=3;d++){const el=document.getElementById(`dh${d}${s}`);if(el)el.textContent=DAY_L[d]||`วัน ${d}`;}});
   renderRemainingTable();
   renderCheckedInTable();
   renderWalkInTable();
+  renderAllCITable();
   // Province dropdown grouped by health zone
   const dd=document.getElementById('pFProvDD');
   const allLbl=dd.querySelector('.all-label');
@@ -1627,6 +1687,81 @@ function exportWalkInExcel(wantID){
   ws['!cols']=[{wch:4},{wch:40},{wch:16},{wch:30},{wch:18}];
   XLSX.utils.book_append_sheet(wb,ws,'Walk-in');
   XLSX.writeFile(wb,`รายชื่อ Walk-in_${activeYear}.xlsx`);
+}
+// ───── Combined all-checkin table ─────
+let _allCIPage=0;
+function _getAllCheckedInUnique(){
+  const pidToIC=new Map(allParticipants.map(p=>[p.id,(p.id_card||'').trim()]));
+  const byPid=new Map(), icToPid=new Map();
+  allData.forEach(r=>{
+    const ic=pidToIC.get(r.participantId)||'';
+    const canonical=(ic&&icToPid.has(ic))?icToPid.get(ic):r.participantId;
+    if(ic&&!icToPid.has(ic)) icToPid.set(ic,r.participantId);
+    if(!byPid.has(canonical)){
+      const ap=allParticipants.find(p=>p.id===r.participantId)||{};
+      byPid.set(canonical,{pid:canonical,ic,name:r.name,dept:r.dept,isWalkin:r.isWalkin,pt:r.pt,days:new Set(),prefix:ap.prefix||'',firstName:ap.first_name||'',lastName:ap.last_name||''});
+    }
+    byPid.get(canonical).days.add(r.day);
+  });
+  const deptOrder=new Map(DEPTS.map((d,i)=>[d,i]));
+  return [...byPid.values()].sort((a,b)=>{
+    const oa=deptOrder.has(a.dept)?deptOrder.get(a.dept):9999;
+    const ob=deptOrder.has(b.dept)?deptOrder.get(b.dept):9999;
+    return oa!==ob?oa-ob:a.name.localeCompare(b.name,'th');
+  });
+}
+function renderAllCITable(){
+  const full=_getAllCheckedInUnique();
+  document.getElementById('allCICount').textContent=`(${full.length.toLocaleString()} คน)`;
+  const sel=document.getElementById('allCIDeptFilter'), curVal=sel.value;
+  const depts=[...new Set(full.map(p=>p.dept||'').filter(Boolean))].sort((a,b)=>{const oa=DEPTS.indexOf(a),ob=DEPTS.indexOf(b);return(oa<0?9999:oa)-(ob<0?9999:ob);});
+  sel.innerHTML='<option value="">ทั้งหมด</option>'+depts.map(d=>`<option value="${d}"${d===curVal?' selected':''}>${d}</option>`).join('');
+  const dayF=document.getElementById('allCIDayFilter').value;
+  let list=curVal?full.filter(p=>p.dept===curVal):full;
+  if(dayF) list=list.filter(p=>p.days.size===parseInt(dayF));
+  if(!list.length){
+    document.getElementById('allCIBody').innerHTML=`<tr><td colspan="9" style="text-align:center;padding:30px;color:#94a3b8;">ไม่พบรายชื่อ</td></tr>`;return;
+  }
+  _paginate(list,_allCIPage,'_allCIPage','allCIBody','allCIPagination',9,(p,i)=>{
+    const d1=p.days.has(1),d2=p.days.has(2),d3=p.days.has(3);
+    const mkCell=has=>has?'<td style="text-align:center;padding:6px 3px;white-space:nowrap;"><span style="background:#dcfce7;color:#15803d;padding:2px 6px;border-radius:10px;font-size:0.68rem;font-weight:700;">✓ เช็คอิน</span></td>':'<td style="text-align:center;padding:6px 3px;white-space:nowrap;"><span style="color:#cbd5e1;font-size:0.68rem;">—</span></td>';
+    const typeBadge=p.isWalkin?'<span style="background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:12px;font-size:0.72rem;font-weight:600;">Walk-in</span>':'<span style="background:#e0f2fe;color:#0369a1;padding:2px 8px;border-radius:12px;font-size:0.72rem;font-weight:600;">ลงทะเบียน</span>';
+    const cntBadge=`<span style="background:${p.days.size===3?'#dcfce7':p.days.size===2?'#fef3c7':'#f1f5f9'};color:${p.days.size===3?'#15803d':p.days.size===2?'#92400e':'#64748b'};padding:2px 8px;border-radius:12px;font-size:0.72rem;font-weight:700;">${p.days.size} วัน</span>`;
+    return`<tr style="${i%2?'background:#f0f9ff':''}">
+    <td style="text-align:center;padding:8px 10px;color:#94a3b8;font-size:0.75rem;">${i+1}</td>
+    <td style="padding:8px 10px;color:#334155;">${p.dept||'-'}</td>
+    <td class="idcard-col" style="padding:8px 10px;color:#475569;font-size:0.8rem;font-family:monospace;display:${_idColVisible?'':'none'};">${p.ic||'—'}</td>
+    <td style="padding:8px 10px;color:#1e293b;">${p.name||'-'}</td>
+    <td style="text-align:center;padding:8px 10px;">${typeBadge}</td>
+    ${mkCell(d1)}${mkCell(d2)}${mkCell(d3)}
+    <td style="text-align:center;padding:8px 10px;">${cntBadge}</td></tr>`;
+  });
+}
+function exportAllCIExcel(wantID){
+  let showID=false;
+  if(wantID){const code=prompt('ใส่รหัส 99037 เพื่อแสดงเลขบัตรประชาชน:');if(!code)return;if(code.trim()!=='99037'){alert('รหัสไม่ถูกต้อง');return;}showID=true;}
+  const full=_getAllCheckedInUnique();
+  const sel=document.getElementById('allCIDeptFilter');
+  const dayF=document.getElementById('allCIDayFilter').value;
+  let list=sel.value?full.filter(p=>p.dept===sel.value):full;
+  if(dayF) list=list.filter(p=>p.days.size===parseInt(dayF));
+  const data=[['#','หน่วยงาน','เลขบัตรประชาชน','ชื่อ-นามสกุล','ประเภท',DAY_L[1]||'วัน 1',DAY_L[2]||'วัน 2',DAY_L[3]||'วัน 3','รวม(วัน)']];
+  list.forEach((p,i)=>data.push([i+1,p.dept||'-',showID?p.ic||'-':'xxxx',p.name||'-',p.isWalkin?'Walk-in':'ลงทะเบียน',p.days.has(1)?'✓':'',p.days.has(2)?'✓':'',p.days.has(3)?'✓':'',p.days.size]));
+  const wb=XLSX.utils.book_new(),ws=XLSX.utils.aoa_to_sheet(data);
+  ws['!cols']=[{wch:4},{wch:40},{wch:16},{wch:30},{wch:12},{wch:10},{wch:10},{wch:10},{wch:8}];
+  XLSX.utils.book_append_sheet(wb,ws,'รายชื่อเช็คอินรวม');
+  XLSX.writeFile(wb,`รายชื่อเช็คอินรวม_${activeYear}.xlsx`);
+}
+// ───── Section collapse toggle ─────
+function toggleSection(sectionId){
+  const sec=document.getElementById(sectionId);
+  if(!sec) return;
+  const content=sec.querySelector('.sec-content');
+  const btn=sec.querySelector('.sec-toggle-btn');
+  if(!content) return;
+  const isHidden=content.style.display==='none';
+  content.style.display=isHidden?'':'none';
+  if(btn) btn.textContent=isHidden?'▲ ซ่อน':'▼ แสดง';
 }
 function toggleParticipants(){
   const sec=document.getElementById('pRegSection');
