@@ -1554,22 +1554,42 @@ function exportWalkInExcel(wantID){
 let _allCIPage=0;
 function _getAllPersons(){
   const deptOrder=new Map(DEPTS.map((d,i)=>[d,i]));
-  // Build ic→days map from check-in events
   const pidToIC=new Map(allParticipants.map(p=>[p.id,(p.id_card||'').trim()]));
-  const icDays=new Map(); // ic → Set{days}
-  const pidDays=new Map(); // pid → Set{days}  (for walk-ins without ic)
+
+  // All check-in days per participantId
+  const pidDays=new Map();
+  allData.forEach(r=>{
+    if(!pidDays.has(r.participantId)) pidDays.set(r.participantId,new Set());
+    pidDays.get(r.participantId).add(r.day);
+  });
+
+  // Map ic → all pids sharing that ic (for dedup + day aggregation)
+  const icToPids=new Map();
+  allParticipants.forEach(p=>{
+    const ic=(p.id_card||'').trim();
+    if(!ic) return;
+    if(!icToPids.has(ic)) icToPids.set(ic,new Set());
+    icToPids.get(ic).add(p.id);
+  });
+  // Same: ic from allData pids not in participants
   allData.forEach(r=>{
     const ic=pidToIC.get(r.participantId)||'';
-    if(ic){
-      if(!icDays.has(ic)) icDays.set(ic,new Set());
-      icDays.get(ic).add(r.day);
-    } else {
-      if(!pidDays.has(r.participantId)) pidDays.set(r.participantId,new Set());
-      pidDays.get(r.participantId).add(r.day);
-    }
+    if(!ic) return;
+    if(!icToPids.has(ic)) icToPids.set(ic,new Set());
+    icToPids.get(ic).add(r.participantId);
   });
-  const result=new Map(); // key → person obj
-  // 1. All pre-registered people from allParticipants
+
+  // Union all days across every pid that shares the same ic
+  function getDaysIC(ic){
+    const days=new Set();
+    (icToPids.get(ic)||new Set()).forEach(pid=>{
+      (pidDays.get(pid)||new Set()).forEach(d=>days.add(d));
+    });
+    return days;
+  }
+
+  const result=new Map();
+  // 1. All people from allParticipants (pre-reg + walk-in), deduplicated by ic
   allParticipants.forEach(p=>{
     const ic=(p.id_card||'').trim();
     const key=ic||`pid:${p.id}`;
@@ -1577,10 +1597,11 @@ function _getAllPersons(){
     const name=((p.prefix||'')+' '+(p.first_name||'')+' '+(p.last_name||'')).trim();
     const dept=(p.internal_external||'').includes('ภายใน')?(p.dept||''):(p.ext_dept||p.dept||'');
     const pt=(p.participation_type||'').replace(/\s+/g,' ').trim();
-    const days=ic&&icDays.has(ic)?icDays.get(ic):(pidDays.get(p.id)||new Set());
+    const days=ic?getDaysIC(ic):(pidDays.get(p.id)||new Set());
     result.set(key,{pid:p.id,ic,name,dept:dept.trim(),pt,isWalkin:!!p.is_walkin,days:new Set(days)});
   });
-  // 2. Anyone in allData whose participantId has no participant record
+
+  // 2. Anyone in allData not covered by allParticipants
   const icInResult=new Set([...result.values()].map(p=>p.ic).filter(Boolean));
   const pidInResult=new Set([...result.values()].map(p=>p.pid));
   const extraByIC=new Map(), extraByPid=new Map();
@@ -1590,13 +1611,12 @@ function _getAllPersons(){
     else{if(!pidInResult.has(r.participantId)) extraByPid.set(r.participantId,r);}
   });
   extraByIC.forEach((r,ic)=>{
-    const days=icDays.get(ic)||new Set();
-    result.set(ic,{pid:r.participantId,ic,name:r.name,dept:r.dept||'',pt:r.pt||'Walk-in',isWalkin:true,days:new Set(days)});
+    result.set(ic,{pid:r.participantId,ic,name:r.name,dept:r.dept||'',pt:r.pt||'Walk-in',isWalkin:true,days:getDaysIC(ic)});
   });
   extraByPid.forEach((r,pid)=>{
-    const days=pidDays.get(pid)||new Set();
-    result.set(`pid:${pid}`,{pid,ic:'',name:r.name,dept:r.dept||'',pt:r.pt||'Walk-in',isWalkin:true,days:new Set(days)});
+    result.set(`pid:${pid}`,{pid,ic:'',name:r.name,dept:r.dept||'',pt:r.pt||'Walk-in',isWalkin:true,days:new Set(pidDays.get(pid)||new Set())});
   });
+
   return [...result.values()].sort((a,b)=>{
     const oa=deptOrder.has(a.dept)?deptOrder.get(a.dept):9999;
     const ob=deptOrder.has(b.dept)?deptOrder.get(b.dept):9999;
@@ -1616,7 +1636,6 @@ function _ptBadgeACI(pt,isWalkin){
 }
 function renderAllCITable(){
   const full=_getAllPersons();
-  document.getElementById('allCICount').textContent=`(${full.length.toLocaleString()} คน)`;
   // Dept dropdown
   const sel=document.getElementById('allCIDeptFilter'), curVal=sel.value;
   const depts=[...new Set(full.map(p=>p.dept||'').filter(Boolean))].sort((a,b)=>{const oa=DEPTS.indexOf(a),ob=DEPTS.indexOf(b);return(oa<0?9999:oa)-(ob<0?9999:ob);});
@@ -1630,6 +1649,10 @@ function renderAllCITable(){
   if(statusF==='checked') list=list.filter(p=>p.days.size>0);
   else if(statusF==='none') list=list.filter(p=>p.days.size===0);
   if(dayF!=='') list=list.filter(p=>p.days.size===parseInt(dayF));
+  const isFiltered=list.length!==full.length;
+  document.getElementById('allCICount').textContent=isFiltered
+    ?`(กรอง ${list.length.toLocaleString()} / ${full.length.toLocaleString()} คน)`
+    :`(${full.length.toLocaleString()} คน)`;
   if(!list.length){
     document.getElementById('allCIBody').innerHTML=`<tr><td colspan="9" style="text-align:center;padding:30px;color:#94a3b8;">ไม่พบรายชื่อ</td></tr>`;
     document.getElementById('allCIPagination').innerHTML='';return;
