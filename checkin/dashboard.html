@@ -788,6 +788,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <span id="remainingCount" style="margin-left:8px;font-size:0.82rem;color:#dc2626;font-weight:600;"></span>
       </div>
       <div style="display:flex;gap:6px;flex-wrap:wrap;">
+        <button class="idcol-btn btn-xl" onclick="toggleIdCol()" style="padding:7px 14px;font-size:0.82rem;background:#94a3b8;color:#fff;border:none;border-radius:8px;cursor:pointer;font-family:'Sarabun',sans-serif;font-weight:600;">แสดง บัตร ปชช.</button>
         <button class="btn-xl green" onclick="exportRemainingExcel(false)" style="padding:7px 14px;font-size:0.82rem;">⬇ Excel (ซ่อน ID)</button>
         <button class="btn-xl" onclick="exportRemainingExcel(true)" style="padding:7px 14px;font-size:0.82rem;background:#0d2b6b;color:#fff;border:none;border-radius:8px;cursor:pointer;font-family:'Sarabun',sans-serif;font-weight:600;">⬇ Excel (เห็น ID)</button>
         <button class="btn-xl" onclick="exportTablePDF('remainingSection','รายชื่อคงเหลือ')" style="padding:7px 14px;font-size:0.82rem;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;">📄 PDF</button>
@@ -817,13 +818,16 @@ document.addEventListener('DOMContentLoaded', function() {
           <tr style="background:#f8fafc;">
             <th style="padding:9px 10px;text-align:center;border-bottom:2px solid #e2e8f0;color:#64748b;font-size:0.7rem;width:36px;">#</th>
             <th style="padding:9px 10px;text-align:left;border-bottom:2px solid #e2e8f0;color:#64748b;font-size:0.7rem;">หน่วยงาน</th>
-            <th style="padding:9px 10px;text-align:left;border-bottom:2px solid #e2e8f0;color:#64748b;font-size:0.7rem;">เลขบัตรประชาชน</th>
+            <th id="thIdCardRem" class="idcard-col" style="padding:9px 10px;text-align:left;border-bottom:2px solid #e2e8f0;color:#64748b;font-size:0.7rem;display:none;">เลขบัตรประชาชน</th>
             <th style="padding:9px 10px;text-align:left;border-bottom:2px solid #e2e8f0;color:#64748b;font-size:0.7rem;">ชื่อ-นามสกุล</th>
             <th style="padding:9px 10px;text-align:center;border-bottom:2px solid #e2e8f0;color:#64748b;font-size:0.7rem;">ประเภท</th>
             <th style="padding:9px 10px;text-align:center;border-bottom:2px solid #e2e8f0;color:#64748b;font-size:0.7rem;">ถุงของ</th>
+            <th id="dh1rem" style="padding:9px 4px;text-align:center;border-bottom:2px solid #e2e8f0;color:#64748b;font-size:0.7rem;min-width:68px;">วัน 1</th>
+            <th id="dh2rem" style="padding:9px 4px;text-align:center;border-bottom:2px solid #e2e8f0;color:#64748b;font-size:0.7rem;min-width:68px;">วัน 2</th>
+            <th id="dh3rem" style="padding:9px 4px;text-align:center;border-bottom:2px solid #e2e8f0;color:#64748b;font-size:0.7rem;min-width:68px;">วัน 3</th>
           </tr>
         </thead>
-        <tbody id="remainingBody"><tr><td colspan="6" style="text-align:center;padding:30px;color:#94a3b8;">กำลังโหลด...</td></tr></tbody>
+        <tbody id="remainingBody"><tr><td colspan="9" style="text-align:center;padding:30px;color:#94a3b8;">กำลังโหลด...</td></tr></tbody>
       </table>
     </div>
   </div>
@@ -835,6 +839,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <span id="checkedInCount" style="margin-left:8px;font-size:0.82rem;color:#15803d;font-weight:600;"></span>
       </div>
       <div style="display:flex;gap:6px;flex-wrap:wrap;">
+        <button class="idcol-btn btn-xl" onclick="toggleIdCol()" style="padding:7px 14px;font-size:0.82rem;background:#94a3b8;color:#fff;border:none;border-radius:8px;cursor:pointer;font-family:'Sarabun',sans-serif;font-weight:600;">แสดง บัตร ปชช.</button>
         <button class="btn-xl green" onclick="exportCheckedInExcel(false)" style="padding:7px 14px;font-size:0.82rem;">⬇ Excel (ซ่อน ID)</button>
         <button class="btn-xl" onclick="exportCheckedInExcel(true)" style="padding:7px 14px;font-size:0.82rem;background:#0d2b6b;color:#fff;border:none;border-radius:8px;cursor:pointer;font-family:'Sarabun',sans-serif;font-weight:600;">⬇ Excel (เห็น ID)</button>
         <button class="btn-xl" onclick="exportTablePDF('checkedInSection','รายชื่อเช็คอิน')" style="padding:7px 14px;font-size:0.82rem;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;">📄 PDF</button>
@@ -858,12 +863,15 @@ document.addEventListener('DOMContentLoaded', function() {
           <tr style="background:#f0fdf4;">
             <th style="padding:9px 10px;text-align:center;border-bottom:2px solid #bbf7d0;color:#64748b;font-size:0.7rem;width:36px;">#</th>
             <th style="padding:9px 10px;text-align:left;border-bottom:2px solid #bbf7d0;color:#64748b;font-size:0.7rem;">หน่วยงาน</th>
-            <th style="padding:9px 10px;text-align:left;border-bottom:2px solid #bbf7d0;color:#64748b;font-size:0.7rem;">เลขบัตรประชาชน</th>
+            <th id="thIdCardCI" class="idcard-col" style="padding:9px 10px;text-align:left;border-bottom:2px solid #bbf7d0;color:#64748b;font-size:0.7rem;display:none;">เลขบัตรประชาชน</th>
             <th style="padding:9px 10px;text-align:left;border-bottom:2px solid #bbf7d0;color:#64748b;font-size:0.7rem;">ชื่อ-นามสกุล</th>
             <th style="padding:9px 10px;text-align:center;border-bottom:2px solid #bbf7d0;color:#64748b;font-size:0.7rem;">ประเภท</th>
+            <th id="dh1ci" style="padding:9px 4px;text-align:center;border-bottom:2px solid #bbf7d0;color:#64748b;font-size:0.7rem;min-width:68px;">วัน 1</th>
+            <th id="dh2ci" style="padding:9px 4px;text-align:center;border-bottom:2px solid #bbf7d0;color:#64748b;font-size:0.7rem;min-width:68px;">วัน 2</th>
+            <th id="dh3ci" style="padding:9px 4px;text-align:center;border-bottom:2px solid #bbf7d0;color:#64748b;font-size:0.7rem;min-width:68px;">วัน 3</th>
           </tr>
         </thead>
-        <tbody id="checkedInBody"><tr><td colspan="5" style="text-align:center;padding:30px;color:#94a3b8;">กำลังโหลด...</td></tr></tbody>
+        <tbody id="checkedInBody"><tr><td colspan="8" style="text-align:center;padding:30px;color:#94a3b8;">กำลังโหลด...</td></tr></tbody>
       </table>
     </div>
     <div id="checkedInPagination" style="display:flex;justify-content:center;align-items:center;gap:6px;padding:12px 16px;border-top:1px solid #f1f5f9;flex-wrap:wrap;"></div>
@@ -947,6 +955,8 @@ let deptRaw=[], dView='table', dChart=null;
 let totalPreReg=0, totalAll=0;
 let allParticipants=[], curPTab=0, curPPage=1;
 const P_PAGE=20;
+let _idColVisible=false;
+let _dayMap=new Map(), _idCardDayMap=new Map();
 const HEALTH_ZONE={
   'เชียงราย':1,'น่าน':1,'พะเยา':1,'แพร่':1,'เชียงใหม่':1,'แม่ฮ่องสอน':1,'ลำปาง':1,'ลำพูน':1,
   'ตาก':2,'พิษณุโลก':2,'เพชรบูรณ์':2,'สุโขทัย':2,'อุตรดิตถ์':2,
@@ -1213,6 +1223,8 @@ async function loadParticipants(){
   buildDD('remPtDD','remPtAll',_allPtTypes,()=>{updateBtn('remPtBtn',getChecked('remPtDD'));renderRemainingTable();});
   buildDD('ciPtDD','ciPtAll',_allPtTypes,()=>{_checkedInPage=0;updateBtn('ciPtBtn',getChecked('ciPtDD'));renderCheckedInTable();});
   buildDD('wiPtDD','wiPtAll',_allPtTypes,()=>{_walkInPage=0;updateBtn('wiPtBtn',getChecked('wiPtDD'));renderWalkInTable();});
+  _buildDayMaps();
+  [['rem'],['ci']].forEach(([s])=>{for(let d=1;d<=3;d++){const el=document.getElementById(`dh${d}${s}`);if(el)el.textContent=DAY_L[d]||`วัน ${d}`;}});
   renderRemainingTable();
   renderCheckedInTable();
   renderWalkInTable();
@@ -1428,6 +1440,30 @@ function _ptBadge(pt){
   const[bg,fg]=map[v]||['#e0f2fe','#0369a1'];
   return `<span style="background:${bg};color:${fg};padding:2px 8px;border-radius:12px;font-size:0.72rem;font-weight:600;white-space:nowrap;">${v}</span>`;
 }
+function _buildDayMaps(){
+  _dayMap=new Map(); _idCardDayMap=new Map();
+  const pidToIC=new Map(allParticipants.map(p=>[p.id,(p.id_card||'').trim()]));
+  allData.forEach(r=>{
+    if(!_dayMap.has(r.participantId)) _dayMap.set(r.participantId,new Set());
+    _dayMap.get(r.participantId).add(r.day);
+    const ic=pidToIC.get(r.participantId)||'';
+    if(ic){if(!_idCardDayMap.has(ic)) _idCardDayMap.set(ic,new Set());_idCardDayMap.get(ic).add(r.day);}
+  });
+}
+function _dayCell(pid,ic,day){
+  const days=_dayMap.get(pid)||_idCardDayMap.get(ic)||new Set();
+  return days.has(day)
+    ?`<td style="text-align:center;padding:6px 3px;white-space:nowrap;"><span style="background:#dcfce7;color:#15803d;padding:2px 6px;border-radius:10px;font-size:0.68rem;font-weight:700;">✓ เช็คอิน</span></td>`
+    :`<td style="text-align:center;padding:6px 3px;white-space:nowrap;"><span style="color:#cbd5e1;font-size:0.68rem;">—</span></td>`;
+}
+function toggleIdCol(){
+  _idColVisible=!_idColVisible;
+  document.querySelectorAll('.idcard-col').forEach(el=>{el.style.display=_idColVisible?'':'none';});
+  document.querySelectorAll('.idcol-btn').forEach(btn=>{
+    btn.textContent=_idColVisible?'ซ่อน บัตร ปชช.':'แสดง บัตร ปชช.';
+    btn.style.background=_idColVisible?'#0d2b6b':'#94a3b8';
+  });
+}
 function renderRemainingTable(){
   const full=_getRemainingList();
   document.getElementById('remainingCount').textContent=`(${full.length.toLocaleString()} คน)`;
@@ -1442,7 +1478,7 @@ function renderRemainingTable(){
   if(bagVal==='received') list=list.filter(p=>p.bag_received===true||p.bag_received===1||p.bag_received==='true');
   else if(bagVal==='not_received') list=list.filter(p=>!(p.bag_received===true||p.bag_received===1||p.bag_received==='true'));
   if(!list.length){
-    document.getElementById('remainingBody').innerHTML=`<tr><td colspan="6" style="text-align:center;padding:30px;color:#15803d;font-weight:700;">${full.length?'ไม่พบรายชื่อในหน่วยงานที่เลือก':'✓ ทุกคนเช็คอินครบแล้ว'}</td></tr>`;
+    document.getElementById('remainingBody').innerHTML=`<tr><td colspan="9" style="text-align:center;padding:30px;color:#15803d;font-weight:700;">${full.length?'ไม่พบรายชื่อในหน่วยงานที่เลือก':'✓ ทุกคนเช็คอินครบแล้ว'}</td></tr>`;
     return;
   }
   document.getElementById('remainingBody').innerHTML=list.map((p,i)=>{
@@ -1450,13 +1486,15 @@ function renderRemainingTable(){
     const bagBadge=bag
       ?'<span style="background:#dcfce7;color:#15803d;padding:2px 8px;border-radius:12px;font-size:0.75rem;font-weight:600;">รับแล้ว ✓</span>'
       :'<span style="background:#f1f5f9;color:#94a3b8;padding:2px 8px;border-radius:12px;font-size:0.75rem;">ยังไม่รับ</span>';
+    const ic=(p.id_card||'').trim();
     return `<tr>
     <td style="text-align:center;padding:8px 10px;color:#94a3b8;font-size:0.75rem;">${i+1}</td>
     <td style="padding:8px 10px;color:#334155;">${p.dept||'-'}</td>
-    <td style="padding:8px 10px;color:#475569;font-size:0.8rem;font-family:monospace;letter-spacing:0.05em;">${(p.id_card||'').trim()||'—'}</td>
+    <td class="idcard-col" style="padding:8px 10px;color:#475569;font-size:0.8rem;font-family:monospace;letter-spacing:0.05em;display:${_idColVisible?'':'none'};">${ic||'—'}</td>
     <td style="padding:8px 10px;color:#1e293b;">${_buildFullName(p)}</td>
     <td style="text-align:center;padding:8px 10px;">${_ptBadge(p.participation_type)}</td>
     <td style="text-align:center;padding:8px 10px;">${bagBadge}</td>
+    ${_dayCell(p.id,ic,1)}${_dayCell(p.id,ic,2)}${_dayCell(p.id,ic,3)}
   </tr>`;
   }).join('');
 }
@@ -1527,12 +1565,13 @@ function renderCheckedInTable(){
   const selPts=getChecked('ciPtDD');
   let list=curVal?full.filter(p=>p.dept===curVal):full;
   if(selPts.size) list=list.filter(p=>selPts.has((p.participation_type||'').replace(/\s+/g,' ').trim()));
-  _paginate(list,_checkedInPage,'_checkedInPage','checkedInBody','checkedInPagination',5,(p,i)=>`<tr style="${i%2?'background:#f9fafb':''}">
+  _paginate(list,_checkedInPage,'_checkedInPage','checkedInBody','checkedInPagination',8,(p,i)=>{const ic=(p.id_card||'').trim();return`<tr style="${i%2?'background:#f9fafb':''}">
     <td style="text-align:center;padding:8px 10px;color:#94a3b8;font-size:0.75rem;">${i+1}</td>
     <td style="padding:8px 10px;color:#334155;">${p.dept||'-'}</td>
-    <td style="padding:8px 10px;color:#475569;font-size:0.8rem;font-family:monospace;">${(p.id_card||'').trim()||'—'}</td>
+    <td class="idcard-col" style="padding:8px 10px;color:#475569;font-size:0.8rem;font-family:monospace;display:${_idColVisible?'':'none'};">${ic||'—'}</td>
     <td style="padding:8px 10px;color:#1e293b;">${_buildFullName(p)}</td>
-    <td style="text-align:center;padding:8px 10px;">${_ptBadge(p.participation_type)}</td></tr>`);
+    <td style="text-align:center;padding:8px 10px;">${_ptBadge(p.participation_type)}</td>
+    ${_dayCell(p.id,ic,1)}${_dayCell(p.id,ic,2)}${_dayCell(p.id,ic,3)}</tr>`;});
 }
 function exportCheckedInExcel(wantID){
   let showID=false;
