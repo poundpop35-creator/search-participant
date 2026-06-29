@@ -1031,17 +1031,16 @@ async function loadAll(){
   if(allExemptDepts.length>0){
     try{
       const exemptSet=new Set(allExemptDepts);
-      // Remove non-walk-in real scans for locked depts (keep walk-in real scans)
+      // Remove ALL real scans for locked depts (both pre-reg and walk-in)
       for(let i=allData.length-1;i>=0;i--){
-        const r=allData[i];
-        if(exemptSet.has(r.dept)&&!r.isWalkin) allData.splice(i,1);
+        if(exemptSet.has(allData[i].dept)) allData.splice(i,1);
       }
       const orFilter=allExemptDepts.map(d=>`dept.eq.${encodeURIComponent(d)}`).join(',');
-      const exemptPeople=await fetchAll(`/rest/v1/participants?event_year=eq.${yr}&or=(${orFilter})&is_walkin=eq.false&select=id,prefix,first_name,last_name,dept,tag,participation_type,internal_external,province&order=last_name.asc`);
+      const exemptPeople=await fetchAll(`/rest/v1/participants?event_year=eq.${yr}&or=(${orFilter})&select=id,prefix,first_name,last_name,dept,tag,participation_type,internal_external,is_walkin,province&order=last_name.asc`);
       exemptPeople.forEach(p=>{
         const exemptType=VIP_DEPTS.has(p.dept)?'vip':'staff';
         const base={name:buildName(p),dept:p.dept||'-',isIn:true,tag:p.tag||'-',items:'',
-          pt:p.participation_type||'-',isWalkin:false,
+          pt:p.participation_type||'-',isWalkin:!!p.is_walkin,
           bagReceived:false,bagDate:null,bagTime:null,
           shirtSize:'',shirtReceived:false,shirtDate:null,shirtTime:null,
           province:(p.province||'').trim()||'กรุงเทพมหานคร',isVIPExempt:true,exemptType};
