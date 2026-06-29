@@ -1617,7 +1617,11 @@ function _getAllPersons(){
     result.set(`pid:${pid}`,{pid,ic:'',name:r.name,dept:r.dept||'',pt:r.pt||'Walk-in',isWalkin:true,days:new Set(pidDays.get(pid)||new Set())});
   });
 
-  return [...result.values()].sort((a,b)=>{
+  const _EXCLUDE=new Set(['ธวัชชัย สร้อยประดิษฐ']);
+  return [...result.values()].filter(p=>{
+    const bare=(p.name||'').replace(/^[฀-๿a-zA-Z().]+\s*/,'').trim();
+    return !_EXCLUDE.has(bare);
+  }).sort((a,b)=>{
     const oa=deptOrder.has(a.dept)?deptOrder.get(a.dept):9999;
     const ob=deptOrder.has(b.dept)?deptOrder.get(b.dept):9999;
     return oa!==ob?oa-ob:(a.name||'').localeCompare(b.name||'','th');
