@@ -1617,10 +1617,10 @@ function _getAllPersons(){
     result.set(`pid:${pid}`,{pid,ic:'',name:r.name,dept:r.dept||'',pt:r.pt||'Walk-in',isWalkin:true,days:new Set(pidDays.get(pid)||new Set())});
   });
 
-  const _EXCLUDE=new Set(['ธวัชชัย สร้อยประดิษฐ']);
+  const _EXCL=[['ธวัชชัย','สร้อยประดิษฐ']];
   return [...result.values()].filter(p=>{
-    const bare=(p.name||'').replace(/^[฀-๿a-zA-Z().]+\s*/,'').trim();
-    return !_EXCLUDE.has(bare);
+    const n=p.name||'';
+    return !_EXCL.some(([fn,ln])=>n.includes(fn)&&n.includes(ln));
   }).sort((a,b)=>{
     const oa=deptOrder.has(a.dept)?deptOrder.get(a.dept):9999;
     const ob=deptOrder.has(b.dept)?deptOrder.get(b.dept):9999;
