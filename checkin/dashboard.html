@@ -1580,22 +1580,22 @@ function _getAllPersons(){
     const days=ic&&icDays.has(ic)?icDays.get(ic):(pidDays.get(p.id)||new Set());
     result.set(key,{pid:p.id,ic,name,dept:dept.trim(),pt,isWalkin:!!p.is_walkin,days:new Set(days)});
   });
-  // 2. Walk-in people from allData not already in result
+  // 2. Anyone in allData whose participantId has no participant record
   const icInResult=new Set([...result.values()].map(p=>p.ic).filter(Boolean));
   const pidInResult=new Set([...result.values()].map(p=>p.pid));
-  const wiByIC=new Map(), wiByPid=new Map();
-  allData.filter(r=>r.isWalkin).forEach(r=>{
+  const extraByIC=new Map(), extraByPid=new Map();
+  allData.forEach(r=>{
     const ic=pidToIC.get(r.participantId)||'';
-    if(ic){if(!icInResult.has(ic)) wiByIC.set(ic,r);}
-    else {if(!pidInResult.has(r.participantId)) wiByPid.set(r.participantId,r);}
+    if(ic){if(!icInResult.has(ic)) extraByIC.set(ic,r);}
+    else{if(!pidInResult.has(r.participantId)) extraByPid.set(r.participantId,r);}
   });
-  wiByIC.forEach((r,ic)=>{
+  extraByIC.forEach((r,ic)=>{
     const days=icDays.get(ic)||new Set();
-    result.set(ic,{pid:r.participantId,ic,name:r.name,dept:r.dept||'',pt:'Walk-in',isWalkin:true,days:new Set(days)});
+    result.set(ic,{pid:r.participantId,ic,name:r.name,dept:r.dept||'',pt:r.pt||'Walk-in',isWalkin:true,days:new Set(days)});
   });
-  wiByPid.forEach((r,pid)=>{
+  extraByPid.forEach((r,pid)=>{
     const days=pidDays.get(pid)||new Set();
-    result.set(`pid:${pid}`,{pid,ic:'',name:r.name,dept:r.dept||'',pt:'Walk-in',isWalkin:true,days:new Set(days)});
+    result.set(`pid:${pid}`,{pid,ic:'',name:r.name,dept:r.dept||'',pt:r.pt||'Walk-in',isWalkin:true,days:new Set(days)});
   });
   return [...result.values()].sort((a,b)=>{
     const oa=deptOrder.has(a.dept)?deptOrder.get(a.dept):9999;
