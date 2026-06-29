@@ -1595,7 +1595,8 @@ function _paginate(list,page,setPage,renderId,paginationId,colSpan,renderRow){
     : `<tr><td colspan="${colSpan}" style="text-align:center;padding:30px;color:#94a3b8;">ไม่พบรายชื่อ</td></tr>`;
   const pg=document.getElementById(paginationId);
   if(pages<=1){pg.innerHTML='';return;}
-  const btn=(label,pg2,disabled)=>`<button onclick="${setPage}=${pg2};${renderId==='checkedInBody'?'renderCheckedInTable':'renderWalkInTable'}()" ${disabled?'disabled':''} style="padding:5px 12px;border-radius:6px;border:1px solid ${pg2===page?'#1d4ed8':'#e2e8f0'};background:${pg2===page?'#1d4ed8':disabled?'#f1f5f9':'#fff'};color:${pg2===page?'#fff':'#334155'};cursor:${disabled?'default':'pointer'};font-family:'Sarabun',sans-serif;font-size:0.8rem;font-weight:${pg2===page?700:400};">${label}</button>`;
+  const renderFn=renderId==='checkedInBody'?'renderCheckedInTable':renderId==='allCIBody'?'renderAllCITable':'renderWalkInTable';
+  const btn=(label,pg2,disabled)=>`<button onclick="${setPage}=${pg2};${renderFn}()" ${disabled?'disabled':''} style="padding:5px 12px;border-radius:6px;border:1px solid ${pg2===page?'#1d4ed8':'#e2e8f0'};background:${pg2===page?'#1d4ed8':disabled?'#f1f5f9':'#fff'};color:${pg2===page?'#fff':'#334155'};cursor:${disabled?'default':'pointer'};font-family:'Sarabun',sans-serif;font-size:0.8rem;font-weight:${pg2===page?700:400};">${label}</button>`;
   let btns=btn('‹',Math.max(0,page-1),page===0);
   for(let i=Math.max(0,page-2);i<=Math.min(pages-1,page+2);i++) btns+=btn(i+1,i,false);
   btns+=btn('›',Math.min(pages-1,page+1),page===pages-1);
