@@ -797,6 +797,8 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
     <div class="sec-content" style="display:none;">
     <div style="padding:10px 16px 6px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;border-bottom:1px solid #f1f5f9;">
+      <label style="font-size:0.82rem;color:#64748b;font-weight:600;">ค้นหา:</label>
+      <input id="allCINameSearch" type="text" placeholder="ชื่อ-นามสกุล..." oninput="_allCIPage=0;renderAllCITable()" style="padding:6px 10px;border-radius:8px;border:1.5px solid #e2e8f0;font-family:'Sarabun',sans-serif;font-size:0.82rem;color:#1e293b;min-width:180px;outline:none;">
       <label style="font-size:0.82rem;color:#64748b;font-weight:600;">หน่วยงาน:</label>
       <select id="allCIDeptFilter" onchange="_allCIPage=0;renderAllCITable()" style="padding:6px 10px;border-radius:8px;border:1.5px solid #e2e8f0;font-family:'Sarabun',sans-serif;font-size:0.82rem;color:#1e293b;min-width:160px;">
         <option value="">ทั้งหมด</option>
@@ -1646,10 +1648,12 @@ function renderAllCITable(){
   const depts=[...new Set(full.map(p=>p.dept||'').filter(Boolean))].sort((a,b)=>{const oa=DEPTS.indexOf(a),ob=DEPTS.indexOf(b);return(oa<0?9999:oa)-(ob<0?9999:ob);});
   sel.innerHTML='<option value="">ทั้งหมด</option>'+depts.map(d=>`<option value="${d}"${d===curVal?' selected':''}>${d}</option>`).join('');
   // Filters
+  const nameQ=(document.getElementById('allCINameSearch').value||'').trim();
   const selPt=getChecked('allCIPtDD');
   const statusF=document.getElementById('allCIStatusFilter').value;
   const dayF=document.getElementById('allCIDayFilter').value;
   let list=curVal?full.filter(p=>p.dept===curVal):full;
+  if(nameQ) list=list.filter(p=>(p.name||'').includes(nameQ));
   if(selPt.size) list=list.filter(p=>selPt.has(p.pt||'Walk-in'));
   if(statusF==='checked') list=list.filter(p=>p.days.size>0);
   else if(statusF==='none') list=list.filter(p=>p.days.size===0);
