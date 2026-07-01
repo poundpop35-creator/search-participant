@@ -678,13 +678,13 @@ document.addEventListener('DOMContentLoaded', function() {
         <span id="allCICount" style="margin-left:8px;font-size:0.82rem;color:#0369a1;font-weight:600;"></span>
       </div>
       <div style="display:flex;gap:6px;flex-wrap:wrap;">
-        <button class="sec-toggle-btn btn-xl" onclick="toggleSection('allCISection')" style="padding:7px 14px;font-size:0.82rem;background:#e2e8f0;color:#334155;border:none;border-radius:8px;cursor:pointer;font-family:'Sarabun',sans-serif;font-weight:600;">▼ แสดง</button>
+        <button class="sec-toggle-btn btn-xl" onclick="toggleSection('allCISection')" style="padding:7px 14px;font-size:0.82rem;background:#e2e8f0;color:#334155;border:none;border-radius:8px;cursor:pointer;font-family:'Sarabun',sans-serif;font-weight:600;">▲ ซ่อน</button>
         <button class="idcol-btn btn-xl" onclick="toggleIdCol()" style="padding:7px 14px;font-size:0.82rem;background:#94a3b8;color:#fff;border:none;border-radius:8px;cursor:pointer;font-family:'Sarabun',sans-serif;font-weight:600;">แสดง บัตร ปชช.</button>
         <button class="btn-xl green" onclick="exportAllCIExcel(false)" style="padding:7px 14px;font-size:0.82rem;">⬇ Excel (ซ่อน ID)</button>
         <button class="btn-xl" onclick="exportAllCIExcel(true)" style="padding:7px 14px;font-size:0.82rem;background:#0d2b6b;color:#fff;border:none;border-radius:8px;cursor:pointer;font-family:'Sarabun',sans-serif;font-weight:600;">⬇ Excel (เห็น ID)</button>
       </div>
     </div>
-    <div class="sec-content" style="display:none;">
+    <div class="sec-content" style="display:block;">
     <div style="padding:10px 16px 6px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;border-bottom:1px solid #f1f5f9;">
       <label style="font-size:0.82rem;color:#64748b;font-weight:600;">ค้นหา:</label>
       <input id="allCINameSearch" type="text" placeholder="ชื่อ-นามสกุล..." oninput="_allCIPage=0;renderAllCITable()" style="padding:6px 10px;border-radius:8px;border:1.5px solid #e2e8f0;font-family:'Sarabun',sans-serif;font-size:0.82rem;color:#1e293b;min-width:180px;outline:none;">
