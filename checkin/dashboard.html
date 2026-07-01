@@ -552,125 +552,14 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
   </div>
 
-  <!-- ALL PARTICIPANTS SECTION -->
-  <div class="tcard" style="margin-bottom:24px;overflow:visible;">
-    <div class="thead-row" style="cursor:pointer;" onclick="toggleParticipants()">
-      <div>
-        <span class="ttitle">รายชื่อผู้ลงทะเบียนทั้งหมด</span>
-        <span class="tcount" id="pRegCount"></span>
-      </div>
-      <div style="display:flex;gap:8px;align-items:center;">
-        <button class="btn-xl green" onclick="event.stopPropagation();exportParticipantsExcel()" style="font-size:0.78rem;">⬇ Excel</button>
-        <button class="btn-xl" id="pToggleBtn" style="background:var(--blue);color:white;pointer-events:none;">▼ ดูรายชื่อ</button>
-      </div>
-    </div>
-    <div id="pRegSection" style="display:none;">
-      <!-- LIST VIEW -->
-      <div id="pListView">
-        <div style="display:flex;border-bottom:2px solid var(--border);padding:0 8px;">
-          <button class="ptab active" id="ptab0" onclick="event.stopPropagation();switchPTab(0)">ลงทะเบียนล่วงหน้า <span id="pPreCount"></span></button>
-          <button class="ptab" id="ptab1" onclick="event.stopPropagation();switchPTab(1)">Walk-in <span id="pWiCount"></span></button>
-        </div>
-        <!-- List content -->
-        <div id="pListContent">
-        <div style="padding:12px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-          <input class="sbox" id="pSearch" placeholder="ค้นหาชื่อ / หน่วยงาน / เลขบัตรประชาชน" oninput="renderParticipants()" style="flex:1;min-width:160px;">
-          <span id="pCountBar" style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:20px;padding:3px 12px;font-size:0.8rem;color:#1e40af;white-space:nowrap;flex-shrink:0;">พบ <b id="pCountFiltered">-</b> ราย <span id="pCountBreakdown" style="color:#94a3b8;font-size:0.75rem;"></span></span>
-        </div>
-        <div class="p-filter-bar">
-          <div class="p-filter-group">
-            <div class="p-filter-label">ประเภทการเข้าร่วม</div>
-            <div class="multi-wrap">
-              <button class="multi-btn" id="pFIntExtBtn" onclick="toggleDD('pFIntExtDD')">ทั้งหมด</button>
-              <div class="multi-dd" id="pFIntExtDD">
-                <label class="all-label"><input type="checkbox" id="pFIntExtAll" checked onchange="onPFIntExtAll()"> เลือกทั้งหมด</label>
-                <label><input type="checkbox" class="pFIntExtCb" value="ภายใน" checked onchange="onPFIntExtChange()"> ภายใน</label>
-                <label><input type="checkbox" class="pFIntExtCb" value="ภายนอก" checked onchange="onPFIntExtChange()"> ภายนอก</label>
-              </div>
-            </div>
-          </div>
-          <div class="p-filter-group">
-            <div class="p-filter-label">หน่วยงาน</div>
-            <div class="multi-wrap">
-              <button class="multi-btn" id="pFDeptBtn" onclick="toggleDD('pFDeptDD')">ทั้งหมด</button>
-              <div class="multi-dd" id="pFDeptDD" style="min-width:220px;">
-                <label class="all-label"><input type="checkbox" id="pFDeptAll" checked onchange="onPFDeptAll()"> เลือกทั้งหมด</label>
-              </div>
-            </div>
-          </div>
-          <div class="p-filter-group">
-            <div class="p-filter-label">TAG</div>
-            <div class="multi-wrap">
-              <button class="multi-btn" id="pFTagBtn" onclick="toggleDD('pFTagDD')">ทั้งหมด</button>
-              <div class="multi-dd" id="pFTagDD">
-                <label class="all-label"><input type="checkbox" id="pFTagAll" checked onchange="onPFTagAll()"> เลือกทั้งหมด</label>
-              </div>
-            </div>
-          </div>
-          <div class="p-filter-group">
-            <div class="p-filter-label">ประเภท</div>
-            <div class="multi-wrap">
-              <button class="multi-btn" id="pFPTypeBtn" onclick="toggleDD('pFPTypeDD')">ทั้งหมด</button>
-              <div class="multi-dd" id="pFPTypeDD" style="min-width:220px;">
-                <label class="all-label"><input type="checkbox" id="pFPTypeAll" checked onchange="onPFPTypeAll()"> เลือกทั้งหมด</label>
-              </div>
-            </div>
-          </div>
-          <div class="p-filter-group">
-            <div class="p-filter-label">เขตสุขภาพ</div>
-            <div class="multi-wrap">
-              <button class="multi-btn" id="pFZoneBtn" onclick="toggleDD('pFZoneDD')">ทั้งหมด</button>
-              <div class="multi-dd" id="pFZoneDD" style="min-width:200px;">
-                <label class="all-label"><input type="checkbox" id="pFZoneAll" checked onchange="onPFZoneAll()"> เลือกทั้งหมด</label>
-                <label><input type="checkbox" class="pFZoneCb" value="1" checked onchange="onPFZoneChange()"> เขตสุขภาพที่ 1</label>
-                <label><input type="checkbox" class="pFZoneCb" value="2" checked onchange="onPFZoneChange()"> เขตสุขภาพที่ 2</label>
-                <label><input type="checkbox" class="pFZoneCb" value="3" checked onchange="onPFZoneChange()"> เขตสุขภาพที่ 3</label>
-                <label><input type="checkbox" class="pFZoneCb" value="4" checked onchange="onPFZoneChange()"> เขตสุขภาพที่ 4</label>
-                <label><input type="checkbox" class="pFZoneCb" value="5" checked onchange="onPFZoneChange()"> เขตสุขภาพที่ 5</label>
-                <label><input type="checkbox" class="pFZoneCb" value="6" checked onchange="onPFZoneChange()"> เขตสุขภาพที่ 6</label>
-                <label><input type="checkbox" class="pFZoneCb" value="7" checked onchange="onPFZoneChange()"> เขตสุขภาพที่ 7</label>
-                <label><input type="checkbox" class="pFZoneCb" value="8" checked onchange="onPFZoneChange()"> เขตสุขภาพที่ 8</label>
-                <label><input type="checkbox" class="pFZoneCb" value="9" checked onchange="onPFZoneChange()"> เขตสุขภาพที่ 9</label>
-                <label><input type="checkbox" class="pFZoneCb" value="10" checked onchange="onPFZoneChange()"> เขตสุขภาพที่ 10</label>
-                <label><input type="checkbox" class="pFZoneCb" value="11" checked onchange="onPFZoneChange()"> เขตสุขภาพที่ 11</label>
-                <label><input type="checkbox" class="pFZoneCb" value="12" checked onchange="onPFZoneChange()"> เขตสุขภาพที่ 12</label>
-                <label><input type="checkbox" class="pFZoneCb" value="13" checked onchange="onPFZoneChange()"> เขตสุขภาพที่ 13</label>
-              </div>
-            </div>
-          </div>
-          <div class="p-filter-group">
-            <div class="p-filter-label">จังหวัด</div>
-            <div class="multi-wrap">
-              <button class="multi-btn" id="pFProvBtn" onclick="toggleDD('pFProvDD')">ทั้งหมด</button>
-              <div class="multi-dd" id="pFProvDD" style="min-width:180px;">
-                <label class="all-label"><input type="checkbox" id="pFProvAll" checked onchange="onPFProvAll()"> เลือกทั้งหมด</label>
-              </div>
-            </div>
-          </div>
-          <button class="p-reset-btn" onclick="resetPFilters()">↺ รีเซ็ต</button>
-        </div>
-        <div style="overflow-x:auto;">
-          <table>
-            <thead>
-              <tr>
-                <th>#</th><th>ชื่อ-นามสกุล</th><th>หน่วยงาน</th>
-                <th>จังหวัด</th><th>เขตสุขภาพ</th>
-                <th>ประเภทการเข้าร่วม</th><th>TAG</th><th>บัตรประชาชน</th>
-              </tr>
-            </thead>
-            <tbody id="pBody"><tr><td colspan="8" class="loading-td">กำลังโหลด...</td></tr></tbody>
-          </table>
-        </div>
-        <div class="pager">
-          <span id="pRegInfo">-</span>
-          <div style="display:flex;gap:6px;">
-            <button class="pbtn" id="pPrev" onclick="changePPage(-1)">← ก่อนหน้า</button>
-            <button class="pbtn" id="pNext" onclick="changePPage(1)">ถัดไป →</button>
-          </div>
-        </div>
-        </div><!-- end pListContent -->
-      </div>
-    </div>
+  <!-- hidden stubs keep dead-code references alive (pRegCount, pPreCount, pWiCount, pFProvDD used by loadParticipants) -->
+  <div style="display:none;">
+    <span id="pRegCount"></span><span id="pPreCount"></span><span id="pWiCount"></span>
+    <div id="pFProvDD"><label class="all-label"><input type="checkbox" id="pFProvAll"> เลือกทั้งหมด</label></div>
+    <div id="pFDeptDD"><label class="all-label"><input type="checkbox" id="pFDeptAll"> เลือกทั้งหมด</label></div>
+    <div id="pFTagDD"><label class="all-label"><input type="checkbox" id="pFTagAll"> เลือกทั้งหมด</label></div>
+    <div id="pFPTypeDD"><label class="all-label"><input type="checkbox" id="pFPTypeAll"> เลือกทั้งหมด</label></div>
+    <div id="pRegSection"></div>
   </div>
 
   <!-- DEPT CARD -->
@@ -808,6 +697,12 @@ document.addEventListener('DOMContentLoaded', function() {
         <button class="multi-btn" id="allCIPtBtn" onclick="toggleDD('allCIPtDD')" style="font-size:0.82rem;padding:6px 28px 6px 10px;min-width:130px;">ทั้งหมด</button>
         <div class="multi-dd" id="allCIPtDD"><label class="all-label"><input type="checkbox" id="allCIPtAll" checked> ทั้งหมด</label></div>
       </div>
+      <label style="font-size:0.82rem;color:#64748b;font-weight:600;">การลงทะเบียน:</label>
+      <select id="allCIRegFilter" onchange="_allCIPage=0;renderAllCITable()" style="padding:6px 10px;border-radius:8px;border:1.5px solid #e2e8f0;font-family:'Sarabun',sans-serif;font-size:0.82rem;color:#1e293b;">
+        <option value="">ทั้งหมด</option>
+        <option value="pre">ลงทะเบียนล่วงหน้า</option>
+        <option value="walkin">Walk-in</option>
+      </select>
       <label style="font-size:0.82rem;color:#64748b;font-weight:600;">สถานะ:</label>
       <select id="allCIStatusFilter" onchange="_allCIPage=0;renderAllCITable()" style="padding:6px 10px;border-radius:8px;border:1.5px solid #e2e8f0;font-family:'Sarabun',sans-serif;font-size:0.82rem;color:#1e293b;">
         <option value="">ทั้งหมด</option>
@@ -832,6 +727,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <th id="thIdCardACI" class="idcard-col" style="padding:9px 10px;text-align:left;border-bottom:2px solid #7dd3fc;color:#64748b;font-size:0.7rem;display:none;">เลขบัตรประชาชน</th>
             <th style="padding:9px 10px;text-align:left;border-bottom:2px solid #7dd3fc;color:#64748b;font-size:0.7rem;">ชื่อ-นามสกุล</th>
             <th style="padding:9px 10px;text-align:center;border-bottom:2px solid #7dd3fc;color:#64748b;font-size:0.7rem;">ประเภท</th>
+            <th style="padding:9px 10px;text-align:center;border-bottom:2px solid #7dd3fc;color:#64748b;font-size:0.7rem;">การลงทะเบียน</th>
             <th id="dh1aci" style="padding:9px 4px;text-align:center;border-bottom:2px solid #7dd3fc;color:#64748b;font-size:0.7rem;min-width:68px;">วัน 1</th>
             <th id="dh2aci" style="padding:9px 4px;text-align:center;border-bottom:2px solid #7dd3fc;color:#64748b;font-size:0.7rem;min-width:68px;">วัน 2</th>
             <th id="dh3aci" style="padding:9px 4px;text-align:center;border-bottom:2px solid #7dd3fc;color:#64748b;font-size:0.7rem;min-width:68px;">วัน 3</th>
@@ -839,7 +735,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <th style="padding:9px 6px;text-align:center;border-bottom:2px solid #7dd3fc;color:#64748b;font-size:0.7rem;width:32px;"></th>
           </tr>
         </thead>
-        <tbody id="allCIBody"><tr><td colspan="10" style="text-align:center;padding:30px;color:#94a3b8;">กำลังโหลด...</td></tr></tbody>
+        <tbody id="allCIBody"><tr><td colspan="11" style="text-align:center;padding:30px;color:#94a3b8;">กำลังโหลด...</td></tr></tbody>
       </table>
     </div>
     <div id="allCIPagination" style="display:flex;justify-content:center;align-items:center;gap:6px;padding:12px 16px;border-top:1px solid #f1f5f9;flex-wrap:wrap;"></div>
@@ -1651,11 +1547,14 @@ function renderAllCITable(){
   // Filters
   const nameQ=(document.getElementById('allCINameSearch').value||'').trim();
   const selPt=getChecked('allCIPtDD');
+  const regF=document.getElementById('allCIRegFilter').value;
   const statusF=document.getElementById('allCIStatusFilter').value;
   const dayF=document.getElementById('allCIDayFilter').value;
   let list=curVal?full.filter(p=>p.dept===curVal):full;
   if(nameQ) list=list.filter(p=>(p.name||'').includes(nameQ));
   if(selPt.size) list=list.filter(p=>selPt.has(p.pt||'Walk-in'));
+  if(regF==='pre') list=list.filter(p=>!p.isWalkin);
+  else if(regF==='walkin') list=list.filter(p=>p.isWalkin);
   if(statusF==='checked') list=list.filter(p=>p.days.size>0);
   else if(statusF==='none') list=list.filter(p=>p.days.size===0);
   if(dayF!=='') list=list.filter(p=>p.days.size===parseInt(dayF));
@@ -1664,10 +1563,10 @@ function renderAllCITable(){
     ?`(กรอง ${list.length.toLocaleString()} / ${full.length.toLocaleString()} คน)`
     :`(${full.length.toLocaleString()} คน)`;
   if(!list.length){
-    document.getElementById('allCIBody').innerHTML=`<tr><td colspan="10" style="text-align:center;padding:30px;color:#94a3b8;">ไม่พบรายชื่อ</td></tr>`;
+    document.getElementById('allCIBody').innerHTML=`<tr><td colspan="11" style="text-align:center;padding:30px;color:#94a3b8;">ไม่พบรายชื่อ</td></tr>`;
     document.getElementById('allCIPagination').innerHTML='';return;
   }
-  _paginate(list,_allCIPage,'_allCIPage','allCIBody','allCIPagination',10,(p,i)=>{
+  _paginate(list,_allCIPage,'_allCIPage','allCIBody','allCIPagination',11,(p,i)=>{
     const mkCell=has=>has?'<td style="text-align:center;padding:6px 3px;white-space:nowrap;"><span style="background:#dcfce7;color:#15803d;padding:2px 6px;border-radius:10px;font-size:0.68rem;font-weight:700;">✓ เช็คอิน</span></td>':'<td style="text-align:center;padding:6px 3px;white-space:nowrap;"><span style="color:#cbd5e1;font-size:0.68rem;">—</span></td>';
     const cntBadge=`<span style="background:${p.days.size===3?'#dcfce7':p.days.size===2?'#fef3c7':p.days.size===1?'#e0f2fe':'#f1f5f9'};color:${p.days.size===3?'#15803d':p.days.size===2?'#92400e':p.days.size===1?'#0369a1':'#64748b'};padding:2px 8px;border-radius:12px;font-size:0.72rem;font-weight:700;">${p.days.size} วัน</span>`;
     return`<tr style="${i%2?'background:#f0f9ff':''}">
@@ -1676,6 +1575,7 @@ function renderAllCITable(){
     <td class="idcard-col" style="padding:8px 10px;color:#475569;font-size:0.8rem;font-family:monospace;display:${_idColVisible?'':'none'};">${p.ic||'—'}</td>
     <td style="padding:8px 10px;color:#1e293b;">${p.name||'-'}</td>
     <td style="text-align:center;padding:8px 10px;">${_ptBadgeACI(p.pt,p.isWalkin)}</td>
+    <td style="text-align:center;padding:8px 10px;">${p.isWalkin?'<span style="background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:12px;font-size:0.72rem;font-weight:600;">Walk-in</span>':'<span style="background:#e0f2fe;color:#0369a1;padding:2px 8px;border-radius:12px;font-size:0.72rem;font-weight:600;">ลงทะเบียนล่วงหน้า</span>'}</td>
     ${mkCell(p.days.has(1))}${mkCell(p.days.has(2))}${mkCell(p.days.has(3))}
     <td style="text-align:center;padding:8px 10px;">${cntBadge}</td>
     <td style="text-align:center;padding:4px 6px;"><button onclick="_openEditDept(${p.pid},'${(p.name||'').replace(/'/g,"\\'")}','${(p.dept||'').replace(/'/g,"\\'")}','${(p.pt||'').replace(/'/g,"\\'")}' )" title="แก้ไขข้อมูล" style="background:none;border:none;cursor:pointer;font-size:0.85rem;color:#94a3b8;padding:4px 6px;border-radius:6px;" onmouseover="this.style.background='#f1f5f9';this.style.color='#334155'" onmouseout="this.style.background='none';this.style.color='#94a3b8'">✏️</button></td></tr>`;
