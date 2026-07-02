@@ -1500,18 +1500,39 @@ function _getAllPersons(){
     return days;
   }
 
-  const result=new Map();
-  // 1. All people from allParticipants (pre-reg + walk-in), deduplicated by ic
+  // Group all participant records by ic (then by pid for no-ic cases)
+  // Pre-reg (is_walkin=false) takes priority over walk-in for the same ic
+  const icRecords=new Map(); // ic → {pre:p, walkin:p}
+  const pidOnlyRecords=[]; // no ic
   allParticipants.forEach(p=>{
     const ic=(p.id_card||'').trim();
-    const key=ic||`pid:${p.id}`;
+    if(!ic){pidOnlyRecords.push(p);return;}
+    if(!icRecords.has(ic)) icRecords.set(ic,{pre:null,walkin:null});
+    const slot=icRecords.get(ic);
+    if(!p.is_walkin){if(!slot.pre) slot.pre=p;} // first pre-reg wins
+    else{if(!slot.walkin) slot.walkin=p;}       // first walk-in wins (fallback)
+  });
+
+  const result=new Map();
+  // 1. All people from allParticipants (pre-reg + walk-in), deduplicated by ic
+  // Pre-reg record takes priority; fall back to walk-in if no pre-reg exists
+  icRecords.forEach(({pre,walkin},ic)=>{
+    const p=pre||walkin;
+    const name=((p.prefix||'')+' '+(p.first_name||'')+' '+(p.last_name||'')).trim();
+    const dept=(p.internal_external||'').includes('ภายใน')?(p.dept||''):(p.ext_dept||p.dept||'');
+    const pt=(p.participation_type||'').replace(/\s+/g,' ').trim();
+    const days=getDaysIC(ic);
+    const isIn=(p.internal_external||'').includes('ภายใน');
+    result.set(ic,{pid:p.id,ic,name,dept:dept.trim(),pt,isWalkin:!pre,isIn,days:new Set(days)});
+  });
+  pidOnlyRecords.forEach(p=>{
+    const key=`pid:${p.id}`;
     if(result.has(key)) return;
     const name=((p.prefix||'')+' '+(p.first_name||'')+' '+(p.last_name||'')).trim();
     const dept=(p.internal_external||'').includes('ภายใน')?(p.dept||''):(p.ext_dept||p.dept||'');
     const pt=(p.participation_type||'').replace(/\s+/g,' ').trim();
-    const days=ic?getDaysIC(ic):(pidDays.get(p.id)||new Set());
     const isIn=(p.internal_external||'').includes('ภายใน');
-    result.set(key,{pid:p.id,ic,name,dept:dept.trim(),pt,isWalkin:!!p.is_walkin,isIn,days:new Set(days)});
+    result.set(key,{pid:p.id,ic:'',name,dept:dept.trim(),pt,isWalkin:!!p.is_walkin,isIn,days:new Set(pidDays.get(p.id)||new Set())});
   });
 
   // 2. Anyone in allData not covered by allParticipants
