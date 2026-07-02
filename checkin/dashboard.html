@@ -697,6 +697,12 @@ document.addEventListener('DOMContentLoaded', function() {
         <button class="multi-btn" id="allCIPtBtn" onclick="toggleDD('allCIPtDD')" style="font-size:0.82rem;padding:6px 28px 6px 10px;min-width:130px;">ทั้งหมด</button>
         <div class="multi-dd" id="allCIPtDD"><label class="all-label"><input type="checkbox" id="allCIPtAll" checked> ทั้งหมด</label></div>
       </div>
+      <label style="font-size:0.82rem;color:#64748b;font-weight:600;">ภายใน/นอก:</label>
+      <select id="allCIInExtFilter" onchange="_allCIPage=0;renderAllCITable()" style="padding:6px 10px;border-radius:8px;border:1.5px solid #e2e8f0;font-family:'Sarabun',sans-serif;font-size:0.82rem;color:#1e293b;">
+        <option value="">ทั้งหมด</option>
+        <option value="in">ภายใน</option>
+        <option value="out">ภายนอก</option>
+      </select>
       <label style="font-size:0.82rem;color:#64748b;font-weight:600;">การลงทะเบียน:</label>
       <select id="allCIRegFilter" onchange="_allCIPage=0;renderAllCITable()" style="padding:6px 10px;border-radius:8px;border:1.5px solid #e2e8f0;font-family:'Sarabun',sans-serif;font-size:0.82rem;color:#1e293b;">
         <option value="">ทั้งหมด</option>
@@ -717,6 +723,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <option value="2">2 วัน</option>
         <option value="3">3 วัน</option>
       </select>
+      <button onclick="resetAllCIFilters()" style="padding:6px 14px;border-radius:8px;border:1.5px solid #e2e8f0;background:#f8fafc;color:#64748b;font-family:'Sarabun',sans-serif;font-size:0.82rem;cursor:pointer;font-weight:600;">↺ ล้างฟิลเตอร์</button>
     </div>
     <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
       <table style="width:100%;border-collapse:collapse;font-size:0.83rem;">
@@ -728,6 +735,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <th style="padding:9px 10px;text-align:left;border-bottom:2px solid #7dd3fc;color:#64748b;font-size:0.7rem;">ชื่อ-นามสกุล</th>
             <th style="padding:9px 10px;text-align:center;border-bottom:2px solid #7dd3fc;color:#64748b;font-size:0.7rem;">ประเภท</th>
             <th style="padding:9px 10px;text-align:center;border-bottom:2px solid #7dd3fc;color:#64748b;font-size:0.7rem;">การลงทะเบียน</th>
+            <th style="padding:9px 10px;text-align:center;border-bottom:2px solid #7dd3fc;color:#64748b;font-size:0.7rem;">ภายใน/นอก</th>
             <th id="dh1aci" style="padding:9px 4px;text-align:center;border-bottom:2px solid #7dd3fc;color:#64748b;font-size:0.7rem;min-width:68px;">วัน 1</th>
             <th id="dh2aci" style="padding:9px 4px;text-align:center;border-bottom:2px solid #7dd3fc;color:#64748b;font-size:0.7rem;min-width:68px;">วัน 2</th>
             <th id="dh3aci" style="padding:9px 4px;text-align:center;border-bottom:2px solid #7dd3fc;color:#64748b;font-size:0.7rem;min-width:68px;">วัน 3</th>
@@ -735,7 +743,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <th style="padding:9px 6px;text-align:center;border-bottom:2px solid #7dd3fc;color:#64748b;font-size:0.7rem;width:32px;"></th>
           </tr>
         </thead>
-        <tbody id="allCIBody"><tr><td colspan="11" style="text-align:center;padding:30px;color:#94a3b8;">กำลังโหลด...</td></tr></tbody>
+        <tbody id="allCIBody"><tr><td colspan="12" style="text-align:center;padding:30px;color:#94a3b8;">กำลังโหลด...</td></tr></tbody>
       </table>
     </div>
     <div id="allCIPagination" style="display:flex;justify-content:center;align-items:center;gap:6px;padding:12px 16px;border-top:1px solid #f1f5f9;flex-wrap:wrap;"></div>
@@ -1502,7 +1510,8 @@ function _getAllPersons(){
     const dept=(p.internal_external||'').includes('ภายใน')?(p.dept||''):(p.ext_dept||p.dept||'');
     const pt=(p.participation_type||'').replace(/\s+/g,' ').trim();
     const days=ic?getDaysIC(ic):(pidDays.get(p.id)||new Set());
-    result.set(key,{pid:p.id,ic,name,dept:dept.trim(),pt,isWalkin:!!p.is_walkin,days:new Set(days)});
+    const isIn=(p.internal_external||'').includes('ภายใน');
+    result.set(key,{pid:p.id,ic,name,dept:dept.trim(),pt,isWalkin:!!p.is_walkin,isIn,days:new Set(days)});
   });
 
   // 2. Anyone in allData not covered by allParticipants
@@ -1547,12 +1556,15 @@ function renderAllCITable(){
   // Filters
   const nameQ=(document.getElementById('allCINameSearch').value||'').trim();
   const selPt=getChecked('allCIPtDD');
+  const inExtF=document.getElementById('allCIInExtFilter').value;
   const regF=document.getElementById('allCIRegFilter').value;
   const statusF=document.getElementById('allCIStatusFilter').value;
   const dayF=document.getElementById('allCIDayFilter').value;
   let list=curVal?full.filter(p=>p.dept===curVal):full;
   if(nameQ) list=list.filter(p=>(p.name||'').includes(nameQ));
   if(selPt.size) list=list.filter(p=>selPt.has(p.pt||'Walk-in'));
+  if(inExtF==='in') list=list.filter(p=>p.isIn);
+  else if(inExtF==='out') list=list.filter(p=>!p.isIn);
   if(regF==='pre') list=list.filter(p=>!p.isWalkin);
   else if(regF==='walkin') list=list.filter(p=>p.isWalkin);
   if(statusF==='checked') list=list.filter(p=>p.days.size>0);
@@ -1563,10 +1575,10 @@ function renderAllCITable(){
     ?`(กรอง ${list.length.toLocaleString()} / ${full.length.toLocaleString()} คน)`
     :`(${full.length.toLocaleString()} คน)`;
   if(!list.length){
-    document.getElementById('allCIBody').innerHTML=`<tr><td colspan="11" style="text-align:center;padding:30px;color:#94a3b8;">ไม่พบรายชื่อ</td></tr>`;
+    document.getElementById('allCIBody').innerHTML=`<tr><td colspan="12" style="text-align:center;padding:30px;color:#94a3b8;">ไม่พบรายชื่อ</td></tr>`;
     document.getElementById('allCIPagination').innerHTML='';return;
   }
-  _paginate(list,_allCIPage,'_allCIPage','allCIBody','allCIPagination',11,(p,i)=>{
+  _paginate(list,_allCIPage,'_allCIPage','allCIBody','allCIPagination',12,(p,i)=>{
     const mkCell=has=>has?'<td style="text-align:center;padding:6px 3px;white-space:nowrap;"><span style="background:#dcfce7;color:#15803d;padding:2px 6px;border-radius:10px;font-size:0.68rem;font-weight:700;">✓ เช็คอิน</span></td>':'<td style="text-align:center;padding:6px 3px;white-space:nowrap;"><span style="color:#cbd5e1;font-size:0.68rem;">—</span></td>';
     const cntBadge=`<span style="background:${p.days.size===3?'#dcfce7':p.days.size===2?'#fef3c7':p.days.size===1?'#e0f2fe':'#f1f5f9'};color:${p.days.size===3?'#15803d':p.days.size===2?'#92400e':p.days.size===1?'#0369a1':'#64748b'};padding:2px 8px;border-radius:12px;font-size:0.72rem;font-weight:700;">${p.days.size} วัน</span>`;
     return`<tr style="${i%2?'background:#f0f9ff':''}">
@@ -1576,6 +1588,7 @@ function renderAllCITable(){
     <td style="padding:8px 10px;color:#1e293b;">${p.name||'-'}</td>
     <td style="text-align:center;padding:8px 10px;">${_ptBadgeACI(p.pt,p.isWalkin)}</td>
     <td style="text-align:center;padding:8px 10px;">${p.isWalkin?'<span style="background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:12px;font-size:0.72rem;font-weight:600;">Walk-in</span>':'<span style="background:#e0f2fe;color:#0369a1;padding:2px 8px;border-radius:12px;font-size:0.72rem;font-weight:600;">ลงทะเบียนล่วงหน้า</span>'}</td>
+    <td style="text-align:center;padding:8px 10px;">${p.isIn?'<span style="background:#f0fdf4;color:#15803d;padding:2px 8px;border-radius:12px;font-size:0.72rem;font-weight:600;">ภายใน</span>':'<span style="background:#fdf4ff;color:#7e22ce;padding:2px 8px;border-radius:12px;font-size:0.72rem;font-weight:600;">ภายนอก</span>'}</td>
     ${mkCell(p.days.has(1))}${mkCell(p.days.has(2))}${mkCell(p.days.has(3))}
     <td style="text-align:center;padding:8px 10px;">${cntBadge}</td>
     <td style="text-align:center;padding:4px 6px;"><button onclick="_openEditDept(${p.pid},'${(p.name||'').replace(/'/g,"\\'")}','${(p.dept||'').replace(/'/g,"\\'")}','${(p.pt||'').replace(/'/g,"\\'")}' )" title="แก้ไขข้อมูล" style="background:none;border:none;cursor:pointer;font-size:0.85rem;color:#94a3b8;padding:4px 6px;border-radius:6px;" onmouseover="this.style.background='#f1f5f9';this.style.color='#334155'" onmouseout="this.style.background='none';this.style.color='#94a3b8'">✏️</button></td></tr>`;
@@ -2723,6 +2736,21 @@ document.addEventListener('click', e => {
 (function(){const c=localStorage.getItem('pageBgUrl');if(c)document.body.style.backgroundImage=`linear-gradient(rgba(232,240,254,0.55),rgba(232,240,254,0.55)),url('${c}')`;})();
 async function _loadPageBg(){try{const r=await fetch(SB_URL+'/rest/v1/app_settings?key=eq.page_bg&select=value',{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}});const d=await r.json();if(Array.isArray(d)&&d.length){const v=d[0].value||'';localStorage.setItem('pageBgUrl',v);document.body.style.backgroundImage=v?`linear-gradient(rgba(232,240,254,0.55),rgba(232,240,254,0.55)),url('${v}')`:''}}catch(e){}}
 _loadPageBg();setInterval(_loadPageBg,30000);
+
+function resetAllCIFilters(){
+  document.getElementById('allCINameSearch').value='';
+  document.getElementById('allCIDeptFilter').value='';
+  document.getElementById('allCIInExtFilter').value='';
+  document.getElementById('allCIRegFilter').value='';
+  document.getElementById('allCIStatusFilter').value='';
+  document.getElementById('allCIDayFilter').value='';
+  // reset multi-select pt dropdown: check "all", uncheck others
+  const allCb=document.getElementById('allCIPtAll');
+  if(allCb){allCb.checked=true;allCb.dispatchEvent(new Event('change'));}
+  _allCIPage=0;
+  updateBtn('allCIPtBtn',getChecked('allCIPtDD'));
+  renderAllCITable();
+}
 
 let _editPid=null;
 function _openEditDept(pid,name,dept,pt){
