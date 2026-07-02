@@ -1612,7 +1612,7 @@ function renderAllCITable(){
     <td style="text-align:center;padding:8px 10px;">${p.isIn?'<span style="background:#f0fdf4;color:#15803d;padding:2px 8px;border-radius:12px;font-size:0.72rem;font-weight:600;">ภายใน</span>':'<span style="background:#fdf4ff;color:#7e22ce;padding:2px 8px;border-radius:12px;font-size:0.72rem;font-weight:600;">ภายนอก</span>'}</td>
     ${mkCell(p.days.has(1))}${mkCell(p.days.has(2))}${mkCell(p.days.has(3))}
     <td style="text-align:center;padding:8px 10px;">${cntBadge}</td>
-    <td style="text-align:center;padding:4px 6px;"><button onclick="_openEditDept(${p.pid},'${(p.name||'').replace(/'/g,"\\'")}','${(p.dept||'').replace(/'/g,"\\'")}','${(p.pt||'').replace(/'/g,"\\'")}' )" title="แก้ไขข้อมูล" style="background:none;border:none;cursor:pointer;font-size:0.85rem;color:#94a3b8;padding:4px 6px;border-radius:6px;" onmouseover="this.style.background='#f1f5f9';this.style.color='#334155'" onmouseout="this.style.background='none';this.style.color='#94a3b8'">✏️</button></td></tr>`;
+    <td style="text-align:center;padding:4px 6px;"><button onclick="_openEditDept(${p.pid},'${(p.name||'').replace(/'/g,"\\'")}','${(p.dept||'').replace(/'/g,"\\'")}','${(p.pt||'').replace(/'/g,"\\'")}',${p.isWalkin},${p.isIn})" title="แก้ไขข้อมูล" style="background:none;border:none;cursor:pointer;font-size:0.85rem;color:#94a3b8;padding:4px 6px;border-radius:6px;" onmouseover="this.style.background='#f1f5f9';this.style.color='#334155'" onmouseout="this.style.background='none';this.style.color='#94a3b8'">✏️</button></td></tr>`;
   });
 }
 function exportAllCIExcel(wantID){
@@ -2774,11 +2774,13 @@ function resetAllCIFilters(){
 }
 
 let _editPid=null;
-function _openEditDept(pid,name,dept,pt){
+function _openEditDept(pid,name,dept,pt,isWalkin,isIn){
   _editPid=pid;
   document.getElementById('editNameInput').value=name||'';
   document.getElementById('editDeptInput').value=dept||'';
   document.getElementById('editPtInput').value=pt||'';
+  document.getElementById('editWalkinSelect').value=isWalkin?'true':'false';
+  document.getElementById('editInExtSelect').value=isIn?'ภายใน':'ภายนอก';
   document.getElementById('editDeptStatus').textContent='';
   const m=document.getElementById('editDeptModal');
   m.style.display='flex';
@@ -2792,7 +2794,9 @@ async function _savePerson(){
   if(!newDept){st.style.color='#dc2626';st.textContent='กรุณากรอกหน่วยงาน';return;}
   st.style.color='#64748b'; st.textContent='กำลังบันทึก...';
   // Parse name into prefix/first/last
-  const patch={dept:newDept,ext_dept:newDept,participation_type:newPt||null};
+  const newIsWalkin=document.getElementById('editWalkinSelect').value==='true';
+  const newInExt=document.getElementById('editInExtSelect').value;
+  const patch={dept:newDept,ext_dept:newDept,participation_type:newPt||null,is_walkin:newIsWalkin,internal_external:newInExt};
   const nameParts=rawName.replace(/\s+/g,' ').trim().split(' ');
   if(nameParts.length>=3){patch.prefix=nameParts[0];patch.first_name=nameParts[1];patch.last_name=nameParts.slice(2).join(' ');}
   else if(nameParts.length===2){patch.first_name=nameParts[0];patch.last_name=nameParts[1];}
@@ -2806,6 +2810,7 @@ async function _savePerson(){
       st.style.color='#15803d'; st.textContent='บันทึกสำเร็จ ✓';
       const p=allParticipants.find(x=>x.id===_editPid);
       if(p){p.dept=newDept;p.ext_dept=newDept;p.participation_type=newPt||null;
+        p.is_walkin=newIsWalkin; p.internal_external=newInExt;
         if(patch.prefix) p.prefix=patch.prefix;
         if(patch.first_name) p.first_name=patch.first_name;
         if(patch.last_name) p.last_name=patch.last_name;}
@@ -2830,7 +2835,23 @@ document.getElementById('editDeptModal').addEventListener('click',function(e){if
     <label style="font-size:0.82rem;color:#475569;font-weight:600;">หน่วยงาน</label>
     <input id="editDeptInput" type="text" style="width:100%;margin-top:4px;margin-bottom:12px;padding:9px 12px;border-radius:8px;border:1.5px solid #cbd5e1;font-family:'Sarabun',sans-serif;font-size:0.88rem;color:#1e293b;box-sizing:border-box;outline:none;">
     <label style="font-size:0.82rem;color:#475569;font-weight:600;">ประเภท</label>
-    <input id="editPtInput" type="text" placeholder="เช่น กรรมการ, ผู้บริหาร, Walk-in ..." style="width:100%;margin-top:4px;padding:9px 12px;border-radius:8px;border:1.5px solid #cbd5e1;font-family:'Sarabun',sans-serif;font-size:0.88rem;color:#1e293b;box-sizing:border-box;outline:none;">
+    <input id="editPtInput" type="text" placeholder="เช่น กรรมการ, ผู้บริหาร, Walk-in ..." style="width:100%;margin-top:4px;margin-bottom:12px;padding:9px 12px;border-radius:8px;border:1.5px solid #cbd5e1;font-family:'Sarabun',sans-serif;font-size:0.88rem;color:#1e293b;box-sizing:border-box;outline:none;">
+    <div style="display:flex;gap:10px;margin-bottom:12px;">
+      <div style="flex:1;">
+        <label style="font-size:0.82rem;color:#475569;font-weight:600;">การลงทะเบียน</label>
+        <select id="editWalkinSelect" style="width:100%;margin-top:4px;padding:9px 12px;border-radius:8px;border:1.5px solid #cbd5e1;font-family:'Sarabun',sans-serif;font-size:0.88rem;color:#1e293b;box-sizing:border-box;background:#fff;">
+          <option value="false">ลงทะเบียนล่วงหน้า</option>
+          <option value="true">Walk-in</option>
+        </select>
+      </div>
+      <div style="flex:1;">
+        <label style="font-size:0.82rem;color:#475569;font-weight:600;">ภายใน/ภายนอก</label>
+        <select id="editInExtSelect" style="width:100%;margin-top:4px;padding:9px 12px;border-radius:8px;border:1.5px solid #cbd5e1;font-family:'Sarabun',sans-serif;font-size:0.88rem;color:#1e293b;box-sizing:border-box;background:#fff;">
+          <option value="ภายใน">ภายใน</option>
+          <option value="ภายนอก">ภายนอก</option>
+        </select>
+      </div>
+    </div>
     <div style="display:flex;gap:10px;margin-top:18px;justify-content:flex-end;">
       <button onclick="document.getElementById('editDeptModal').style.display='none'" style="padding:8px 20px;border-radius:8px;border:1.5px solid #e2e8f0;background:#f8fafc;color:#64748b;font-family:'Sarabun',sans-serif;font-size:0.88rem;cursor:pointer;">ยกเลิก</button>
       <button onclick="_savePerson()" style="padding:8px 20px;border-radius:8px;border:none;background:#1d4ed8;color:#fff;font-family:'Sarabun',sans-serif;font-size:0.88rem;font-weight:600;cursor:pointer;">บันทึก</button>
