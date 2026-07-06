@@ -212,10 +212,10 @@ document.addEventListener('DOMContentLoaded', function() {
     <span class="last-update" id="lastUpdate">-</span>
     <span class="last-update" id="userDisplay" style="color:#0d2b6b;font-weight:700;"></span>
     <select id="autoRefreshSel" onchange="setAutoRefresh()" style="padding:6px 10px;border-radius:8px;border:1.5px solid #cbd5e1;background:white;color:#1e293b;font-family:'Sarabun',sans-serif;font-size:0.82rem;cursor:pointer;">
-      <option value="0">ไม่ auto-refresh</option>
-      <option value="30">ทุก 30 วินาที</option>
-      <option value="60" selected>ทุก 1 นาที</option>
+      <option value="0" selected>ไม่ auto-refresh</option>
       <option value="300">ทุก 5 นาที</option>
+      <option value="600">ทุก 10 นาที</option>
+      <option value="1800">ทุก 30 นาที</option>
     </select>
     <button class="refresh-btn" onclick="loadAll()">รีเฟรช</button>
     <button class="clear-btn mob-hide" onclick="openClearModal()">ล้างข้อมูล</button>
