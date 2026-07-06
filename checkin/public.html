@@ -420,7 +420,7 @@
 <div class="footer">
   <div class="update-info">
     <div class="dot-live"></div>
-    <span>อัปเดตอัตโนมัติทุก 1 นาที — ล่าสุด: <span id="lastUpdate">-</span></span>
+    <span>อัปเดตอัตโนมัติทุก 10 นาที — ล่าสุด: <span id="lastUpdate">-</span></span>
   </div>
   <div style="text-align:center;padding:4px 0 10px;font-family:'Sarabun',sans-serif;font-size:0.78rem;color:#94a3b8;">© 2026 Built by <span style="font-family:'Dancing Script',cursive;font-weight:700;font-size:1.25em;color:#0ABAB5;letter-spacing:0.01em;">Saharat Phetrnitchakun</span> · <span style="font-weight:800;letter-spacing:0.04em;font-size:1.05em;"><span style="color:#2563eb;">D</span><span style="color:#f59e0b;">P</span><span style="color:#16a34a;">T</span><span style="color:#dc2626;">C</span></span> · DMSc</div>
 </div>
@@ -1835,7 +1835,7 @@ async function loadHeroBgFromSupabase() {
 loadThemeFromSupabase();
 loadHeroBgFromSupabase();
 loadData();
-setInterval(loadData, 60000);
+setInterval(loadData, 600000);
 setInterval(loadThemeFromSupabase, 30000);
 setInterval(loadHeroBgFromSupabase, 30000);
 (function(){const c=sessionStorage.getItem('publicBgUrl');if(c)document.body.style.backgroundImage=`linear-gradient(rgba(232,240,254,0.55),rgba(232,240,254,0.55)),url('${c}')`;})();
